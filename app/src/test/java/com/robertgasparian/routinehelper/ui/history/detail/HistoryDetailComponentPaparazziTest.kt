@@ -1,4 +1,4 @@
-package com.robertgasparian.routinehelper.ui.history
+package com.robertgasparian.routinehelper.ui.history.detail
 
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
@@ -6,7 +6,7 @@ import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 import org.junit.Rule
 import org.junit.Test
 
-class HistoryComponentPaparazziTest {
+class HistoryDetailComponentPaparazziTest {
     @get:Rule
     val paparazzi = Paparazzi(
         deviceConfig = DeviceConfig.PIXEL_5,
@@ -16,9 +16,10 @@ class HistoryComponentPaparazziTest {
     fun populated() {
         paparazzi.snapshot {
             RoutineHelperTheme {
-                HistoryComponent(
-                    uiState = HistoryUiState.preview(),
-                    onSnapshotClick = {},
+                HistoryDetailComponent(
+                    uiState = HistoryDetailUiState.preview(),
+                    onBackClick = {},
+                    onDeleteClick = {},
                 )
             }
         }
@@ -28,9 +29,10 @@ class HistoryComponentPaparazziTest {
     fun empty() {
         paparazzi.snapshot {
             RoutineHelperTheme {
-                HistoryComponent(
-                    uiState = HistoryUiState.previewEmpty(),
-                    onSnapshotClick = {},
+                HistoryDetailComponent(
+                    uiState = HistoryDetailUiState.previewEmpty(),
+                    onBackClick = {},
+                    onDeleteClick = {},
                 )
             }
         }

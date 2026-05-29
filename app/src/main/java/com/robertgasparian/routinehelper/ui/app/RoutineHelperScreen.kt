@@ -18,7 +18,6 @@ import androidx.compose.material3.ShortNavigationBarItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,61 +25,60 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
+import com.robertgasparian.routinehelper.ui.history.detail.HistoryDetailScreen
 import com.robertgasparian.routinehelper.ui.history.HistoryScreen
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 import com.robertgasparian.routinehelper.ui.today.TodayScreen
 
 @Composable
 fun RoutineHelperScreen() {
-    val backStack = remember { mutableStateListOf<Any>(TodayDestination) }
-    val selectedDestination = backStack.lastOrNull().topLevelDestination()
+    val topLevelBackStack = remember { TopLevelBackStack<Any>(TodayDestination) }
 
     RoutineHelperComponent(
-        backStack = backStack,
-        selectedDestination = selectedDestination,
-        onDestinationSelected = { destination ->
-            if (selectedDestination != destination) {
-                backStack.clear()
-                backStack.add(destination)
-            }
-        },
+        topLevelBackStack = topLevelBackStack,
     )
 }
 
 @Composable
 fun RoutineHelperComponent(
-    backStack: List<Any>,
-    selectedDestination: Any,
-    onDestinationSelected: (Any) -> Unit,
+    topLevelBackStack: TopLevelBackStack<Any>,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier,
         bottomBar = {
             FloatingBottomNavigationBar(
-                selectedDestination = selectedDestination,
-                onDestinationSelected = onDestinationSelected,
+                selectedDestination = topLevelBackStack.topLevelKey,
+                onDestinationSelected = topLevelBackStack::addTopLevel,
             )
         },
     ) { innerPadding ->
         NavDisplay(
-            backStack = backStack,
+            backStack = topLevelBackStack.backStack,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(PaddingValues(bottom = innerPadding.calculateBottomPadding())),
-            onBack = {},
-            entryProvider = { key ->
-                when (key) {
-                    TodayDestination -> NavEntry(key) {
+            onBack = { topLevelBackStack.removeLast() },
+            entryProvider = entryProvider {
+                entry<TodayDestination> {
                         TodayScreen()
                     }
 
-                    HistoryDestination -> NavEntry(key) {
-                        HistoryScreen()
+                entry<HistoryDestination> {
+                        HistoryScreen(
+                            onSnapshotClick = { snapshotId ->
+                                topLevelBackStack.add(HistoryDetailDestination(snapshotId))
+                            },
+                        )
                     }
 
-                    else -> error("Unknown destination: $key")
+                entry<HistoryDetailDestination> { destination ->
+                        HistoryDetailScreen(
+                            snapshotId = destination.snapshotId,
+                            onBackClick = { topLevelBackStack.removeLast() },
+                        )
                 }
             },
         )
@@ -136,20 +134,12 @@ private fun FloatingBottomNavigationBar(
     }
 }
 
-private fun Any?.topLevelDestination(): Any =
-    when (this) {
-        HistoryDestination -> HistoryDestination
-        else -> TodayDestination
-    }
-
 @Preview(showBackground = true)
 @Composable
 private fun RoutineHelperComponentPreview() {
     RoutineHelperTheme {
         RoutineHelperComponent(
-            backStack = listOf(TodayDestination),
-            selectedDestination = TodayDestination,
-            onDestinationSelected = {},
+            topLevelBackStack = TopLevelBackStack<Any>(TodayDestination),
         )
     }
 }

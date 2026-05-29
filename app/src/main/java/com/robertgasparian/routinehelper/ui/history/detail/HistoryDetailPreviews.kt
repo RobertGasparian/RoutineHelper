@@ -1,4 +1,4 @@
-package com.robertgasparian.routinehelper.ui.history
+package com.robertgasparian.routinehelper.ui.history.detail
 
 import android.content.res.Configuration
 import androidx.compose.runtime.Composable
@@ -14,11 +14,12 @@ import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
     uiMode = Configuration.UI_MODE_NIGHT_YES,
 )
 @Composable
-private fun HistoryComponentPhonePreview() {
+private fun HistoryDetailComponentPhonePreview() {
     RoutineHelperTheme {
-        HistoryComponent(
-            uiState = HistoryUiState.preview(),
-            onSnapshotClick = {},
+        HistoryDetailComponent(
+            uiState = HistoryDetailUiState.preview(),
+            onBackClick = {},
+            onDeleteClick = {},
         )
     }
 }
@@ -32,44 +33,48 @@ private fun HistoryComponentPhonePreview() {
     uiMode = Configuration.UI_MODE_NIGHT_YES,
 )
 @Composable
-private fun HistoryComponentLandscapePreview() {
+private fun HistoryDetailComponentLandscapePreview() {
     RoutineHelperTheme {
-        HistoryComponent(
-            uiState = HistoryUiState.preview(),
-            onSnapshotClick = {},
+        HistoryDetailComponent(
+            uiState = HistoryDetailUiState.preview(),
+            onBackClick = {},
+            onDeleteClick = {},
         )
     }
 }
 
 @Preview(name = "Tablet", showBackground = true, widthDp = 800, heightDp = 1280)
 @Composable
-private fun HistoryComponentTabletPreview() {
+private fun HistoryDetailComponentTabletPreview() {
     RoutineHelperTheme {
-        HistoryComponent(
-            uiState = HistoryUiState.preview(),
-            onSnapshotClick = {},
+        HistoryDetailComponent(
+            uiState = HistoryDetailUiState.preview(),
+            onBackClick = {},
+            onDeleteClick = {},
         )
     }
 }
 
 @Preview(name = "Foldable", showBackground = true, widthDp = 673, heightDp = 841)
 @Composable
-private fun HistoryComponentFoldablePreview() {
+private fun HistoryDetailComponentFoldablePreview() {
     RoutineHelperTheme {
-        HistoryComponent(
-            uiState = HistoryUiState.preview(),
-            onSnapshotClick = {},
+        HistoryDetailComponent(
+            uiState = HistoryDetailUiState.preview(),
+            onBackClick = {},
+            onDeleteClick = {},
         )
     }
 }
 
 @Preview(name = "Empty", showBackground = true, widthDp = 393, heightDp = 852)
 @Composable
-private fun HistoryComponentEmptyPreview() {
+private fun HistoryDetailComponentEmptyPreview() {
     RoutineHelperTheme {
-        HistoryComponent(
-            uiState = HistoryUiState.previewEmpty(),
-            onSnapshotClick = {},
+        HistoryDetailComponent(
+            uiState = HistoryDetailUiState.previewEmpty(),
+            onBackClick = {},
+            onDeleteClick = {},
         )
     }
 }

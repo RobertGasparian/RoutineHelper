@@ -17,4 +17,6 @@ interface RoutineHistoryRepository {
         finalizedAtMillis: Long,
         items: List<RoutineDaySnapshotItem>,
     ): Long
+
+    suspend fun deleteSnapshot(snapshotId: Long)
 }

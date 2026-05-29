@@ -1,5 +1,11 @@
 package com.robertgasparian.routinehelper.ui.app
 
-data object TodayDestination
+sealed interface TopLevelDestination
 
-data object HistoryDestination
+data object TodayDestination : TopLevelDestination
+
+data object HistoryDestination : TopLevelDestination
+
+data class HistoryDetailDestination(
+    val snapshotId: Long,
+)

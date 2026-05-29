@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.map
 class FakeRoutineHistoryRepository : RoutineHistoryRepository {
     private val snapshots = MutableStateFlow<List<RoutineDaySnapshot>>(emptyList())
     val savedSnapshots = mutableListOf<SavedSnapshot>()
+    val deletedSnapshotIds = mutableListOf<Long>()
 
     fun setSnapshot(summary: RoutineDaySummary) {
         snapshots.value = snapshots.value + RoutineDaySnapshot(
@@ -60,6 +61,11 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
             items = items,
         )
         return snapshotId
+    }
+
+    override suspend fun deleteSnapshot(snapshotId: Long) {
+        deletedSnapshotIds += snapshotId
+        snapshots.value = snapshots.value.filterNot { it.snapshotId == snapshotId }
     }
 }
 

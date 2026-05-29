@@ -30,6 +30,7 @@ import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 
 @Composable
 fun HistoryScreen(
+    onSnapshotClick: (snapshotId: Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HistoryViewModel = hiltViewModel(),
 ) {
@@ -37,6 +38,7 @@ fun HistoryScreen(
 
     HistoryComponent(
         uiState = uiState,
+        onSnapshotClick = onSnapshotClick,
         modifier = modifier,
     )
 }
@@ -45,6 +47,7 @@ fun HistoryScreen(
 @Composable
 fun HistoryComponent(
     uiState: HistoryUiState,
+    onSnapshotClick: (snapshotId: Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -78,7 +81,10 @@ fun HistoryComponent(
                     items = uiState.snapshots,
                     key = { snapshot -> snapshot.snapshotId },
                 ) { snapshot ->
-                    HistorySnapshotCard(snapshot = snapshot)
+                    HistorySnapshotCard(
+                        snapshot = snapshot,
+                        onClick = { onSnapshotClick(snapshot.snapshotId) },
+                    )
                 }
             }
         }
@@ -114,10 +120,12 @@ private fun EmptyHistoryContent(
 @Composable
 private fun HistorySnapshotCard(
     snapshot: HistorySnapshotUiState,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
+        onClick = onClick,
     ) {
         ListItem(
             headlineContent = {
@@ -134,6 +142,9 @@ private fun HistorySnapshotCard(
 @Composable
 private fun HistoryComponentPreview() {
     RoutineHelperTheme {
-        HistoryComponent(uiState = HistoryUiState.preview())
+        HistoryComponent(
+            uiState = HistoryUiState.preview(),
+            onSnapshotClick = {},
+        )
     }
 }

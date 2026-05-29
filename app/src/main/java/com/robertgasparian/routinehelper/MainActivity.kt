@@ -6,8 +6,9 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.robertgasparian.routinehelper.ui.app.RoutineHelperComponent
-import com.robertgasparian.routinehelper.ui.app.TodayDestination
 import com.robertgasparian.routinehelper.ui.app.RoutineHelperScreen
+import com.robertgasparian.routinehelper.ui.app.TodayDestination
+import com.robertgasparian.routinehelper.ui.app.TopLevelBackStack
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -33,9 +34,7 @@ private fun RoutineHelperApp() {
 private fun RoutineHelperAppPreview() {
     RoutineHelperTheme {
         RoutineHelperComponent(
-            backStack = listOf(TodayDestination),
-            selectedDestination = TodayDestination,
-            onDestinationSelected = {},
+            topLevelBackStack = TopLevelBackStack<Any>(TodayDestination),
         )
     }
 }

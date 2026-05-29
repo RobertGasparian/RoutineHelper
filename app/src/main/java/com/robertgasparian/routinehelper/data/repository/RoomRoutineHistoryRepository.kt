@@ -70,6 +70,10 @@ class RoomRoutineHistoryRepository(
         )
         snapshotId
     }
+
+    override suspend fun deleteSnapshot(snapshotId: Long) {
+        dailySnapshotDao.deleteSnapshot(snapshotId)
+    }
 }
 
 private fun DailySnapshotWithEntries.toDomain(): RoutineDaySnapshot =
