@@ -97,4 +97,32 @@ class FinalizeTodayUseCaseTest {
         assertEquals(listOf("2026-05-29"), todayRepository.resetDates)
         assertTrue(historyRepository.savedSnapshots.isEmpty())
     }
+
+    @Test
+    fun savesTodayItemsUnderSelectedSnapshotDate() = runTest {
+        todayRepository.setItems(
+            date = "2026-05-29",
+            items = listOf(
+                TodayRoutineItem(
+                    routineItemId = 10L,
+                    actionId = 100L,
+                    title = "Drink water",
+                    description = null,
+                    position = 0,
+                    date = "2026-05-29",
+                    isChecked = true,
+                    note = null,
+                ),
+            ),
+        )
+
+        useCase(
+            date = "2026-05-29",
+            snapshotDate = "2026-05-27",
+            finalizedAtMillis = 123L,
+        )
+
+        assertEquals("2026-05-27", historyRepository.savedSnapshots.single().date)
+        assertEquals(listOf("2026-05-29"), todayRepository.resetDates)
+    }
 }

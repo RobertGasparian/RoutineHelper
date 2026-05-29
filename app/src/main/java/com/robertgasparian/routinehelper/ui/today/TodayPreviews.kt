@@ -93,5 +93,6 @@ private fun TodayComponentPreviewContent(
         onAddAction = { _, _ -> },
         onCheckedChange = { _, _ -> },
         onNoteChange = { _, _ -> },
+        onSnapshotClick = { _ -> },
     )
 }

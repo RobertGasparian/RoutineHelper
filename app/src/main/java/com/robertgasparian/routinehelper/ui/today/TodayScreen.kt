@@ -14,6 +14,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +37,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneOffset
 
 @Composable
 fun TodayScreen(
@@ -47,6 +52,7 @@ fun TodayScreen(
         onAddAction = viewModel::addAction,
         onCheckedChange = viewModel::setChecked,
         onNoteChange = viewModel::updateNote,
+        onSnapshotClick = viewModel::snapshotToday,
     )
 }
 
@@ -57,9 +63,11 @@ fun TodayComponent(
     onAddAction: (title: String, description: String?) -> Unit,
     onCheckedChange: (routineItemId: Long, isChecked: Boolean) -> Unit,
     onNoteChange: (routineItemId: Long, note: String) -> Unit,
+    onSnapshotClick: (snapshotDate: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var showAddDialog by rememberSaveable { mutableStateOf(false) }
+    var showSnapshotDatePicker by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier,
@@ -72,6 +80,16 @@ fun TodayComponent(
                             text = uiState.date,
                             style = MaterialTheme.typography.bodySmall,
                         )
+                    }
+                },
+                actions = {
+                    TextButton(
+                        onClick = {
+                            // TODO Remove this test-only date picker when snapshots are created by WorkManager.
+                            showSnapshotDatePicker = true
+                        },
+                    ) {
+                        Text(text = "Snapshot")
                     }
                 },
             )
@@ -125,6 +143,52 @@ fun TodayComponent(
                 showAddDialog = false
             },
         )
+    }
+
+    if (showSnapshotDatePicker) {
+        SnapshotDatePickerDialog(
+            initialDate = uiState.date,
+            onDismiss = { showSnapshotDatePicker = false },
+            onConfirm = { snapshotDate ->
+                onSnapshotClick(snapshotDate)
+                showSnapshotDatePicker = false
+            },
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SnapshotDatePickerDialog(
+    initialDate: String,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit,
+) {
+    val datePickerState = androidx.compose.material3.rememberDatePickerState(
+        initialSelectedDateMillis = initialDate.toEpochMillis(),
+    )
+
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    val selectedDate = datePickerState.selectedDateMillis
+                        ?.toLocalDateString()
+                        ?: initialDate
+                    onConfirm(selectedDate)
+                },
+            ) {
+                Text(text = "Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = "Cancel")
+            }
+        },
+    ) {
+        DatePicker(state = datePickerState)
     }
 }
 
@@ -320,6 +384,19 @@ private fun TodayScreenPreview() {
             onAddAction = { _, _ -> },
             onCheckedChange = { _, _ -> },
             onNoteChange = { _, _ -> },
+            onSnapshotClick = { _ -> },
         )
     }
 }
+
+private fun String.toEpochMillis(): Long =
+    LocalDate.parse(this)
+        .atStartOfDay()
+        .toInstant(ZoneOffset.UTC)
+        .toEpochMilli()
+
+private fun Long.toLocalDateString(): String =
+    Instant.ofEpochMilli(this)
+        .atZone(ZoneOffset.UTC)
+        .toLocalDate()
+        .toString()

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import com.robertgasparian.routinehelper.domain.usecase.AddTemplateItemUseCase
+import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetTodayItemCheckedUseCase
 import com.robertgasparian.routinehelper.domain.usecase.TodayItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayItemNoteUseCase
@@ -20,6 +21,7 @@ import kotlinx.coroutines.launch
 class TodayViewModel @Inject constructor(
     todayItemsUseCase: TodayItemsUseCase,
     private val addTemplateItemUseCase: AddTemplateItemUseCase,
+    private val finalizeTodayUseCase: FinalizeTodayUseCase,
     private val setTodayItemCheckedUseCase: SetTodayItemCheckedUseCase,
     private val updateTodayItemNoteUseCase: UpdateTodayItemNoteUseCase,
 ) : ViewModel() {
@@ -73,6 +75,17 @@ class TodayViewModel @Inject constructor(
                 date = todayDate,
                 routineItemId = routineItemId,
                 note = note,
+            )
+        }
+    }
+
+    fun snapshotToday(snapshotDate: String) {
+        viewModelScope.launch {
+            // TODO Remove manual date selection when nightly WorkManager finalization is introduced.
+            finalizeTodayUseCase(
+                date = todayDate,
+                snapshotDate = snapshotDate,
+                finalizedAtMillis = System.currentTimeMillis(),
             )
         }
     }

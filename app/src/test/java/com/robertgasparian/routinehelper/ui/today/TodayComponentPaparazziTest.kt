@@ -41,5 +41,6 @@ private fun TodayComponentPaparazziContent(
         onAddAction = { _, _ -> },
         onCheckedChange = { _, _ -> },
         onNoteChange = { _, _ -> },
+        onSnapshotClick = { _ -> },
     )
 }

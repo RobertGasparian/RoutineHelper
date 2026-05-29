@@ -8,8 +8,9 @@ lifecycleRuntimeKtx = "2.10.0"
 lifecycleRuntimeCompose = "2.10.0"
 lifecycleViewModelCompose = "2.10.0"
 hiltNavigationCompose = "1.4.0-beta01"
+navigation3 = "1.2.0-alpha02"
 room = "2.8.4"
-ksp = "2.2.10-2.0.2"
+ksp = "2.3.7"
 hilt = "2.59.2"
 paparazzi = "2.0.0-alpha05"
 junit = "4.13.2"
@@ -35,6 +36,9 @@ androidx-compose-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
 androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
+androidx-compose-material-icons-core = { module = "androidx.compose.material:material-icons-core" }
+androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
+androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
