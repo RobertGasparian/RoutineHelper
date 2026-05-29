@@ -3,9 +3,10 @@ package com.robertgasparian.routinehelper.domain.usecase
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshotItem
 import com.robertgasparian.routinehelper.domain.repository.RoutineHistoryRepository
 import com.robertgasparian.routinehelper.domain.repository.TodayRoutineRepository
+import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 
-class FinalizeTodayUseCase(
+class FinalizeTodayUseCase @Inject constructor(
     private val todayRoutineRepository: TodayRoutineRepository,
     private val routineHistoryRepository: RoutineHistoryRepository,
 ) {
