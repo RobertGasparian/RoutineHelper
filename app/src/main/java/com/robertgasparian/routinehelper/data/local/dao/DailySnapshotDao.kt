@@ -13,14 +13,17 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface DailySnapshotDao {
     @Query("SELECT * FROM daily_snapshots ORDER BY date DESC")
-    fun observeSnapshots(): Flow<List<DailySnapshotEntity>>
+    fun snapshots(): Flow<List<DailySnapshotEntity>>
 
     @Transaction
     @Query("SELECT * FROM daily_snapshots WHERE id = :id")
-    fun observeSnapshot(id: Long): Flow<DailySnapshotWithEntries?>
+    fun snapshot(id: Long): Flow<DailySnapshotWithEntries?>
+
+    @Query("SELECT * FROM daily_snapshot_entries WHERE snapshotId = :snapshotId ORDER BY positionSnapshot")
+    fun snapshotEntries(snapshotId: Long): Flow<List<DailySnapshotEntryEntity>>
 
     @Query("SELECT * FROM daily_snapshots WHERE date = :date")
-    suspend fun getSnapshotForDate(date: String): DailySnapshotEntity?
+    fun snapshotForDate(date: String): Flow<DailySnapshotEntity?>
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertSnapshot(snapshot: DailySnapshotEntity): Long

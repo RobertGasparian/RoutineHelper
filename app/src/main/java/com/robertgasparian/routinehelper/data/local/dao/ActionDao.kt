@@ -11,10 +11,10 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ActionDao {
     @Query("SELECT * FROM actions ORDER BY title COLLATE NOCASE")
-    fun observeActions(): Flow<List<ActionEntity>>
+    fun actions(): Flow<List<ActionEntity>>
 
     @Query("SELECT * FROM actions WHERE id = :id")
-    suspend fun getAction(id: Long): ActionEntity?
+    fun action(id: Long): Flow<ActionEntity?>
 
     @Insert
     suspend fun insert(action: ActionEntity): Long
@@ -24,4 +24,7 @@ interface ActionDao {
 
     @Delete
     suspend fun delete(action: ActionEntity)
+
+    @Query("DELETE FROM actions WHERE id = :id")
+    suspend fun deleteById(id: Long)
 }

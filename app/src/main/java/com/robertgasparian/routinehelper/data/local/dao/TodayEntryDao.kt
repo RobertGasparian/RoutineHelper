@@ -11,10 +11,10 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TodayEntryDao {
     @Query("SELECT * FROM today_entries WHERE date = :date")
-    fun observeEntriesForDate(date: String): Flow<List<TodayEntryEntity>>
+    fun entriesForDate(date: String): Flow<List<TodayEntryEntity>>
 
-    @Query("SELECT * FROM today_entries WHERE date = :date")
-    suspend fun getEntriesForDate(date: String): List<TodayEntryEntity>
+    @Query("SELECT * FROM today_entries WHERE date = :date AND routineItemId = :routineItemId")
+    fun entryForDate(date: String, routineItemId: Long): Flow<TodayEntryEntity?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(entry: TodayEntryEntity): Long

@@ -1,0 +1,91 @@
+package com.robertgasparian.routinehelper.data.repository
+
+import androidx.room.withTransaction
+import com.robertgasparian.routinehelper.data.local.RoutineDatabase
+import com.robertgasparian.routinehelper.data.local.dao.ActionDao
+import com.robertgasparian.routinehelper.data.local.dao.RoutineItemDao
+import com.robertgasparian.routinehelper.data.local.entity.ActionEntity
+import com.robertgasparian.routinehelper.data.local.entity.RoutineItemEntity
+import com.robertgasparian.routinehelper.data.local.model.RoutineItemWithAction
+import com.robertgasparian.routinehelper.domain.model.RoutineTemplateItem
+import com.robertgasparian.routinehelper.domain.repository.RoutineTemplateRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+
+class RoomRoutineTemplateRepository(
+    private val database: RoutineDatabase,
+    private val actionDao: ActionDao = database.actionDao(),
+    private val routineItemDao: RoutineItemDao = database.routineItemDao(),
+    private val clock: () -> Long = System::currentTimeMillis,
+) : RoutineTemplateRepository {
+    override fun templateItems(): Flow<List<RoutineTemplateItem>> =
+        routineItemDao.routineItems().map { items ->
+            items.map(RoutineItemWithAction::toDomain)
+        }
+
+    override suspend fun addTemplateItem(
+        title: String,
+        description: String?,
+    ): Long = database.withTransaction {
+        val now = clock()
+        val actionId = actionDao.insert(
+            ActionEntity(
+                title = title.trim(),
+                description = description?.trim()?.takeIf(String::isNotEmpty),
+                createdAtMillis = now,
+                updatedAtMillis = now,
+            ),
+        )
+        routineItemDao.insert(
+            RoutineItemEntity(
+                actionId = actionId,
+                position = routineItemDao.maxPosition().first() + 1,
+                createdAtMillis = now,
+            ),
+        )
+    }
+
+    override suspend fun updateAction(
+        actionId: Long,
+        title: String,
+        description: String?,
+    ) {
+        val existing = actionDao.action(actionId).first() ?: return
+        actionDao.update(
+            existing.copy(
+                title = title.trim(),
+                description = description?.trim()?.takeIf(String::isNotEmpty),
+                updatedAtMillis = clock(),
+            ),
+        )
+    }
+
+    override suspend fun removeTemplateItem(routineItemId: Long) {
+        database.withTransaction {
+            val routineItem = routineItemDao.routineItem(routineItemId).first() ?: return@withTransaction
+            routineItemDao.deleteById(routineItemId)
+            actionDao.deleteById(routineItem.actionId)
+        }
+    }
+
+    override suspend fun reorderTemplateItems(routineItemIdsInOrder: List<Long>) {
+        database.withTransaction {
+            routineItemIdsInOrder.forEachIndexed { index, routineItemId ->
+                val routineItem = routineItemDao.routineItem(routineItemId).first()
+                if (routineItem != null && routineItem.position != index) {
+                    routineItemDao.update(routineItem.copy(position = index))
+                }
+            }
+        }
+    }
+}
+
+private fun RoutineItemWithAction.toDomain(): RoutineTemplateItem =
+    RoutineTemplateItem(
+        routineItemId = routineItem.id,
+        actionId = action.id,
+        title = action.title,
+        description = action.description,
+        position = routineItem.position,
+    )

@@ -13,11 +13,13 @@ import kotlinx.coroutines.flow.Flow
 interface RoutineItemDao {
     @Transaction
     @Query("SELECT * FROM routine_items ORDER BY position")
-    fun observeRoutineItems(): Flow<List<RoutineItemWithAction>>
+    fun routineItems(): Flow<List<RoutineItemWithAction>>
 
-    @Transaction
-    @Query("SELECT * FROM routine_items ORDER BY position")
-    suspend fun getRoutineItems(): List<RoutineItemWithAction>
+    @Query("SELECT COALESCE(MAX(position), -1) FROM routine_items")
+    fun maxPosition(): Flow<Int>
+
+    @Query("SELECT * FROM routine_items WHERE id = :id")
+    fun routineItem(id: Long): Flow<RoutineItemEntity?>
 
     @Insert
     suspend fun insert(routineItem: RoutineItemEntity): Long
