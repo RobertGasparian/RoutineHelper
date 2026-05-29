@@ -6,27 +6,29 @@ import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshotItem
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotUseCase
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-@HiltViewModel
-class HistoryDetailViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = HistoryDetailViewModel.Factory::class)
+class HistoryDetailViewModel @AssistedInject constructor(
+    @Assisted private val snapshotId: Long,
     private val deleteSnapshotUseCase: DeleteSnapshotUseCase,
     private val snapshotUseCase: SnapshotUseCase,
 ) : ViewModel() {
-    fun uiState(snapshotId: Long): Flow<HistoryDetailUiState> =
+    val uiState: Flow<HistoryDetailUiState> =
         snapshotUseCase(snapshotId).map { snapshot ->
             snapshot?.toUiState() ?: HistoryDetailUiState.previewMissing()
         }
 
     fun deleteSnapshot(
-        snapshotId: Long,
         onDeleted: () -> Unit,
     ) {
         viewModelScope.launch {
@@ -34,6 +36,11 @@ class HistoryDetailViewModel @Inject constructor(
             deleteSnapshotUseCase(snapshotId)
             onDeleted()
         }
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(snapshotId: Long): HistoryDetailViewModel
     }
 }
 

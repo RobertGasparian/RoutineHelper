@@ -24,9 +24,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.robertgasparian.routinehelper.ui.actioneditor.ActionEditorScreen
 import com.robertgasparian.routinehelper.ui.history.detail.HistoryDetailScreen
 import com.robertgasparian.routinehelper.ui.history.HistoryScreen
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
@@ -61,9 +64,20 @@ fun RoutineHelperComponent(
                 .fillMaxSize()
                 .padding(PaddingValues(bottom = innerPadding.calculateBottomPadding())),
             onBack = { topLevelBackStack.removeLast() },
+            entryDecorators = listOf(
+                rememberSaveableStateHolderNavEntryDecorator(),
+                rememberViewModelStoreNavEntryDecorator(),
+            ),
             entryProvider = entryProvider {
                 entry<TodayDestination> {
-                        TodayScreen()
+                        TodayScreen(
+                            onCreateActionClick = {
+                                topLevelBackStack.add(ActionEditorDestination())
+                            },
+                            onEditActionClick = { actionId ->
+                                topLevelBackStack.add(ActionEditorDestination(actionId))
+                            },
+                        )
                     }
 
                 entry<HistoryDestination> {
@@ -79,6 +93,13 @@ fun RoutineHelperComponent(
                             snapshotId = destination.snapshotId,
                             onBackClick = { topLevelBackStack.removeLast() },
                         )
+                }
+
+                entry<ActionEditorDestination> { destination ->
+                    ActionEditorScreen(
+                        actionId = destination.actionId,
+                        onBackClick = { topLevelBackStack.removeLast() },
+                    )
                 }
             },
         )

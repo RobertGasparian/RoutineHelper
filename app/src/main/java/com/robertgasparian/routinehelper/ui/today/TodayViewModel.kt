@@ -3,7 +3,6 @@ package com.robertgasparian.routinehelper.ui.today
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
-import com.robertgasparian.routinehelper.domain.usecase.AddTemplateItemUseCase
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetTodayItemCheckedUseCase
 import com.robertgasparian.routinehelper.domain.usecase.TodayItemsUseCase
@@ -20,7 +19,6 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class TodayViewModel @Inject constructor(
     todayItemsUseCase: TodayItemsUseCase,
-    private val addTemplateItemUseCase: AddTemplateItemUseCase,
     private val finalizeTodayUseCase: FinalizeTodayUseCase,
     private val setTodayItemCheckedUseCase: SetTodayItemCheckedUseCase,
     private val updateTodayItemNoteUseCase: UpdateTodayItemNoteUseCase,
@@ -40,18 +38,6 @@ class TodayViewModel @Inject constructor(
                 started = SharingStarted.WhileSubscribed(5_000),
                 initialValue = TodayUiState(date = todayDate),
             )
-
-    fun addAction(
-        title: String,
-        description: String?,
-    ) {
-        viewModelScope.launch {
-            addTemplateItemUseCase(
-                title = title,
-                description = description,
-            )
-        }
-    }
 
     fun setChecked(
         routineItemId: Long,
@@ -94,6 +80,7 @@ class TodayViewModel @Inject constructor(
 private fun TodayRoutineItem.toUiState(): TodayItemUiState =
     TodayItemUiState(
         routineItemId = routineItemId,
+        actionId = actionId,
         title = title,
         description = description,
         isChecked = isChecked,

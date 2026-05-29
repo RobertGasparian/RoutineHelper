@@ -11,6 +11,7 @@ data class TodayUiState(
                 items = listOf(
                     TodayItemUiState(
                         routineItemId = 1,
+                        actionId = 101,
                         title = "Drink water",
                         description = "Drink 3L water",
                         isChecked = true,
@@ -18,6 +19,7 @@ data class TodayUiState(
                     ),
                     TodayItemUiState(
                         routineItemId = 2,
+                        actionId = 102,
                         title = "Stretch",
                         description = "Ten minutes of mobility work",
                         isChecked = false,
@@ -25,6 +27,7 @@ data class TodayUiState(
                     ),
                     TodayItemUiState(
                         routineItemId = 3,
+                        actionId = 103,
                         title = "Read",
                         description = null,
                         isChecked = false,
@@ -40,6 +43,7 @@ data class TodayUiState(
 
 data class TodayItemUiState(
     val routineItemId: Long,
+    val actionId: Long,
     val title: String,
     val description: String?,
     val isChecked: Boolean,

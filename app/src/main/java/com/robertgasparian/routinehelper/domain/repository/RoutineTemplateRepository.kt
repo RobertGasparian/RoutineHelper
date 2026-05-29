@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.Flow
 interface RoutineTemplateRepository {
     fun templateItems(): Flow<List<RoutineTemplateItem>>
 
+    fun templateItem(actionId: Long): Flow<RoutineTemplateItem?>
+
     suspend fun addTemplateItem(
         title: String,
         description: String?,

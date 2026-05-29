@@ -9,3 +9,7 @@ data object HistoryDestination : TopLevelDestination
 data class HistoryDetailDestination(
     val snapshotId: Long,
 )
+
+data class ActionEditorDestination(
+    val actionId: Long? = null,
+)

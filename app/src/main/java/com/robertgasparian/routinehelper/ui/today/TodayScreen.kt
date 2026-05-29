@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -43,13 +42,16 @@ import java.time.ZoneOffset
 
 @Composable
 fun TodayScreen(
+    onCreateActionClick: () -> Unit,
+    onEditActionClick: (actionId: Long) -> Unit,
     viewModel: TodayViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     TodayComponent(
         uiState = uiState,
-        onAddAction = viewModel::addAction,
+        onCreateActionClick = onCreateActionClick,
+        onEditActionClick = onEditActionClick,
         onCheckedChange = viewModel::setChecked,
         onNoteChange = viewModel::updateNote,
         onSnapshotClick = viewModel::snapshotToday,
@@ -60,13 +62,14 @@ fun TodayScreen(
 @Composable
 fun TodayComponent(
     uiState: TodayUiState,
-    onAddAction: (title: String, description: String?) -> Unit,
+    onCreateActionClick: () -> Unit,
+    onEditActionClick: (actionId: Long) -> Unit,
     onCheckedChange: (routineItemId: Long, isChecked: Boolean) -> Unit,
     onNoteChange: (routineItemId: Long, note: String) -> Unit,
     onSnapshotClick: (snapshotDate: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var showAddDialog by rememberSaveable { mutableStateOf(false) }
+    var noteEditorItem by rememberSaveable { mutableStateOf<TodayItemUiState?>(null) }
     var showSnapshotDatePicker by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
@@ -96,7 +99,7 @@ fun TodayComponent(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { showAddDialog = true },
+                onClick = onCreateActionClick,
             ) {
                 Text(text = "+")
             }
@@ -104,7 +107,7 @@ fun TodayComponent(
     ) { innerPadding ->
         if (uiState.items.isEmpty()) {
             EmptyTodayContent(
-                onAddClick = { showAddDialog = true },
+                onAddClick = onCreateActionClick,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
@@ -123,26 +126,19 @@ fun TodayComponent(
                 ) { item ->
                     TodayItemCard(
                         item = item,
+                        onEditActionClick = {
+                            onEditActionClick(item.actionId)
+                        },
                         onCheckedChange = { isChecked ->
                             onCheckedChange(item.routineItemId, isChecked)
                         },
-                        onNoteChange = { note ->
-                            onNoteChange(item.routineItemId, note)
+                        onEditNoteClick = {
+                            noteEditorItem = item
                         },
                     )
                 }
             }
         }
-    }
-
-    if (showAddDialog) {
-        AddActionDialog(
-            onDismiss = { showAddDialog = false },
-            onConfirm = { title, description ->
-                onAddAction(title, description)
-                showAddDialog = false
-            },
-        )
     }
 
     if (showSnapshotDatePicker) {
@@ -152,6 +148,17 @@ fun TodayComponent(
             onConfirm = { snapshotDate ->
                 onSnapshotClick(snapshotDate)
                 showSnapshotDatePicker = false
+            },
+        )
+    }
+
+    noteEditorItem?.let { item ->
+        NoteEditorDialog(
+            initialNote = item.note,
+            onDismiss = { noteEditorItem = null },
+            onConfirm = { note ->
+                onNoteChange(item.routineItemId, note)
+                noteEditorItem = null
             },
         )
     }
@@ -223,13 +230,11 @@ private fun EmptyTodayContent(
 @Composable
 private fun TodayItemCard(
     item: TodayItemUiState,
+    onEditActionClick: () -> Unit,
     onCheckedChange: (Boolean) -> Unit,
-    onNoteChange: (String) -> Unit,
+    onEditNoteClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var isEditingNote by rememberSaveable(item.routineItemId) { mutableStateOf(false) }
-    var noteDraft by rememberSaveable(item.routineItemId) { mutableStateOf(item.note) }
-
     Card(
         modifier = modifier.fillMaxWidth(),
     ) {
@@ -267,59 +272,25 @@ private fun TodayItemCard(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            if (isEditingNote) {
-                OutlinedTextField(
-                    value = noteDraft,
-                    onValueChange = { noteDraft = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text(text = "Today note") },
-                    minLines = 2,
-                    maxLines = 5,
+            if (item.note.isNotBlank()) {
+                Text(
+                    text = item.note,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 12.dp),
                 )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.End,
-                ) {
-                    TextButton(
-                        onClick = {
-                            noteDraft = item.note
-                            isEditingNote = false
-                        },
-                    ) {
-                        Text(text = "Cancel")
-                    }
-                    TextButton(
-                        onClick = {
-                            onNoteChange(noteDraft)
-                            isEditingNote = false
-                        },
-                    ) {
-                        Text(text = "Save")
-                    }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                TextButton(onClick = onEditActionClick) {
+                    Text(text = "Edit action")
                 }
-            } else {
-                if (item.note.isNotBlank()) {
-                    Text(
-                        text = item.note,
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                ) {
-                    TextButton(
-                        onClick = {
-                            noteDraft = item.note
-                            isEditingNote = true
-                        },
-                    ) {
-                        Text(text = if (item.note.isBlank()) "Add note" else "Edit note")
-                    }
+                TextButton(onClick = onEditNoteClick) {
+                    Text(text = if (item.note.isBlank()) "Add note" else "Edit note")
                 }
             }
         }
@@ -327,42 +298,29 @@ private fun TodayItemCard(
 }
 
 @Composable
-private fun AddActionDialog(
+private fun NoteEditorDialog(
+    initialNote: String,
     onDismiss: () -> Unit,
-    onConfirm: (title: String, description: String?) -> Unit,
+    onConfirm: (note: String) -> Unit,
 ) {
-    var title by rememberSaveable { mutableStateOf("") }
-    var description by rememberSaveable { mutableStateOf("") }
-    val canSave = title.isNotBlank()
+    var note by rememberSaveable(initialNote) { mutableStateOf(initialNote) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(text = "Add action") },
+        title = { Text(text = if (initialNote.isBlank()) "Add note" else "Edit note") },
         text = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    label = { Text(text = "Title") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    label = { Text(text = "Description") },
-                    minLines = 2,
-                    maxLines = 4,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
+            OutlinedTextField(
+                value = note,
+                onValueChange = { note = it },
+                label = { Text(text = "Today note") },
+                minLines = 4,
+                maxLines = 8,
+                modifier = Modifier.fillMaxWidth(),
+            )
         },
         confirmButton = {
             TextButton(
-                onClick = { onConfirm(title, description) },
-                enabled = canSave,
+                onClick = { onConfirm(note) },
             ) {
                 Text(text = "Save")
             }
@@ -381,7 +339,8 @@ private fun TodayScreenPreview() {
     RoutineHelperTheme {
         TodayComponent(
             uiState = TodayUiState.preview(),
-            onAddAction = { _, _ -> },
+            onCreateActionClick = {},
+            onEditActionClick = {},
             onCheckedChange = { _, _ -> },
             onNoteChange = { _, _ -> },
             onSnapshotClick = { _ -> },

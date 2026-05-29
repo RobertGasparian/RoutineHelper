@@ -38,7 +38,8 @@ private fun TodayComponentPaparazziContent(
 ) {
     TodayComponent(
         uiState = uiState,
-        onAddAction = { _, _ -> },
+        onCreateActionClick = {},
+        onEditActionClick = {},
         onCheckedChange = { _, _ -> },
         onNoteChange = { _, _ -> },
         onSnapshotClick = { _ -> },

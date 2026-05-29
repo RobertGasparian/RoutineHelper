@@ -86,11 +86,12 @@ private fun TodayComponentEmptyPreview() {
 
 @Composable
 private fun TodayComponentPreviewContent(
-    uiState: TodayUiState,
+        uiState: TodayUiState,
 ) {
     TodayComponent(
         uiState = uiState,
-        onAddAction = { _, _ -> },
+        onCreateActionClick = {},
+        onEditActionClick = {},
         onCheckedChange = { _, _ -> },
         onNoteChange = { _, _ -> },
         onSnapshotClick = { _ -> },

@@ -45,9 +45,11 @@ fun HistoryDetailScreen(
     snapshotId: Long,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: HistoryDetailViewModel = hiltViewModel(),
+    viewModel: HistoryDetailViewModel = hiltViewModel<HistoryDetailViewModel, HistoryDetailViewModel.Factory>(
+        creationCallback = { factory -> factory.create(snapshotId) },
+    ),
 ) {
-    val uiState by viewModel.uiState(snapshotId).collectAsStateWithLifecycle(
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle(
         initialValue = HistoryDetailUiState(),
     )
 
@@ -56,7 +58,6 @@ fun HistoryDetailScreen(
         onBackClick = onBackClick,
         onDeleteClick = {
             viewModel.deleteSnapshot(
-                snapshotId = snapshotId,
                 onDeleted = onBackClick,
             )
         },

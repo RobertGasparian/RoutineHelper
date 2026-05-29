@@ -24,6 +24,11 @@ class RoomRoutineTemplateRepository(
             items.map(RoutineItemWithAction::toDomain)
         }
 
+    override fun templateItem(actionId: Long): Flow<RoutineTemplateItem?> =
+        templateItems().map { items ->
+            items.firstOrNull { it.actionId == actionId }
+        }
+
     override suspend fun addTemplateItem(
         title: String,
         description: String?,
