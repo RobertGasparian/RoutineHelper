@@ -1,0 +1,34 @@
+package com.robertgasparian.routinehelper.data.local.entity
+
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
+import androidx.room.PrimaryKey
+
+@Entity(
+    tableName = "daily_snapshot_entries",
+    foreignKeys = [
+        ForeignKey(
+            entity = DailySnapshotEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["snapshotId"],
+            onDelete = ForeignKey.CASCADE,
+        ),
+    ],
+    indices = [
+        Index(value = ["snapshotId"]),
+        Index(value = ["actionId"]),
+        Index(value = ["snapshotId", "positionSnapshot"]),
+    ],
+)
+data class DailySnapshotEntryEntity(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    val snapshotId: Long,
+    val actionId: Long,
+    val titleSnapshot: String,
+    val descriptionSnapshot: String? = null,
+    val positionSnapshot: Int,
+    val isChecked: Boolean,
+    val note: String? = null,
+)
