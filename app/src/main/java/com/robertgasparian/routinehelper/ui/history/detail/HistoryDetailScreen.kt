@@ -1,5 +1,6 @@
 package com.robertgasparian.routinehelper.ui.history.detail
 
+import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,12 +16,14 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -30,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -49,6 +53,7 @@ fun HistoryDetailScreen(
         creationCallback = { factory -> factory.create(snapshotId) },
     ),
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle(
         initialValue = HistoryDetailUiState(),
     )
@@ -56,6 +61,13 @@ fun HistoryDetailScreen(
     HistoryDetailComponent(
         uiState = uiState,
         onBackClick = onBackClick,
+        onShareClick = viewModel::showSharePreview,
+        onShareTextChange = viewModel::updateShareText,
+        onShareDismiss = viewModel::dismissSharePreview,
+        onShareConfirm = { text ->
+            context.shareText(text = text, title = "Share routine snapshot")
+            viewModel.dismissSharePreview()
+        },
         onDeleteClick = {
             viewModel.deleteSnapshot(
                 onDeleted = onBackClick,
@@ -70,6 +82,10 @@ fun HistoryDetailScreen(
 fun HistoryDetailComponent(
     uiState: HistoryDetailUiState,
     onBackClick: () -> Unit,
+    onShareClick: () -> Unit,
+    onShareTextChange: (String) -> Unit,
+    onShareDismiss: () -> Unit,
+    onShareConfirm: (String) -> Unit,
     onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -99,6 +115,15 @@ fun HistoryDetailComponent(
                     }
                 },
                 actions = {
+                    IconButton(
+                        enabled = !uiState.isMissing && uiState.date.isNotBlank(),
+                        onClick = onShareClick,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Share,
+                            contentDescription = "Share snapshot",
+                        )
+                    }
                     IconButton(
                         onClick = {
                             // TODO Remove this test-only delete affordance when history management UX is finalized.
@@ -171,6 +196,51 @@ fun HistoryDetailComponent(
             },
         )
     }
+
+    uiState.shareText?.let { shareText ->
+        ShareSnapshotDialog(
+            text = shareText,
+            onTextChange = onShareTextChange,
+            onDismiss = onShareDismiss,
+            onShareClick = { onShareConfirm(shareText) },
+        )
+    }
+}
+
+@Composable
+private fun ShareSnapshotDialog(
+    text: String,
+    onTextChange: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onShareClick: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = "Share snapshot") },
+        text = {
+            OutlinedTextField(
+                value = text,
+                onValueChange = onTextChange,
+                label = { Text(text = "Message") },
+                minLines = 8,
+                maxLines = 14,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        confirmButton = {
+            TextButton(
+                enabled = text.isNotBlank(),
+                onClick = onShareClick,
+            ) {
+                Text(text = "Share")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = "Cancel")
+            }
+        },
+    )
 }
 
 @Composable
@@ -316,7 +386,22 @@ private fun HistoryDetailComponentPreview() {
         HistoryDetailComponent(
             uiState = HistoryDetailUiState.preview(),
             onBackClick = {},
+            onShareClick = {},
+            onShareTextChange = {},
+            onShareDismiss = {},
+            onShareConfirm = {},
             onDeleteClick = {},
         )
     }
+}
+
+private fun android.content.Context.shareText(
+    text: String,
+    title: String,
+) {
+    val sendIntent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_TEXT, text)
+    }
+    startActivity(Intent.createChooser(sendIntent, title))
 }

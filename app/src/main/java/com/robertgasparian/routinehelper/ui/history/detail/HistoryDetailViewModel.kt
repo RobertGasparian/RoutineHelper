@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshotItem
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
+import com.robertgasparian.routinehelper.domain.usecase.SnapshotShareTextUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -14,18 +15,31 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @HiltViewModel(assistedFactory = HistoryDetailViewModel.Factory::class)
 class HistoryDetailViewModel @AssistedInject constructor(
     @Assisted private val snapshotId: Long,
     private val deleteSnapshotUseCase: DeleteSnapshotUseCase,
+    private val snapshotShareTextUseCase: SnapshotShareTextUseCase,
     private val snapshotUseCase: SnapshotUseCase,
 ) : ViewModel() {
+    private val shareText = MutableStateFlow<String?>(null)
+    private var currentSnapshot: RoutineDaySnapshot? = null
+
     val uiState: Flow<HistoryDetailUiState> =
-        snapshotUseCase(snapshotId).map { snapshot ->
-            snapshot?.toUiState() ?: HistoryDetailUiState.previewMissing()
+        combine(
+            snapshotUseCase(snapshotId).onEach { snapshot ->
+                currentSnapshot = snapshot
+            },
+            shareText,
+        ) { snapshot, shareText ->
+            (snapshot?.toUiState() ?: HistoryDetailUiState.previewMissing()).copy(
+                shareText = shareText,
+            )
         }
 
     fun deleteSnapshot(
@@ -36,6 +50,19 @@ class HistoryDetailViewModel @AssistedInject constructor(
             deleteSnapshotUseCase(snapshotId)
             onDeleted()
         }
+    }
+
+    fun showSharePreview() {
+        val snapshot = currentSnapshot ?: return
+        shareText.value = snapshotShareTextUseCase(snapshot)
+    }
+
+    fun updateShareText(text: String) {
+        shareText.value = text
+    }
+
+    fun dismissSharePreview() {
+        shareText.value = null
     }
 
     @AssistedFactory

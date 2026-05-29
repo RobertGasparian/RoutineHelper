@@ -19,6 +19,10 @@ class HistoryDetailComponentPaparazziTest {
                 HistoryDetailComponent(
                     uiState = HistoryDetailUiState.preview(),
                     onBackClick = {},
+                    onShareClick = {},
+                    onShareTextChange = {},
+                    onShareDismiss = {},
+                    onShareConfirm = {},
                     onDeleteClick = {},
                 )
             }
@@ -32,6 +36,27 @@ class HistoryDetailComponentPaparazziTest {
                 HistoryDetailComponent(
                     uiState = HistoryDetailUiState.previewEmpty(),
                     onBackClick = {},
+                    onShareClick = {},
+                    onShareTextChange = {},
+                    onShareDismiss = {},
+                    onShareConfirm = {},
+                    onDeleteClick = {},
+                )
+            }
+        }
+    }
+
+    @Test
+    fun shareDialog() {
+        paparazzi.snapshot {
+            RoutineHelperTheme {
+                HistoryDetailComponent(
+                    uiState = HistoryDetailUiState.previewShare(),
+                    onBackClick = {},
+                    onShareClick = {},
+                    onShareTextChange = {},
+                    onShareDismiss = {},
+                    onShareConfirm = {},
                     onDeleteClick = {},
                 )
             }

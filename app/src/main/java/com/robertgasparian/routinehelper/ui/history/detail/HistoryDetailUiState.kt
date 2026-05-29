@@ -5,6 +5,7 @@ data class HistoryDetailUiState(
     val finalizedLabel: String = "",
     val items: List<HistoryDetailItemUiState> = emptyList(),
     val isMissing: Boolean = false,
+    val shareText: String? = null,
 ) {
     companion object {
         fun preview(): HistoryDetailUiState =
@@ -33,6 +34,22 @@ data class HistoryDetailUiState(
             HistoryDetailUiState(
                 date = "2026-05-29",
                 finalizedLabel = "Finalized 11:45 PM",
+            )
+
+        fun previewShare(): HistoryDetailUiState =
+            preview().copy(
+                shareText = """
+                    Routine snapshot
+                    Date: 2026-05-29
+                    Finalized: 11:45 PM
+
+                    1. [x] Drink water
+                       Description: Drink 3L water
+                       Note: One liter was diet soda.
+
+                    2. [ ] Stretch
+                       Description: Ten minutes of mobility work
+                """.trimIndent(),
             )
 
         fun previewMissing(): HistoryDetailUiState =

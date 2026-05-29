@@ -19,6 +19,10 @@ private fun HistoryDetailComponentPhonePreview() {
         HistoryDetailComponent(
             uiState = HistoryDetailUiState.preview(),
             onBackClick = {},
+            onShareClick = {},
+            onShareTextChange = {},
+            onShareDismiss = {},
+            onShareConfirm = {},
             onDeleteClick = {},
         )
     }
@@ -38,6 +42,10 @@ private fun HistoryDetailComponentLandscapePreview() {
         HistoryDetailComponent(
             uiState = HistoryDetailUiState.preview(),
             onBackClick = {},
+            onShareClick = {},
+            onShareTextChange = {},
+            onShareDismiss = {},
+            onShareConfirm = {},
             onDeleteClick = {},
         )
     }
@@ -50,6 +58,10 @@ private fun HistoryDetailComponentTabletPreview() {
         HistoryDetailComponent(
             uiState = HistoryDetailUiState.preview(),
             onBackClick = {},
+            onShareClick = {},
+            onShareTextChange = {},
+            onShareDismiss = {},
+            onShareConfirm = {},
             onDeleteClick = {},
         )
     }
@@ -62,6 +74,10 @@ private fun HistoryDetailComponentFoldablePreview() {
         HistoryDetailComponent(
             uiState = HistoryDetailUiState.preview(),
             onBackClick = {},
+            onShareClick = {},
+            onShareTextChange = {},
+            onShareDismiss = {},
+            onShareConfirm = {},
             onDeleteClick = {},
         )
     }
@@ -74,6 +90,26 @@ private fun HistoryDetailComponentEmptyPreview() {
         HistoryDetailComponent(
             uiState = HistoryDetailUiState.previewEmpty(),
             onBackClick = {},
+            onShareClick = {},
+            onShareTextChange = {},
+            onShareDismiss = {},
+            onShareConfirm = {},
+            onDeleteClick = {},
+        )
+    }
+}
+
+@Preview(name = "Share Dialog", showBackground = true, widthDp = 393, heightDp = 852)
+@Composable
+private fun HistoryDetailComponentSharePreview() {
+    RoutineHelperTheme {
+        HistoryDetailComponent(
+            uiState = HistoryDetailUiState.previewShare(),
+            onBackClick = {},
+            onShareClick = {},
+            onShareTextChange = {},
+            onShareDismiss = {},
+            onShareConfirm = {},
             onDeleteClick = {},
         )
     }
