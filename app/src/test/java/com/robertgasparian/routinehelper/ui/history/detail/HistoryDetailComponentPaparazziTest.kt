@@ -20,9 +20,12 @@ class HistoryDetailComponentPaparazziTest {
                     uiState = HistoryDetailUiState.preview(),
                     onBackClick = {},
                     onShareClick = {},
+                    onShareAsTextClick = {},
+                    onShareAsFileClick = {},
                     onShareTextChange = {},
                     onShareDismiss = {},
-                    onShareConfirm = {},
+                    onShareTextConfirm = {},
+                    onShareFileConfirm = {},
                     onDeleteClick = {},
                 )
             }
@@ -37,9 +40,12 @@ class HistoryDetailComponentPaparazziTest {
                     uiState = HistoryDetailUiState.previewEmpty(),
                     onBackClick = {},
                     onShareClick = {},
+                    onShareAsTextClick = {},
+                    onShareAsFileClick = {},
                     onShareTextChange = {},
                     onShareDismiss = {},
-                    onShareConfirm = {},
+                    onShareTextConfirm = {},
+                    onShareFileConfirm = {},
                     onDeleteClick = {},
                 )
             }
@@ -54,9 +60,52 @@ class HistoryDetailComponentPaparazziTest {
                     uiState = HistoryDetailUiState.previewShare(),
                     onBackClick = {},
                     onShareClick = {},
+                    onShareAsTextClick = {},
+                    onShareAsFileClick = {},
                     onShareTextChange = {},
                     onShareDismiss = {},
-                    onShareConfirm = {},
+                    onShareTextConfirm = {},
+                    onShareFileConfirm = {},
+                    onDeleteClick = {},
+                )
+            }
+        }
+    }
+
+    @Test
+    fun shareOptions() {
+        paparazzi.snapshot {
+            RoutineHelperTheme {
+                HistoryDetailComponent(
+                    uiState = HistoryDetailUiState.previewShareOptions(),
+                    onBackClick = {},
+                    onShareClick = {},
+                    onShareAsTextClick = {},
+                    onShareAsFileClick = {},
+                    onShareTextChange = {},
+                    onShareDismiss = {},
+                    onShareTextConfirm = {},
+                    onShareFileConfirm = {},
+                    onDeleteClick = {},
+                )
+            }
+        }
+    }
+
+    @Test
+    fun fileShareDialog() {
+        paparazzi.snapshot {
+            RoutineHelperTheme {
+                HistoryDetailComponent(
+                    uiState = HistoryDetailUiState.previewFileShare(),
+                    onBackClick = {},
+                    onShareClick = {},
+                    onShareAsTextClick = {},
+                    onShareAsFileClick = {},
+                    onShareTextChange = {},
+                    onShareDismiss = {},
+                    onShareTextConfirm = {},
+                    onShareFileConfirm = {},
                     onDeleteClick = {},
                 )
             }

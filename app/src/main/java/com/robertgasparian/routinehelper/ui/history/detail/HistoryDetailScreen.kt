@@ -1,6 +1,5 @@
 package com.robertgasparian.routinehelper.ui.history.detail
 
-import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,7 +22,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -42,6 +40,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.robertgasparian.routinehelper.ui.share.ShareDraft
+import com.robertgasparian.routinehelper.ui.share.ShareFormatDialog
+import com.robertgasparian.routinehelper.ui.share.ShareTextDialog
+import com.robertgasparian.routinehelper.ui.share.shareText
+import com.robertgasparian.routinehelper.ui.share.shareTextFile
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 
 @Composable
@@ -61,11 +64,22 @@ fun HistoryDetailScreen(
     HistoryDetailComponent(
         uiState = uiState,
         onBackClick = onBackClick,
-        onShareClick = viewModel::showSharePreview,
+        onShareClick = viewModel::showShareOptions,
+        onShareAsTextClick = viewModel::showTextSharePreview,
+        onShareAsFileClick = viewModel::showFileSharePreview,
         onShareTextChange = viewModel::updateShareText,
         onShareDismiss = viewModel::dismissSharePreview,
-        onShareConfirm = { text ->
-            context.shareText(text = text, title = "Share routine snapshot")
+        onShareTextConfirm = { messageText ->
+            context.shareText(text = messageText, title = "Share routine snapshot")
+            viewModel.dismissSharePreview()
+        },
+        onShareFileConfirm = { draft ->
+            context.shareTextFile(
+                fileText = draft.fileText.orEmpty(),
+                messageText = draft.messageText,
+                title = "Share routine snapshot",
+                fileName = "routine-snapshot-${uiState.date.ifBlank { "export" }}.txt",
+            )
             viewModel.dismissSharePreview()
         },
         onDeleteClick = {
@@ -83,9 +97,12 @@ fun HistoryDetailComponent(
     uiState: HistoryDetailUiState,
     onBackClick: () -> Unit,
     onShareClick: () -> Unit,
+    onShareAsTextClick: () -> Unit,
+    onShareAsFileClick: () -> Unit,
     onShareTextChange: (String) -> Unit,
     onShareDismiss: () -> Unit,
-    onShareConfirm: (String) -> Unit,
+    onShareTextConfirm: (String) -> Unit,
+    onShareFileConfirm: (ShareDraft) -> Unit,
     onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -197,49 +214,42 @@ fun HistoryDetailComponent(
         )
     }
 
-    uiState.shareText?.let { shareText ->
+    if (uiState.isShareFormatDialogVisible) {
+        ShareFormatDialog(
+            onDismiss = onShareDismiss,
+            onTextClick = onShareAsTextClick,
+            onFileClick = onShareAsFileClick,
+        )
+    }
+
+    uiState.shareDraft?.let { draft ->
         ShareSnapshotDialog(
-            text = shareText,
+            draft = draft,
             onTextChange = onShareTextChange,
             onDismiss = onShareDismiss,
-            onShareClick = { onShareConfirm(shareText) },
+            onShareClick = {
+                if (draft.isFileShare) {
+                    onShareFileConfirm(draft)
+                } else {
+                    onShareTextConfirm(draft.messageText)
+                }
+            },
         )
     }
 }
 
 @Composable
 private fun ShareSnapshotDialog(
-    text: String,
+    draft: ShareDraft,
     onTextChange: (String) -> Unit,
     onDismiss: () -> Unit,
     onShareClick: () -> Unit,
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = "Share snapshot") },
-        text = {
-            OutlinedTextField(
-                value = text,
-                onValueChange = onTextChange,
-                label = { Text(text = "Message") },
-                minLines = 8,
-                maxLines = 14,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        },
-        confirmButton = {
-            TextButton(
-                enabled = text.isNotBlank(),
-                onClick = onShareClick,
-            ) {
-                Text(text = "Share")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = "Cancel")
-            }
-        },
+    ShareTextDialog(
+        draft = draft,
+        onTextChange = onTextChange,
+        onDismiss = onDismiss,
+        onShareClick = onShareClick,
     )
 }
 
@@ -387,21 +397,13 @@ private fun HistoryDetailComponentPreview() {
             uiState = HistoryDetailUiState.preview(),
             onBackClick = {},
             onShareClick = {},
+            onShareAsTextClick = {},
+            onShareAsFileClick = {},
             onShareTextChange = {},
             onShareDismiss = {},
-            onShareConfirm = {},
+            onShareTextConfirm = {},
+            onShareFileConfirm = {},
             onDeleteClick = {},
         )
     }
-}
-
-private fun android.content.Context.shareText(
-    text: String,
-    title: String,
-) {
-    val sendIntent = Intent(Intent.ACTION_SEND).apply {
-        type = "text/plain"
-        putExtra(Intent.EXTRA_TEXT, text)
-    }
-    startActivity(Intent.createChooser(sendIntent, title))
 }

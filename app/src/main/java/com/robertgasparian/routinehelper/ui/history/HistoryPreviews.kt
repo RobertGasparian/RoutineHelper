@@ -19,6 +19,16 @@ private fun HistoryComponentPhonePreview() {
         HistoryComponent(
             uiState = HistoryUiState.preview(),
             onSnapshotClick = {},
+            onSnapshotLongClick = {},
+            onClearSelectionClick = {},
+            onShareSelectedClick = {},
+            onShareAsTextClick = {},
+            onShareAsFileClick = {},
+            onDeleteSelectedClick = {},
+            onShareTextChange = {},
+            onShareDismiss = {},
+            onShareTextConfirm = {},
+            onShareFileConfirm = {},
         )
     }
 }
@@ -37,6 +47,16 @@ private fun HistoryComponentLandscapePreview() {
         HistoryComponent(
             uiState = HistoryUiState.preview(),
             onSnapshotClick = {},
+            onSnapshotLongClick = {},
+            onClearSelectionClick = {},
+            onShareSelectedClick = {},
+            onShareAsTextClick = {},
+            onShareAsFileClick = {},
+            onDeleteSelectedClick = {},
+            onShareTextChange = {},
+            onShareDismiss = {},
+            onShareTextConfirm = {},
+            onShareFileConfirm = {},
         )
     }
 }
@@ -48,6 +68,16 @@ private fun HistoryComponentTabletPreview() {
         HistoryComponent(
             uiState = HistoryUiState.preview(),
             onSnapshotClick = {},
+            onSnapshotLongClick = {},
+            onClearSelectionClick = {},
+            onShareSelectedClick = {},
+            onShareAsTextClick = {},
+            onShareAsFileClick = {},
+            onDeleteSelectedClick = {},
+            onShareTextChange = {},
+            onShareDismiss = {},
+            onShareTextConfirm = {},
+            onShareFileConfirm = {},
         )
     }
 }
@@ -59,6 +89,16 @@ private fun HistoryComponentFoldablePreview() {
         HistoryComponent(
             uiState = HistoryUiState.preview(),
             onSnapshotClick = {},
+            onSnapshotLongClick = {},
+            onClearSelectionClick = {},
+            onShareSelectedClick = {},
+            onShareAsTextClick = {},
+            onShareAsFileClick = {},
+            onDeleteSelectedClick = {},
+            onShareTextChange = {},
+            onShareDismiss = {},
+            onShareTextConfirm = {},
+            onShareFileConfirm = {},
         )
     }
 }
@@ -70,6 +110,121 @@ private fun HistoryComponentEmptyPreview() {
         HistoryComponent(
             uiState = HistoryUiState.previewEmpty(),
             onSnapshotClick = {},
+            onSnapshotLongClick = {},
+            onClearSelectionClick = {},
+            onShareSelectedClick = {},
+            onShareAsTextClick = {},
+            onShareAsFileClick = {},
+            onDeleteSelectedClick = {},
+            onShareTextChange = {},
+            onShareDismiss = {},
+            onShareTextConfirm = {},
+            onShareFileConfirm = {},
+        )
+    }
+}
+
+@Preview(name = "Selection", showBackground = true, widthDp = 393, heightDp = 852)
+@Composable
+private fun HistoryComponentSelectionPreview() {
+    RoutineHelperTheme {
+        HistoryComponent(
+            uiState = HistoryUiState.previewSelection(),
+            onSnapshotClick = {},
+            onSnapshotLongClick = {},
+            onClearSelectionClick = {},
+            onShareSelectedClick = {},
+            onShareAsTextClick = {},
+            onShareAsFileClick = {},
+            onDeleteSelectedClick = {},
+            onShareTextChange = {},
+            onShareDismiss = {},
+            onShareTextConfirm = {},
+            onShareFileConfirm = {},
+        )
+    }
+}
+
+@Preview(name = "Share Dialog", showBackground = true, widthDp = 393, heightDp = 852)
+@Composable
+private fun HistoryComponentSharePreview() {
+    RoutineHelperTheme {
+        HistoryComponent(
+            uiState = HistoryUiState.previewShare(),
+            onSnapshotClick = {},
+            onSnapshotLongClick = {},
+            onClearSelectionClick = {},
+            onShareSelectedClick = {},
+            onShareAsTextClick = {},
+            onShareAsFileClick = {},
+            onDeleteSelectedClick = {},
+            onShareTextChange = {},
+            onShareDismiss = {},
+            onShareTextConfirm = {},
+            onShareFileConfirm = {},
+        )
+    }
+}
+
+@Preview(name = "Share Options", showBackground = true, widthDp = 393, heightDp = 852)
+@Composable
+private fun HistoryComponentShareOptionsPreview() {
+    RoutineHelperTheme {
+        HistoryComponent(
+            uiState = HistoryUiState.previewShareOptions(),
+            onSnapshotClick = {},
+            onSnapshotLongClick = {},
+            onClearSelectionClick = {},
+            onShareSelectedClick = {},
+            onShareAsTextClick = {},
+            onShareAsFileClick = {},
+            onDeleteSelectedClick = {},
+            onShareTextChange = {},
+            onShareDismiss = {},
+            onShareTextConfirm = {},
+            onShareFileConfirm = {},
+        )
+    }
+}
+
+@Preview(name = "File Share Dialog", showBackground = true, widthDp = 393, heightDp = 852)
+@Composable
+private fun HistoryComponentFileSharePreview() {
+    RoutineHelperTheme {
+        HistoryComponent(
+            uiState = HistoryUiState.previewFileShare(),
+            onSnapshotClick = {},
+            onSnapshotLongClick = {},
+            onClearSelectionClick = {},
+            onShareSelectedClick = {},
+            onShareAsTextClick = {},
+            onShareAsFileClick = {},
+            onDeleteSelectedClick = {},
+            onShareTextChange = {},
+            onShareDismiss = {},
+            onShareTextConfirm = {},
+            onShareFileConfirm = {},
+        )
+    }
+}
+
+@Preview(name = "Long Share Warning", showBackground = true, widthDp = 393, heightDp = 852)
+@Composable
+private fun HistoryComponentLongSharePreview() {
+    RoutineHelperTheme {
+        HistoryComponent(
+            uiState = HistoryUiState.previewLongShare(),
+            onSnapshotClick = {},
+            onSnapshotLongClick = {},
+            onClearSelectionClick = {},
+            onShareSelectedClick = {},
+            onShareAsTextClick = {},
+            onShareAsFileClick = {},
+            onDeleteSelectedClick = {},
+            onShareTextChange = {},
+            onShareDismiss = {},
+            onShareTextConfirm = {},
+            onShareFileConfirm = {},
         )
     }
 }

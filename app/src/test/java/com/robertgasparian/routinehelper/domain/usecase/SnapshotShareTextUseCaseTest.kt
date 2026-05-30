@@ -60,4 +60,27 @@ class SnapshotShareTextUseCaseTest {
         assertTrue(text.contains("No actions were saved for this day."))
         assertFalse(text.endsWith("\n"))
     }
+
+    @Test
+    fun formatsMultipleSnapshotsNewestFirst() {
+        val text = useCase(
+            listOf(
+                RoutineDaySnapshot(
+                    snapshotId = 1L,
+                    date = "2026-05-28",
+                    finalizedAtMillis = 1_234L,
+                    items = emptyList(),
+                ),
+                RoutineDaySnapshot(
+                    snapshotId = 2L,
+                    date = "2026-05-29",
+                    finalizedAtMillis = 1_234L,
+                    items = emptyList(),
+                ),
+            ),
+        )
+
+        assertTrue(text.indexOf("Date: 2026-05-29") < text.indexOf("Date: 2026-05-28"))
+        assertTrue(text.contains("---"))
+    }
 }

@@ -20,9 +20,12 @@ private fun HistoryDetailComponentPhonePreview() {
             uiState = HistoryDetailUiState.preview(),
             onBackClick = {},
             onShareClick = {},
+            onShareAsTextClick = {},
+            onShareAsFileClick = {},
             onShareTextChange = {},
             onShareDismiss = {},
-            onShareConfirm = {},
+            onShareTextConfirm = {},
+            onShareFileConfirm = {},
             onDeleteClick = {},
         )
     }
@@ -43,9 +46,12 @@ private fun HistoryDetailComponentLandscapePreview() {
             uiState = HistoryDetailUiState.preview(),
             onBackClick = {},
             onShareClick = {},
+            onShareAsTextClick = {},
+            onShareAsFileClick = {},
             onShareTextChange = {},
             onShareDismiss = {},
-            onShareConfirm = {},
+            onShareTextConfirm = {},
+            onShareFileConfirm = {},
             onDeleteClick = {},
         )
     }
@@ -59,9 +65,12 @@ private fun HistoryDetailComponentTabletPreview() {
             uiState = HistoryDetailUiState.preview(),
             onBackClick = {},
             onShareClick = {},
+            onShareAsTextClick = {},
+            onShareAsFileClick = {},
             onShareTextChange = {},
             onShareDismiss = {},
-            onShareConfirm = {},
+            onShareTextConfirm = {},
+            onShareFileConfirm = {},
             onDeleteClick = {},
         )
     }
@@ -75,9 +84,12 @@ private fun HistoryDetailComponentFoldablePreview() {
             uiState = HistoryDetailUiState.preview(),
             onBackClick = {},
             onShareClick = {},
+            onShareAsTextClick = {},
+            onShareAsFileClick = {},
             onShareTextChange = {},
             onShareDismiss = {},
-            onShareConfirm = {},
+            onShareTextConfirm = {},
+            onShareFileConfirm = {},
             onDeleteClick = {},
         )
     }
@@ -91,9 +103,12 @@ private fun HistoryDetailComponentEmptyPreview() {
             uiState = HistoryDetailUiState.previewEmpty(),
             onBackClick = {},
             onShareClick = {},
+            onShareAsTextClick = {},
+            onShareAsFileClick = {},
             onShareTextChange = {},
             onShareDismiss = {},
-            onShareConfirm = {},
+            onShareTextConfirm = {},
+            onShareFileConfirm = {},
             onDeleteClick = {},
         )
     }
@@ -107,9 +122,50 @@ private fun HistoryDetailComponentSharePreview() {
             uiState = HistoryDetailUiState.previewShare(),
             onBackClick = {},
             onShareClick = {},
+            onShareAsTextClick = {},
+            onShareAsFileClick = {},
             onShareTextChange = {},
             onShareDismiss = {},
-            onShareConfirm = {},
+            onShareTextConfirm = {},
+            onShareFileConfirm = {},
+            onDeleteClick = {},
+        )
+    }
+}
+
+@Preview(name = "Share Options", showBackground = true, widthDp = 393, heightDp = 852)
+@Composable
+private fun HistoryDetailComponentShareOptionsPreview() {
+    RoutineHelperTheme {
+        HistoryDetailComponent(
+            uiState = HistoryDetailUiState.previewShareOptions(),
+            onBackClick = {},
+            onShareClick = {},
+            onShareAsTextClick = {},
+            onShareAsFileClick = {},
+            onShareTextChange = {},
+            onShareDismiss = {},
+            onShareTextConfirm = {},
+            onShareFileConfirm = {},
+            onDeleteClick = {},
+        )
+    }
+}
+
+@Preview(name = "File Share Dialog", showBackground = true, widthDp = 393, heightDp = 852)
+@Composable
+private fun HistoryDetailComponentFileSharePreview() {
+    RoutineHelperTheme {
+        HistoryDetailComponent(
+            uiState = HistoryDetailUiState.previewFileShare(),
+            onBackClick = {},
+            onShareClick = {},
+            onShareAsTextClick = {},
+            onShareAsFileClick = {},
+            onShareTextChange = {},
+            onShareDismiss = {},
+            onShareTextConfirm = {},
+            onShareFileConfirm = {},
             onDeleteClick = {},
         )
     }

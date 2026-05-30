@@ -1,11 +1,14 @@
 package com.robertgasparian.routinehelper.ui.history.detail
 
+import com.robertgasparian.routinehelper.ui.share.ShareDraft
+
 data class HistoryDetailUiState(
     val date: String = "",
     val finalizedLabel: String = "",
     val items: List<HistoryDetailItemUiState> = emptyList(),
     val isMissing: Boolean = false,
-    val shareText: String? = null,
+    val isShareFormatDialogVisible: Boolean = false,
+    val shareDraft: ShareDraft? = null,
 ) {
     companion object {
         fun preview(): HistoryDetailUiState =
@@ -38,7 +41,8 @@ data class HistoryDetailUiState(
 
         fun previewShare(): HistoryDetailUiState =
             preview().copy(
-                shareText = """
+                shareDraft = ShareDraft.text(
+                    """
                     Routine snapshot
                     Date: 2026-05-29
                     Finalized: 11:45 PM
@@ -49,7 +53,21 @@ data class HistoryDetailUiState(
 
                     2. [ ] Stretch
                        Description: Ten minutes of mobility work
-                """.trimIndent(),
+                    """.trimIndent(),
+                ),
+            )
+
+        fun previewFileShare(): HistoryDetailUiState =
+            preview().copy(
+                shareDraft = ShareDraft.file(
+                    messageText = "Here is the routine snapshot from 2026-05-29.",
+                    fileText = previewShare().shareDraft?.messageText.orEmpty(),
+                ),
+            )
+
+        fun previewShareOptions(): HistoryDetailUiState =
+            preview().copy(
+                isShareFormatDialogVisible = true,
             )
 
         fun previewMissing(): HistoryDetailUiState =

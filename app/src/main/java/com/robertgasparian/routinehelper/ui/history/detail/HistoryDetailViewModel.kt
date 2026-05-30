@@ -7,6 +7,7 @@ import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshotItem
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotShareTextUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotUseCase
+import com.robertgasparian.routinehelper.ui.share.ShareDraft
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -27,7 +28,8 @@ class HistoryDetailViewModel @AssistedInject constructor(
     private val snapshotShareTextUseCase: SnapshotShareTextUseCase,
     private val snapshotUseCase: SnapshotUseCase,
 ) : ViewModel() {
-    private val shareText = MutableStateFlow<String?>(null)
+    private val isShareFormatDialogVisible = MutableStateFlow(false)
+    private val shareDraft = MutableStateFlow<ShareDraft?>(null)
     private var currentSnapshot: RoutineDaySnapshot? = null
 
     val uiState: Flow<HistoryDetailUiState> =
@@ -35,10 +37,12 @@ class HistoryDetailViewModel @AssistedInject constructor(
             snapshotUseCase(snapshotId).onEach { snapshot ->
                 currentSnapshot = snapshot
             },
-            shareText,
-        ) { snapshot, shareText ->
+            isShareFormatDialogVisible,
+            shareDraft,
+        ) { snapshot, isShareFormatDialogVisible, shareDraft ->
             (snapshot?.toUiState() ?: HistoryDetailUiState.previewMissing()).copy(
-                shareText = shareText,
+                isShareFormatDialogVisible = isShareFormatDialogVisible,
+                shareDraft = shareDraft,
             )
         }
 
@@ -52,17 +56,34 @@ class HistoryDetailViewModel @AssistedInject constructor(
         }
     }
 
-    fun showSharePreview() {
+    fun showShareOptions() {
+        if (currentSnapshot != null) {
+            isShareFormatDialogVisible.value = true
+        }
+    }
+
+    fun showTextSharePreview() {
         val snapshot = currentSnapshot ?: return
-        shareText.value = snapshotShareTextUseCase(snapshot)
+        isShareFormatDialogVisible.value = false
+        shareDraft.value = ShareDraft.text(snapshotShareTextUseCase(snapshot))
+    }
+
+    fun showFileSharePreview() {
+        val snapshot = currentSnapshot ?: return
+        isShareFormatDialogVisible.value = false
+        shareDraft.value = ShareDraft.file(
+            messageText = "Here is the routine snapshot from ${snapshot.date}.",
+            fileText = snapshotShareTextUseCase(snapshot),
+        )
     }
 
     fun updateShareText(text: String) {
-        shareText.value = text
+        shareDraft.value = shareDraft.value?.copy(messageText = text)
     }
 
     fun dismissSharePreview() {
-        shareText.value = null
+        isShareFormatDialogVisible.value = false
+        shareDraft.value = null
     }
 
     @AssistedFactory

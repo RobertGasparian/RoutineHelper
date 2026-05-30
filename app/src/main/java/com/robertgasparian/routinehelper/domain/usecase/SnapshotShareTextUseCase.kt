@@ -33,6 +33,11 @@ class SnapshotShareTextUseCase @Inject constructor() {
             }
     }.trimEnd()
 
+    operator fun invoke(snapshots: List<RoutineDaySnapshot>): String =
+        snapshots
+            .sortedWith(compareByDescending<RoutineDaySnapshot> { it.date }.thenByDescending { it.finalizedAtMillis })
+            .joinToString(separator = "\n\n---\n\n") { snapshot -> invoke(snapshot) }
+
     private val RoutineDaySnapshotItem.statusLabel: String
         get() = if (isChecked) "[x]" else "[ ]"
 }

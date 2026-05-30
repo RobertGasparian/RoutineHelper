@@ -19,6 +19,16 @@ class HistoryComponentPaparazziTest {
                 HistoryComponent(
                     uiState = HistoryUiState.preview(),
                     onSnapshotClick = {},
+                    onSnapshotLongClick = {},
+                    onClearSelectionClick = {},
+                    onShareSelectedClick = {},
+                    onShareAsTextClick = {},
+                    onShareAsFileClick = {},
+                    onDeleteSelectedClick = {},
+                    onShareTextChange = {},
+                    onShareDismiss = {},
+                    onShareTextConfirm = {},
+                    onShareFileConfirm = {},
                 )
             }
         }
@@ -31,6 +41,126 @@ class HistoryComponentPaparazziTest {
                 HistoryComponent(
                     uiState = HistoryUiState.previewEmpty(),
                     onSnapshotClick = {},
+                    onSnapshotLongClick = {},
+                    onClearSelectionClick = {},
+                    onShareSelectedClick = {},
+                    onShareAsTextClick = {},
+                    onShareAsFileClick = {},
+                    onDeleteSelectedClick = {},
+                    onShareTextChange = {},
+                    onShareDismiss = {},
+                    onShareTextConfirm = {},
+                    onShareFileConfirm = {},
+                )
+            }
+        }
+    }
+
+    @Test
+    fun selection() {
+        paparazzi.snapshot {
+            RoutineHelperTheme {
+                HistoryComponent(
+                    uiState = HistoryUiState.previewSelection(),
+                    onSnapshotClick = {},
+                    onSnapshotLongClick = {},
+                    onClearSelectionClick = {},
+                    onShareSelectedClick = {},
+                    onShareAsTextClick = {},
+                    onShareAsFileClick = {},
+                    onDeleteSelectedClick = {},
+                    onShareTextChange = {},
+                    onShareDismiss = {},
+                    onShareTextConfirm = {},
+                    onShareFileConfirm = {},
+                )
+            }
+        }
+    }
+
+    @Test
+    fun shareDialog() {
+        paparazzi.snapshot {
+            RoutineHelperTheme {
+                HistoryComponent(
+                    uiState = HistoryUiState.previewShare(),
+                    onSnapshotClick = {},
+                    onSnapshotLongClick = {},
+                    onClearSelectionClick = {},
+                    onShareSelectedClick = {},
+                    onShareAsTextClick = {},
+                    onShareAsFileClick = {},
+                    onDeleteSelectedClick = {},
+                    onShareTextChange = {},
+                    onShareDismiss = {},
+                    onShareTextConfirm = {},
+                    onShareFileConfirm = {},
+                )
+            }
+        }
+    }
+
+    @Test
+    fun shareOptions() {
+        paparazzi.snapshot {
+            RoutineHelperTheme {
+                HistoryComponent(
+                    uiState = HistoryUiState.previewShareOptions(),
+                    onSnapshotClick = {},
+                    onSnapshotLongClick = {},
+                    onClearSelectionClick = {},
+                    onShareSelectedClick = {},
+                    onShareAsTextClick = {},
+                    onShareAsFileClick = {},
+                    onDeleteSelectedClick = {},
+                    onShareTextChange = {},
+                    onShareDismiss = {},
+                    onShareTextConfirm = {},
+                    onShareFileConfirm = {},
+                )
+            }
+        }
+    }
+
+    @Test
+    fun fileShareDialog() {
+        paparazzi.snapshot {
+            RoutineHelperTheme {
+                HistoryComponent(
+                    uiState = HistoryUiState.previewFileShare(),
+                    onSnapshotClick = {},
+                    onSnapshotLongClick = {},
+                    onClearSelectionClick = {},
+                    onShareSelectedClick = {},
+                    onShareAsTextClick = {},
+                    onShareAsFileClick = {},
+                    onDeleteSelectedClick = {},
+                    onShareTextChange = {},
+                    onShareDismiss = {},
+                    onShareTextConfirm = {},
+                    onShareFileConfirm = {},
+                )
+            }
+        }
+    }
+
+    @Test
+    fun longShareDialog() {
+        paparazzi.snapshot {
+            RoutineHelperTheme {
+                HistoryComponent(
+                    uiState = HistoryUiState.previewLongShare(),
+                    onSnapshotClick = {},
+                    onSnapshotLongClick = {},
+                    onClearSelectionClick = {},
+                    onShareSelectedClick = {},
+                    onShareAsTextClick = {},
+                    onShareAsFileClick = {},
+                    onDeleteSelectedClick = {},
+                    onShareTextChange = {},
+                    onShareDismiss = {},
+                    onShareTextConfirm = {},
+                    onShareFileConfirm = {},
                 )
             }
         }

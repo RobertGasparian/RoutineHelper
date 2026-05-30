@@ -1,7 +1,13 @@
 package com.robertgasparian.routinehelper.ui.history
 
+import com.robertgasparian.routinehelper.ui.share.ShareDraft
+
 data class HistoryUiState(
     val snapshots: List<HistorySnapshotUiState> = emptyList(),
+    val isSelectionMode: Boolean = false,
+    val selectedCount: Int = 0,
+    val isShareFormatDialogVisible: Boolean = false,
+    val shareDraft: ShareDraft? = null,
 ) {
     companion object {
         fun preview(): HistoryUiState =
@@ -20,6 +26,70 @@ data class HistoryUiState(
                 ),
             )
 
+        fun previewSelection(): HistoryUiState =
+            HistoryUiState(
+                isSelectionMode = true,
+                selectedCount = 1,
+                snapshots = listOf(
+                    HistorySnapshotUiState(
+                        snapshotId = 1,
+                        date = "2026-05-29",
+                        finalizedLabel = "Finalized 11:45 PM",
+                        isSelected = true,
+                    ),
+                    HistorySnapshotUiState(
+                        snapshotId = 2,
+                        date = "2026-05-28",
+                        finalizedLabel = "Finalized 11:38 PM",
+                    ),
+                ),
+            )
+
+        fun previewShare(): HistoryUiState =
+            previewSelection().copy(
+                shareDraft = ShareDraft.text(
+                    """
+                    Routine snapshot
+                    Date: 2026-05-29
+                    Finalized: 11:45 PM
+
+                    1. [x] Drink water
+                       Note: One liter was diet soda.
+                    """.trimIndent(),
+                ),
+            )
+
+        fun previewLongShare(): HistoryUiState =
+            previewSelection().copy(
+                shareDraft = ShareDraft.text(
+                    buildString {
+                        repeat(260) { index ->
+                            appendLine("Routine snapshot")
+                            appendLine("Date: 2026-05-${(index % 28) + 1}")
+                            appendLine("Finalized: 11:45 PM")
+                            appendLine()
+                            appendLine("1. [x] Drink water")
+                            appendLine("   Description: Drink 3L water")
+                            appendLine("   Note: Export preview item $index")
+                            appendLine()
+                        }
+                    }.trimEnd(),
+                ),
+            )
+
+        fun previewFileShare(): HistoryUiState =
+            previewSelection().copy(
+                shareDraft = ShareDraft.file(
+                    messageText = "Here are the routine snapshots from 2026-05-28 to 2026-05-29.",
+                    fileText = previewShare().shareDraft?.messageText.orEmpty(),
+                ),
+            )
+
+        fun previewShareOptions(): HistoryUiState =
+            previewSelection().copy(
+                isShareFormatDialogVisible = true,
+            )
+
         fun previewEmpty(): HistoryUiState = HistoryUiState()
     }
 }
@@ -28,4 +98,5 @@ data class HistorySnapshotUiState(
     val snapshotId: Long,
     val date: String,
     val finalizedLabel: String,
+    val isSelected: Boolean = false,
 )
