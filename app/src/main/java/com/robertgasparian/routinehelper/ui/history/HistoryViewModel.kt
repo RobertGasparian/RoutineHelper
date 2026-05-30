@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySummary
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotShareTextUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotSummariesUseCase
@@ -30,22 +31,28 @@ class HistoryViewModel @Inject constructor(
     private val snapshotUseCase: SnapshotUseCase,
 ) : ViewModel() {
     private val selectedSnapshotIds = MutableStateFlow<Set<Long>>(emptySet())
+    private val selectedFilter = MutableStateFlow(HistoryFilter.All)
     private val isShareFormatDialogVisible = MutableStateFlow(false)
     private val shareDraft = MutableStateFlow<ShareDraft?>(null)
 
     val uiState: StateFlow<HistoryUiState> =
         combine(
             snapshotSummariesUseCase(),
+            selectedFilter,
             selectedSnapshotIds,
             isShareFormatDialogVisible,
             shareDraft,
-        ) { summaries, selectedIds, isShareFormatDialogVisible, shareDraft ->
-            val existingIds = summaries.map(RoutineDaySummary::snapshotId).toSet()
+        ) { summaries, selectedFilter, selectedIds, isShareFormatDialogVisible, shareDraft ->
+            val filteredSummaries = summaries.filter { summary ->
+                selectedFilter.cadence == null || summary.cadence == selectedFilter.cadence
+            }
+            val existingIds = filteredSummaries.map(RoutineDaySummary::snapshotId).toSet()
             val effectiveSelectedIds = selectedIds.intersect(existingIds)
             HistoryUiState(
-                snapshots = summaries.map { summary ->
+                snapshots = filteredSummaries.map { summary ->
                     summary.toUiState(isSelected = summary.snapshotId in effectiveSelectedIds)
                 },
+                selectedFilter = selectedFilter,
                 isSelectionMode = effectiveSelectedIds.isNotEmpty(),
                 selectedCount = effectiveSelectedIds.size,
                 isShareFormatDialogVisible = isShareFormatDialogVisible,
@@ -63,6 +70,13 @@ class HistoryViewModel @Inject constructor(
     }
 
     fun clearSelection() {
+        selectedSnapshotIds.value = emptySet()
+        isShareFormatDialogVisible.value = false
+        shareDraft.value = null
+    }
+
+    fun selectFilter(filter: HistoryFilter) {
+        selectedFilter.value = filter
         selectedSnapshotIds.value = emptySet()
         isShareFormatDialogVisible.value = false
         shareDraft.value = null
@@ -143,10 +157,18 @@ private fun List<RoutineDaySnapshot>.toFileShareMessage(): String {
 private fun RoutineDaySummary.toUiState(isSelected: Boolean): HistorySnapshotUiState =
     HistorySnapshotUiState(
         snapshotId = snapshotId,
-        date = date,
+        date = if (cadence == RoutineCadence.Weekly) "Week of $date" else date,
         finalizedLabel = "Finalized ${timeFormatter.format(Instant.ofEpochMilli(finalizedAtMillis))}",
+        cadence = cadence,
         isSelected = isSelected,
     )
+
+private val HistoryFilter.cadence: RoutineCadence?
+    get() = when (this) {
+        HistoryFilter.All -> null
+        HistoryFilter.Daily -> RoutineCadence.Daily
+        HistoryFilter.Weekly -> RoutineCadence.Weekly
+    }
 
 private fun Set<Long>.toggle(snapshotId: Long): Set<Long> =
     if (snapshotId in this) {

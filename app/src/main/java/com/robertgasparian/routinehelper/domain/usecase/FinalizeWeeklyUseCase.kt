@@ -3,26 +3,29 @@ package com.robertgasparian.routinehelper.domain.usecase
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshotItem
 import com.robertgasparian.routinehelper.domain.repository.RoutineHistoryRepository
-import com.robertgasparian.routinehelper.domain.repository.TodayRoutineRepository
+import com.robertgasparian.routinehelper.domain.repository.WeeklyRoutineRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 
-class FinalizeTodayUseCase @Inject constructor(
-    private val todayRoutineRepository: TodayRoutineRepository,
+class FinalizeWeeklyUseCase @Inject constructor(
+    private val weeklyRoutineRepository: WeeklyRoutineRepository,
     private val routineHistoryRepository: RoutineHistoryRepository,
 ) {
     suspend operator fun invoke(
-        date: String,
+        weekStartDate: String,
         finalizedAtMillis: Long,
-        snapshotDate: String = date,
+        snapshotWeekStartDate: String = weekStartDate,
     ): Long {
-        routineHistoryRepository.snapshotForDate(snapshotDate, cadence = RoutineCadence.Daily).first()?.let { existing ->
-            todayRoutineRepository.resetDate(date)
+        routineHistoryRepository.snapshotForDate(
+            date = snapshotWeekStartDate,
+            cadence = RoutineCadence.Weekly,
+        ).first()?.let { existing ->
+            weeklyRoutineRepository.resetWeek(weekStartDate)
             return existing.snapshotId
         }
 
-        val todayItems = todayRoutineRepository.todayItems(date).first()
-        val snapshotItems = todayItems.map { item ->
+        val weeklyItems = weeklyRoutineRepository.weeklyItems(weekStartDate).first()
+        val snapshotItems = weeklyItems.map { item ->
             RoutineDaySnapshotItem(
                 actionId = item.actionId,
                 title = item.title,
@@ -34,12 +37,12 @@ class FinalizeTodayUseCase @Inject constructor(
         }
 
         val snapshotId = routineHistoryRepository.saveSnapshot(
-            date = snapshotDate,
+            date = snapshotWeekStartDate,
             finalizedAtMillis = finalizedAtMillis,
             items = snapshotItems,
-            cadence = RoutineCadence.Daily,
+            cadence = RoutineCadence.Weekly,
         )
-        todayRoutineRepository.resetDate(date)
+        weeklyRoutineRepository.resetWeek(weekStartDate)
         return snapshotId
     }
 }

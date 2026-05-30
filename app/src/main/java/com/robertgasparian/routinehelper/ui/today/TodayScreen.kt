@@ -100,6 +100,7 @@ fun TodayComponent(
     emptyTitle: String = "No routine items yet",
     emptyDescription: String = "Add your first action to start tracking today.",
     showSnapshotAction: Boolean = true,
+    snapshotInitialDate: String = uiState.date,
 ) {
     var noteEditorItem by rememberSaveable { mutableStateOf<TodayItemUiState?>(null) }
     var showSnapshotDatePicker by rememberSaveable { mutableStateOf(false) }
@@ -179,7 +180,7 @@ fun TodayComponent(
 
     if (showSnapshotDatePicker) {
         SnapshotDatePickerDialog(
-            initialDate = uiState.date,
+            initialDate = snapshotInitialDate,
             onDismiss = { showSnapshotDatePicker = false },
             onConfirm = { snapshotDate ->
                 onEvent(TodayUiEvent.SnapshotClick(snapshotDate))

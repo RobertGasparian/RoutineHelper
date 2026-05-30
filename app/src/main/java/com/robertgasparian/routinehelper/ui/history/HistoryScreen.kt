@@ -5,6 +5,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,11 +15,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -35,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
 import com.robertgasparian.routinehelper.ui.share.ShareFormatDialog
 import com.robertgasparian.routinehelper.ui.share.ShareTextDialog
@@ -60,6 +64,10 @@ sealed interface HistoryUiEvent {
     data object ShareAsFileClick : HistoryUiEvent
 
     data object DeleteSelectedClick : HistoryUiEvent
+
+    data class FilterClick(
+        val filter: HistoryFilter,
+    ) : HistoryUiEvent
 
     data class ShareTextChange(
         val text: String,
@@ -91,6 +99,7 @@ fun HistoryScreen(
             when (event) {
                 HistoryUiEvent.ClearSelectionClick -> viewModel.clearSelection()
                 HistoryUiEvent.DeleteSelectedClick -> viewModel.deleteSelectedSnapshots()
+                is HistoryUiEvent.FilterClick -> viewModel.selectFilter(event.filter)
                 HistoryUiEvent.ShareAsFileClick -> viewModel.showFileSharePreview()
                 HistoryUiEvent.ShareAsTextClick -> viewModel.showTextSharePreview()
                 HistoryUiEvent.ShareDismiss -> viewModel.dismissSharePreview()
@@ -178,35 +187,42 @@ fun HistoryComponent(
             )
         },
     ) { innerPadding ->
-        if (uiState.snapshots.isEmpty()) {
-            EmptyHistoryContent(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+        ) {
+            HistoryFilterRow(
+                selectedFilter = uiState.selectedFilter,
+                onFilterClick = { filter -> onEvent(HistoryUiEvent.FilterClick(filter)) },
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             )
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentPadding = PaddingValues(
-                    start = 16.dp,
-                    top = 16.dp,
-                    end = 16.dp,
-                    bottom = 112.dp,
-                ),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                items(
-                    items = uiState.snapshots,
-                    key = { snapshot -> snapshot.snapshotId },
-                ) { snapshot ->
-                    HistorySnapshotCard(
-                        snapshot = snapshot,
-                        isSelectionMode = uiState.isSelectionMode,
-                        onClick = { onEvent(HistoryUiEvent.SnapshotClick(snapshot.snapshotId)) },
-                        onLongClick = { onEvent(HistoryUiEvent.SnapshotLongClick(snapshot.snapshotId)) },
-                    )
+            if (uiState.snapshots.isEmpty()) {
+                EmptyHistoryContent(
+                    modifier = Modifier.fillMaxSize(),
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        top = 4.dp,
+                        end = 16.dp,
+                        bottom = 112.dp,
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    items(
+                        items = uiState.snapshots,
+                        key = { snapshot -> snapshot.snapshotId },
+                    ) { snapshot ->
+                        HistorySnapshotCard(
+                            snapshot = snapshot,
+                            isSelectionMode = uiState.isSelectionMode,
+                            onClick = { onEvent(HistoryUiEvent.SnapshotClick(snapshot.snapshotId)) },
+                            onLongClick = { onEvent(HistoryUiEvent.SnapshotLongClick(snapshot.snapshotId)) },
+                        )
+                    }
                 }
             }
         }
@@ -237,6 +253,38 @@ fun HistoryComponent(
 }
 
 @Composable
+private fun HistoryFilterRow(
+    selectedFilter: HistoryFilter,
+    onFilterClick: (HistoryFilter) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        HistoryFilter.entries.forEach { filter ->
+            FilterChip(
+                selected = selectedFilter == filter,
+                onClick = { onFilterClick(filter) },
+                label = { Text(text = filter.label) },
+                leadingIcon = filter.cadence?.let { cadence ->
+                    {
+                        Icon(
+                            imageVector = if (cadence == RoutineCadence.Weekly) {
+                                Icons.Default.Refresh
+                            } else {
+                                Icons.Default.DateRange
+                            },
+                            contentDescription = null,
+                        )
+                    }
+                },
+            )
+        }
+    }
+}
+
+@Composable
 private fun EmptyHistoryContent(
     modifier: Modifier = Modifier,
 ) {
@@ -255,7 +303,7 @@ private fun EmptyHistoryContent(
             modifier = Modifier.padding(top = 16.dp),
         )
         Text(
-            text = "Use the Snapshot action on Today while we build the nightly reset.",
+            text = "Use the Snapshot action on Today or Weekly while we build the scheduled reset.",
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(top = 8.dp),
         )
@@ -293,17 +341,46 @@ private fun HistorySnapshotCard(
                         checked = snapshot.isSelected,
                         onCheckedChange = null,
                     )
+                } else {
+                    Icon(
+                        imageVector = if (snapshot.cadence == RoutineCadence.Weekly) {
+                            Icons.Default.Refresh
+                        } else {
+                            Icons.Default.DateRange
+                        },
+                        contentDescription = null,
+                    )
                 }
             },
             headlineContent = {
                 Text(text = snapshot.date)
             },
             supportingContent = {
-                Text(text = snapshot.finalizedLabel)
+                Text(text = "${snapshot.cadence.label} - ${snapshot.finalizedLabel}")
             },
         )
     }
 }
+
+private val RoutineCadence.label: String
+    get() = when (this) {
+        RoutineCadence.Daily -> "Daily"
+        RoutineCadence.Weekly -> "Weekly"
+    }
+
+private val HistoryFilter.label: String
+    get() = when (this) {
+        HistoryFilter.All -> "All"
+        HistoryFilter.Daily -> "Daily"
+        HistoryFilter.Weekly -> "Weekly"
+    }
+
+private val HistoryFilter.cadence: RoutineCadence?
+    get() = when (this) {
+        HistoryFilter.All -> null
+        HistoryFilter.Daily -> RoutineCadence.Daily
+        HistoryFilter.Weekly -> RoutineCadence.Weekly
+    }
 
 @Preview(showBackground = true)
 @Composable

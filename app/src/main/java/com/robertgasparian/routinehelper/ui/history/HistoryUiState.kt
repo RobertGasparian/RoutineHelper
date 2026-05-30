@@ -1,9 +1,11 @@
 package com.robertgasparian.routinehelper.ui.history
 
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
 
 data class HistoryUiState(
     val snapshots: List<HistorySnapshotUiState> = emptyList(),
+    val selectedFilter: HistoryFilter = HistoryFilter.All,
     val isSelectionMode: Boolean = false,
     val selectedCount: Int = 0,
     val isShareFormatDialogVisible: Boolean = false,
@@ -17,11 +19,13 @@ data class HistoryUiState(
                         snapshotId = 1,
                         date = "2026-05-29",
                         finalizedLabel = "Finalized 11:45 PM",
+                        cadence = RoutineCadence.Daily,
                     ),
                     HistorySnapshotUiState(
                         snapshotId = 2,
-                        date = "2026-05-28",
+                        date = "Week of 2026-05-24",
                         finalizedLabel = "Finalized 11:38 PM",
+                        cadence = RoutineCadence.Weekly,
                     ),
                 ),
             )
@@ -35,12 +39,14 @@ data class HistoryUiState(
                         snapshotId = 1,
                         date = "2026-05-29",
                         finalizedLabel = "Finalized 11:45 PM",
+                        cadence = RoutineCadence.Daily,
                         isSelected = true,
                     ),
                     HistorySnapshotUiState(
                         snapshotId = 2,
-                        date = "2026-05-28",
+                        date = "Week of 2026-05-24",
                         finalizedLabel = "Finalized 11:38 PM",
+                        cadence = RoutineCadence.Weekly,
                     ),
                 ),
             )
@@ -98,5 +104,12 @@ data class HistorySnapshotUiState(
     val snapshotId: Long,
     val date: String,
     val finalizedLabel: String,
+    val cadence: RoutineCadence,
     val isSelected: Boolean = false,
 )
+
+enum class HistoryFilter {
+    All,
+    Daily,
+    Weekly,
+}

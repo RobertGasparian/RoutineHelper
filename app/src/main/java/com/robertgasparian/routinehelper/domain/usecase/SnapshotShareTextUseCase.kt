@@ -2,6 +2,7 @@ package com.robertgasparian.routinehelper.domain.usecase
 
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshotItem
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -9,8 +10,8 @@ import javax.inject.Inject
 
 class SnapshotShareTextUseCase @Inject constructor() {
     operator fun invoke(snapshot: RoutineDaySnapshot): String = buildString {
-        appendLine("Routine snapshot")
-        appendLine("Date: ${snapshot.date}")
+        appendLine("${snapshot.cadence.label} routine snapshot")
+        appendLine("${snapshot.cadence.dateLabel}: ${snapshot.date}")
         appendLine("Finalized: ${timeFormatter.format(Instant.ofEpochMilli(snapshot.finalizedAtMillis))}")
         appendLine()
 
@@ -41,6 +42,18 @@ class SnapshotShareTextUseCase @Inject constructor() {
     private val RoutineDaySnapshotItem.statusLabel: String
         get() = if (isChecked) "[x]" else "[ ]"
 }
+
+private val RoutineCadence.label: String
+    get() = when (this) {
+        RoutineCadence.Daily -> "Daily"
+        RoutineCadence.Weekly -> "Weekly"
+    }
+
+private val RoutineCadence.dateLabel: String
+    get() = when (this) {
+        RoutineCadence.Daily -> "Date"
+        RoutineCadence.Weekly -> "Week of"
+    }
 
 private val timeFormatter: DateTimeFormatter =
     DateTimeFormatter.ofPattern("h:mm a").withZone(ZoneId.systemDefault())

@@ -5,4 +5,5 @@ data class RoutineDaySnapshot(
     val date: String,
     val finalizedAtMillis: Long,
     val items: List<RoutineDaySnapshotItem>,
+    val cadence: RoutineCadence = RoutineCadence.Daily,
 )

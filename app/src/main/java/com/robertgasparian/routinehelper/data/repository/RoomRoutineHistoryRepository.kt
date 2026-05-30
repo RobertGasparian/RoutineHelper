@@ -6,6 +6,7 @@ import com.robertgasparian.routinehelper.data.local.dao.DailySnapshotDao
 import com.robertgasparian.routinehelper.data.local.entity.DailySnapshotEntity
 import com.robertgasparian.routinehelper.data.local.entity.DailySnapshotEntryEntity
 import com.robertgasparian.routinehelper.data.local.model.DailySnapshotWithEntries
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshotItem
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySummary
@@ -17,13 +18,14 @@ class RoomRoutineHistoryRepository(
     private val database: RoutineDatabase,
     private val dailySnapshotDao: DailySnapshotDao = database.dailySnapshotDao(),
 ) : RoutineHistoryRepository {
-    override fun snapshotSummaries(): Flow<List<RoutineDaySummary>> =
-        dailySnapshotDao.snapshots().map { snapshots ->
+    override fun snapshotSummaries(cadence: RoutineCadence?): Flow<List<RoutineDaySummary>> =
+        (cadence?.let { dailySnapshotDao.snapshots(it.toStorageValue()) } ?: dailySnapshotDao.snapshots()).map { snapshots ->
             snapshots.map { snapshot ->
                 RoutineDaySummary(
                     snapshotId = snapshot.id,
                     date = snapshot.date,
                     finalizedAtMillis = snapshot.finalizedAtMillis,
+                    cadence = snapshot.cadence.toRoutineCadence(),
                 )
             }
         }
@@ -33,13 +35,17 @@ class RoomRoutineHistoryRepository(
             snapshotWithEntries?.toDomain()
         }
 
-    override fun snapshotForDate(date: String): Flow<RoutineDaySummary?> =
-        dailySnapshotDao.snapshotForDate(date).map { snapshot ->
+    override fun snapshotForDate(
+        date: String,
+        cadence: RoutineCadence,
+    ): Flow<RoutineDaySummary?> =
+        dailySnapshotDao.snapshotForDate(date, cadence.toStorageValue()).map { snapshot ->
             snapshot?.let {
                 RoutineDaySummary(
                     snapshotId = it.id,
                     date = it.date,
                     finalizedAtMillis = it.finalizedAtMillis,
+                    cadence = it.cadence.toRoutineCadence(),
                 )
             }
         }
@@ -48,11 +54,13 @@ class RoomRoutineHistoryRepository(
         date: String,
         finalizedAtMillis: Long,
         items: List<RoutineDaySnapshotItem>,
+        cadence: RoutineCadence,
     ): Long = database.withTransaction {
         val snapshotId = dailySnapshotDao.insertSnapshot(
             DailySnapshotEntity(
                 date = date,
                 finalizedAtMillis = finalizedAtMillis,
+                cadence = cadence.toStorageValue(),
             ),
         )
         dailySnapshotDao.insertEntries(
@@ -76,11 +84,24 @@ class RoomRoutineHistoryRepository(
     }
 }
 
+private fun RoutineCadence.toStorageValue(): String =
+    when (this) {
+        RoutineCadence.Daily -> "DAILY"
+        RoutineCadence.Weekly -> "WEEKLY"
+    }
+
+private fun String.toRoutineCadence(): RoutineCadence =
+    when (this) {
+        "WEEKLY" -> RoutineCadence.Weekly
+        else -> RoutineCadence.Daily
+    }
+
 private fun DailySnapshotWithEntries.toDomain(): RoutineDaySnapshot =
     RoutineDaySnapshot(
         snapshotId = snapshot.id,
         date = snapshot.date,
         finalizedAtMillis = snapshot.finalizedAtMillis,
+        cadence = snapshot.cadence.toRoutineCadence(),
         items = entries
             .sortedBy { it.positionSnapshot }
             .map { entry ->

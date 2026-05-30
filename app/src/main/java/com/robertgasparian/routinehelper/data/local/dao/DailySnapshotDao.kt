@@ -15,6 +15,9 @@ interface DailySnapshotDao {
     @Query("SELECT * FROM daily_snapshots ORDER BY date DESC")
     fun snapshots(): Flow<List<DailySnapshotEntity>>
 
+    @Query("SELECT * FROM daily_snapshots WHERE cadence = :cadence ORDER BY date DESC")
+    fun snapshots(cadence: String): Flow<List<DailySnapshotEntity>>
+
     @Transaction
     @Query("SELECT * FROM daily_snapshots WHERE id = :id")
     fun snapshot(id: Long): Flow<DailySnapshotWithEntries?>
@@ -22,8 +25,11 @@ interface DailySnapshotDao {
     @Query("SELECT * FROM daily_snapshot_entries WHERE snapshotId = :snapshotId ORDER BY positionSnapshot")
     fun snapshotEntries(snapshotId: Long): Flow<List<DailySnapshotEntryEntity>>
 
-    @Query("SELECT * FROM daily_snapshots WHERE date = :date")
-    fun snapshotForDate(date: String): Flow<DailySnapshotEntity?>
+    @Query("SELECT * FROM daily_snapshots WHERE date = :date AND cadence = :cadence")
+    fun snapshotForDate(
+        date: String,
+        cadence: String,
+    ): Flow<DailySnapshotEntity?>
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertSnapshot(snapshot: DailySnapshotEntity): Long

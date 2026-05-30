@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshotItem
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotShareTextUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotUseCase
@@ -72,7 +73,7 @@ class HistoryDetailViewModel @AssistedInject constructor(
         val snapshot = currentSnapshot ?: return
         isShareFormatDialogVisible.value = false
         shareDraft.value = ShareDraft.file(
-            messageText = "Here is the routine snapshot from ${snapshot.date}.",
+            messageText = "Here is the ${snapshot.cadence.label.lowercase()} routine snapshot from ${snapshot.displayDate}.",
             fileText = snapshotShareTextUseCase(snapshot),
         )
     }
@@ -94,10 +95,19 @@ class HistoryDetailViewModel @AssistedInject constructor(
 
 private fun RoutineDaySnapshot.toUiState(): HistoryDetailUiState =
     HistoryDetailUiState(
-        date = date,
+        date = displayDate,
         finalizedLabel = "Finalized ${timeFormatter.format(Instant.ofEpochMilli(finalizedAtMillis))}",
         items = items.map(RoutineDaySnapshotItem::toUiState),
     )
+
+private val RoutineDaySnapshot.displayDate: String
+    get() = if (cadence == RoutineCadence.Weekly) "Week of $date" else date
+
+private val RoutineCadence.label: String
+    get() = when (this) {
+        RoutineCadence.Daily -> "Daily"
+        RoutineCadence.Weekly -> "Weekly"
+    }
 
 private fun RoutineDaySnapshotItem.toUiState(): HistoryDetailItemUiState =
     HistoryDetailItemUiState(

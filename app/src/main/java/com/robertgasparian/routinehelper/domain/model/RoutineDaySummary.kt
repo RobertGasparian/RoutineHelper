@@ -4,4 +4,5 @@ data class RoutineDaySummary(
     val snapshotId: Long,
     val date: String,
     val finalizedAtMillis: Long,
+    val cadence: RoutineCadence = RoutineCadence.Daily,
 )

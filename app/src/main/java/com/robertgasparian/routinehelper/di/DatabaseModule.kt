@@ -27,6 +27,7 @@ object DatabaseModule {
             "routine-helper.db",
         )
             .addMigrations(MIGRATION_1_2)
+            .addMigrations(MIGRATION_2_3)
             .build()
 
     private val MIGRATION_1_2 =
@@ -49,6 +50,15 @@ object DatabaseModule {
                 )
                 connection.execSQL("CREATE INDEX IF NOT EXISTS index_weekly_entries_routineItemId ON weekly_entries(routineItemId)")
                 connection.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_weekly_entries_weekStartDate_routineItemId ON weekly_entries(weekStartDate, routineItemId)")
+            }
+        }
+
+    private val MIGRATION_2_3 =
+        object : Migration(2, 3) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE daily_snapshots ADD COLUMN cadence TEXT NOT NULL DEFAULT 'DAILY'")
+                connection.execSQL("DROP INDEX IF EXISTS index_daily_snapshots_date")
+                connection.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_daily_snapshots_date_cadence ON daily_snapshots(date, cadence)")
             }
         }
 }

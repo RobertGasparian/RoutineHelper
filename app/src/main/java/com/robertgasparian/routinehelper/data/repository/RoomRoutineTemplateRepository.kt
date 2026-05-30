@@ -11,6 +11,7 @@ import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.RoutineTemplateItem
 import com.robertgasparian.routinehelper.domain.repository.RoutineTemplateRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
@@ -26,8 +27,11 @@ class RoomRoutineTemplateRepository(
         }
 
     override fun templateItem(actionId: Long): Flow<RoutineTemplateItem?> =
-        templateItems().map { items ->
-            items.firstOrNull { it.actionId == actionId }
+        combine(
+            templateItems(RoutineCadence.Daily),
+            templateItems(RoutineCadence.Weekly),
+        ) { dailyItems, weeklyItems ->
+            (dailyItems + weeklyItems).firstOrNull { it.actionId == actionId }
         }
 
     override suspend fun addTemplateItem(

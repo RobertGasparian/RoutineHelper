@@ -37,7 +37,7 @@ class SnapshotShareTextUseCaseTest {
             ),
         )
 
-        assertTrue(text.contains("Routine snapshot"))
+        assertTrue(text.contains("Daily routine snapshot"))
         assertTrue(text.contains("Date: 2026-05-29"))
         assertTrue(text.contains("1. [x] Drink water"))
         assertTrue(text.contains("   Description: Drink 3L water"))

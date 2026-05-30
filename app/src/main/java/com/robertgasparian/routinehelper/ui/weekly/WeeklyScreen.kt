@@ -29,12 +29,13 @@ fun WeeklyScreen(
                     routineItemId = event.routineItemId,
                     note = event.note,
                 )
-                is TodayUiEvent.SnapshotClick -> Unit
+                is TodayUiEvent.SnapshotClick -> viewModel.snapshotWeek(event.snapshotDate)
             }
         },
         title = "Weekly",
         emptyTitle = "No weekly items yet",
         emptyDescription = "Add your first weekly action to start tracking this week.",
-        showSnapshotAction = false,
+        showSnapshotAction = true,
+        snapshotInitialDate = uiState.date.removePrefix("Week of "),
     )
 }
