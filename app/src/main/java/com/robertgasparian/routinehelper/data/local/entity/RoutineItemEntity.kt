@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import androidx.room.ColumnInfo
 
 @Entity(
     tableName = "routine_items",
@@ -17,7 +18,7 @@ import androidx.room.PrimaryKey
     ],
     indices = [
         Index(value = ["actionId"], unique = true),
-        Index(value = ["position"]),
+        Index(value = ["cadence", "position"]),
     ],
 )
 data class RoutineItemEntity(
@@ -25,5 +26,7 @@ data class RoutineItemEntity(
     val id: Long = 0,
     val actionId: Long,
     val position: Int,
+    @ColumnInfo(defaultValue = "DAILY")
+    val cadence: String = "DAILY",
     val createdAtMillis: Long,
 )

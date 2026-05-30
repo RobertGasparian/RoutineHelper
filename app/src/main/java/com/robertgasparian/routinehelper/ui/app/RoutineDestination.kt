@@ -1,8 +1,12 @@
 package com.robertgasparian.routinehelper.ui.app
 
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+
 sealed interface TopLevelDestination
 
 data object TodayDestination : TopLevelDestination
+
+data object WeeklyDestination : TopLevelDestination
 
 data object HistoryDestination : TopLevelDestination
 
@@ -12,4 +16,5 @@ data class HistoryDetailDestination(
 
 data class ActionEditorDestination(
     val actionId: Long? = null,
+    val cadence: RoutineCadence = RoutineCadence.Daily,
 )

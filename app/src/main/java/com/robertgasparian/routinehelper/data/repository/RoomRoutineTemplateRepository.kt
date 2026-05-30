@@ -7,6 +7,7 @@ import com.robertgasparian.routinehelper.data.local.dao.RoutineItemDao
 import com.robertgasparian.routinehelper.data.local.entity.ActionEntity
 import com.robertgasparian.routinehelper.data.local.entity.RoutineItemEntity
 import com.robertgasparian.routinehelper.data.local.model.RoutineItemWithAction
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.RoutineTemplateItem
 import com.robertgasparian.routinehelper.domain.repository.RoutineTemplateRepository
 import kotlinx.coroutines.flow.Flow
@@ -19,8 +20,8 @@ class RoomRoutineTemplateRepository(
     private val routineItemDao: RoutineItemDao = database.routineItemDao(),
     private val clock: () -> Long = System::currentTimeMillis,
 ) : RoutineTemplateRepository {
-    override fun templateItems(): Flow<List<RoutineTemplateItem>> =
-        routineItemDao.routineItems().map { items ->
+    override fun templateItems(cadence: RoutineCadence): Flow<List<RoutineTemplateItem>> =
+        routineItemDao.routineItems(cadence.toStorageValue()).map { items ->
             items.map(RoutineItemWithAction::toDomain)
         }
 
@@ -32,6 +33,7 @@ class RoomRoutineTemplateRepository(
     override suspend fun addTemplateItem(
         title: String,
         description: String?,
+        cadence: RoutineCadence,
     ): Long = database.withTransaction {
         val now = clock()
         val actionId = actionDao.insert(
@@ -45,7 +47,8 @@ class RoomRoutineTemplateRepository(
         routineItemDao.insert(
             RoutineItemEntity(
                 actionId = actionId,
-                position = routineItemDao.maxPosition().first() + 1,
+                position = routineItemDao.maxPosition(cadence.toStorageValue()).first() + 1,
+                cadence = cadence.toStorageValue(),
                 createdAtMillis = now,
             ),
         )
@@ -86,6 +89,18 @@ class RoomRoutineTemplateRepository(
     }
 }
 
+private fun RoutineCadence.toStorageValue(): String =
+    when (this) {
+        RoutineCadence.Daily -> "DAILY"
+        RoutineCadence.Weekly -> "WEEKLY"
+    }
+
+private fun String.toRoutineCadence(): RoutineCadence =
+    when (this) {
+        "WEEKLY" -> RoutineCadence.Weekly
+        else -> RoutineCadence.Daily
+    }
+
 private fun RoutineItemWithAction.toDomain(): RoutineTemplateItem =
     RoutineTemplateItem(
         routineItemId = routineItem.id,
@@ -93,4 +108,5 @@ private fun RoutineItemWithAction.toDomain(): RoutineTemplateItem =
         title = action.title,
         description = action.description,
         position = routineItem.position,
+        cadence = routineItem.cadence.toRoutineCadence(),
     )

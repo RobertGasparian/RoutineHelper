@@ -6,11 +6,13 @@ import com.robertgasparian.routinehelper.data.local.dao.ActionDao
 import com.robertgasparian.routinehelper.data.local.dao.DailySnapshotDao
 import com.robertgasparian.routinehelper.data.local.dao.RoutineItemDao
 import com.robertgasparian.routinehelper.data.local.dao.TodayEntryDao
+import com.robertgasparian.routinehelper.data.local.dao.WeeklyEntryDao
 import com.robertgasparian.routinehelper.data.local.entity.ActionEntity
 import com.robertgasparian.routinehelper.data.local.entity.DailySnapshotEntity
 import com.robertgasparian.routinehelper.data.local.entity.DailySnapshotEntryEntity
 import com.robertgasparian.routinehelper.data.local.entity.RoutineItemEntity
 import com.robertgasparian.routinehelper.data.local.entity.TodayEntryEntity
+import com.robertgasparian.routinehelper.data.local.entity.WeeklyEntryEntity
 
 @Database(
     entities = [
@@ -19,8 +21,9 @@ import com.robertgasparian.routinehelper.data.local.entity.TodayEntryEntity
         TodayEntryEntity::class,
         DailySnapshotEntity::class,
         DailySnapshotEntryEntity::class,
+        WeeklyEntryEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 abstract class RoutineDatabase : RoomDatabase() {
@@ -31,4 +34,6 @@ abstract class RoutineDatabase : RoomDatabase() {
     abstract fun todayEntryDao(): TodayEntryDao
 
     abstract fun dailySnapshotDao(): DailySnapshotDao
+
+    abstract fun weeklyEntryDao(): WeeklyEntryDao
 }

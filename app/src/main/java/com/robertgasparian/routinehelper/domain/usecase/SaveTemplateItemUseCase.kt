@@ -1,5 +1,6 @@
 package com.robertgasparian.routinehelper.domain.usecase
 
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.repository.RoutineTemplateRepository
 import javax.inject.Inject
 
@@ -10,6 +11,7 @@ class SaveTemplateItemUseCase @Inject constructor(
         actionId: Long?,
         title: String,
         description: String?,
+        cadence: RoutineCadence = RoutineCadence.Daily,
     ) {
         val normalizedTitle = title.trim()
         if (normalizedTitle.isEmpty()) return
@@ -19,6 +21,7 @@ class SaveTemplateItemUseCase @Inject constructor(
             routineTemplateRepository.addTemplateItem(
                 title = normalizedTitle,
                 description = normalizedDescription,
+                cadence = cadence,
             )
         } else {
             routineTemplateRepository.updateAction(

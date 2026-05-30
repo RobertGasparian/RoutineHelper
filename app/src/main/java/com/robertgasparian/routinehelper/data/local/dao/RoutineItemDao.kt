@@ -12,11 +12,11 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface RoutineItemDao {
     @Transaction
-    @Query("SELECT * FROM routine_items ORDER BY position")
-    fun routineItems(): Flow<List<RoutineItemWithAction>>
+    @Query("SELECT * FROM routine_items WHERE cadence = :cadence ORDER BY position")
+    fun routineItems(cadence: String): Flow<List<RoutineItemWithAction>>
 
-    @Query("SELECT COALESCE(MAX(position), -1) FROM routine_items")
-    fun maxPosition(): Flow<Int>
+    @Query("SELECT COALESCE(MAX(position), -1) FROM routine_items WHERE cadence = :cadence")
+    fun maxPosition(cadence: String): Flow<Int>
 
     @Query("SELECT * FROM routine_items WHERE id = :id")
     fun routineItem(id: Long): Flow<RoutineItemEntity?>

@@ -1,5 +1,6 @@
 package com.robertgasparian.routinehelper.domain.usecase
 
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -21,6 +22,7 @@ class AddTemplateItemUseCaseTest {
             AddedTemplateItem(
                 title = "Drink water",
                 description = "Drink 3L water",
+                cadence = RoutineCadence.Daily,
             ),
             repository.addedItems.single(),
         )
@@ -37,6 +39,7 @@ class AddTemplateItemUseCaseTest {
             AddedTemplateItem(
                 title = "Stretch",
                 description = null,
+                cadence = RoutineCadence.Daily,
             ),
             repository.addedItems.single(),
         )

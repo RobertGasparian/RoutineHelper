@@ -2,6 +2,7 @@ package com.robertgasparian.routinehelper.ui.actioneditor
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.usecase.SaveTemplateItemUseCase
 import com.robertgasparian.routinehelper.domain.usecase.TemplateItemUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -57,6 +58,7 @@ class ActionEditorViewModel @Inject constructor(
 
     fun save(
         actionId: Long?,
+        cadence: RoutineCadence,
         onSaved: () -> Unit,
     ) {
         viewModelScope.launch {
@@ -64,6 +66,7 @@ class ActionEditorViewModel @Inject constructor(
                 actionId = actionId,
                 title = draftTitle.value,
                 description = draftDescription.value,
+                cadence = cadence,
             )
             onSaved()
         }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -29,11 +30,13 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.ui.actioneditor.ActionEditorScreen
 import com.robertgasparian.routinehelper.ui.history.detail.HistoryDetailScreen
 import com.robertgasparian.routinehelper.ui.history.HistoryScreen
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 import com.robertgasparian.routinehelper.ui.today.TodayScreen
+import com.robertgasparian.routinehelper.ui.weekly.WeeklyScreen
 
 @Composable
 fun RoutineHelperScreen() {
@@ -80,6 +83,24 @@ fun RoutineHelperComponent(
                         )
                     }
 
+                entry<WeeklyDestination> {
+                        WeeklyScreen(
+                            onCreateActionClick = {
+                                topLevelBackStack.add(
+                                    ActionEditorDestination(cadence = RoutineCadence.Weekly),
+                                )
+                            },
+                            onEditActionClick = { actionId ->
+                                topLevelBackStack.add(
+                                    ActionEditorDestination(
+                                        actionId = actionId,
+                                        cadence = RoutineCadence.Weekly,
+                                    ),
+                                )
+                            },
+                        )
+                    }
+
                 entry<HistoryDestination> {
                         HistoryScreen(
                             onSnapshotClick = { snapshotId ->
@@ -98,6 +119,7 @@ fun RoutineHelperComponent(
                 entry<ActionEditorDestination> { destination ->
                     ActionEditorScreen(
                         actionId = destination.actionId,
+                        cadence = destination.cadence,
                         onBackClick = { topLevelBackStack.removeLast() },
                     )
                 }
@@ -138,6 +160,17 @@ private fun FloatingBottomNavigationBar(
                         )
                     },
                     label = { Text(text = "Today") },
+                )
+                ShortNavigationBarItem(
+                    selected = selectedDestination == WeeklyDestination,
+                    onClick = { onDestinationSelected(WeeklyDestination) },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = null,
+                        )
+                    },
+                    label = { Text(text = "Weekly") },
                 )
                 ShortNavigationBarItem(
                     selected = selectedDestination == HistoryDestination,

@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 
 sealed interface ActionEditorUiEvent {
@@ -41,6 +42,7 @@ sealed interface ActionEditorUiEvent {
 @Composable
 fun ActionEditorScreen(
     actionId: Long?,
+    cadence: RoutineCadence,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ActionEditorViewModel = hiltViewModel(),
@@ -58,6 +60,7 @@ fun ActionEditorScreen(
                 ActionEditorUiEvent.SaveClick -> {
                     viewModel.save(
                         actionId = actionId,
+                        cadence = cadence,
                         onSaved = onBackClick,
                     )
                 }

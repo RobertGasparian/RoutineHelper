@@ -96,6 +96,10 @@ fun TodayComponent(
     uiState: TodayUiState,
     onEvent: (TodayUiEvent) -> Unit,
     modifier: Modifier = Modifier,
+    title: String = "Today",
+    emptyTitle: String = "No routine items yet",
+    emptyDescription: String = "Add your first action to start tracking today.",
+    showSnapshotAction: Boolean = true,
 ) {
     var noteEditorItem by rememberSaveable { mutableStateOf<TodayItemUiState?>(null) }
     var showSnapshotDatePicker by rememberSaveable { mutableStateOf(false) }
@@ -106,7 +110,7 @@ fun TodayComponent(
             TopAppBar(
                 title = {
                     Column {
-                        Text(text = "Today")
+                        Text(text = title)
                         Text(
                             text = uiState.date,
                             style = MaterialTheme.typography.bodySmall,
@@ -114,13 +118,15 @@ fun TodayComponent(
                     }
                 },
                 actions = {
-                    TextButton(
-                        onClick = {
-                            // TODO Remove this test-only date picker when snapshots are created by WorkManager.
-                            showSnapshotDatePicker = true
-                        },
-                    ) {
-                        Text(text = "Snapshot")
+                    if (showSnapshotAction) {
+                        TextButton(
+                            onClick = {
+                                // TODO Remove this test-only date picker when snapshots are created by WorkManager.
+                                showSnapshotDatePicker = true
+                            },
+                        ) {
+                            Text(text = "Snapshot")
+                        }
                     }
                 },
             )
@@ -136,6 +142,8 @@ fun TodayComponent(
         if (uiState.items.isEmpty()) {
             EmptyTodayContent(
                 onAddClick = { onEvent(TodayUiEvent.CreateActionClick) },
+                title = emptyTitle,
+                description = emptyDescription,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
@@ -230,6 +238,8 @@ private fun SnapshotDatePickerDialog(
 @Composable
 private fun EmptyTodayContent(
     onAddClick: () -> Unit,
+    title: String,
+    description: String,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -238,11 +248,11 @@ private fun EmptyTodayContent(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = "No routine items yet",
+            text = title,
             style = MaterialTheme.typography.headlineSmall,
         )
         Text(
-            text = "Add your first action to start tracking today.",
+            text = description,
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(top = 8.dp),
         )

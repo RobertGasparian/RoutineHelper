@@ -1,5 +1,6 @@
 package com.robertgasparian.routinehelper.domain.usecase
 
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.RoutineTemplateItem
 import com.robertgasparian.routinehelper.domain.repository.RoutineTemplateRepository
 import kotlinx.coroutines.flow.Flow
@@ -15,7 +16,8 @@ class FakeRoutineTemplateRepository : RoutineTemplateRepository {
         this.items.value = items
     }
 
-    override fun templateItems(): Flow<List<RoutineTemplateItem>> = items
+    override fun templateItems(cadence: RoutineCadence): Flow<List<RoutineTemplateItem>> =
+        items.map { templateItems -> templateItems.filter { it.cadence == cadence } }
 
     override fun templateItem(actionId: Long): Flow<RoutineTemplateItem?> =
         items.map { templateItems ->
@@ -25,8 +27,9 @@ class FakeRoutineTemplateRepository : RoutineTemplateRepository {
     override suspend fun addTemplateItem(
         title: String,
         description: String?,
+        cadence: RoutineCadence,
     ): Long {
-        addedItems += AddedTemplateItem(title = title, description = description)
+        addedItems += AddedTemplateItem(title = title, description = description, cadence = cadence)
         return addedItems.size.toLong()
     }
 
@@ -50,6 +53,7 @@ class FakeRoutineTemplateRepository : RoutineTemplateRepository {
 data class AddedTemplateItem(
     val title: String,
     val description: String?,
+    val cadence: RoutineCadence,
 )
 
 data class UpdatedTemplateItem(
