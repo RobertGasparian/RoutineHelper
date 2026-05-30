@@ -18,15 +18,7 @@ class HistoryDetailComponentPaparazziTest {
             RoutineHelperTheme {
                 HistoryDetailComponent(
                     uiState = HistoryDetailUiState.preview(),
-                    onBackClick = {},
-                    onShareClick = {},
-                    onShareAsTextClick = {},
-                    onShareAsFileClick = {},
-                    onShareTextChange = {},
-                    onShareDismiss = {},
-                    onShareTextConfirm = {},
-                    onShareFileConfirm = {},
-                    onDeleteClick = {},
+                    onEvent = {},
                 )
             }
         }
@@ -38,15 +30,7 @@ class HistoryDetailComponentPaparazziTest {
             RoutineHelperTheme {
                 HistoryDetailComponent(
                     uiState = HistoryDetailUiState.previewEmpty(),
-                    onBackClick = {},
-                    onShareClick = {},
-                    onShareAsTextClick = {},
-                    onShareAsFileClick = {},
-                    onShareTextChange = {},
-                    onShareDismiss = {},
-                    onShareTextConfirm = {},
-                    onShareFileConfirm = {},
-                    onDeleteClick = {},
+                    onEvent = {},
                 )
             }
         }
@@ -58,15 +42,7 @@ class HistoryDetailComponentPaparazziTest {
             RoutineHelperTheme {
                 HistoryDetailComponent(
                     uiState = HistoryDetailUiState.previewShare(),
-                    onBackClick = {},
-                    onShareClick = {},
-                    onShareAsTextClick = {},
-                    onShareAsFileClick = {},
-                    onShareTextChange = {},
-                    onShareDismiss = {},
-                    onShareTextConfirm = {},
-                    onShareFileConfirm = {},
-                    onDeleteClick = {},
+                    onEvent = {},
                 )
             }
         }
@@ -78,15 +54,7 @@ class HistoryDetailComponentPaparazziTest {
             RoutineHelperTheme {
                 HistoryDetailComponent(
                     uiState = HistoryDetailUiState.previewShareOptions(),
-                    onBackClick = {},
-                    onShareClick = {},
-                    onShareAsTextClick = {},
-                    onShareAsFileClick = {},
-                    onShareTextChange = {},
-                    onShareDismiss = {},
-                    onShareTextConfirm = {},
-                    onShareFileConfirm = {},
-                    onDeleteClick = {},
+                    onEvent = {},
                 )
             }
         }
@@ -98,15 +66,7 @@ class HistoryDetailComponentPaparazziTest {
             RoutineHelperTheme {
                 HistoryDetailComponent(
                     uiState = HistoryDetailUiState.previewFileShare(),
-                    onBackClick = {},
-                    onShareClick = {},
-                    onShareAsTextClick = {},
-                    onShareAsFileClick = {},
-                    onShareTextChange = {},
-                    onShareDismiss = {},
-                    onShareTextConfirm = {},
-                    onShareFileConfirm = {},
-                    onDeleteClick = {},
+                    onEvent = {},
                 )
             }
         }

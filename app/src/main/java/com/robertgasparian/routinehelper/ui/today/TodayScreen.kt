@@ -40,6 +40,28 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
 
+sealed interface TodayUiEvent {
+    data object CreateActionClick : TodayUiEvent
+
+    data class EditActionClick(
+        val actionId: Long,
+    ) : TodayUiEvent
+
+    data class CheckedChange(
+        val routineItemId: Long,
+        val isChecked: Boolean,
+    ) : TodayUiEvent
+
+    data class NoteChange(
+        val routineItemId: Long,
+        val note: String,
+    ) : TodayUiEvent
+
+    data class SnapshotClick(
+        val snapshotDate: String,
+    ) : TodayUiEvent
+}
+
 @Composable
 fun TodayScreen(
     onCreateActionClick: () -> Unit,
@@ -50,11 +72,21 @@ fun TodayScreen(
 
     TodayComponent(
         uiState = uiState,
-        onCreateActionClick = onCreateActionClick,
-        onEditActionClick = onEditActionClick,
-        onCheckedChange = viewModel::setChecked,
-        onNoteChange = viewModel::updateNote,
-        onSnapshotClick = viewModel::snapshotToday,
+        onEvent = { event ->
+            when (event) {
+                is TodayUiEvent.CheckedChange -> viewModel.setChecked(
+                    routineItemId = event.routineItemId,
+                    isChecked = event.isChecked,
+                )
+                TodayUiEvent.CreateActionClick -> onCreateActionClick()
+                is TodayUiEvent.EditActionClick -> onEditActionClick(event.actionId)
+                is TodayUiEvent.NoteChange -> viewModel.updateNote(
+                    routineItemId = event.routineItemId,
+                    note = event.note,
+                )
+                is TodayUiEvent.SnapshotClick -> viewModel.snapshotToday(event.snapshotDate)
+            }
+        },
     )
 }
 
@@ -62,11 +94,7 @@ fun TodayScreen(
 @Composable
 fun TodayComponent(
     uiState: TodayUiState,
-    onCreateActionClick: () -> Unit,
-    onEditActionClick: (actionId: Long) -> Unit,
-    onCheckedChange: (routineItemId: Long, isChecked: Boolean) -> Unit,
-    onNoteChange: (routineItemId: Long, note: String) -> Unit,
-    onSnapshotClick: (snapshotDate: String) -> Unit,
+    onEvent: (TodayUiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var noteEditorItem by rememberSaveable { mutableStateOf<TodayItemUiState?>(null) }
@@ -99,7 +127,7 @@ fun TodayComponent(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onCreateActionClick,
+                onClick = { onEvent(TodayUiEvent.CreateActionClick) },
             ) {
                 Text(text = "+")
             }
@@ -107,7 +135,7 @@ fun TodayComponent(
     ) { innerPadding ->
         if (uiState.items.isEmpty()) {
             EmptyTodayContent(
-                onAddClick = onCreateActionClick,
+                onAddClick = { onEvent(TodayUiEvent.CreateActionClick) },
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
@@ -127,10 +155,10 @@ fun TodayComponent(
                     TodayItemCard(
                         item = item,
                         onEditActionClick = {
-                            onEditActionClick(item.actionId)
+                            onEvent(TodayUiEvent.EditActionClick(item.actionId))
                         },
                         onCheckedChange = { isChecked ->
-                            onCheckedChange(item.routineItemId, isChecked)
+                            onEvent(TodayUiEvent.CheckedChange(item.routineItemId, isChecked))
                         },
                         onEditNoteClick = {
                             noteEditorItem = item
@@ -146,7 +174,7 @@ fun TodayComponent(
             initialDate = uiState.date,
             onDismiss = { showSnapshotDatePicker = false },
             onConfirm = { snapshotDate ->
-                onSnapshotClick(snapshotDate)
+                onEvent(TodayUiEvent.SnapshotClick(snapshotDate))
                 showSnapshotDatePicker = false
             },
         )
@@ -157,7 +185,7 @@ fun TodayComponent(
             initialNote = item.note,
             onDismiss = { noteEditorItem = null },
             onConfirm = { note ->
-                onNoteChange(item.routineItemId, note)
+                onEvent(TodayUiEvent.NoteChange(item.routineItemId, note))
                 noteEditorItem = null
             },
         )
@@ -339,11 +367,7 @@ private fun TodayScreenPreview() {
     RoutineHelperTheme {
         TodayComponent(
             uiState = TodayUiState.preview(),
-            onCreateActionClick = {},
-            onEditActionClick = {},
-            onCheckedChange = { _, _ -> },
-            onNoteChange = { _, _ -> },
-            onSnapshotClick = { _ -> },
+            onEvent = {},
         )
     }
 }

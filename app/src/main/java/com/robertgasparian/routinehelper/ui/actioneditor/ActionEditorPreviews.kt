@@ -65,9 +65,6 @@ private fun ActionEditorPreviewContent(
 ) {
     ActionEditorComponent(
         uiState = uiState,
-        onBackClick = {},
-        onTitleChange = {},
-        onDescriptionChange = {},
-        onSaveClick = {},
+        onEvent = {},
     )
 }

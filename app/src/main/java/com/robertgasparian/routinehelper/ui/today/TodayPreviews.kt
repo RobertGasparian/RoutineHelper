@@ -90,10 +90,6 @@ private fun TodayComponentPreviewContent(
 ) {
     TodayComponent(
         uiState = uiState,
-        onCreateActionClick = {},
-        onEditActionClick = {},
-        onCheckedChange = { _, _ -> },
-        onNoteChange = { _, _ -> },
-        onSnapshotClick = { _ -> },
+        onEvent = {},
     )
 }

@@ -5,6 +5,7 @@
 - Screen-level composables use two layers:
   - `XxxScreen`: stateful boundary. Owns the `ViewModel`, collects state, handles launched effects, and maps UI events to ViewModel calls.
   - `XxxComponent`: stateless renderer. Receives a `UiState`, renders it, and propagates events upward.
+- If a screen component (`XxxComponent`) or reusable composable needs more than three callbacks, replace the callback list with a corresponding `XxxUiEvent` sealed interface and a single `onEvent: (XxxUiEvent) -> Unit` callback. The `XxxScreen` handles those events by calling ViewModel functions, navigation callbacks, Android intents, or other side-effect boundaries.
 - Components must be covered with Paparazzi snapshot tests for relevant states.
 - Every `UiState` data class must include a `companion object` with at least `preview()`. Add state-specific helpers such as `previewEmpty()` or `previewError()` when applicable.
 - Each component should have:

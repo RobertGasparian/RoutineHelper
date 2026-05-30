@@ -24,6 +24,20 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 
+sealed interface ActionEditorUiEvent {
+    data object BackClick : ActionEditorUiEvent
+
+    data class TitleChange(
+        val title: String,
+    ) : ActionEditorUiEvent
+
+    data class DescriptionChange(
+        val description: String,
+    ) : ActionEditorUiEvent
+
+    data object SaveClick : ActionEditorUiEvent
+}
+
 @Composable
 fun ActionEditorScreen(
     actionId: Long?,
@@ -37,14 +51,18 @@ fun ActionEditorScreen(
 
     ActionEditorComponent(
         uiState = uiState,
-        onBackClick = onBackClick,
-        onTitleChange = viewModel::updateTitle,
-        onDescriptionChange = viewModel::updateDescription,
-        onSaveClick = {
-            viewModel.save(
-                actionId = actionId,
-                onSaved = onBackClick,
-            )
+        onEvent = { event ->
+            when (event) {
+                ActionEditorUiEvent.BackClick -> onBackClick()
+                is ActionEditorUiEvent.DescriptionChange -> viewModel.updateDescription(event.description)
+                ActionEditorUiEvent.SaveClick -> {
+                    viewModel.save(
+                        actionId = actionId,
+                        onSaved = onBackClick,
+                    )
+                }
+                is ActionEditorUiEvent.TitleChange -> viewModel.updateTitle(event.title)
+            }
         },
         modifier = modifier,
     )
@@ -54,10 +72,7 @@ fun ActionEditorScreen(
 @Composable
 fun ActionEditorComponent(
     uiState: ActionEditorUiState,
-    onBackClick: () -> Unit,
-    onTitleChange: (String) -> Unit,
-    onDescriptionChange: (String) -> Unit,
-    onSaveClick: () -> Unit,
+    onEvent: (ActionEditorUiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -65,7 +80,7 @@ fun ActionEditorComponent(
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
+                    IconButton(onClick = { onEvent(ActionEditorUiEvent.BackClick) }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
@@ -87,20 +102,20 @@ fun ActionEditorComponent(
         ) {
             OutlinedTextField(
                 value = uiState.title,
-                onValueChange = onTitleChange,
+                onValueChange = { title -> onEvent(ActionEditorUiEvent.TitleChange(title)) },
                 label = { Text(text = "Title") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
             OutlinedTextField(
                 value = uiState.description,
-                onValueChange = onDescriptionChange,
+                onValueChange = { description -> onEvent(ActionEditorUiEvent.DescriptionChange(description)) },
                 label = { Text(text = "Description") },
                 minLines = 4,
                 modifier = Modifier.fillMaxWidth(),
             )
             Button(
-                onClick = onSaveClick,
+                onClick = { onEvent(ActionEditorUiEvent.SaveClick) },
                 enabled = uiState.canSave,
                 modifier = Modifier.fillMaxWidth(),
             ) {
@@ -116,10 +131,7 @@ private fun ActionEditorComponentPreview() {
     RoutineHelperTheme {
         ActionEditorComponent(
             uiState = ActionEditorUiState.preview(),
-            onBackClick = {},
-            onTitleChange = {},
-            onDescriptionChange = {},
-            onSaveClick = {},
+            onEvent = {},
         )
     }
 }

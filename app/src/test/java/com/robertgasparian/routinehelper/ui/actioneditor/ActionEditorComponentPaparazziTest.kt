@@ -18,10 +18,7 @@ class ActionEditorComponentPaparazziTest {
             RoutineHelperTheme {
                 ActionEditorComponent(
                     uiState = ActionEditorUiState.preview(),
-                    onBackClick = {},
-                    onTitleChange = {},
-                    onDescriptionChange = {},
-                    onSaveClick = {},
+                    onEvent = {},
                 )
             }
         }
@@ -33,10 +30,7 @@ class ActionEditorComponentPaparazziTest {
             RoutineHelperTheme {
                 ActionEditorComponent(
                     uiState = ActionEditorUiState.previewEmpty(),
-                    onBackClick = {},
-                    onTitleChange = {},
-                    onDescriptionChange = {},
-                    onSaveClick = {},
+                    onEvent = {},
                 )
             }
         }
