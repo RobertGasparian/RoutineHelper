@@ -8,8 +8,10 @@ lifecycleRuntimeKtx = "2.10.0"
 lifecycleRuntimeCompose = "2.10.0"
 lifecycleViewModelCompose = "2.10.0"
 hiltNavigationCompose = "1.4.0-beta01"
+hiltWork = "1.2.0"
 navigation3 = "1.2.0-alpha02"
 room = "2.8.4"
+work = "2.10.5"
 ksp = "2.3.7"
 hilt = "2.59.2"
 paparazzi = "2.0.0-alpha05"
@@ -26,7 +28,10 @@ androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecy
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
+androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltWork" }
+hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltWork" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
 hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 junit = { module = "junit:junit", version.ref = "junit" }

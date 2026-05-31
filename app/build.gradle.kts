@@ -57,8 +57,10 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
+    implementation(libs.hilt.work)
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
 
@@ -71,6 +73,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     ksp(libs.androidx.room.compiler)
+    ksp(libs.androidx.hilt.compiler)
     ksp(libs.hilt.compiler)
 
     testImplementation(libs.junit)

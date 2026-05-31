@@ -9,10 +9,9 @@ import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyItemNoteUseC
 import com.robertgasparian.routinehelper.domain.usecase.WeeklyItemsUseCase
 import com.robertgasparian.routinehelper.ui.today.TodayItemUiState
 import com.robertgasparian.routinehelper.ui.today.TodayUiState
+import com.robertgasparian.routinehelper.work.startOfCalendarWeek
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
-import java.time.temporal.WeekFields
-import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -82,8 +81,7 @@ class WeeklyViewModel @Inject constructor(
 }
 
 private fun LocalDate.startOfWeek(): LocalDate {
-    val firstDayOfWeek = WeekFields.of(Locale.getDefault()).firstDayOfWeek
-    return with(java.time.temporal.TemporalAdjusters.previousOrSame(firstDayOfWeek))
+    return startOfCalendarWeek()
 }
 
 private fun WeeklyRoutineItem.toUiState(): TodayItemUiState =
