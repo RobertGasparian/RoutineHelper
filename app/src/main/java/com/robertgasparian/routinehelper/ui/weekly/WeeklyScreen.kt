@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.robertgasparian.routinehelper.BuildConfig
 import com.robertgasparian.routinehelper.ui.today.TodayComponent
 import com.robertgasparian.routinehelper.ui.today.TodayUiEvent
 
@@ -34,13 +35,12 @@ fun WeeklyScreen(
                     note = event.note,
                 )
                 is TodayUiEvent.SummaryNoteChange -> viewModel.updateSummaryNote(event.note)
-                is TodayUiEvent.SnapshotClick -> viewModel.snapshotWeek(event.snapshotDate)
+                TodayUiEvent.SnapshotClick -> viewModel.snapshotWeek()
             }
         },
         title = "Weekly",
         emptyTitle = "No weekly items yet",
         emptyDescription = "Add your first weekly action to start tracking this week.",
-        showSnapshotAction = true,
-        snapshotInitialDate = uiState.date.removePrefix("Week of "),
+        showSnapshotAction = BuildConfig.DEBUG,
     )
 }

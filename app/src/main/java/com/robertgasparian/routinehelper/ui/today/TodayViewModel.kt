@@ -10,8 +10,10 @@ import com.robertgasparian.routinehelper.domain.usecase.TodaySummaryNoteUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayItemCompletedCountUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayItemNoteUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTodaySummaryNoteUseCase
+import com.robertgasparian.routinehelper.work.SnapshotWorkDates
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
+import java.time.ZonedDateTime
 import javax.inject.Inject
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.SharingStarted
@@ -96,11 +98,11 @@ class TodayViewModel @Inject constructor(
         }
     }
 
-    fun snapshotToday(snapshotDate: String) {
+    fun snapshotToday() {
         viewModelScope.launch {
-            // TODO Remove manual date selection when nightly WorkManager finalization is introduced.
+            val snapshotDate = SnapshotWorkDates.dailySnapshotDate(ZonedDateTime.now()).toString()
             finalizeTodayUseCase(
-                date = todayDate,
+                date = snapshotDate,
                 snapshotDate = snapshotDate,
                 finalizedAtMillis = System.currentTimeMillis(),
             )

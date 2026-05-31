@@ -9,16 +9,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -35,10 +31,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.robertgasparian.routinehelper.BuildConfig
+import com.robertgasparian.routinehelper.ui.dsm.NoteEditorDialog
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneOffset
 
 sealed interface TodayUiEvent {
     data object CreateActionClick : TodayUiEvent
@@ -66,9 +61,7 @@ sealed interface TodayUiEvent {
         val note: String,
     ) : TodayUiEvent
 
-    data class SnapshotClick(
-        val snapshotDate: String,
-    ) : TodayUiEvent
+    data object SnapshotClick : TodayUiEvent
 }
 
 @Composable
@@ -98,9 +91,10 @@ fun TodayScreen(
                     note = event.note,
                 )
                 is TodayUiEvent.SummaryNoteChange -> viewModel.updateSummaryNote(event.note)
-                is TodayUiEvent.SnapshotClick -> viewModel.snapshotToday(event.snapshotDate)
+                TodayUiEvent.SnapshotClick -> viewModel.snapshotToday()
             }
         },
+        showSnapshotAction = BuildConfig.DEBUG,
     )
 }
 
@@ -114,11 +108,9 @@ fun TodayComponent(
     emptyTitle: String = "No routine items yet",
     emptyDescription: String = "Add your first action to start tracking today.",
     showSnapshotAction: Boolean = true,
-    snapshotInitialDate: String = uiState.date,
 ) {
     var noteEditorItem by rememberSaveable { mutableStateOf<TodayItemUiState?>(null) }
     var isSummaryNoteEditorVisible by rememberSaveable { mutableStateOf(false) }
-    var showSnapshotDatePicker by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier,
@@ -137,8 +129,8 @@ fun TodayComponent(
                     if (showSnapshotAction) {
                         TextButton(
                             onClick = {
-                                // TODO Remove this test-only date picker when snapshots are created by WorkManager.
-                                showSnapshotDatePicker = true
+                                // TODO Remove this debug-only action when worker triggering has a dedicated test tool.
+                                onEvent(TodayUiEvent.SnapshotClick)
                             },
                         ) {
                             Text(text = "Snapshot")
@@ -207,19 +199,10 @@ fun TodayComponent(
         }
     }
 
-    if (showSnapshotDatePicker) {
-        SnapshotDatePickerDialog(
-            initialDate = snapshotInitialDate,
-            onDismiss = { showSnapshotDatePicker = false },
-            onConfirm = { snapshotDate ->
-                onEvent(TodayUiEvent.SnapshotClick(snapshotDate))
-                showSnapshotDatePicker = false
-            },
-        )
-    }
-
     noteEditorItem?.let { item ->
         NoteEditorDialog(
+            title = if (item.note.isBlank()) "Add note" else "Edit note",
+            textFieldLabel = "Today note",
             initialNote = item.note,
             onDismiss = { noteEditorItem = null },
             onConfirm = { note ->
@@ -230,50 +213,17 @@ fun TodayComponent(
     }
 
     if (isSummaryNoteEditorVisible) {
-        SummaryNoteEditorDialog(
+        val label = if (title == "Weekly") "Week note" else "Day note"
+        NoteEditorDialog(
+            title = label,
+            textFieldLabel = label,
             initialNote = uiState.summaryNote,
-            label = if (title == "Weekly") "Week note" else "Day note",
             onDismiss = { isSummaryNoteEditorVisible = false },
             onConfirm = { note ->
                 onEvent(TodayUiEvent.SummaryNoteChange(note))
                 isSummaryNoteEditorVisible = false
             },
         )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun SnapshotDatePickerDialog(
-    initialDate: String,
-    onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit,
-) {
-    val datePickerState = androidx.compose.material3.rememberDatePickerState(
-        initialSelectedDateMillis = initialDate.toEpochMillis(),
-    )
-
-    DatePickerDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    val selectedDate = datePickerState.selectedDateMillis
-                        ?.toLocalDateString()
-                        ?: initialDate
-                    onConfirm(selectedDate)
-                },
-            ) {
-                Text(text = "Save")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = "Cancel")
-            }
-        },
-    ) {
-        DatePicker(state = datePickerState)
     }
 }
 
@@ -468,77 +418,6 @@ private fun RepeatCountControl(
     }
 }
 
-@Composable
-private fun SummaryNoteEditorDialog(
-    initialNote: String,
-    label: String,
-    onDismiss: () -> Unit,
-    onConfirm: (note: String) -> Unit,
-) {
-    var note by rememberSaveable(initialNote) { mutableStateOf(initialNote) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = label) },
-        text = {
-            OutlinedTextField(
-                value = note,
-                onValueChange = { note = it },
-                label = { Text(text = label) },
-                minLines = 4,
-                maxLines = 8,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        },
-        confirmButton = {
-            TextButton(onClick = { onConfirm(note) }) {
-                Text(text = "Save")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = "Cancel")
-            }
-        },
-    )
-}
-
-@Composable
-private fun NoteEditorDialog(
-    initialNote: String,
-    onDismiss: () -> Unit,
-    onConfirm: (note: String) -> Unit,
-) {
-    var note by rememberSaveable(initialNote) { mutableStateOf(initialNote) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = if (initialNote.isBlank()) "Add note" else "Edit note") },
-        text = {
-            OutlinedTextField(
-                value = note,
-                onValueChange = { note = it },
-                label = { Text(text = "Today note") },
-                minLines = 4,
-                maxLines = 8,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { onConfirm(note) },
-            ) {
-                Text(text = "Save")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = "Cancel")
-            }
-        },
-    )
-}
-
 @Preview(showBackground = true)
 @Composable
 private fun TodayScreenPreview() {
@@ -549,15 +428,3 @@ private fun TodayScreenPreview() {
         )
     }
 }
-
-private fun String.toEpochMillis(): Long =
-    LocalDate.parse(this)
-        .atStartOfDay()
-        .toInstant(ZoneOffset.UTC)
-        .toEpochMilli()
-
-private fun Long.toLocalDateString(): String =
-    Instant.ofEpochMilli(this)
-        .atZone(ZoneOffset.UTC)
-        .toLocalDate()
-        .toString()

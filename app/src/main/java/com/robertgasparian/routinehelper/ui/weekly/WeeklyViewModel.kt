@@ -12,9 +12,11 @@ import com.robertgasparian.routinehelper.domain.usecase.WeeklyItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.WeeklySummaryNoteUseCase
 import com.robertgasparian.routinehelper.ui.today.TodayItemUiState
 import com.robertgasparian.routinehelper.ui.today.TodayUiState
+import com.robertgasparian.routinehelper.work.SnapshotWorkDates
 import com.robertgasparian.routinehelper.work.startOfCalendarWeek
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
+import java.time.ZonedDateTime
 import javax.inject.Inject
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.SharingStarted
@@ -99,11 +101,13 @@ class WeeklyViewModel @Inject constructor(
         }
     }
 
-    fun snapshotWeek(snapshotWeekStartDate: String) {
+    fun snapshotWeek() {
         viewModelScope.launch {
-            // TODO Remove this test-only snapshot action when weekly snapshots are created by WorkManager.
+            val snapshotWeekStartDate = SnapshotWorkDates
+                .previousCompletedCalendarWeekStartDate(ZonedDateTime.now())
+                .toString()
             finalizeWeeklyUseCase(
-                weekStartDate = weekStartDate,
+                weekStartDate = snapshotWeekStartDate,
                 snapshotWeekStartDate = snapshotWeekStartDate,
                 finalizedAtMillis = System.currentTimeMillis(),
             )
