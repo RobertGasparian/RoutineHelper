@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.robertgasparian.routinehelper.domain.model.WeeklyRoutineItem
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeWeeklyUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetWeeklyItemCheckedUseCase
+import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyItemCompletedCountUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyItemNoteUseCase
 import com.robertgasparian.routinehelper.domain.usecase.WeeklyItemsUseCase
 import com.robertgasparian.routinehelper.ui.today.TodayItemUiState
@@ -24,6 +25,7 @@ class WeeklyViewModel @Inject constructor(
     weeklyItemsUseCase: WeeklyItemsUseCase,
     private val finalizeWeeklyUseCase: FinalizeWeeklyUseCase,
     private val setWeeklyItemCheckedUseCase: SetWeeklyItemCheckedUseCase,
+    private val updateWeeklyItemCompletedCountUseCase: UpdateWeeklyItemCompletedCountUseCase,
     private val updateWeeklyItemNoteUseCase: UpdateWeeklyItemNoteUseCase,
 ) : ViewModel() {
     private val weekStartDate = LocalDate.now().startOfWeek().toString()
@@ -68,6 +70,19 @@ class WeeklyViewModel @Inject constructor(
         }
     }
 
+    fun updateCompletedCount(
+        routineItemId: Long,
+        completedCount: Int,
+    ) {
+        viewModelScope.launch {
+            updateWeeklyItemCompletedCountUseCase(
+                weekStartDate = weekStartDate,
+                routineItemId = routineItemId,
+                completedCount = completedCount,
+            )
+        }
+    }
+
     fun snapshotWeek(snapshotWeekStartDate: String) {
         viewModelScope.launch {
             // TODO Remove this test-only snapshot action when weekly snapshots are created by WorkManager.
@@ -90,6 +105,8 @@ private fun WeeklyRoutineItem.toUiState(): TodayItemUiState =
         actionId = actionId,
         title = title,
         description = description,
+        repeatTargetCount = repeatTargetCount,
+        completedCount = completedCount,
         isChecked = isChecked,
         note = note.orEmpty(),
     )

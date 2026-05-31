@@ -74,6 +74,25 @@ class RoomTodayRoutineRepository(
         )
     }
 
+    override suspend fun updateCompletedCount(
+        date: String,
+        routineItemId: Long,
+        completedCount: Int,
+    ) {
+        val existing = todayEntryDao.entryForDate(date, routineItemId).first()
+        todayEntryDao.upsert(
+            existing?.copy(
+                completedCount = completedCount.coerceAtLeast(0),
+                updatedAtMillis = clock(),
+            ) ?: TodayEntryEntity(
+                routineItemId = routineItemId,
+                date = date,
+                completedCount = completedCount.coerceAtLeast(0),
+                updatedAtMillis = clock(),
+            ),
+        )
+    }
+
     override suspend fun resetDate(date: String) {
         todayEntryDao.deleteEntriesForDate(date)
     }
@@ -82,17 +101,25 @@ class RoomTodayRoutineRepository(
 private fun RoutineItemWithAction.toTodayDomain(
     date: String,
     todayEntry: TodayEntryEntity?,
-): TodayRoutineItem =
-    TodayRoutineItem(
+): TodayRoutineItem {
+    val completedCount = action.repeatTargetCount?.let { targetCount ->
+        (todayEntry?.completedCount ?: 0).coerceIn(0, targetCount)
+    } ?: 0
+    return TodayRoutineItem(
         routineItemId = routineItem.id,
         actionId = action.id,
         title = action.title,
         description = action.description,
+        repeatTargetCount = action.repeatTargetCount,
+        completedCount = completedCount,
         position = routineItem.position,
         date = date,
-        isChecked = todayEntry?.isChecked ?: false,
+        isChecked = action.repeatTargetCount?.let { targetCount ->
+            completedCount >= targetCount
+        } ?: (todayEntry?.isChecked ?: false),
         note = todayEntry?.note,
     )
+}
 
 private fun RoutineCadence.toStorageValue(): String =
     when (this) {

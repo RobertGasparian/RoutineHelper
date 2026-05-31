@@ -10,6 +10,7 @@ class FakeTodayRoutineRepository : TodayRoutineRepository {
     private val itemsByDate = mutableMapOf<String, MutableStateFlow<List<TodayRoutineItem>>>()
     val checkedChanges = mutableListOf<CheckedChange>()
     val noteChanges = mutableListOf<NoteChange>()
+    val countChanges = mutableListOf<CountChange>()
     val resetDates = mutableListOf<String>()
 
     fun setItems(
@@ -49,6 +50,18 @@ class FakeTodayRoutineRepository : TodayRoutineRepository {
         )
     }
 
+    override suspend fun updateCompletedCount(
+        date: String,
+        routineItemId: Long,
+        completedCount: Int,
+    ) {
+        countChanges += CountChange(
+            date = date,
+            routineItemId = routineItemId,
+            completedCount = completedCount,
+        )
+    }
+
     override suspend fun resetDate(date: String) {
         resetDates += date
     }
@@ -64,4 +77,10 @@ data class NoteChange(
     val date: String,
     val routineItemId: Long,
     val note: String?,
+)
+
+data class CountChange(
+    val date: String,
+    val routineItemId: Long,
+    val completedCount: Int,
 )

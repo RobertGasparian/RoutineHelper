@@ -22,5 +22,11 @@ interface TodayRoutineRepository {
         note: String?,
     )
 
+    suspend fun updateCompletedCount(
+        date: String,
+        routineItemId: Long,
+        completedCount: Int,
+    )
+
     suspend fun resetDate(date: String)
 }

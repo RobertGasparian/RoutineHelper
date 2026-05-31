@@ -7,4 +7,6 @@ data class RoutineDaySnapshotItem(
     val position: Int,
     val isChecked: Boolean,
     val note: String?,
+    val repeatTargetCount: Int? = null,
+    val completedCount: Int = 0,
 )

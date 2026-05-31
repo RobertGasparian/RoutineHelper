@@ -23,7 +23,7 @@ import com.robertgasparian.routinehelper.data.local.entity.WeeklyEntryEntity
         DailySnapshotEntryEntity::class,
         WeeklyEntryEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 abstract class RoutineDatabase : RoomDatabase() {

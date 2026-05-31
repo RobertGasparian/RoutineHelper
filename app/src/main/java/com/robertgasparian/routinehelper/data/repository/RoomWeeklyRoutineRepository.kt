@@ -71,6 +71,25 @@ class RoomWeeklyRoutineRepository(
         )
     }
 
+    override suspend fun updateCompletedCount(
+        weekStartDate: String,
+        routineItemId: Long,
+        completedCount: Int,
+    ) {
+        val existing = weeklyEntryDao.entryForWeek(weekStartDate, routineItemId).first()
+        weeklyEntryDao.upsert(
+            existing?.copy(
+                completedCount = completedCount.coerceAtLeast(0),
+                updatedAtMillis = clock(),
+            ) ?: WeeklyEntryEntity(
+                routineItemId = routineItemId,
+                weekStartDate = weekStartDate,
+                completedCount = completedCount.coerceAtLeast(0),
+                updatedAtMillis = clock(),
+            ),
+        )
+    }
+
     override suspend fun resetWeek(weekStartDate: String) {
         weeklyEntryDao.deleteEntriesForWeek(weekStartDate)
     }
@@ -79,17 +98,25 @@ class RoomWeeklyRoutineRepository(
 private fun RoutineItemWithAction.toWeeklyDomain(
     weekStartDate: String,
     weeklyEntry: WeeklyEntryEntity?,
-): WeeklyRoutineItem =
-    WeeklyRoutineItem(
+): WeeklyRoutineItem {
+    val completedCount = action.repeatTargetCount?.let { targetCount ->
+        (weeklyEntry?.completedCount ?: 0).coerceIn(0, targetCount)
+    } ?: 0
+    return WeeklyRoutineItem(
         routineItemId = routineItem.id,
         actionId = action.id,
         title = action.title,
         description = action.description,
+        repeatTargetCount = action.repeatTargetCount,
+        completedCount = completedCount,
         position = routineItem.position,
         weekStartDate = weekStartDate,
-        isChecked = weeklyEntry?.isChecked ?: false,
+        isChecked = action.repeatTargetCount?.let { targetCount ->
+            completedCount >= targetCount
+        } ?: (weeklyEntry?.isChecked ?: false),
         note = weeklyEntry?.note,
     )
+}
 
 private fun RoutineCadence.toStorageValue(): String =
     when (this) {

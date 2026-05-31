@@ -37,6 +37,7 @@ class RoomRoutineTemplateRepository(
     override suspend fun addTemplateItem(
         title: String,
         description: String?,
+        repeatTargetCount: Int?,
         cadence: RoutineCadence,
     ): Long = database.withTransaction {
         val now = clock()
@@ -44,6 +45,7 @@ class RoomRoutineTemplateRepository(
             ActionEntity(
                 title = title.trim(),
                 description = description?.trim()?.takeIf(String::isNotEmpty),
+                repeatTargetCount = repeatTargetCount,
                 createdAtMillis = now,
                 updatedAtMillis = now,
             ),
@@ -62,12 +64,14 @@ class RoomRoutineTemplateRepository(
         actionId: Long,
         title: String,
         description: String?,
+        repeatTargetCount: Int?,
     ) {
         val existing = actionDao.action(actionId).first() ?: return
         actionDao.update(
             existing.copy(
                 title = title.trim(),
                 description = description?.trim()?.takeIf(String::isNotEmpty),
+                repeatTargetCount = repeatTargetCount,
                 updatedAtMillis = clock(),
             ),
         )
@@ -111,6 +115,7 @@ private fun RoutineItemWithAction.toDomain(): RoutineTemplateItem =
         actionId = action.id,
         title = action.title,
         description = action.description,
+        repeatTargetCount = action.repeatTargetCount,
         position = routineItem.position,
         cadence = routineItem.cadence.toRoutineCadence(),
     )

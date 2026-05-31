@@ -20,6 +20,8 @@ data class HistoryDetailUiState(
                         actionId = 100,
                         title = "Drink water",
                         description = "Drink 3L water",
+                        repeatTargetCount = null,
+                        completedCount = 0,
                         isChecked = true,
                         note = "One liter was diet soda.",
                     ),
@@ -27,6 +29,8 @@ data class HistoryDetailUiState(
                         actionId = 101,
                         title = "Stretch",
                         description = "Ten minutes of mobility work",
+                        repeatTargetCount = 3,
+                        completedCount = 1,
                         isChecked = false,
                         note = null,
                     ),
@@ -79,6 +83,10 @@ data class HistoryDetailItemUiState(
     val actionId: Long,
     val title: String,
     val description: String?,
+    val repeatTargetCount: Int?,
+    val completedCount: Int,
     val isChecked: Boolean,
     val note: String?,
-)
+) {
+    val isRepeatAction: Boolean = repeatTargetCount != null
+}

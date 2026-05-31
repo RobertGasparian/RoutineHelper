@@ -42,4 +42,22 @@ class TodayItemCommandUseCaseTest {
             repository.noteChanges.single(),
         )
     }
+
+    @Test
+    fun updateCompletedCountForwardsDateItemAndCount() = runTest {
+        UpdateTodayItemCompletedCountUseCase(repository)(
+            date = "2026-05-29",
+            routineItemId = 42L,
+            completedCount = 3,
+        )
+
+        assertEquals(
+            CountChange(
+                date = "2026-05-29",
+                routineItemId = 42L,
+                completedCount = 3,
+            ),
+            repository.countChanges.single(),
+        )
+    }
 }

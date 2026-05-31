@@ -9,6 +9,7 @@ data class ActionEntity(
     val id: Long = 0,
     val title: String,
     val description: String? = null,
+    val repeatTargetCount: Int? = null,
     val createdAtMillis: Long,
     val updatedAtMillis: Long,
 )

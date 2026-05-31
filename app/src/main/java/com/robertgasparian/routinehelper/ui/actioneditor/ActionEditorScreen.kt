@@ -13,7 +13,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,6 +36,14 @@ sealed interface ActionEditorUiEvent {
 
     data class DescriptionChange(
         val description: String,
+    ) : ActionEditorUiEvent
+
+    data class RepeatEnabledChange(
+        val enabled: Boolean,
+    ) : ActionEditorUiEvent
+
+    data class RepeatTargetCountChange(
+        val targetCount: Int,
     ) : ActionEditorUiEvent
 
     data object SaveClick : ActionEditorUiEvent
@@ -57,6 +67,8 @@ fun ActionEditorScreen(
             when (event) {
                 ActionEditorUiEvent.BackClick -> onBackClick()
                 is ActionEditorUiEvent.DescriptionChange -> viewModel.updateDescription(event.description)
+                is ActionEditorUiEvent.RepeatEnabledChange -> viewModel.updateRepeatEnabled(event.enabled)
+                is ActionEditorUiEvent.RepeatTargetCountChange -> viewModel.updateRepeatTargetCount(event.targetCount)
                 ActionEditorUiEvent.SaveClick -> {
                     viewModel.save(
                         actionId = actionId,
@@ -117,12 +129,74 @@ fun ActionEditorComponent(
                 minLines = 4,
                 modifier = Modifier.fillMaxWidth(),
             )
+            RepeatCountEditor(
+                uiState = uiState,
+                onEvent = onEvent,
+            )
             Button(
                 onClick = { onEvent(ActionEditorUiEvent.SaveClick) },
                 enabled = uiState.canSave,
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(text = "Save")
+            }
+        }
+    }
+}
+
+@Composable
+private fun RepeatCountEditor(
+    uiState: ActionEditorUiState,
+    onEvent: (ActionEditorUiEvent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        androidx.compose.foundation.layout.Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+            ) {
+                Text(text = "Repeat count")
+                Text(
+                    text = "Use a counter instead of a checkbox",
+                    style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                )
+            }
+            Switch(
+                checked = uiState.isRepeatEnabled,
+                onCheckedChange = { enabled -> onEvent(ActionEditorUiEvent.RepeatEnabledChange(enabled)) },
+            )
+        }
+        if (uiState.isRepeatEnabled) {
+            androidx.compose.foundation.layout.Row(
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                TextButton(
+                    enabled = uiState.repeatTargetCount > 2,
+                    onClick = {
+                        onEvent(ActionEditorUiEvent.RepeatTargetCountChange(uiState.repeatTargetCount - 1))
+                    },
+                ) {
+                    Text(text = "-")
+                }
+                Text(
+                    text = "${uiState.repeatTargetCount} times",
+                    style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                )
+                TextButton(
+                    onClick = {
+                        onEvent(ActionEditorUiEvent.RepeatTargetCountChange(uiState.repeatTargetCount + 1))
+                    },
+                ) {
+                    Text(text = "+")
+                }
             }
         }
     }

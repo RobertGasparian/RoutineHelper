@@ -66,6 +66,36 @@ class SaveTemplateItemUseCaseTest {
     }
 
     @Test
+    fun savesRepeatTargetCountWhenGreaterThanOne() = runTest {
+        useCase(
+            actionId = null,
+            title = "Pushups",
+            description = null,
+            repeatTargetCount = 5,
+        )
+
+        assertEquals(
+            5,
+            repository.addedItems.single().repeatTargetCount,
+        )
+    }
+
+    @Test
+    fun ignoresRepeatTargetCountWhenLessThanTwo() = runTest {
+        useCase(
+            actionId = null,
+            title = "Pushups",
+            description = null,
+            repeatTargetCount = 1,
+        )
+
+        assertEquals(
+            null,
+            repository.addedItems.single().repeatTargetCount,
+        )
+    }
+
+    @Test
     fun ignoresBlankTitle() = runTest {
         useCase(
             actionId = null,

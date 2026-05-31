@@ -9,4 +9,6 @@ data class WeeklyRoutineItem(
     val weekStartDate: String,
     val isChecked: Boolean,
     val note: String?,
+    val repeatTargetCount: Int? = null,
+    val completedCount: Int = 0,
 )

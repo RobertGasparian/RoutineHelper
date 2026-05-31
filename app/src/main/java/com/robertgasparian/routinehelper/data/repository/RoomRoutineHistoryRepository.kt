@@ -68,13 +68,15 @@ class RoomRoutineHistoryRepository(
                 DailySnapshotEntryEntity(
                     snapshotId = snapshotId,
                     actionId = item.actionId,
-                    titleSnapshot = item.title,
-                    descriptionSnapshot = item.description,
-                    positionSnapshot = item.position,
-                    isChecked = item.isChecked,
-                    note = item.note,
-                )
-            },
+                titleSnapshot = item.title,
+                descriptionSnapshot = item.description,
+                positionSnapshot = item.position,
+                isChecked = item.isChecked,
+                repeatTargetCountSnapshot = item.repeatTargetCount,
+                completedCount = item.completedCount,
+                note = item.note,
+            )
+        },
         )
         snapshotId
     }
@@ -109,6 +111,8 @@ private fun DailySnapshotWithEntries.toDomain(): RoutineDaySnapshot =
                     actionId = entry.actionId,
                     title = entry.titleSnapshot,
                     description = entry.descriptionSnapshot,
+                    repeatTargetCount = entry.repeatTargetCountSnapshot,
+                    completedCount = entry.completedCount,
                     position = entry.positionSnapshot,
                     isChecked = entry.isChecked,
                     note = entry.note,

@@ -9,6 +9,7 @@ class FakeWeeklyRoutineRepository : WeeklyRoutineRepository {
     private val itemsByWeek = mutableMapOf<String, MutableStateFlow<List<WeeklyRoutineItem>>>()
     val checkedChanges = mutableListOf<WeeklyCheckedChange>()
     val noteChanges = mutableListOf<WeeklyNoteChange>()
+    val countChanges = mutableListOf<WeeklyCountChange>()
     val resetWeeks = mutableListOf<String>()
 
     fun setItems(
@@ -45,6 +46,18 @@ class FakeWeeklyRoutineRepository : WeeklyRoutineRepository {
         )
     }
 
+    override suspend fun updateCompletedCount(
+        weekStartDate: String,
+        routineItemId: Long,
+        completedCount: Int,
+    ) {
+        countChanges += WeeklyCountChange(
+            weekStartDate = weekStartDate,
+            routineItemId = routineItemId,
+            completedCount = completedCount,
+        )
+    }
+
     override suspend fun resetWeek(weekStartDate: String) {
         resetWeeks += weekStartDate
     }
@@ -60,4 +73,10 @@ data class WeeklyNoteChange(
     val weekStartDate: String,
     val routineItemId: Long,
     val note: String?,
+)
+
+data class WeeklyCountChange(
+    val weekStartDate: String,
+    val routineItemId: Long,
+    val completedCount: Int,
 )

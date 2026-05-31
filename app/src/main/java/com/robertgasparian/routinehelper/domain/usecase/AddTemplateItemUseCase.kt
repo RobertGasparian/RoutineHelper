@@ -16,6 +16,7 @@ class AddTemplateItemUseCase @Inject constructor(
         return routineTemplateRepository.addTemplateItem(
             title = normalizedTitle,
             description = description?.trim()?.takeIf(String::isNotEmpty),
+            repeatTargetCount = null,
         )
     }
 }

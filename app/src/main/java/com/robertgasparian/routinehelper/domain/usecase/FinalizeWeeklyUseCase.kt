@@ -30,6 +30,8 @@ class FinalizeWeeklyUseCase @Inject constructor(
                 actionId = item.actionId,
                 title = item.title,
                 description = item.description,
+                repeatTargetCount = item.repeatTargetCount,
+                completedCount = item.completedCount,
                 position = item.position,
                 isChecked = item.isChecked,
                 note = item.note,

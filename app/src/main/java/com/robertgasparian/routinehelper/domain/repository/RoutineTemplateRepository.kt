@@ -12,6 +12,7 @@ interface RoutineTemplateRepository {
     suspend fun addTemplateItem(
         title: String,
         description: String?,
+        repeatTargetCount: Int?,
         cadence: RoutineCadence = RoutineCadence.Daily,
     ): Long
 
@@ -19,6 +20,7 @@ interface RoutineTemplateRepository {
         actionId: Long,
         title: String,
         description: String?,
+        repeatTargetCount: Int?,
     )
 
     suspend fun removeTemplateItem(routineItemId: Long)

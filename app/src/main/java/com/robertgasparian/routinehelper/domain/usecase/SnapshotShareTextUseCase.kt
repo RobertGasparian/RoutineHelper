@@ -24,6 +24,9 @@ class SnapshotShareTextUseCase @Inject constructor() {
             .sortedBy(RoutineDaySnapshotItem::position)
             .forEachIndexed { index, item ->
                 appendLine("${index + 1}. ${item.statusLabel} ${item.title}")
+                if (item.repeatTargetCount != null) {
+                    appendLine("   Count: ${item.completedCount}/${item.repeatTargetCount}")
+                }
                 item.description
                     ?.takeIf(String::isNotBlank)
                     ?.let { description -> appendLine("   Description: $description") }

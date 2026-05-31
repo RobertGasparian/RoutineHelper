@@ -18,5 +18,11 @@ interface WeeklyRoutineRepository {
         note: String?,
     )
 
+    suspend fun updateCompletedCount(
+        weekStartDate: String,
+        routineItemId: Long,
+        completedCount: Int,
+    )
+
     suspend fun resetWeek(weekStartDate: String)
 }

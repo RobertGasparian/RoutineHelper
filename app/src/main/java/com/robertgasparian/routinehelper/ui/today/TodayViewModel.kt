@@ -6,6 +6,7 @@ import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetTodayItemCheckedUseCase
 import com.robertgasparian.routinehelper.domain.usecase.TodayItemsUseCase
+import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayItemCompletedCountUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayItemNoteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
@@ -21,6 +22,7 @@ class TodayViewModel @Inject constructor(
     todayItemsUseCase: TodayItemsUseCase,
     private val finalizeTodayUseCase: FinalizeTodayUseCase,
     private val setTodayItemCheckedUseCase: SetTodayItemCheckedUseCase,
+    private val updateTodayItemCompletedCountUseCase: UpdateTodayItemCompletedCountUseCase,
     private val updateTodayItemNoteUseCase: UpdateTodayItemNoteUseCase,
 ) : ViewModel() {
     private val todayDate = LocalDate.now().toString()
@@ -65,6 +67,19 @@ class TodayViewModel @Inject constructor(
         }
     }
 
+    fun updateCompletedCount(
+        routineItemId: Long,
+        completedCount: Int,
+    ) {
+        viewModelScope.launch {
+            updateTodayItemCompletedCountUseCase(
+                date = todayDate,
+                routineItemId = routineItemId,
+                completedCount = completedCount,
+            )
+        }
+    }
+
     fun snapshotToday(snapshotDate: String) {
         viewModelScope.launch {
             // TODO Remove manual date selection when nightly WorkManager finalization is introduced.
@@ -83,6 +98,8 @@ private fun TodayRoutineItem.toUiState(): TodayItemUiState =
         actionId = actionId,
         title = title,
         description = description,
+        repeatTargetCount = repeatTargetCount,
+        completedCount = completedCount,
         isChecked = isChecked,
         note = note.orEmpty(),
     )

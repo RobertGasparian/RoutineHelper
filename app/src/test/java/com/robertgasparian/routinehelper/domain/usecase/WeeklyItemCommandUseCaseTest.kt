@@ -46,4 +46,24 @@ class WeeklyItemCommandUseCaseTest {
             repository.noteChanges,
         )
     }
+
+    @Test
+    fun updateCompletedCountForwardsWeekItemAndCount() = runTest {
+        UpdateWeeklyItemCompletedCountUseCase(repository)(
+            weekStartDate = "2026-05-24",
+            routineItemId = 10L,
+            completedCount = 2,
+        )
+
+        assertEquals(
+            listOf(
+                WeeklyCountChange(
+                    weekStartDate = "2026-05-24",
+                    routineItemId = 10L,
+                    completedCount = 2,
+                ),
+            ),
+            repository.countChanges,
+        )
+    }
 }

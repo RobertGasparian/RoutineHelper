@@ -336,7 +336,7 @@ private fun HistoryDetailItemCard(
                     )
                 }
 
-                CompletionChip(isChecked = item.isChecked)
+                CompletionChip(item = item)
             }
 
             DetailSection(
@@ -356,7 +356,7 @@ private fun HistoryDetailItemCard(
 
 @Composable
 private fun CompletionChip(
-    isChecked: Boolean,
+    item: HistoryDetailItemUiState,
     modifier: Modifier = Modifier,
 ) {
     ElevatedAssistChip(
@@ -364,7 +364,7 @@ private fun CompletionChip(
         onClick = {},
         leadingIcon = {
             Icon(
-                imageVector = if (isChecked) {
+                imageVector = if (item.isChecked) {
                     Icons.Default.CheckCircle
                 } else {
                     Icons.Default.DateRange
@@ -373,7 +373,15 @@ private fun CompletionChip(
             )
         },
         label = {
-            Text(text = if (isChecked) "Checked" else "Unchecked")
+            Text(
+                text = if (item.isRepeatAction) {
+                    "${item.completedCount}/${item.repeatTargetCount}"
+                } else if (item.isChecked) {
+                    "Checked"
+                } else {
+                    "Unchecked"
+                },
+            )
         },
     )
 }

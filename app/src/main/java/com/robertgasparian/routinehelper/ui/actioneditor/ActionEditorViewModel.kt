@@ -21,6 +21,8 @@ class ActionEditorViewModel @Inject constructor(
 ) : ViewModel() {
     private val draftTitle = MutableStateFlow("")
     private val draftDescription = MutableStateFlow("")
+    private val isRepeatEnabled = MutableStateFlow(false)
+    private val repeatTargetCount = MutableStateFlow(2)
     private val loadedActionIds = mutableSetOf<Long>()
 
     fun uiState(actionId: Long?): Flow<ActionEditorUiState> {
@@ -31,6 +33,8 @@ class ActionEditorViewModel @Inject constructor(
                 if (item != null && loadedActionIds.add(actionId)) {
                     draftTitle.value = item.title
                     draftDescription.value = item.description.orEmpty()
+                    isRepeatEnabled.value = item.repeatTargetCount != null
+                    repeatTargetCount.value = item.repeatTargetCount ?: 2
                 }
             }
         }
@@ -39,10 +43,14 @@ class ActionEditorViewModel @Inject constructor(
             source,
             draftTitle,
             draftDescription,
-        ) { _, title, description ->
+            isRepeatEnabled,
+            repeatTargetCount,
+        ) { _, title, description, isRepeatEnabled, repeatTargetCount ->
             ActionEditorUiState(
                 title = title,
                 description = description,
+                isRepeatEnabled = isRepeatEnabled,
+                repeatTargetCount = repeatTargetCount,
                 isEditing = actionId != null,
             )
         }.distinctUntilChanged()
@@ -56,6 +64,14 @@ class ActionEditorViewModel @Inject constructor(
         draftDescription.value = description
     }
 
+    fun updateRepeatEnabled(enabled: Boolean) {
+        isRepeatEnabled.value = enabled
+    }
+
+    fun updateRepeatTargetCount(targetCount: Int) {
+        repeatTargetCount.value = targetCount.coerceAtLeast(2)
+    }
+
     fun save(
         actionId: Long?,
         cadence: RoutineCadence,
@@ -66,6 +82,7 @@ class ActionEditorViewModel @Inject constructor(
                 actionId = actionId,
                 title = draftTitle.value,
                 description = draftDescription.value,
+                repeatTargetCount = repeatTargetCount.value.takeIf { isRepeatEnabled.value },
                 cadence = cadence,
             )
             onSaved()

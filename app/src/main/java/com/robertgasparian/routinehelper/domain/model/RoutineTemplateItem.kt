@@ -7,4 +7,5 @@ data class RoutineTemplateItem(
     val description: String?,
     val position: Int,
     val cadence: RoutineCadence,
+    val repeatTargetCount: Int? = null,
 )

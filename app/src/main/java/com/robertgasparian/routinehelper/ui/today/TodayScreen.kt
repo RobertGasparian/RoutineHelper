@@ -52,6 +52,11 @@ sealed interface TodayUiEvent {
         val isChecked: Boolean,
     ) : TodayUiEvent
 
+    data class CompletedCountChange(
+        val routineItemId: Long,
+        val completedCount: Int,
+    ) : TodayUiEvent
+
     data class NoteChange(
         val routineItemId: Long,
         val note: String,
@@ -77,6 +82,10 @@ fun TodayScreen(
                 is TodayUiEvent.CheckedChange -> viewModel.setChecked(
                     routineItemId = event.routineItemId,
                     isChecked = event.isChecked,
+                )
+                is TodayUiEvent.CompletedCountChange -> viewModel.updateCompletedCount(
+                    routineItemId = event.routineItemId,
+                    completedCount = event.completedCount,
                 )
                 TodayUiEvent.CreateActionClick -> onCreateActionClick()
                 is TodayUiEvent.EditActionClick -> onEditActionClick(event.actionId)
@@ -163,14 +172,21 @@ fun TodayComponent(
                 ) { item ->
                     TodayItemCard(
                         item = item,
-                        onEditActionClick = {
-                            onEvent(TodayUiEvent.EditActionClick(item.actionId))
-                        },
-                        onCheckedChange = { isChecked ->
-                            onEvent(TodayUiEvent.CheckedChange(item.routineItemId, isChecked))
-                        },
-                        onEditNoteClick = {
-                            noteEditorItem = item
+                        onEvent = { itemEvent ->
+                            when (itemEvent) {
+                                is TodayItemCardUiEvent.CheckedChange -> {
+                                    onEvent(TodayUiEvent.CheckedChange(item.routineItemId, itemEvent.isChecked))
+                                }
+                                is TodayItemCardUiEvent.CompletedCountChange -> {
+                                    onEvent(TodayUiEvent.CompletedCountChange(item.routineItemId, itemEvent.completedCount))
+                                }
+                                TodayItemCardUiEvent.EditActionClick -> {
+                                    onEvent(TodayUiEvent.EditActionClick(item.actionId))
+                                }
+                                TodayItemCardUiEvent.EditNoteClick -> {
+                                    noteEditorItem = item
+                                }
+                            }
                         },
                     )
                 }
@@ -266,12 +282,24 @@ private fun EmptyTodayContent(
     }
 }
 
+private sealed interface TodayItemCardUiEvent {
+    data object EditActionClick : TodayItemCardUiEvent
+
+    data object EditNoteClick : TodayItemCardUiEvent
+
+    data class CheckedChange(
+        val isChecked: Boolean,
+    ) : TodayItemCardUiEvent
+
+    data class CompletedCountChange(
+        val completedCount: Int,
+    ) : TodayItemCardUiEvent
+}
+
 @Composable
 private fun TodayItemCard(
     item: TodayItemUiState,
-    onEditActionClick: () -> Unit,
-    onCheckedChange: (Boolean) -> Unit,
-    onEditNoteClick: () -> Unit,
+    onEvent: (TodayItemCardUiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -283,10 +311,22 @@ private fun TodayItemCard(
             Row(
                 verticalAlignment = Alignment.Top,
             ) {
-                Checkbox(
-                    checked = item.isChecked,
-                    onCheckedChange = onCheckedChange,
-                )
+                if (item.isRepeatAction) {
+                    RepeatCountControl(
+                        completedCount = item.completedCount,
+                        repeatTargetCount = item.repeatTargetCount ?: 2,
+                        onCompletedCountChange = { completedCount ->
+                            onEvent(TodayItemCardUiEvent.CompletedCountChange(completedCount))
+                        },
+                    )
+                } else {
+                    Checkbox(
+                        checked = item.isChecked,
+                        onCheckedChange = { isChecked ->
+                            onEvent(TodayItemCardUiEvent.CheckedChange(isChecked))
+                        },
+                    )
+                }
                 Column(
                     modifier = Modifier
                         .weight(1f)
@@ -325,13 +365,44 @@ private fun TodayItemCard(
                     .padding(top = 8.dp),
                 horizontalArrangement = Arrangement.End,
             ) {
-                TextButton(onClick = onEditActionClick) {
+                TextButton(onClick = { onEvent(TodayItemCardUiEvent.EditActionClick) }) {
                     Text(text = "Edit action")
                 }
-                TextButton(onClick = onEditNoteClick) {
+                TextButton(onClick = { onEvent(TodayItemCardUiEvent.EditNoteClick) }) {
                     Text(text = if (item.note.isBlank()) "Add note" else "Edit note")
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun RepeatCountControl(
+    completedCount: Int,
+    repeatTargetCount: Int,
+    onCompletedCountChange: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        TextButton(
+            enabled = completedCount > 0,
+            onClick = { onCompletedCountChange((completedCount - 1).coerceAtLeast(0)) },
+        ) {
+            Text(text = "-")
+        }
+        Text(
+            text = "${completedCount.coerceIn(0, repeatTargetCount)}/$repeatTargetCount",
+            style = MaterialTheme.typography.titleMedium,
+        )
+        TextButton(
+            enabled = completedCount < repeatTargetCount,
+            onClick = { onCompletedCountChange((completedCount + 1).coerceAtMost(repeatTargetCount)) },
+        ) {
+            Text(text = "+")
         }
     }
 }

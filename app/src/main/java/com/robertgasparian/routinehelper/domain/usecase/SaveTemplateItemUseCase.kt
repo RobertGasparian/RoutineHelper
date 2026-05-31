@@ -11,16 +11,19 @@ class SaveTemplateItemUseCase @Inject constructor(
         actionId: Long?,
         title: String,
         description: String?,
+        repeatTargetCount: Int? = null,
         cadence: RoutineCadence = RoutineCadence.Daily,
     ) {
         val normalizedTitle = title.trim()
         if (normalizedTitle.isEmpty()) return
 
         val normalizedDescription = description?.trim()?.takeIf(String::isNotEmpty)
+        val normalizedRepeatTargetCount = repeatTargetCount?.takeIf { it > 1 }
         if (actionId == null) {
             routineTemplateRepository.addTemplateItem(
                 title = normalizedTitle,
                 description = normalizedDescription,
+                repeatTargetCount = normalizedRepeatTargetCount,
                 cadence = cadence,
             )
         } else {
@@ -28,6 +31,7 @@ class SaveTemplateItemUseCase @Inject constructor(
                 actionId = actionId,
                 title = normalizedTitle,
                 description = normalizedDescription,
+                repeatTargetCount = normalizedRepeatTargetCount,
             )
         }
     }

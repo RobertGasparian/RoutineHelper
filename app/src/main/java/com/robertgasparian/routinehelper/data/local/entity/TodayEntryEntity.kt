@@ -26,6 +26,7 @@ data class TodayEntryEntity(
     val routineItemId: Long,
     val date: String,
     val isChecked: Boolean = false,
+    val completedCount: Int = 0,
     val note: String? = null,
     val updatedAtMillis: Long,
 )

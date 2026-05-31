@@ -24,6 +24,8 @@ class SnapshotShareTextUseCaseTest {
                         position = 1,
                         isChecked = false,
                         note = null,
+                        repeatTargetCount = 3,
+                        completedCount = 1,
                     ),
                     RoutineDaySnapshotItem(
                         actionId = 100L,
@@ -43,6 +45,7 @@ class SnapshotShareTextUseCaseTest {
         assertTrue(text.contains("   Description: Drink 3L water"))
         assertTrue(text.contains("   Note: One liter was diet soda."))
         assertTrue(text.contains("2. [ ] Stretch"))
+        assertTrue(text.contains("   Count: 1/3"))
         assertTrue(text.indexOf("Drink water") < text.indexOf("Stretch"))
     }
 

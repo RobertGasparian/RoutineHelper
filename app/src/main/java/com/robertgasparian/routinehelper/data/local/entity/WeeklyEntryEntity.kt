@@ -26,6 +26,7 @@ data class WeeklyEntryEntity(
     val routineItemId: Long,
     val weekStartDate: String,
     val isChecked: Boolean = false,
+    val completedCount: Int = 0,
     val note: String? = null,
     val updatedAtMillis: Long,
 )

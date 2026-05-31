@@ -23,6 +23,10 @@ fun WeeklyScreen(
                     routineItemId = event.routineItemId,
                     isChecked = event.isChecked,
                 )
+                is TodayUiEvent.CompletedCountChange -> viewModel.updateCompletedCount(
+                    routineItemId = event.routineItemId,
+                    completedCount = event.completedCount,
+                )
                 TodayUiEvent.CreateActionClick -> onCreateActionClick()
                 is TodayUiEvent.EditActionClick -> onEditActionClick(event.actionId)
                 is TodayUiEvent.NoteChange -> viewModel.updateNote(

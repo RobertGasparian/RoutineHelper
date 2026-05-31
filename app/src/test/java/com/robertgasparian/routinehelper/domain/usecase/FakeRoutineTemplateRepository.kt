@@ -27,9 +27,15 @@ class FakeRoutineTemplateRepository : RoutineTemplateRepository {
     override suspend fun addTemplateItem(
         title: String,
         description: String?,
+        repeatTargetCount: Int?,
         cadence: RoutineCadence,
     ): Long {
-        addedItems += AddedTemplateItem(title = title, description = description, cadence = cadence)
+        addedItems += AddedTemplateItem(
+            title = title,
+            description = description,
+            repeatTargetCount = repeatTargetCount,
+            cadence = cadence,
+        )
         return addedItems.size.toLong()
     }
 
@@ -37,11 +43,13 @@ class FakeRoutineTemplateRepository : RoutineTemplateRepository {
         actionId: Long,
         title: String,
         description: String?,
+        repeatTargetCount: Int?,
     ) {
         updatedItems += UpdatedTemplateItem(
             actionId = actionId,
             title = title,
             description = description,
+            repeatTargetCount = repeatTargetCount,
         )
     }
 
@@ -53,11 +61,13 @@ class FakeRoutineTemplateRepository : RoutineTemplateRepository {
 data class AddedTemplateItem(
     val title: String,
     val description: String?,
-    val cadence: RoutineCadence,
+    val repeatTargetCount: Int? = null,
+    val cadence: RoutineCadence = RoutineCadence.Daily,
 )
 
 data class UpdatedTemplateItem(
     val actionId: Long,
     val title: String,
     val description: String?,
+    val repeatTargetCount: Int? = null,
 )
