@@ -66,4 +66,22 @@ class WeeklyItemCommandUseCaseTest {
             repository.countChanges,
         )
     }
+
+    @Test
+    fun updateSummaryNoteForwardsWeekAndNote() = runTest {
+        UpdateWeeklySummaryNoteUseCase(repository)(
+            weekStartDate = "2026-05-24",
+            note = "Kept most weekly priorities moving.",
+        )
+
+        assertEquals(
+            listOf(
+                WeeklySummaryNoteChange(
+                    weekStartDate = "2026-05-24",
+                    note = "Kept most weekly priorities moving.",
+                ),
+            ),
+            repository.summaryNoteChanges,
+        )
+    }
 }

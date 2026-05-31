@@ -4,6 +4,8 @@ import com.robertgasparian.routinehelper.data.local.RoutineDatabase
 import com.robertgasparian.routinehelper.data.local.dao.RoutineItemDao
 import com.robertgasparian.routinehelper.data.local.dao.WeeklyEntryDao
 import com.robertgasparian.routinehelper.data.local.entity.WeeklyEntryEntity
+import com.robertgasparian.routinehelper.data.local.dao.WeeklySummaryNoteDao
+import com.robertgasparian.routinehelper.data.local.entity.WeeklySummaryNoteEntity
 import com.robertgasparian.routinehelper.data.local.model.RoutineItemWithAction
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.WeeklyRoutineItem
@@ -11,11 +13,13 @@ import com.robertgasparian.routinehelper.domain.repository.WeeklyRoutineReposito
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 
 class RoomWeeklyRoutineRepository(
     database: RoutineDatabase,
     private val routineItemDao: RoutineItemDao = database.routineItemDao(),
     private val weeklyEntryDao: WeeklyEntryDao = database.weeklyEntryDao(),
+    private val weeklySummaryNoteDao: WeeklySummaryNoteDao = database.weeklySummaryNoteDao(),
     private val clock: () -> Long = System::currentTimeMillis,
 ) : WeeklyRoutineRepository {
     override fun weeklyItems(weekStartDate: String): Flow<List<WeeklyRoutineItem>> =
@@ -31,6 +35,9 @@ class RoomWeeklyRoutineRepository(
                 )
             }
         }
+
+    override fun summaryNote(weekStartDate: String): Flow<String?> =
+        weeklySummaryNoteDao.noteForWeek(weekStartDate).map { note -> note?.note }
 
     override suspend fun setChecked(
         weekStartDate: String,
@@ -90,8 +97,27 @@ class RoomWeeklyRoutineRepository(
         )
     }
 
+    override suspend fun updateSummaryNote(
+        weekStartDate: String,
+        note: String?,
+    ) {
+        val normalizedNote = note?.trim()?.takeIf(String::isNotEmpty)
+        if (normalizedNote == null) {
+            weeklySummaryNoteDao.deleteForWeek(weekStartDate)
+        } else {
+            weeklySummaryNoteDao.upsert(
+                WeeklySummaryNoteEntity(
+                    weekStartDate = weekStartDate,
+                    note = normalizedNote,
+                    updatedAtMillis = clock(),
+                ),
+            )
+        }
+    }
+
     override suspend fun resetWeek(weekStartDate: String) {
         weeklyEntryDao.deleteEntriesForWeek(weekStartDate)
+        weeklySummaryNoteDao.deleteForWeek(weekStartDate)
     }
 }
 

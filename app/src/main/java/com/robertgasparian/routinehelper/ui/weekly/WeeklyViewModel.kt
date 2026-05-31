@@ -7,37 +7,44 @@ import com.robertgasparian.routinehelper.domain.usecase.FinalizeWeeklyUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetWeeklyItemCheckedUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyItemCompletedCountUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyItemNoteUseCase
+import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklySummaryNoteUseCase
 import com.robertgasparian.routinehelper.domain.usecase.WeeklyItemsUseCase
+import com.robertgasparian.routinehelper.domain.usecase.WeeklySummaryNoteUseCase
 import com.robertgasparian.routinehelper.ui.today.TodayItemUiState
 import com.robertgasparian.routinehelper.ui.today.TodayUiState
 import com.robertgasparian.routinehelper.work.startOfCalendarWeek
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 import javax.inject.Inject
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class WeeklyViewModel @Inject constructor(
     weeklyItemsUseCase: WeeklyItemsUseCase,
+    weeklySummaryNoteUseCase: WeeklySummaryNoteUseCase,
     private val finalizeWeeklyUseCase: FinalizeWeeklyUseCase,
     private val setWeeklyItemCheckedUseCase: SetWeeklyItemCheckedUseCase,
     private val updateWeeklyItemCompletedCountUseCase: UpdateWeeklyItemCompletedCountUseCase,
     private val updateWeeklyItemNoteUseCase: UpdateWeeklyItemNoteUseCase,
+    private val updateWeeklySummaryNoteUseCase: UpdateWeeklySummaryNoteUseCase,
 ) : ViewModel() {
     private val weekStartDate = LocalDate.now().startOfWeek().toString()
 
     val uiState: StateFlow<TodayUiState> =
-        weeklyItemsUseCase(weekStartDate)
-            .map { items ->
-                TodayUiState(
-                    date = "Week of $weekStartDate",
-                    items = items.map(WeeklyRoutineItem::toUiState),
-                )
-            }
+        combine(
+            weeklyItemsUseCase(weekStartDate),
+            weeklySummaryNoteUseCase(weekStartDate),
+        ) { items, summaryNote ->
+            TodayUiState(
+                date = "Week of $weekStartDate",
+                summaryNote = summaryNote.orEmpty(),
+                items = items.map(WeeklyRoutineItem::toUiState),
+            )
+        }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
@@ -65,6 +72,15 @@ class WeeklyViewModel @Inject constructor(
             updateWeeklyItemNoteUseCase(
                 weekStartDate = weekStartDate,
                 routineItemId = routineItemId,
+                note = note,
+            )
+        }
+    }
+
+    fun updateSummaryNote(note: String) {
+        viewModelScope.launch {
+            updateWeeklySummaryNoteUseCase(
+                weekStartDate = weekStartDate,
                 note = note,
             )
         }

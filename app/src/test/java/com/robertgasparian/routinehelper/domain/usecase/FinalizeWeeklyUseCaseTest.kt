@@ -44,6 +44,10 @@ class FinalizeWeeklyUseCaseTest {
                 ),
             ),
         )
+        weeklyRepository.setSummaryNote(
+            weekStartDate = "2026-05-24",
+            note = "Solid weekly reset.",
+        )
 
         val snapshotId = useCase(
             weekStartDate = "2026-05-24",
@@ -56,6 +60,7 @@ class FinalizeWeeklyUseCaseTest {
             SavedSnapshot(
                 date = "2026-05-24",
                 finalizedAtMillis = 123L,
+                summaryNote = "Solid weekly reset.",
                 cadence = RoutineCadence.Weekly,
                 items = listOf(
                     RoutineDaySnapshotItem(

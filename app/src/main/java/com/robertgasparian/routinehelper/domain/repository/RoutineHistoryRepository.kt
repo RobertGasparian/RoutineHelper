@@ -20,6 +20,7 @@ interface RoutineHistoryRepository {
         date: String,
         finalizedAtMillis: Long,
         items: List<RoutineDaySnapshotItem>,
+        summaryNote: String?,
         cadence: RoutineCadence = RoutineCadence.Daily,
     ): Long
 

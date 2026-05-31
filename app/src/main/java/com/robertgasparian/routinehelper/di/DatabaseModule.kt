@@ -29,6 +29,7 @@ object DatabaseModule {
             .addMigrations(MIGRATION_1_2)
             .addMigrations(MIGRATION_2_3)
             .addMigrations(MIGRATION_3_4)
+            .addMigrations(MIGRATION_4_5)
             .build()
 
     private val MIGRATION_1_2 =
@@ -71,6 +72,31 @@ object DatabaseModule {
                 connection.execSQL("ALTER TABLE weekly_entries ADD COLUMN completedCount INTEGER NOT NULL DEFAULT 0")
                 connection.execSQL("ALTER TABLE daily_snapshot_entries ADD COLUMN repeatTargetCountSnapshot INTEGER")
                 connection.execSQL("ALTER TABLE daily_snapshot_entries ADD COLUMN completedCount INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+    private val MIGRATION_4_5 =
+        object : Migration(4, 5) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE daily_snapshots ADD COLUMN summaryNote TEXT")
+                connection.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS daily_summary_notes (
+                        date TEXT NOT NULL PRIMARY KEY,
+                        note TEXT NOT NULL,
+                        updatedAtMillis INTEGER NOT NULL
+                    )
+                    """.trimIndent(),
+                )
+                connection.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS weekly_summary_notes (
+                        weekStartDate TEXT NOT NULL PRIMARY KEY,
+                        note TEXT NOT NULL,
+                        updatedAtMillis INTEGER NOT NULL
+                    )
+                    """.trimIndent(),
+                )
             }
         }
 }

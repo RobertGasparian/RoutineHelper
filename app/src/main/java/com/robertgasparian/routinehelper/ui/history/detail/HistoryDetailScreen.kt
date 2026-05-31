@@ -199,6 +199,11 @@ fun HistoryDetailComponent(
                 ),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
+                if (uiState.summaryNote.isNotBlank()) {
+                    item {
+                        SummaryNoteDetailCard(note = uiState.summaryNote)
+                    }
+                }
                 items(
                     items = uiState.items,
                     key = { item -> item.actionId },
@@ -300,6 +305,34 @@ private fun EmptySnapshotContent(
             text = "No items in this snapshot",
             style = MaterialTheme.typography.headlineSmall,
         )
+    }
+}
+
+@Composable
+private fun SummaryNoteDetailCard(
+    note: String,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+        ) {
+            Text(
+                text = "Summary note",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+                text = note,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+        }
     }
 }
 

@@ -22,6 +22,7 @@ class FinalizeTodayUseCase @Inject constructor(
         }
 
         val todayItems = todayRoutineRepository.todayItems(date).first()
+        val summaryNote = todayRoutineRepository.summaryNote(date).first()
         val snapshotItems = todayItems.map { item ->
             RoutineDaySnapshotItem(
                 actionId = item.actionId,
@@ -39,6 +40,7 @@ class FinalizeTodayUseCase @Inject constructor(
             date = snapshotDate,
             finalizedAtMillis = finalizedAtMillis,
             items = snapshotItems,
+            summaryNote = summaryNote,
             cadence = RoutineCadence.Daily,
         )
         todayRoutineRepository.resetDate(date)

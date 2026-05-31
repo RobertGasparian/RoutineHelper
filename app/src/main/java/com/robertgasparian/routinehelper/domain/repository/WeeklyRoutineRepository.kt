@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.Flow
 interface WeeklyRoutineRepository {
     fun weeklyItems(weekStartDate: String): Flow<List<WeeklyRoutineItem>>
 
+    fun summaryNote(weekStartDate: String): Flow<String?>
+
     suspend fun setChecked(
         weekStartDate: String,
         routineItemId: Long,
@@ -22,6 +24,11 @@ interface WeeklyRoutineRepository {
         weekStartDate: String,
         routineItemId: Long,
         completedCount: Int,
+    )
+
+    suspend fun updateSummaryNote(
+        weekStartDate: String,
+        note: String?,
     )
 
     suspend fun resetWeek(weekStartDate: String)

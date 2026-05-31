@@ -5,6 +5,7 @@ import com.robertgasparian.routinehelper.ui.share.ShareDraft
 data class HistoryDetailUiState(
     val date: String = "",
     val finalizedLabel: String = "",
+    val summaryNote: String = "",
     val items: List<HistoryDetailItemUiState> = emptyList(),
     val isMissing: Boolean = false,
     val isShareFormatDialogVisible: Boolean = false,
@@ -15,6 +16,7 @@ data class HistoryDetailUiState(
             HistoryDetailUiState(
                 date = "2026-05-29",
                 finalizedLabel = "Finalized 11:45 PM",
+                summaryNote = "Low-energy day, but I kept the basics moving.",
                 items = listOf(
                     HistoryDetailItemUiState(
                         actionId = 100,
@@ -50,6 +52,9 @@ data class HistoryDetailUiState(
                     Routine snapshot
                     Date: 2026-05-29
                     Finalized: 11:45 PM
+
+                    Summary note:
+                    Low-energy day, but I kept the basics moving.
 
                     1. [x] Drink water
                        Description: Drink 3L water

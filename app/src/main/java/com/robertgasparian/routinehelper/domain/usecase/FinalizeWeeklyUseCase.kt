@@ -25,6 +25,7 @@ class FinalizeWeeklyUseCase @Inject constructor(
         }
 
         val weeklyItems = weeklyRoutineRepository.weeklyItems(weekStartDate).first()
+        val summaryNote = weeklyRoutineRepository.summaryNote(weekStartDate).first()
         val snapshotItems = weeklyItems.map { item ->
             RoutineDaySnapshotItem(
                 actionId = item.actionId,
@@ -42,6 +43,7 @@ class FinalizeWeeklyUseCase @Inject constructor(
             date = snapshotWeekStartDate,
             finalizedAtMillis = finalizedAtMillis,
             items = snapshotItems,
+            summaryNote = summaryNote,
             cadence = RoutineCadence.Weekly,
         )
         weeklyRoutineRepository.resetWeek(weekStartDate)

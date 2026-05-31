@@ -16,6 +16,7 @@ class SnapshotShareTextUseCaseTest {
                 snapshotId = 1L,
                 date = "2026-05-29",
                 finalizedAtMillis = 1_234L,
+                summaryNote = "Low-energy day, but I kept the basics moving.",
                 items = listOf(
                     RoutineDaySnapshotItem(
                         actionId = 101L,
@@ -41,6 +42,8 @@ class SnapshotShareTextUseCaseTest {
 
         assertTrue(text.contains("Daily routine snapshot"))
         assertTrue(text.contains("Date: 2026-05-29"))
+        assertTrue(text.contains("Summary note:"))
+        assertTrue(text.contains("Low-energy day, but I kept the basics moving."))
         assertTrue(text.contains("1. [x] Drink water"))
         assertTrue(text.contains("   Description: Drink 3L water"))
         assertTrue(text.contains("   Note: One liter was diet soda."))

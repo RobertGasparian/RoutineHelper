@@ -60,4 +60,20 @@ class TodayItemCommandUseCaseTest {
             repository.countChanges.single(),
         )
     }
+
+    @Test
+    fun updateSummaryNoteForwardsDateAndNote() = runTest {
+        UpdateTodaySummaryNoteUseCase(repository)(
+            date = "2026-05-29",
+            note = "Low-energy day.",
+        )
+
+        assertEquals(
+            SummaryNoteChange(
+                date = "2026-05-29",
+                note = "Low-energy day.",
+            ),
+            repository.summaryNoteChanges.single(),
+        )
+    }
 }

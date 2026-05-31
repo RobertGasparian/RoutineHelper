@@ -2,12 +2,14 @@ package com.robertgasparian.routinehelper.ui.today
 
 data class TodayUiState(
     val date: String,
+    val summaryNote: String = "",
     val items: List<TodayItemUiState> = emptyList(),
 ) {
     companion object {
         fun preview(): TodayUiState =
             TodayUiState(
                 date = "2026-05-29",
+                summaryNote = "Low-energy day, but I kept the basics moving.",
                 items = listOf(
                     TodayItemUiState(
                         routineItemId = 1,

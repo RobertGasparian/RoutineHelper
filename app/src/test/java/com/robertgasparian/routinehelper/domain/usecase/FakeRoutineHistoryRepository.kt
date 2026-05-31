@@ -58,6 +58,7 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
         date: String,
         finalizedAtMillis: Long,
         items: List<RoutineDaySnapshotItem>,
+        summaryNote: String?,
         cadence: RoutineCadence,
     ): Long {
         val snapshotId = savedSnapshots.size + 1L
@@ -65,6 +66,7 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
             date = date,
             finalizedAtMillis = finalizedAtMillis,
             items = items,
+            summaryNote = summaryNote,
             cadence = cadence,
         )
         snapshots.value = snapshots.value + RoutineDaySnapshot(
@@ -72,6 +74,7 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
             date = date,
             finalizedAtMillis = finalizedAtMillis,
             cadence = cadence,
+            summaryNote = summaryNote,
             items = items,
         )
         return snapshotId
@@ -86,6 +89,7 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
             date = date,
             finalizedAtMillis = finalizedAtMillis,
             items = items,
+            summaryNote = null,
             cadence = RoutineCadence.Daily,
         )
 
@@ -99,5 +103,6 @@ data class SavedSnapshot(
     val date: String,
     val finalizedAtMillis: Long,
     val items: List<RoutineDaySnapshotItem>,
+    val summaryNote: String? = null,
     val cadence: RoutineCadence = RoutineCadence.Daily,
 )

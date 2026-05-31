@@ -54,6 +54,7 @@ class RoomRoutineHistoryRepository(
         date: String,
         finalizedAtMillis: Long,
         items: List<RoutineDaySnapshotItem>,
+        summaryNote: String?,
         cadence: RoutineCadence,
     ): Long = database.withTransaction {
         val snapshotId = dailySnapshotDao.insertSnapshot(
@@ -61,6 +62,7 @@ class RoomRoutineHistoryRepository(
                 date = date,
                 finalizedAtMillis = finalizedAtMillis,
                 cadence = cadence.toStorageValue(),
+                summaryNote = summaryNote?.trim()?.takeIf(String::isNotEmpty),
             ),
         )
         dailySnapshotDao.insertEntries(
@@ -104,6 +106,7 @@ private fun DailySnapshotWithEntries.toDomain(): RoutineDaySnapshot =
         date = snapshot.date,
         finalizedAtMillis = snapshot.finalizedAtMillis,
         cadence = snapshot.cadence.toRoutineCadence(),
+        summaryNote = snapshot.summaryNote,
         items = entries
             .sortedBy { it.positionSnapshot }
             .map { entry ->

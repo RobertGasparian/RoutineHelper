@@ -62,6 +62,10 @@ sealed interface TodayUiEvent {
         val note: String,
     ) : TodayUiEvent
 
+    data class SummaryNoteChange(
+        val note: String,
+    ) : TodayUiEvent
+
     data class SnapshotClick(
         val snapshotDate: String,
     ) : TodayUiEvent
@@ -93,6 +97,7 @@ fun TodayScreen(
                     routineItemId = event.routineItemId,
                     note = event.note,
                 )
+                is TodayUiEvent.SummaryNoteChange -> viewModel.updateSummaryNote(event.note)
                 is TodayUiEvent.SnapshotClick -> viewModel.snapshotToday(event.snapshotDate)
             }
         },
@@ -112,6 +117,7 @@ fun TodayComponent(
     snapshotInitialDate: String = uiState.date,
 ) {
     var noteEditorItem by rememberSaveable { mutableStateOf<TodayItemUiState?>(null) }
+    var isSummaryNoteEditorVisible by rememberSaveable { mutableStateOf(false) }
     var showSnapshotDatePicker by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
@@ -166,6 +172,13 @@ fun TodayComponent(
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
+                item {
+                    SummaryNoteCard(
+                        note = uiState.summaryNote,
+                        label = if (title == "Weekly") "Week note" else "Day note",
+                        onEditClick = { isSummaryNoteEditorVisible = true },
+                    )
+                }
                 items(
                     items = uiState.items,
                     key = { item -> item.routineItemId },
@@ -212,6 +225,18 @@ fun TodayComponent(
             onConfirm = { note ->
                 onEvent(TodayUiEvent.NoteChange(item.routineItemId, note))
                 noteEditorItem = null
+            },
+        )
+    }
+
+    if (isSummaryNoteEditorVisible) {
+        SummaryNoteEditorDialog(
+            initialNote = uiState.summaryNote,
+            label = if (title == "Weekly") "Week note" else "Day note",
+            onDismiss = { isSummaryNoteEditorVisible = false },
+            onConfirm = { note ->
+                onEvent(TodayUiEvent.SummaryNoteChange(note))
+                isSummaryNoteEditorVisible = false
             },
         )
     }
@@ -377,6 +402,42 @@ private fun TodayItemCard(
 }
 
 @Composable
+private fun SummaryNoteCard(
+    note: String,
+    label: String,
+    onEditClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+            ) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.titleSmall,
+                )
+                Text(
+                    text = note.takeIf(String::isNotBlank) ?: "No summary note yet.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 4.dp),
+                )
+            }
+            TextButton(onClick = onEditClick) {
+                Text(text = if (note.isBlank()) "Add" else "Edit")
+            }
+        }
+    }
+}
+
+@Composable
 private fun RepeatCountControl(
     completedCount: Int,
     repeatTargetCount: Int,
@@ -405,6 +466,41 @@ private fun RepeatCountControl(
             Text(text = "+")
         }
     }
+}
+
+@Composable
+private fun SummaryNoteEditorDialog(
+    initialNote: String,
+    label: String,
+    onDismiss: () -> Unit,
+    onConfirm: (note: String) -> Unit,
+) {
+    var note by rememberSaveable(initialNote) { mutableStateOf(initialNote) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = label) },
+        text = {
+            OutlinedTextField(
+                value = note,
+                onValueChange = { note = it },
+                label = { Text(text = label) },
+                minLines = 4,
+                maxLines = 8,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(note) }) {
+                Text(text = "Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = "Cancel")
+            }
+        },
+    )
 }
 
 @Composable

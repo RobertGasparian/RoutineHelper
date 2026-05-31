@@ -33,6 +33,7 @@ fun WeeklyScreen(
                     routineItemId = event.routineItemId,
                     note = event.note,
                 )
+                is TodayUiEvent.SummaryNoteChange -> viewModel.updateSummaryNote(event.note)
                 is TodayUiEvent.SnapshotClick -> viewModel.snapshotWeek(event.snapshotDate)
             }
         },

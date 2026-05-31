@@ -10,6 +10,8 @@ interface TodayRoutineRepository {
         cadence: RoutineCadence = RoutineCadence.Daily,
     ): Flow<List<TodayRoutineItem>>
 
+    fun summaryNote(date: String): Flow<String?>
+
     suspend fun setChecked(
         date: String,
         routineItemId: Long,
@@ -26,6 +28,11 @@ interface TodayRoutineRepository {
         date: String,
         routineItemId: Long,
         completedCount: Int,
+    )
+
+    suspend fun updateSummaryNote(
+        date: String,
+        note: String?,
     )
 
     suspend fun resetDate(date: String)

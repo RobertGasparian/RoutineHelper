@@ -1,8 +1,10 @@
 package com.robertgasparian.routinehelper.data.repository
 
 import com.robertgasparian.routinehelper.data.local.RoutineDatabase
+import com.robertgasparian.routinehelper.data.local.dao.DailySummaryNoteDao
 import com.robertgasparian.routinehelper.data.local.dao.RoutineItemDao
 import com.robertgasparian.routinehelper.data.local.dao.TodayEntryDao
+import com.robertgasparian.routinehelper.data.local.entity.DailySummaryNoteEntity
 import com.robertgasparian.routinehelper.data.local.entity.TodayEntryEntity
 import com.robertgasparian.routinehelper.data.local.model.RoutineItemWithAction
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
@@ -11,11 +13,13 @@ import com.robertgasparian.routinehelper.domain.repository.TodayRoutineRepositor
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 
 class RoomTodayRoutineRepository(
     database: RoutineDatabase,
     private val routineItemDao: RoutineItemDao = database.routineItemDao(),
     private val todayEntryDao: TodayEntryDao = database.todayEntryDao(),
+    private val dailySummaryNoteDao: DailySummaryNoteDao = database.dailySummaryNoteDao(),
     private val clock: () -> Long = System::currentTimeMillis,
 ) : TodayRoutineRepository {
     override fun todayItems(
@@ -34,6 +38,9 @@ class RoomTodayRoutineRepository(
                 )
             }
         }
+
+    override fun summaryNote(date: String): Flow<String?> =
+        dailySummaryNoteDao.noteForDate(date).map { note -> note?.note }
 
     override suspend fun setChecked(
         date: String,
@@ -93,8 +100,27 @@ class RoomTodayRoutineRepository(
         )
     }
 
+    override suspend fun updateSummaryNote(
+        date: String,
+        note: String?,
+    ) {
+        val normalizedNote = note?.trim()?.takeIf(String::isNotEmpty)
+        if (normalizedNote == null) {
+            dailySummaryNoteDao.deleteForDate(date)
+        } else {
+            dailySummaryNoteDao.upsert(
+                DailySummaryNoteEntity(
+                    date = date,
+                    note = normalizedNote,
+                    updatedAtMillis = clock(),
+                ),
+            )
+        }
+    }
+
     override suspend fun resetDate(date: String) {
         todayEntryDao.deleteEntriesForDate(date)
+        dailySummaryNoteDao.deleteForDate(date)
     }
 }
 

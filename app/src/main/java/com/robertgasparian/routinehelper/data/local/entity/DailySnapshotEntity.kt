@@ -18,4 +18,5 @@ data class DailySnapshotEntity(
     val finalizedAtMillis: Long,
     @ColumnInfo(defaultValue = "DAILY")
     val cadence: String = "DAILY",
+    val summaryNote: String? = null,
 )

@@ -43,6 +43,10 @@ class FinalizeTodayUseCaseTest {
                 ),
             ),
         )
+        todayRepository.setSummaryNote(
+            date = "2026-05-29",
+            note = "Low-energy day, but I kept the basics moving.",
+        )
 
         val snapshotId = useCase(
             date = "2026-05-29",
@@ -55,6 +59,7 @@ class FinalizeTodayUseCaseTest {
             SavedSnapshot(
                 date = "2026-05-29",
                 finalizedAtMillis = 123L,
+                summaryNote = "Low-energy day, but I kept the basics moving.",
                 items = listOf(
                     RoutineDaySnapshotItem(
                         actionId = 100L,

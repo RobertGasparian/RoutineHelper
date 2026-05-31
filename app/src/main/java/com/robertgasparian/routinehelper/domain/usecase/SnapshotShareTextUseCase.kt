@@ -15,6 +15,14 @@ class SnapshotShareTextUseCase @Inject constructor() {
         appendLine("Finalized: ${timeFormatter.format(Instant.ofEpochMilli(snapshot.finalizedAtMillis))}")
         appendLine()
 
+        snapshot.summaryNote
+            ?.takeIf(String::isNotBlank)
+            ?.let { summaryNote ->
+                appendLine("Summary note:")
+                appendLine(summaryNote)
+                appendLine()
+            }
+
         if (snapshot.items.isEmpty()) {
             appendLine("No actions were saved for this day.")
             return@buildString

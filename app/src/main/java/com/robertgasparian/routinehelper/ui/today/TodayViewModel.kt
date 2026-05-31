@@ -6,35 +6,42 @@ import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetTodayItemCheckedUseCase
 import com.robertgasparian.routinehelper.domain.usecase.TodayItemsUseCase
+import com.robertgasparian.routinehelper.domain.usecase.TodaySummaryNoteUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayItemCompletedCountUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayItemNoteUseCase
+import com.robertgasparian.routinehelper.domain.usecase.UpdateTodaySummaryNoteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 import javax.inject.Inject
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class TodayViewModel @Inject constructor(
     todayItemsUseCase: TodayItemsUseCase,
+    todaySummaryNoteUseCase: TodaySummaryNoteUseCase,
     private val finalizeTodayUseCase: FinalizeTodayUseCase,
     private val setTodayItemCheckedUseCase: SetTodayItemCheckedUseCase,
     private val updateTodayItemCompletedCountUseCase: UpdateTodayItemCompletedCountUseCase,
     private val updateTodayItemNoteUseCase: UpdateTodayItemNoteUseCase,
+    private val updateTodaySummaryNoteUseCase: UpdateTodaySummaryNoteUseCase,
 ) : ViewModel() {
     private val todayDate = LocalDate.now().toString()
 
     val uiState: StateFlow<TodayUiState> =
-        todayItemsUseCase(todayDate)
-            .map { items ->
-                TodayUiState(
-                    date = todayDate,
-                    items = items.map(TodayRoutineItem::toUiState),
-                )
-            }
+        combine(
+            todayItemsUseCase(todayDate),
+            todaySummaryNoteUseCase(todayDate),
+        ) { items, summaryNote ->
+            TodayUiState(
+                date = todayDate,
+                summaryNote = summaryNote.orEmpty(),
+                items = items.map(TodayRoutineItem::toUiState),
+            )
+        }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
@@ -62,6 +69,15 @@ class TodayViewModel @Inject constructor(
             updateTodayItemNoteUseCase(
                 date = todayDate,
                 routineItemId = routineItemId,
+                note = note,
+            )
+        }
+    }
+
+    fun updateSummaryNote(note: String) {
+        viewModelScope.launch {
+            updateTodaySummaryNoteUseCase(
+                date = todayDate,
                 note = note,
             )
         }
