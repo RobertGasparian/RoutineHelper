@@ -7,9 +7,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,8 +24,11 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,6 +40,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
+import com.robertgasparian.routinehelper.ui.theme.routineCompletedColor
+import com.robertgasparian.routinehelper.ui.theme.routineCompletedContainerColor
+import com.robertgasparian.routinehelper.ui.theme.routineOnCompletedContainerColor
 
 @Composable
 fun RoutineActionItemCard(
@@ -60,24 +68,12 @@ fun RoutineActionItemCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        border = if (isComplete) {
-            null
-        } else {
-            CardDefaults.outlinedCardBorder().copy(
-                brush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.outlineVariant),
-            )
-        },
+        border = CardDefaults.outlinedCardBorder().copy(
+            brush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.outlineVariant),
+        ),
         colors = CardDefaults.cardColors(
-            containerColor = if (isComplete) {
-                MaterialTheme.colorScheme.secondaryContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceContainerLow
-            },
-            contentColor = if (isComplete) {
-                MaterialTheme.colorScheme.onSecondaryContainer
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            },
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            contentColor = MaterialTheme.colorScheme.onSurface,
         ),
     ) {
         Column(
@@ -107,7 +103,7 @@ fun RoutineActionItemCard(
                     modifier = Modifier
                         .weight(1f)
                         .padding(horizontal = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Text(
                         text = title,
@@ -119,11 +115,7 @@ fun RoutineActionItemCard(
                         Text(
                             text = description,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = if (isComplete) {
-                                MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.82f)
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            },
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -158,20 +150,19 @@ private fun RoutineActionItemCardCheckControl(
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(8.dp),
         color = if (checked) {
-            MaterialTheme.colorScheme.secondary
+            routineCompletedContainerColor()
         } else {
             MaterialTheme.colorScheme.surfaceContainerHigh
         },
         contentColor = if (checked) {
-            MaterialTheme.colorScheme.onSecondary
+            routineOnCompletedContainerColor()
         } else {
             MaterialTheme.colorScheme.onSurfaceVariant
         },
-        border = if (checked) {
-            null
-        } else {
-            BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-        },
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (checked) routineCompletedColor() else MaterialTheme.colorScheme.outlineVariant,
+        ),
     ) {
         Box(
             contentAlignment = Alignment.Center,
@@ -195,47 +186,99 @@ private fun RoutineActionItemCardRepeatCounter(
     onCompletedCountChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(8.dp),
-        color = if (isComplete) {
-            MaterialTheme.colorScheme.secondary
-        } else {
-            MaterialTheme.colorScheme.surfaceContainerHigh
-        },
-        contentColor = if (isComplete) {
-            MaterialTheme.colorScheme.onSecondary
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        },
+    OutlinedCard(
+        modifier = modifier.width(42.dp),
+        shape = RoundedCornerShape(23.dp),
+        colors = CardDefaults.outlinedCardColors(
+            containerColor = if (isComplete) {
+                routineCompletedContainerColor()
+            } else {
+                MaterialTheme.colorScheme.surfaceContainerLow
+            },
+            contentColor = if (isComplete) {
+                routineOnCompletedContainerColor()
+            } else {
+                MaterialTheme.colorScheme.onSurface
+            },
+        ),
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (isComplete) {
+                routineCompletedColor()
+            } else {
+                MaterialTheme.colorScheme.outlineVariant
+            },
+        ),
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 2.dp, vertical = 4.dp),
+            modifier = Modifier.padding(horizontal = 2.dp, vertical = 4.dp).fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(1.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
-            RoutineActionItemCardSmallIconButton(
+            RoutineActionItemCardCounterButton(
                 enabled = completedCount < repeatTargetCount,
                 onClick = { onCompletedCountChange((completedCount + 1).coerceAtMost(repeatTargetCount)) },
                 contentDescription = "Increase completed count",
                 icon = if (isComplete) Icons.Default.Check else Icons.Default.Add,
-                tint = LocalCounterTint(isComplete),
-                disabledTint = LocalDisabledTint(isComplete),
+                isComplete = isComplete,
             )
             Text(
                 text = "${completedCount.coerceIn(0, repeatTargetCount)}/$repeatTargetCount",
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.SemiBold,
             )
-            RoutineActionItemCardSmallIconButton(
+            RoutineActionItemCardCounterButton(
                 enabled = completedCount > 0,
                 onClick = { onCompletedCountChange((completedCount - 1).coerceAtLeast(0)) },
                 contentDescription = "Decrease completed count",
                 icon = Icons.Default.Remove,
-                tint = LocalCounterTint(isComplete),
-                disabledTint = LocalDisabledTint(isComplete),
+                isComplete = isComplete,
             )
         }
+    }
+}
+
+@Composable
+private fun RoutineActionItemCardCounterButton(
+    enabled: Boolean,
+    onClick: () -> Unit,
+    contentDescription: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    isComplete: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    FilledTonalIconButton(
+        enabled = enabled,
+        onClick = onClick,
+        modifier = modifier.size(34.dp),
+        colors = IconButtonDefaults.filledTonalIconButtonColors(
+            containerColor = if (isComplete) {
+                routineCompletedContainerColor()
+            } else {
+                MaterialTheme.colorScheme.primaryContainer
+            },
+            contentColor = if (isComplete) {
+                routineOnCompletedContainerColor()
+            } else {
+                MaterialTheme.colorScheme.onPrimaryContainer
+            },
+            disabledContainerColor = if (isComplete) {
+                routineCompletedContainerColor()
+            } else {
+                MaterialTheme.colorScheme.surfaceContainerHighest
+            },
+            disabledContentColor = if (isComplete) {
+                routineOnCompletedContainerColor()
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+            },
+        ),
+    ) {
+        Icon(
+            modifier = Modifier.size(18.dp),
+            imageVector = icon,
+            contentDescription = contentDescription,
+        )
     }
 }
 
@@ -299,25 +342,9 @@ private fun RoutineActionItemCardSmallIconButton(
 }
 
 @Composable
-private fun LocalCounterTint(isComplete: Boolean): Color =
-    if (isComplete) {
-        MaterialTheme.colorScheme.onSecondary
-    } else {
-        MaterialTheme.colorScheme.primary
-    }
-
-@Composable
-private fun LocalDisabledTint(isComplete: Boolean): Color =
-    if (isComplete) {
-        MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.38f)
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
-    }
-
-@Composable
 private fun LocalActionTint(isComplete: Boolean): Color =
     if (isComplete) {
-        MaterialTheme.colorScheme.onSecondaryContainer
+        MaterialTheme.colorScheme.onSurfaceVariant
     } else {
         MaterialTheme.colorScheme.onSurfaceVariant
     }
@@ -331,16 +358,8 @@ private fun RoutineActionItemCardNote(
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
-        color = if (isComplete) {
-            MaterialTheme.colorScheme.secondary
-        } else {
-            MaterialTheme.colorScheme.surfaceContainerHigh
-        },
-        contentColor = if (isComplete) {
-            MaterialTheme.colorScheme.onSecondary
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        },
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
     ) {
         Text(
             text = note,
@@ -355,72 +374,25 @@ private fun Int?.orZero(): Int = this ?: 0
 @Preview(showBackground = true, widthDp = 390, heightDp = 1300, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun RoutineActionItemCardAllStatesDarkModePreview() {
-    RoutineHelperTheme(dynamicColor = false) {
-        Column(
-            modifier = Modifier
-                .widthIn(max = 390.dp)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            RoutineActionItemCard(title = "Drink Water")
-            RoutineActionItemCard(
-                title = "Morning Meditation",
-                description = "10 minutes of mindfulness.",
-            )
-            RoutineActionItemCard(
-                title = "Stretching",
-                description = "Full-body routine.",
-                isChecked = true,
-            )
-            RoutineActionItemCard(
-                title = "Read Book",
-                description = "At least 20 pages.",
-                note = "Chapter 4 was very interesting.",
-            )
-            RoutineActionItemCard(
-                title = "Take Vitamins",
-                note = "Took with breakfast.",
-                isChecked = true,
-            )
-            RoutineActionItemCard(
-                title = "Pushups",
-                repeatTargetCount = 5,
-                completedCount = 0,
-            )
-            RoutineActionItemCard(
-                title = "Walk Dog",
-                description = "Around the park.",
-                repeatTargetCount = 5,
-                completedCount = 2,
-            )
-            RoutineActionItemCard(
-                title = "Coding Practice",
-                description = "Two LeetCode problems.",
-                repeatTargetCount = 5,
-                completedCount = 5,
-            )
-            RoutineActionItemCard(
-                title = "Journaling",
-                description = "Three things I am grateful for.",
-                note = "Gratitude for the weather.",
-                repeatTargetCount = 5,
-                completedCount = 2,
-            )
-            RoutineActionItemCard(
-                title = "Call Family",
-                note = "Spoke with Mom.",
-                repeatTargetCount = 5,
-                completedCount = 5,
-            )
-        }
+    RoutineHelperTheme {
+        RoutineActionItemCardAllStatesPreviewContent()
     }
 }
 
 @Preview(showBackground = true, widthDp = 390, heightDp = 1300)
 @Composable
 private fun RoutineActionItemCardAllStatesPreview() {
-    RoutineHelperTheme(dynamicColor = false) {
+    RoutineHelperTheme {
+        RoutineActionItemCardAllStatesPreviewContent()
+    }
+}
+
+@Composable
+private fun RoutineActionItemCardAllStatesPreviewContent() {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background,
+    ) {
         Column(
             modifier = Modifier
                 .widthIn(max = 390.dp)
