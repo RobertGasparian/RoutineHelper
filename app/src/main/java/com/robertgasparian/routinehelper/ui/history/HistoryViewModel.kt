@@ -11,9 +11,6 @@ import com.robertgasparian.routinehelper.domain.usecase.SnapshotSummariesUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotUseCase
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -158,7 +155,6 @@ private fun RoutineDaySummary.toUiState(isSelected: Boolean): HistorySnapshotUiS
     HistorySnapshotUiState(
         snapshotId = snapshotId,
         date = if (cadence == RoutineCadence.Weekly) "Week of $date" else date,
-        finalizedLabel = "Finalized ${timeFormatter.format(Instant.ofEpochMilli(finalizedAtMillis))}",
         cadence = cadence,
         completedCount = completedCount,
         totalCount = totalCount,
@@ -179,6 +175,3 @@ private fun Set<Long>.toggle(snapshotId: Long): Set<Long> =
     } else {
         this + snapshotId
     }
-
-private val timeFormatter: DateTimeFormatter =
-    DateTimeFormatter.ofPattern("h:mm a").withZone(ZoneId.systemDefault())

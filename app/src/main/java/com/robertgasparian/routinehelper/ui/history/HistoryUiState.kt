@@ -18,7 +18,6 @@ data class HistoryUiState(
                     HistorySnapshotUiState(
                         snapshotId = 1,
                         date = "2026-05-29",
-                        finalizedLabel = "Finalized 11:45 PM",
                         cadence = RoutineCadence.Daily,
                         completedCount = 2,
                         totalCount = 3,
@@ -27,7 +26,6 @@ data class HistoryUiState(
                     HistorySnapshotUiState(
                         snapshotId = 2,
                         date = "Week of 2026-05-24",
-                        finalizedLabel = "Finalized 11:38 PM",
                         cadence = RoutineCadence.Weekly,
                         completedCount = 4,
                         totalCount = 5,
@@ -43,7 +41,6 @@ data class HistoryUiState(
                     HistorySnapshotUiState(
                         snapshotId = 1,
                         date = "2026-05-29",
-                        finalizedLabel = "Finalized 11:45 PM",
                         cadence = RoutineCadence.Daily,
                         completedCount = 2,
                         totalCount = 3,
@@ -53,7 +50,6 @@ data class HistoryUiState(
                     HistorySnapshotUiState(
                         snapshotId = 2,
                         date = "Week of 2026-05-24",
-                        finalizedLabel = "Finalized 11:38 PM",
                         cadence = RoutineCadence.Weekly,
                         completedCount = 4,
                         totalCount = 5,
@@ -113,7 +109,6 @@ data class HistoryUiState(
 data class HistorySnapshotUiState(
     val snapshotId: Long,
     val date: String,
-    val finalizedLabel: String,
     val cadence: RoutineCadence,
     val completedCount: Int = 0,
     val totalCount: Int = 0,

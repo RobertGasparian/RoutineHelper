@@ -1,7 +1,5 @@
 package com.robertgasparian.routinehelper.ui.history
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,25 +7,20 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.filled.StickyNote2
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
+import androidx.compose.material.icons.filled.ViewWeek
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -42,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
-import com.robertgasparian.routinehelper.ui.dsm.CadenceChip
+import com.robertgasparian.routinehelper.ui.dsm.RoutineHistoryItemCard
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
 import com.robertgasparian.routinehelper.ui.share.ShareFormatDialog
 import com.robertgasparian.routinehelper.ui.share.ShareTextDialog
@@ -220,9 +213,13 @@ fun HistoryComponent(
                         items = uiState.snapshots,
                         key = { snapshot -> snapshot.snapshotId },
                     ) { snapshot ->
-                        HistorySnapshotCard(
-                            snapshot = snapshot,
+                        RoutineHistoryItemCard(
+                            cadence = snapshot.cadence,
+                            title = snapshot.date,
+                            completionLabel = snapshot.completionLabel,
+                            hasSummaryNote = snapshot.hasSummaryNote,
                             isSelectionMode = uiState.isSelectionMode,
+                            isSelected = snapshot.isSelected,
                             onClick = { onEvent(HistoryUiEvent.SnapshotClick(snapshot.snapshotId)) },
                             onLongClick = { onEvent(HistoryUiEvent.SnapshotLongClick(snapshot.snapshotId)) },
                         )
@@ -275,9 +272,9 @@ private fun HistoryFilterRow(
                     {
                         Icon(
                             imageVector = if (cadence == RoutineCadence.Weekly) {
-                                Icons.Default.Refresh
+                                Icons.Default.ViewWeek
                             } else {
-                                Icons.Default.DateRange
+                                Icons.Default.Event
                             },
                             contentDescription = null,
                         )
@@ -314,88 +311,6 @@ private fun EmptyHistoryContent(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun HistorySnapshotCard(
-    snapshot: HistorySnapshotUiState,
-    isSelectionMode: Boolean,
-    onClick: () -> Unit,
-    onLongClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick,
-            ),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (snapshot.isSelected) {
-                MaterialTheme.colorScheme.secondaryContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceContainerLow
-            },
-        ),
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            if (isSelectionMode) {
-                Checkbox(
-                    checked = snapshot.isSelected,
-                    onCheckedChange = null,
-                )
-            }
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    CadenceChip(cadence = snapshot.cadence)
-                    if (snapshot.hasSummaryNote) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.StickyNote2,
-                            contentDescription = "Has summary note",
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                    }
-                }
-                Text(
-                    text = snapshot.date,
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Text(
-                    text = snapshot.completionLabel,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    text = snapshot.finalizedLabel,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            if (!isSelectionMode) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-    }
-}
-
 private val HistoryFilter.label: String
     get() = when (this) {
         HistoryFilter.All -> "All"
@@ -413,6 +328,8 @@ private val HistoryFilter.cadence: RoutineCadence?
 private val HistorySnapshotUiState.completionLabel: String
     get() = if (totalCount == 0) {
         "No actions saved"
+    } else if (completedCount == totalCount) {
+        "All completed!"
     } else {
         "$completedCount/$totalCount completed"
     }
