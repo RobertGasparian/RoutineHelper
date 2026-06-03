@@ -1,16 +1,15 @@
 package com.robertgasparian.routinehelper.ui.app
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.ViewWeek
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -35,12 +34,12 @@ import com.robertgasparian.routinehelper.ui.actioneditor.ActionEditorScreen
 import com.robertgasparian.routinehelper.ui.history.detail.HistoryDetailScreen
 import com.robertgasparian.routinehelper.ui.history.HistoryScreen
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
-import com.robertgasparian.routinehelper.ui.today.TodayScreen
+import com.robertgasparian.routinehelper.ui.daily.DailyScreen
 import com.robertgasparian.routinehelper.ui.weekly.WeeklyScreen
 
 @Composable
 fun RoutineHelperScreen() {
-    val topLevelBackStack = remember { TopLevelBackStack<Any>(TodayDestination) }
+    val topLevelBackStack = remember { TopLevelBackStack<Any>(DailyDestination) }
 
     RoutineHelperComponent(
         topLevelBackStack = topLevelBackStack,
@@ -63,17 +62,15 @@ fun RoutineHelperComponent(
     ) { innerPadding ->
         NavDisplay(
             backStack = topLevelBackStack.backStack,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(PaddingValues(bottom = innerPadding.calculateBottomPadding())),
+            modifier = Modifier.fillMaxSize(),
             onBack = { topLevelBackStack.removeLast() },
             entryDecorators = listOf(
                 rememberSaveableStateHolderNavEntryDecorator(),
                 rememberViewModelStoreNavEntryDecorator(),
             ),
             entryProvider = entryProvider {
-                entry<TodayDestination> {
-                        TodayScreen(
+                entry<DailyDestination> {
+                        DailyScreen(
                             onCreateActionClick = {
                                 topLevelBackStack.add(ActionEditorDestination())
                             },
@@ -151,22 +148,22 @@ private fun FloatingBottomNavigationBar(
                 containerColor = Color.Transparent,
             ) {
                 ShortNavigationBarItem(
-                    selected = selectedDestination == TodayDestination,
-                    onClick = { onDestinationSelected(TodayDestination) },
+                    selected = selectedDestination == DailyDestination,
+                    onClick = { onDestinationSelected(DailyDestination) },
                     icon = {
                         Icon(
-                            imageVector = Icons.Default.CheckCircle,
+                            imageVector = Icons.Default.Event,
                             contentDescription = null,
                         )
                     },
-                    label = { Text(text = "Today") },
+                    label = { Text(text = "Daily") },
                 )
                 ShortNavigationBarItem(
                     selected = selectedDestination == WeeklyDestination,
                     onClick = { onDestinationSelected(WeeklyDestination) },
                     icon = {
                         Icon(
-                            imageVector = Icons.Default.Refresh,
+                            imageVector = Icons.Default.ViewWeek,
                             contentDescription = null,
                         )
                     },
@@ -177,7 +174,7 @@ private fun FloatingBottomNavigationBar(
                     onClick = { onDestinationSelected(HistoryDestination) },
                     icon = {
                         Icon(
-                            imageVector = Icons.Default.DateRange,
+                            imageVector = Icons.Default.History,
                             contentDescription = null,
                         )
                     },
@@ -193,7 +190,7 @@ private fun FloatingBottomNavigationBar(
 private fun RoutineHelperComponentPreview() {
     RoutineHelperTheme {
         RoutineHelperComponent(
-            topLevelBackStack = TopLevelBackStack<Any>(TodayDestination),
+            topLevelBackStack = TopLevelBackStack<Any>(DailyDestination),
         )
     }
 }

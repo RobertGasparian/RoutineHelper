@@ -1,4 +1,4 @@
-package com.robertgasparian.routinehelper.ui.today
+package com.robertgasparian.routinehelper.ui.daily
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class TodayViewModel @Inject constructor(
+class DailyViewModel @Inject constructor(
     todayItemsUseCase: TodayItemsUseCase,
     todaySummaryNoteUseCase: TodaySummaryNoteUseCase,
     private val finalizeTodayUseCase: FinalizeTodayUseCase,
@@ -33,12 +33,12 @@ class TodayViewModel @Inject constructor(
 ) : ViewModel() {
     private val todayDate = LocalDate.now().toString()
 
-    val uiState: StateFlow<TodayUiState> =
+    val uiState: StateFlow<DailyUiState> =
         combine(
             todayItemsUseCase(todayDate),
             todaySummaryNoteUseCase(todayDate),
         ) { items, summaryNote ->
-            TodayUiState(
+            DailyUiState(
                 date = todayDate,
                 summaryNote = summaryNote.orEmpty(),
                 items = items.map(TodayRoutineItem::toUiState),
@@ -47,7 +47,7 @@ class TodayViewModel @Inject constructor(
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = TodayUiState(date = todayDate),
+                initialValue = DailyUiState(date = todayDate),
             )
 
     fun setChecked(
@@ -98,7 +98,7 @@ class TodayViewModel @Inject constructor(
         }
     }
 
-    fun snapshotToday() {
+    fun snapshotDaily() {
         viewModelScope.launch {
             val snapshotDate = SnapshotWorkDates.dailySnapshotDate(ZonedDateTime.now()).toString()
             finalizeTodayUseCase(
@@ -110,8 +110,8 @@ class TodayViewModel @Inject constructor(
     }
 }
 
-private fun TodayRoutineItem.toUiState(): TodayItemUiState =
-    TodayItemUiState(
+private fun TodayRoutineItem.toUiState(): DailyItemUiState =
+    DailyItemUiState(
         routineItemId = routineItemId,
         actionId = actionId,
         title = title,

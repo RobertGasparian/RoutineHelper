@@ -4,8 +4,8 @@ import android.content.res.Configuration
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
-import com.robertgasparian.routinehelper.ui.today.TodayComponent
-import com.robertgasparian.routinehelper.ui.today.TodayUiState
+import com.robertgasparian.routinehelper.ui.daily.DailyComponent
+import com.robertgasparian.routinehelper.ui.daily.DailyUiState
 
 @Preview(name = "Phone - Light", showBackground = true, widthDp = 393, heightDp = 852)
 @Preview(
@@ -17,7 +17,7 @@ import com.robertgasparian.routinehelper.ui.today.TodayUiState
 )
 @Composable
 private fun WeeklyComponentPhonePreview() {
-    WeeklyPreviewContent(uiState = TodayUiState.preview().copy(date = "Week of 2026-05-24"))
+    WeeklyPreviewContent(uiState = DailyUiState.preview().copy(date = "Week of 2026-05-24"))
 }
 
 @Preview(name = "Landscape - Light", showBackground = true, widthDp = 852, heightDp = 393)
@@ -30,31 +30,31 @@ private fun WeeklyComponentPhonePreview() {
 )
 @Composable
 private fun WeeklyComponentLandscapePreview() {
-    WeeklyPreviewContent(uiState = TodayUiState.preview().copy(date = "Week of 2026-05-24"))
+    WeeklyPreviewContent(uiState = DailyUiState.preview().copy(date = "Week of 2026-05-24"))
 }
 
 @Preview(name = "Tablet", showBackground = true, widthDp = 800, heightDp = 1280)
 @Composable
 private fun WeeklyComponentTabletPreview() {
-    WeeklyPreviewContent(uiState = TodayUiState.preview().copy(date = "Week of 2026-05-24"))
+    WeeklyPreviewContent(uiState = DailyUiState.preview().copy(date = "Week of 2026-05-24"))
 }
 
 @Preview(name = "Foldable", showBackground = true, widthDp = 673, heightDp = 841)
 @Composable
 private fun WeeklyComponentFoldablePreview() {
-    WeeklyPreviewContent(uiState = TodayUiState.preview().copy(date = "Week of 2026-05-24"))
+    WeeklyPreviewContent(uiState = DailyUiState.preview().copy(date = "Week of 2026-05-24"))
 }
 
 @Preview(name = "Empty", showBackground = true, widthDp = 393, heightDp = 852)
 @Composable
 private fun WeeklyComponentEmptyPreview() {
-    WeeklyPreviewContent(uiState = TodayUiState.previewEmpty().copy(date = "Week of 2026-05-24"))
+    WeeklyPreviewContent(uiState = DailyUiState.previewEmpty().copy(date = "Week of 2026-05-24"))
 }
 
 @Composable
-private fun WeeklyPreviewContent(uiState: TodayUiState) {
+private fun WeeklyPreviewContent(uiState: DailyUiState) {
     RoutineHelperTheme {
-        TodayComponent(
+        DailyComponent(
             uiState = uiState,
             onEvent = {},
             title = "Weekly",

@@ -1,4 +1,4 @@
-package com.robertgasparian.routinehelper.ui.today
+package com.robertgasparian.routinehelper.ui.daily
 
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
@@ -7,7 +7,7 @@ import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 import org.junit.Rule
 import org.junit.Test
 
-class TodayComponentPaparazziTest {
+class DailyComponentPaparazziTest {
     @get:Rule
     val paparazzi = Paparazzi(
         deviceConfig = DeviceConfig.PIXEL_5,
@@ -17,7 +17,7 @@ class TodayComponentPaparazziTest {
     fun populated() {
         paparazzi.snapshot {
             RoutineHelperTheme {
-                TodayComponentPaparazziContent(uiState = TodayUiState.preview())
+                DailyComponentPaparazziContent(uiState = DailyUiState.preview())
             }
         }
     }
@@ -26,17 +26,17 @@ class TodayComponentPaparazziTest {
     fun empty() {
         paparazzi.snapshot {
             RoutineHelperTheme {
-                TodayComponentPaparazziContent(uiState = TodayUiState.previewEmpty())
+                DailyComponentPaparazziContent(uiState = DailyUiState.previewEmpty())
             }
         }
     }
 }
 
 @Composable
-private fun TodayComponentPaparazziContent(
-    uiState: TodayUiState,
+private fun DailyComponentPaparazziContent(
+    uiState: DailyUiState,
 ) {
-    TodayComponent(
+    DailyComponent(
         uiState = uiState,
         onEvent = {},
     )

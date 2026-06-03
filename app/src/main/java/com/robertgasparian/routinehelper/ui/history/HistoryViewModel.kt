@@ -160,6 +160,9 @@ private fun RoutineDaySummary.toUiState(isSelected: Boolean): HistorySnapshotUiS
         date = if (cadence == RoutineCadence.Weekly) "Week of $date" else date,
         finalizedLabel = "Finalized ${timeFormatter.format(Instant.ofEpochMilli(finalizedAtMillis))}",
         cadence = cadence,
+        completedCount = completedCount,
+        totalCount = totalCount,
+        hasSummaryNote = hasSummaryNote,
         isSelected = isSelected,
     )
 

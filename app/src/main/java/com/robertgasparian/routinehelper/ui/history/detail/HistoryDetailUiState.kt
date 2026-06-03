@@ -1,9 +1,11 @@
 package com.robertgasparian.routinehelper.ui.history.detail
 
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
 
 data class HistoryDetailUiState(
     val date: String = "",
+    val cadence: RoutineCadence = RoutineCadence.Daily,
     val finalizedLabel: String = "",
     val summaryNote: String = "",
     val items: List<HistoryDetailItemUiState> = emptyList(),
@@ -15,6 +17,7 @@ data class HistoryDetailUiState(
         fun preview(): HistoryDetailUiState =
             HistoryDetailUiState(
                 date = "2026-05-29",
+                cadence = RoutineCadence.Daily,
                 finalizedLabel = "Finalized 11:45 PM",
                 summaryNote = "Low-energy day, but I kept the basics moving.",
                 items = listOf(

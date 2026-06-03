@@ -5,4 +5,7 @@ data class RoutineDaySummary(
     val date: String,
     val finalizedAtMillis: Long,
     val cadence: RoutineCadence = RoutineCadence.Daily,
+    val completedCount: Int = 0,
+    val totalCount: Int = 0,
+    val hasSummaryNote: Boolean = false,
 )

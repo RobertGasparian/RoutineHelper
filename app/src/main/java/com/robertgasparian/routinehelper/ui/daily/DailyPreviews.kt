@@ -1,4 +1,4 @@
-package com.robertgasparian.routinehelper.ui.today
+package com.robertgasparian.routinehelper.ui.daily
 
 import android.content.res.Configuration
 import androidx.compose.runtime.Composable
@@ -19,9 +19,9 @@ import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
     uiMode = Configuration.UI_MODE_NIGHT_YES,
 )
 @Composable
-private fun TodayComponentPhonePreview() {
+private fun DailyComponentPhonePreview() {
     RoutineHelperTheme {
-        TodayComponentPreviewContent(uiState = TodayUiState.preview())
+        DailyComponentPreviewContent(uiState = DailyUiState.preview())
     }
 }
 
@@ -39,9 +39,9 @@ private fun TodayComponentPhonePreview() {
     uiMode = Configuration.UI_MODE_NIGHT_YES,
 )
 @Composable
-private fun TodayComponentLandscapePreview() {
+private fun DailyComponentLandscapePreview() {
     RoutineHelperTheme {
-        TodayComponentPreviewContent(uiState = TodayUiState.preview())
+        DailyComponentPreviewContent(uiState = DailyUiState.preview())
     }
 }
 
@@ -52,9 +52,9 @@ private fun TodayComponentLandscapePreview() {
     heightDp = 1280,
 )
 @Composable
-private fun TodayComponentTabletPreview() {
+private fun DailyComponentTabletPreview() {
     RoutineHelperTheme {
-        TodayComponentPreviewContent(uiState = TodayUiState.preview())
+        DailyComponentPreviewContent(uiState = DailyUiState.preview())
     }
 }
 
@@ -65,9 +65,9 @@ private fun TodayComponentTabletPreview() {
     heightDp = 841,
 )
 @Composable
-private fun TodayComponentFoldablePreview() {
+private fun DailyComponentFoldablePreview() {
     RoutineHelperTheme {
-        TodayComponentPreviewContent(uiState = TodayUiState.preview())
+        DailyComponentPreviewContent(uiState = DailyUiState.preview())
     }
 }
 
@@ -78,17 +78,17 @@ private fun TodayComponentFoldablePreview() {
     heightDp = 852,
 )
 @Composable
-private fun TodayComponentEmptyPreview() {
+private fun DailyComponentEmptyPreview() {
     RoutineHelperTheme {
-        TodayComponentPreviewContent(uiState = TodayUiState.previewEmpty())
+        DailyComponentPreviewContent(uiState = DailyUiState.previewEmpty())
     }
 }
 
 @Composable
-private fun TodayComponentPreviewContent(
-        uiState: TodayUiState,
+private fun DailyComponentPreviewContent(
+        uiState: DailyUiState,
 ) {
-    TodayComponent(
+    DailyComponent(
         uiState = uiState,
         onEvent = {},
     )

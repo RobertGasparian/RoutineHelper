@@ -7,17 +7,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
-import androidx.compose.material3.ElevatedAssistChip
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,6 +39,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.robertgasparian.routinehelper.ui.dsm.CadenceChip
+import com.robertgasparian.routinehelper.ui.dsm.CompletionChip as RoutineCompletionChip
+import com.robertgasparian.routinehelper.ui.dsm.RoutineNoteBlock
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
 import com.robertgasparian.routinehelper.ui.share.ShareFormatDialog
 import com.robertgasparian.routinehelper.ui.share.ShareTextDialog
@@ -199,6 +201,9 @@ fun HistoryDetailComponent(
                 ),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
+                item {
+                    SnapshotHeaderCard(uiState = uiState)
+                }
                 if (uiState.summaryNote.isNotBlank()) {
                     item {
                         SummaryNoteDetailCard(note = uiState.summaryNote)
@@ -309,12 +314,46 @@ private fun EmptySnapshotContent(
 }
 
 @Composable
+private fun SnapshotHeaderCard(
+    uiState: HistoryDetailUiState,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        ),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            CadenceChip(cadence = uiState.cadence)
+            Text(
+                text = uiState.date,
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Text(
+                text = uiState.finalizedLabel,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@Composable
 private fun SummaryNoteDetailCard(
     note: String,
     modifier: Modifier = Modifier,
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        ),
     ) {
         Column(
             modifier = Modifier
@@ -343,6 +382,14 @@ private fun HistoryDetailItemCard(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (item.isChecked) {
+                MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.54f)
+            } else {
+                MaterialTheme.colorScheme.surfaceContainerLow
+            },
+        ),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -372,17 +419,19 @@ private fun HistoryDetailItemCard(
                 CompletionChip(item = item)
             }
 
-            DetailSection(
-                label = "Action description",
-                text = item.description,
-                emptyText = "No description saved for this action.",
-            )
+            if (!item.description.isNullOrBlank()) {
+                DetailSection(
+                    label = "Action description",
+                    text = item.description,
+                )
+            }
 
-            DetailSection(
-                label = "Day note",
-                text = item.note,
-                emptyText = "No note was added for this day.",
-            )
+            if (!item.note.isNullOrBlank()) {
+                RoutineNoteBlock(
+                    note = item.note,
+                    label = "Note",
+                )
+            }
         }
     }
 }
@@ -392,30 +441,12 @@ private fun CompletionChip(
     item: HistoryDetailItemUiState,
     modifier: Modifier = Modifier,
 ) {
-    ElevatedAssistChip(
+    RoutineCompletionChip(
         modifier = modifier,
-        onClick = {},
-        leadingIcon = {
-            Icon(
-                imageVector = if (item.isChecked) {
-                    Icons.Default.CheckCircle
-                } else {
-                    Icons.Default.DateRange
-                },
-                contentDescription = null,
-            )
-        },
-        label = {
-            Text(
-                text = if (item.isRepeatAction) {
-                    "${item.completedCount}/${item.repeatTargetCount}"
-                } else if (item.isChecked) {
-                    "Checked"
-                } else {
-                    "Unchecked"
-                },
-            )
-        },
+        isChecked = item.isChecked,
+        isRepeatAction = item.isRepeatAction,
+        completedCount = item.completedCount,
+        repeatTargetCount = item.repeatTargetCount,
     )
 }
 
@@ -423,7 +454,6 @@ private fun CompletionChip(
 private fun DetailSection(
     label: String,
     text: String?,
-    emptyText: String,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -436,13 +466,9 @@ private fun DetailSection(
             color = MaterialTheme.colorScheme.primary,
         )
         Text(
-            text = text?.takeIf(String::isNotBlank) ?: emptyText,
+            text = text.orEmpty(),
             style = MaterialTheme.typography.bodyMedium,
-            color = if (text.isNullOrBlank()) {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            },
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(top = 4.dp),
         )
     }

@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.map
 class FakeRoutineTemplateRepository : RoutineTemplateRepository {
     private val items = MutableStateFlow<List<RoutineTemplateItem>>(emptyList())
     val addedItems = mutableListOf<AddedTemplateItem>()
+    val removedTemplateItemIds = mutableListOf<Long>()
     val updatedItems = mutableListOf<UpdatedTemplateItem>()
 
     fun setItems(items: List<RoutineTemplateItem>) {
@@ -53,7 +54,9 @@ class FakeRoutineTemplateRepository : RoutineTemplateRepository {
         )
     }
 
-    override suspend fun removeTemplateItem(routineItemId: Long) = Unit
+    override suspend fun removeTemplateItem(routineItemId: Long) {
+        removedTemplateItemIds += routineItemId
+    }
 
     override suspend fun reorderTemplateItems(routineItemIdsInOrder: List<Long>) = Unit
 }

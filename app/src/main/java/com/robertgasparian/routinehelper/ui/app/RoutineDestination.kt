@@ -4,7 +4,7 @@ import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 
 sealed interface TopLevelDestination
 
-data object TodayDestination : TopLevelDestination
+data object DailyDestination : TopLevelDestination
 
 data object WeeklyDestination : TopLevelDestination
 

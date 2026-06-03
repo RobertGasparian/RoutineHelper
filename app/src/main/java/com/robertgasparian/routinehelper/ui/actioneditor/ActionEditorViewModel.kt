@@ -3,6 +3,7 @@ package com.robertgasparian.routinehelper.ui.actioneditor
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.domain.usecase.RemoveTemplateItemUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SaveTemplateItemUseCase
 import com.robertgasparian.routinehelper.domain.usecase.TemplateItemUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,11 +12,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class ActionEditorViewModel @Inject constructor(
+    private val removeTemplateItemUseCase: RemoveTemplateItemUseCase,
     private val saveTemplateItemUseCase: SaveTemplateItemUseCase,
     private val templateItemUseCase: TemplateItemUseCase,
 ) : ViewModel() {
@@ -86,6 +89,19 @@ class ActionEditorViewModel @Inject constructor(
                 cadence = cadence,
             )
             onSaved()
+        }
+    }
+
+    fun delete(
+        actionId: Long?,
+        onDeleted: () -> Unit,
+    ) {
+        if (actionId == null) return
+
+        viewModelScope.launch {
+            val item = templateItemUseCase(actionId).first() ?: return@launch
+            removeTemplateItemUseCase(item.routineItemId)
+            onDeleted()
         }
     }
 }

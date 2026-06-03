@@ -6,7 +6,7 @@ import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 import org.junit.Rule
 import org.junit.Test
 
-class NoteEditorDialogPaparazziTest {
+class RoutineNoteDialogPaparazziTest {
     @get:Rule
     val paparazzi = Paparazzi(
         deviceConfig = DeviceConfig.PIXEL_5,
@@ -16,12 +16,14 @@ class NoteEditorDialogPaparazziTest {
     fun populated() {
         paparazzi.snapshot {
             RoutineHelperTheme {
-                NoteEditorDialog(
-                    title = "Edit note",
-                    textFieldLabel = "Today note",
-                    initialNote = "08:30 Walked before breakfast.",
+                RoutineNoteDialogContent(
+                    note = "08:30 Walked before breakfast.",
+                    onNoteChange = {},
                     onDismiss = {},
-                    onConfirm = {},
+                    onSaveClick = {},
+                    title = "Edit note",
+                    supportingText = "Daily note for Walk",
+                    placeholder = "Daily note",
                 )
             }
         }
@@ -31,12 +33,14 @@ class NoteEditorDialogPaparazziTest {
     fun empty() {
         paparazzi.snapshot {
             RoutineHelperTheme {
-                NoteEditorDialog(
-                    title = "Add note",
-                    textFieldLabel = "Day note",
-                    initialNote = "",
+                RoutineNoteDialogContent(
+                    note = "",
+                    onNoteChange = {},
                     onDismiss = {},
-                    onConfirm = {},
+                    onSaveClick = {},
+                    title = "Add note",
+                    supportingText = "This note is saved for this day only.",
+                    placeholder = "Day note",
                 )
             }
         }

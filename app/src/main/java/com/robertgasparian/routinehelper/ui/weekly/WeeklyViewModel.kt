@@ -10,8 +10,8 @@ import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyItemNoteUseC
 import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklySummaryNoteUseCase
 import com.robertgasparian.routinehelper.domain.usecase.WeeklyItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.WeeklySummaryNoteUseCase
-import com.robertgasparian.routinehelper.ui.today.TodayItemUiState
-import com.robertgasparian.routinehelper.ui.today.TodayUiState
+import com.robertgasparian.routinehelper.ui.daily.DailyItemUiState
+import com.robertgasparian.routinehelper.ui.daily.DailyUiState
 import com.robertgasparian.routinehelper.work.SnapshotWorkDates
 import com.robertgasparian.routinehelper.work.startOfCalendarWeek
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,12 +36,12 @@ class WeeklyViewModel @Inject constructor(
 ) : ViewModel() {
     private val weekStartDate = LocalDate.now().startOfWeek().toString()
 
-    val uiState: StateFlow<TodayUiState> =
+    val uiState: StateFlow<DailyUiState> =
         combine(
             weeklyItemsUseCase(weekStartDate),
             weeklySummaryNoteUseCase(weekStartDate),
         ) { items, summaryNote ->
-            TodayUiState(
+            DailyUiState(
                 date = "Week of $weekStartDate",
                 summaryNote = summaryNote.orEmpty(),
                 items = items.map(WeeklyRoutineItem::toUiState),
@@ -50,7 +50,7 @@ class WeeklyViewModel @Inject constructor(
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = TodayUiState(date = "Week of $weekStartDate"),
+                initialValue = DailyUiState(date = "Week of $weekStartDate"),
             )
 
     fun setChecked(
@@ -119,8 +119,8 @@ private fun LocalDate.startOfWeek(): LocalDate {
     return startOfCalendarWeek()
 }
 
-private fun WeeklyRoutineItem.toUiState(): TodayItemUiState =
-    TodayItemUiState(
+private fun WeeklyRoutineItem.toUiState(): DailyItemUiState =
+    DailyItemUiState(
         routineItemId = routineItemId,
         actionId = actionId,
         title = title,

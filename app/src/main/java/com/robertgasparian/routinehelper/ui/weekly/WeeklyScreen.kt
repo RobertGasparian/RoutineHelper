@@ -5,8 +5,8 @@ import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robertgasparian.routinehelper.BuildConfig
-import com.robertgasparian.routinehelper.ui.today.TodayComponent
-import com.robertgasparian.routinehelper.ui.today.TodayUiEvent
+import com.robertgasparian.routinehelper.ui.daily.DailyComponent
+import com.robertgasparian.routinehelper.ui.daily.DailyUiEvent
 
 @Composable
 fun WeeklyScreen(
@@ -16,26 +16,26 @@ fun WeeklyScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    TodayComponent(
+    DailyComponent(
         uiState = uiState,
         onEvent = { event ->
             when (event) {
-                is TodayUiEvent.CheckedChange -> viewModel.setChecked(
+                is DailyUiEvent.CheckedChange -> viewModel.setChecked(
                     routineItemId = event.routineItemId,
                     isChecked = event.isChecked,
                 )
-                is TodayUiEvent.CompletedCountChange -> viewModel.updateCompletedCount(
+                is DailyUiEvent.CompletedCountChange -> viewModel.updateCompletedCount(
                     routineItemId = event.routineItemId,
                     completedCount = event.completedCount,
                 )
-                TodayUiEvent.CreateActionClick -> onCreateActionClick()
-                is TodayUiEvent.EditActionClick -> onEditActionClick(event.actionId)
-                is TodayUiEvent.NoteChange -> viewModel.updateNote(
+                DailyUiEvent.CreateActionClick -> onCreateActionClick()
+                is DailyUiEvent.EditActionClick -> onEditActionClick(event.actionId)
+                is DailyUiEvent.NoteChange -> viewModel.updateNote(
                     routineItemId = event.routineItemId,
                     note = event.note,
                 )
-                is TodayUiEvent.SummaryNoteChange -> viewModel.updateSummaryNote(event.note)
-                TodayUiEvent.SnapshotClick -> viewModel.snapshotWeek()
+                is DailyUiEvent.SummaryNoteChange -> viewModel.updateSummaryNote(event.note)
+                DailyUiEvent.SnapshotClick -> viewModel.snapshotWeek()
             }
         },
         title = "Weekly",

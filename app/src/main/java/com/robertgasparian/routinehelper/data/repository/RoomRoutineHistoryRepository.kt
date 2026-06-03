@@ -19,14 +19,10 @@ class RoomRoutineHistoryRepository(
     private val dailySnapshotDao: DailySnapshotDao = database.dailySnapshotDao(),
 ) : RoutineHistoryRepository {
     override fun snapshotSummaries(cadence: RoutineCadence?): Flow<List<RoutineDaySummary>> =
-        (cadence?.let { dailySnapshotDao.snapshots(it.toStorageValue()) } ?: dailySnapshotDao.snapshots()).map { snapshots ->
-            snapshots.map { snapshot ->
-                RoutineDaySummary(
-                    snapshotId = snapshot.id,
-                    date = snapshot.date,
-                    finalizedAtMillis = snapshot.finalizedAtMillis,
-                    cadence = snapshot.cadence.toRoutineCadence(),
-                )
+        (cadence?.let { dailySnapshotDao.snapshotsWithEntries(it.toStorageValue()) }
+            ?: dailySnapshotDao.snapshotsWithEntries()).map { snapshots ->
+            snapshots.map { snapshotWithEntries ->
+                snapshotWithEntries.toSummary()
             }
         }
 
@@ -46,6 +42,7 @@ class RoomRoutineHistoryRepository(
                     date = it.date,
                     finalizedAtMillis = it.finalizedAtMillis,
                     cadence = it.cadence.toRoutineCadence(),
+                    hasSummaryNote = !it.summaryNote.isNullOrBlank(),
                 )
             }
         }
@@ -70,15 +67,15 @@ class RoomRoutineHistoryRepository(
                 DailySnapshotEntryEntity(
                     snapshotId = snapshotId,
                     actionId = item.actionId,
-                titleSnapshot = item.title,
-                descriptionSnapshot = item.description,
-                positionSnapshot = item.position,
-                isChecked = item.isChecked,
-                repeatTargetCountSnapshot = item.repeatTargetCount,
-                completedCount = item.completedCount,
-                note = item.note,
-            )
-        },
+                    titleSnapshot = item.title,
+                    descriptionSnapshot = item.description,
+                    positionSnapshot = item.position,
+                    isChecked = item.isChecked,
+                    repeatTargetCountSnapshot = item.repeatTargetCount,
+                    completedCount = item.completedCount,
+                    note = item.note,
+                )
+            },
         )
         snapshotId
     }
@@ -121,4 +118,19 @@ private fun DailySnapshotWithEntries.toDomain(): RoutineDaySnapshot =
                     note = entry.note,
                 )
             },
+    )
+
+private fun DailySnapshotWithEntries.toSummary(): RoutineDaySummary =
+    RoutineDaySummary(
+        snapshotId = snapshot.id,
+        date = snapshot.date,
+        finalizedAtMillis = snapshot.finalizedAtMillis,
+        cadence = snapshot.cadence.toRoutineCadence(),
+        completedCount = entries.count { entry ->
+            entry.repeatTargetCountSnapshot?.let { target ->
+                entry.completedCount >= target
+            } ?: entry.isChecked
+        },
+        totalCount = entries.size,
+        hasSummaryNote = !snapshot.summaryNote.isNullOrBlank(),
     )

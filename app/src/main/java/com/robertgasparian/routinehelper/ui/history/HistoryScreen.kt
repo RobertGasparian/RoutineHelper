@@ -9,9 +9,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.StickyNote2
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
@@ -39,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.ui.dsm.CadenceChip
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
 import com.robertgasparian.routinehelper.ui.share.ShareFormatDialog
 import com.robertgasparian.routinehelper.ui.share.ShareTextDialog
@@ -303,7 +307,7 @@ private fun EmptyHistoryContent(
             modifier = Modifier.padding(top = 16.dp),
         )
         Text(
-            text = "Use the Snapshot action on Today or Weekly while we build the scheduled reset.",
+            text = "Use the Snapshot action on Daily or Weekly while we build the scheduled reset.",
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(top = 8.dp),
         )
@@ -326,6 +330,7 @@ private fun HistorySnapshotCard(
                 onClick = onClick,
                 onLongClick = onLongClick,
             ),
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (snapshot.isSelected) {
                 MaterialTheme.colorScheme.secondaryContainer
@@ -334,39 +339,62 @@ private fun HistorySnapshotCard(
             },
         ),
     ) {
-        ListItem(
-            leadingContent = {
-                if (isSelectionMode) {
-                    Checkbox(
-                        checked = snapshot.isSelected,
-                        onCheckedChange = null,
-                    )
-                } else {
-                    Icon(
-                        imageVector = if (snapshot.cadence == RoutineCadence.Weekly) {
-                            Icons.Default.Refresh
-                        } else {
-                            Icons.Default.DateRange
-                        },
-                        contentDescription = null,
-                    )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            if (isSelectionMode) {
+                Checkbox(
+                    checked = snapshot.isSelected,
+                    onCheckedChange = null,
+                )
+            }
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    CadenceChip(cadence = snapshot.cadence)
+                    if (snapshot.hasSummaryNote) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.StickyNote2,
+                            contentDescription = "Has summary note",
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
                 }
-            },
-            headlineContent = {
-                Text(text = snapshot.date)
-            },
-            supportingContent = {
-                Text(text = "${snapshot.cadence.label} - ${snapshot.finalizedLabel}")
-            },
-        )
+                Text(
+                    text = snapshot.date,
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Text(
+                    text = snapshot.completionLabel,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = snapshot.finalizedLabel,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            if (!isSelectionMode) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
     }
 }
-
-private val RoutineCadence.label: String
-    get() = when (this) {
-        RoutineCadence.Daily -> "Daily"
-        RoutineCadence.Weekly -> "Weekly"
-    }
 
 private val HistoryFilter.label: String
     get() = when (this) {
@@ -380,6 +408,13 @@ private val HistoryFilter.cadence: RoutineCadence?
         HistoryFilter.All -> null
         HistoryFilter.Daily -> RoutineCadence.Daily
         HistoryFilter.Weekly -> RoutineCadence.Weekly
+    }
+
+private val HistorySnapshotUiState.completionLabel: String
+    get() = if (totalCount == 0) {
+        "No actions saved"
+    } else {
+        "$completedCount/$totalCount completed"
     }
 
 @Preview(showBackground = true)

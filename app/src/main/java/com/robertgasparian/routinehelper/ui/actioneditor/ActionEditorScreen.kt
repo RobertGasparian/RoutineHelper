@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -19,6 +21,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -47,6 +52,8 @@ sealed interface ActionEditorUiEvent {
     ) : ActionEditorUiEvent
 
     data object SaveClick : ActionEditorUiEvent
+
+    data object DeleteClick : ActionEditorUiEvent
 }
 
 @Composable
@@ -76,6 +83,10 @@ fun ActionEditorScreen(
                         onSaved = onBackClick,
                     )
                 }
+                ActionEditorUiEvent.DeleteClick -> viewModel.delete(
+                    actionId = actionId,
+                    onDeleted = onBackClick,
+                )
                 is ActionEditorUiEvent.TitleChange -> viewModel.updateTitle(event.title)
             }
         },
@@ -90,6 +101,8 @@ fun ActionEditorComponent(
     onEvent: (ActionEditorUiEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var showDeleteConfirmation by rememberSaveable { mutableStateOf(false) }
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -104,6 +117,16 @@ fun ActionEditorComponent(
                 },
                 title = {
                     Text(text = if (uiState.isEditing) "Edit action" else "New action")
+                },
+                actions = {
+                    if (uiState.isEditing) {
+                        IconButton(onClick = { showDeleteConfirmation = true }) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Delete action",
+                            )
+                        }
+                    }
                 },
             )
         },
@@ -141,6 +164,31 @@ fun ActionEditorComponent(
                 Text(text = "Save")
             }
         }
+    }
+
+    if (showDeleteConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmation = false },
+            title = { Text(text = "Delete action?") },
+            text = {
+                Text(text = "This removes the action from this routine list. Existing saved history snapshots stay unchanged.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteConfirmation = false
+                        onEvent(ActionEditorUiEvent.DeleteClick)
+                    },
+                ) {
+                    Text(text = "Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirmation = false }) {
+                    Text(text = "Cancel")
+                }
+            },
+        )
     }
 }
 

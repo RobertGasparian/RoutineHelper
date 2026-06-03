@@ -96,6 +96,7 @@ class HistoryDetailViewModel @AssistedInject constructor(
 private fun RoutineDaySnapshot.toUiState(): HistoryDetailUiState =
     HistoryDetailUiState(
         date = displayDate,
+        cadence = cadence,
         finalizedLabel = "Finalized ${timeFormatter.format(Instant.ofEpochMilli(finalizedAtMillis))}",
         summaryNote = summaryNote.orEmpty(),
         items = items.map(RoutineDaySnapshotItem::toUiState),

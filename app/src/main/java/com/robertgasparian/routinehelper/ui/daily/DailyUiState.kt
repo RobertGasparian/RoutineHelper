@@ -1,17 +1,17 @@
-package com.robertgasparian.routinehelper.ui.today
+package com.robertgasparian.routinehelper.ui.daily
 
-data class TodayUiState(
+data class DailyUiState(
     val date: String,
     val summaryNote: String = "",
-    val items: List<TodayItemUiState> = emptyList(),
+    val items: List<DailyItemUiState> = emptyList(),
 ) {
     companion object {
-        fun preview(): TodayUiState =
-            TodayUiState(
+        fun preview(): DailyUiState =
+            DailyUiState(
                 date = "2026-05-29",
                 summaryNote = "Low-energy day, but I kept the basics moving.",
                 items = listOf(
-                    TodayItemUiState(
+                    DailyItemUiState(
                         routineItemId = 1,
                         actionId = 101,
                         title = "Drink water",
@@ -21,7 +21,7 @@ data class TodayUiState(
                         isChecked = true,
                         note = "One liter was diet soda.",
                     ),
-                    TodayItemUiState(
+                    DailyItemUiState(
                         routineItemId = 2,
                         actionId = 102,
                         title = "Stretch",
@@ -31,7 +31,7 @@ data class TodayUiState(
                         isChecked = false,
                         note = "",
                     ),
-                    TodayItemUiState(
+                    DailyItemUiState(
                         routineItemId = 3,
                         actionId = 103,
                         title = "Read",
@@ -44,12 +44,12 @@ data class TodayUiState(
                 ),
             )
 
-        fun previewEmpty(): TodayUiState =
-            TodayUiState(date = "2026-05-29")
+        fun previewEmpty(): DailyUiState =
+            DailyUiState(date = "2026-05-29")
     }
 }
 
-data class TodayItemUiState(
+data class DailyItemUiState(
     val routineItemId: Long,
     val actionId: Long,
     val title: String,

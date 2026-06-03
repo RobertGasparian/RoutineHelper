@@ -19,6 +19,14 @@ interface DailySnapshotDao {
     fun snapshots(cadence: String): Flow<List<DailySnapshotEntity>>
 
     @Transaction
+    @Query("SELECT * FROM daily_snapshots ORDER BY date DESC")
+    fun snapshotsWithEntries(): Flow<List<DailySnapshotWithEntries>>
+
+    @Transaction
+    @Query("SELECT * FROM daily_snapshots WHERE cadence = :cadence ORDER BY date DESC")
+    fun snapshotsWithEntries(cadence: String): Flow<List<DailySnapshotWithEntries>>
+
+    @Transaction
     @Query("SELECT * FROM daily_snapshots WHERE id = :id")
     fun snapshot(id: Long): Flow<DailySnapshotWithEntries?>
 
