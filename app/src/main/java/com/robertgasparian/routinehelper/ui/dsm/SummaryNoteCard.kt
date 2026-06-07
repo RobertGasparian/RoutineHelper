@@ -2,6 +2,8 @@ package com.robertgasparian.routinehelper.ui.dsm
 
 import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,10 +20,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.StickyNote2
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,10 +44,9 @@ fun SummaryNoteCard(
 ) {
     val hasNote = note.isNotBlank()
 
-    Card(
+    OutlinedCard(
         modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onEditClick),
+            .fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         border = CardDefaults.outlinedCardBorder().copy(
             brush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.outlineVariant),
@@ -96,20 +97,25 @@ fun SummaryNoteCard(
 private fun SummaryNoteIcon(
     modifier: Modifier = Modifier,
 ) {
-    Surface(
-        modifier = modifier.size(32.dp),
-        shape = RoundedCornerShape(8.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        contentColor = MaterialTheme.colorScheme.primary,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Icon(
-                modifier = Modifier.size(20.dp),
-                imageVector = Icons.AutoMirrored.Filled.StickyNote2,
-                contentDescription = null,
+    Box(
+        modifier = modifier
+            .size(32.dp)
+            .background(
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                shape = RoundedCornerShape(8.dp),
             )
-        }
+            .border(
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                shape = RoundedCornerShape(8.dp),
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            modifier = Modifier.size(20.dp),
+            imageVector = Icons.AutoMirrored.Filled.StickyNote2,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+        )
     }
 }
 
@@ -139,23 +145,23 @@ private fun SummaryNoteTextBlock(
     text: String,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyMedium,
-            maxLines = 3,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-        )
-    }
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        maxLines = 3,
+        overflow = TextOverflow.Ellipsis,
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                shape = RoundedCornerShape(8.dp),
+            )
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+    )
 }
 
-@Preview(showBackground = true, widthDp = 390, heightDp = 520)
+@Preview(showBackground = true, widthDp = 390, heightDp = 620)
 @Composable
 private fun SummaryNoteCardAllStatesPreview() {
     RoutineHelperTheme(dynamicColor = false) {
@@ -163,7 +169,7 @@ private fun SummaryNoteCardAllStatesPreview() {
     }
 }
 
-@Preview(showBackground = true, widthDp = 390, heightDp = 520, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(showBackground = true, widthDp = 390, heightDp = 620, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SummaryNoteCardAllStatesDarkPreview() {
     RoutineHelperTheme(dynamicColor = false) {
