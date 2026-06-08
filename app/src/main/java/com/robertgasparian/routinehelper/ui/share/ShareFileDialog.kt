@@ -6,26 +6,23 @@ import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import com.robertgasparian.routinehelper.ui.dsm.RoutineDialogFilledButton
 import com.robertgasparian.routinehelper.ui.dsm.RoutineDialogTextButton
+import com.robertgasparian.routinehelper.ui.dsm.RoutineOutlinedTextField
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 import java.io.File
 
@@ -51,27 +48,23 @@ fun ShareFileDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 ShareFileDescriptionBlock()
-                ShareFileFieldLabel(
-                    text = "File name",
-                    isRequired = true,
-                )
-                OutlinedTextField(
+                RoutineOutlinedTextField(
                     value = draft.fileName.orEmpty(),
                     onValueChange = onFileNameChange,
+                    label = "File name",
+                    isRequired = true,
                     singleLine = true,
-                    colors = shareFileTextFieldColors(),
                     modifier = Modifier.fillMaxWidth(),
                 )
-                ShareFileFieldLabel(text = "Message")
-                OutlinedTextField(
+                RoutineOutlinedTextField(
                     value = draft.messageText,
                     onValueChange = onTextChange,
+                    label = "Message",
                     minLines = 3,
                     maxLines = 5,
                     supportingText = {
                         Text(text = "${draft.messageText.length} characters")
                     },
-                    colors = shareFileTextFieldColors(),
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -118,27 +111,23 @@ private fun ShareFileDialogPreviewContent(
                 style = MaterialTheme.typography.headlineSmall,
             )
             ShareFileDescriptionBlock()
-            ShareFileFieldLabel(
-                text = "File name",
-                isRequired = true,
-            )
-            OutlinedTextField(
+            RoutineOutlinedTextField(
                 value = draft.fileName.orEmpty(),
                 onValueChange = {},
+                label = "File name",
+                isRequired = true,
                 singleLine = true,
-                colors = shareFileTextFieldColors(),
                 modifier = Modifier.fillMaxWidth(),
             )
-            ShareFileFieldLabel(text = "Message")
-            OutlinedTextField(
+            RoutineOutlinedTextField(
                 value = draft.messageText,
                 onValueChange = {},
+                label = "Message",
                 minLines = 3,
                 maxLines = 5,
                 supportingText = {
                     Text(text = "${draft.messageText.length} characters")
                 },
-                colors = shareFileTextFieldColors(),
                 modifier = Modifier.fillMaxWidth(),
             )
             FlowRow(
@@ -160,15 +149,6 @@ private fun ShareFileDialogPreviewContent(
 }
 
 @Composable
-private fun shareFileTextFieldColors() =
-    OutlinedTextFieldDefaults.colors(
-        focusedBorderColor = MaterialTheme.colorScheme.primary,
-        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-    )
-
-@Composable
 private fun ShareFileDescriptionBlock(
     modifier: Modifier = Modifier,
 ) {
@@ -184,29 +164,6 @@ private fun ShareFileDescriptionBlock(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-    }
-}
-
-@Composable
-private fun ShareFileFieldLabel(
-    text: String,
-    isRequired: Boolean = false,
-) {
-    Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        if (isRequired) {
-            Text(
-                text = "*",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.error,
-            )
-        }
     }
 }
 

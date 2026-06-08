@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.WindowInsets
@@ -38,7 +37,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -57,7 +55,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.robertgasparian.routinehelper.ui.dsm.RoutineOutlinedTextField
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 
 sealed interface ShareTextPreviewUiEvent {
@@ -139,13 +139,13 @@ fun ShareTextPreviewComponent(
             if (isOverSoftLimit) {
                 ShareTextLimitNote()
             }
-            OutlinedTextField(
+            RoutineOutlinedTextField(
                 value = text,
                 onValueChange = { value -> onEvent(ShareTextPreviewUiEvent.TextChange(value)) },
+                label = "Message",
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                shape = RoundedCornerShape(16.dp),
                 minLines = 12,
                 supportingText = {
                     Text(text = "${text.length} characters")
@@ -292,10 +292,7 @@ private fun ShareTextPreviewMorphActions(
     ) { keyboardVisible ->
         if (keyboardVisible) 48.dp else 114.dp
     }
-    val shareYOffset by transition.animateDp(
-        transitionSpec = { animationSpec },
-        label = "ShareYOffset",
-    ) { 0.dp }
+    val shareYOffset = 0.dp
     val cancelYOffset by transition.animateDp(
         transitionSpec = { animationSpec },
         label = "CancelYOffset",
@@ -308,6 +305,7 @@ private fun ShareTextPreviewMorphActions(
             .fillMaxWidth()
             .height(containerHeight),
     ) {
+        val density = LocalDensity.current
         val horizontalGap = 10.dp
         val compactWidth = (maxWidth - horizontalGap) / 2
         val buttonWidth by transition.animateDp(
@@ -322,14 +320,16 @@ private fun ShareTextPreviewMorphActions(
         ) { keyboardVisible ->
             if (keyboardVisible) compactWidth + horizontalGap else 0.dp
         }
-        val cancelXOffset by transition.animateDp(
-            transitionSpec = { animationSpec },
-            label = "CancelXOffset",
-        ) { 0.dp }
+        val cancelXOffset = 0.dp
 
         Box(
             modifier = Modifier
-                .offset(x = shareXOffset, y = shareYOffset)
+                .offset {
+                    IntOffset(
+                        x = with(density) { shareXOffset.roundToPx() },
+                        y = with(density) { shareYOffset.roundToPx() },
+                    )
+                }
                 .width(buttonWidth)
                 .height(buttonHeight),
         ) {
@@ -344,7 +344,12 @@ private fun ShareTextPreviewMorphActions(
         OutlinedButton(
             onClick = onCancelClick,
             modifier = Modifier
-                .offset(x = cancelXOffset, y = cancelYOffset)
+                .offset {
+                    IntOffset(
+                        x = with(density) { cancelXOffset.roundToPx() },
+                        y = with(density) { cancelYOffset.roundToPx() },
+                    )
+                }
                 .width(buttonWidth)
                 .height(buttonHeight),
         ) {

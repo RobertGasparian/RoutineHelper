@@ -27,7 +27,7 @@ class HistoryDetailViewModel @AssistedInject constructor(
     @Assisted private val snapshotId: Long,
     private val deleteSnapshotUseCase: DeleteSnapshotUseCase,
     private val snapshotShareTextUseCase: SnapshotShareTextUseCase,
-    private val snapshotUseCase: SnapshotUseCase,
+    snapshotUseCase: SnapshotUseCase,
 ) : ViewModel() {
     private val isShareFormatDialogVisible = MutableStateFlow(false)
     private val shareDraft = MutableStateFlow<ShareDraft?>(null)

@@ -1,7 +1,6 @@
 package com.robertgasparian.routinehelper.ui.actioneditor
 
 import android.content.res.Configuration
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -28,7 +26,6 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.ViewWeek
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,7 +35,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
@@ -60,6 +56,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.ui.dsm.RoutineDialogTextButton
+import com.robertgasparian.routinehelper.ui.dsm.RoutineOutlinedTextField
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -159,27 +156,20 @@ private fun ActionEditorFormCard(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             ActionEditorCadenceRow(cadence = cadence)
-            OutlinedTextField(
+            RoutineOutlinedTextField(
                 value = uiState.title,
                 onValueChange = { title -> onEvent(ActionEditorUiEvent.TitleChange(title)) },
-                label = {
-                    Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text(text = "Title")
-                        Text(
-                            text = "*",
-                            color = MaterialTheme.colorScheme.error,
-                        )
-                    }
-                },
-                placeholder = { Text(text = "Drink water") },
+                label = "Title",
+                isRequired = true,
+                placeholder = "Drink water",
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
-            OutlinedTextField(
+            RoutineOutlinedTextField(
                 value = uiState.description,
                 onValueChange = { description -> onEvent(ActionEditorUiEvent.DescriptionChange(description)) },
-                label = { Text(text = "Description") },
-                placeholder = { Text(text = "Drink 3L water") },
+                label = "Description",
+                placeholder = "Drink 3L water",
                 minLines = 4,
                 modifier = Modifier.fillMaxWidth(),
             )

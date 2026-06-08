@@ -64,7 +64,9 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
         val existingSnapshot = snapshots.value.firstOrNull { snapshot ->
             snapshot.date == date && snapshot.cadence == cadence
         }
-        val snapshotId = existingSnapshot?.snapshotId ?: (snapshots.value.maxOfOrNull { it.snapshotId } ?: 0L) + 1L
+        val snapshotId =
+            existingSnapshot?.snapshotId ?: ((snapshots.value.maxOfOrNull { it.snapshotId }
+                ?: 0L) + 1L)
         val savedSnapshot = SavedSnapshot(
             date = date,
             finalizedAtMillis = finalizedAtMillis,

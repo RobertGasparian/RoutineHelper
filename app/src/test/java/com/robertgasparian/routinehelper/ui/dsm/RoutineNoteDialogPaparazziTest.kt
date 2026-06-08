@@ -24,6 +24,7 @@ class RoutineNoteDialogPaparazziTest {
                     title = "Edit note",
                     supportingText = "Daily note for Walk",
                     placeholder = "Daily note",
+                    autoFocus = false,
                 )
             }
         }
@@ -41,6 +42,7 @@ class RoutineNoteDialogPaparazziTest {
                     title = "Add note",
                     supportingText = "This note is saved for this day only.",
                     placeholder = "Day note",
+                    autoFocus = false,
                 )
             }
         }

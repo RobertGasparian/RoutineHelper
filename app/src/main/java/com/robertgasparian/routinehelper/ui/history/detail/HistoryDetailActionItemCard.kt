@@ -66,7 +66,6 @@ fun HistoryDetailActionItemCard(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 SnapshotCompletionMark(
-                    item = item,
                     isComplete = isComplete,
                 )
 
@@ -106,7 +105,6 @@ fun HistoryDetailActionItemCard(
 
 @Composable
 private fun SnapshotCompletionMark(
-    item: HistoryDetailItemUiState,
     isComplete: Boolean,
     modifier: Modifier = Modifier,
 ) {

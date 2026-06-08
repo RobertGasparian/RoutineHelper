@@ -112,9 +112,6 @@ private fun String.toRoutineCadence(): RoutineCadence =
         else -> RoutineCadence.Daily
     }
 
-private fun DailySnapshotWithEntries.toDomain(): RoutineDaySnapshot =
-    snapshot.toDomain(entries)
-
 private fun DailySnapshotEntity.toDomain(
     entries: List<DailySnapshotEntryEntity>,
 ): RoutineDaySnapshot =

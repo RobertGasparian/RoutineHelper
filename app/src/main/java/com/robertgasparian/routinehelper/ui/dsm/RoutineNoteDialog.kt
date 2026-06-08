@@ -8,11 +8,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Schedule
@@ -34,10 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -47,7 +42,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
-import kotlinx.coroutines.delay
 import java.util.Date
 
 @Composable
@@ -60,6 +54,7 @@ fun RoutineNoteDialog(
     title: String = if (note.isBlank()) "Add note" else "Edit note",
     supportingText: String = "This note is saved for this day only.",
     placeholder: String = "Note",
+    autoFocus: Boolean = true,
 ) {
     Dialog(
         onDismissRequest = onDismiss,
@@ -73,6 +68,7 @@ fun RoutineNoteDialog(
             title = title,
             supportingText = supportingText,
             placeholder = placeholder,
+            autoFocus = autoFocus,
             modifier = modifier,
         )
     }
@@ -88,10 +84,10 @@ fun RoutineNoteDialogContent(
     title: String = if (note.isBlank()) "Add note" else "Edit note",
     supportingText: String = "This note is saved for this day only.",
     placeholder: String = "Note",
+    autoFocus: Boolean = true,
 ) {
     val context = LocalContext.current
     val focusRequester = remember { FocusRequester() }
-    val keyboardController = LocalSoftwareKeyboardController.current
     var noteFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(note, selection = TextRange(note.length)))
     }
@@ -107,10 +103,10 @@ fun RoutineNoteDialogContent(
         onNoteChange(value.text)
     }
 
-    LaunchedEffect(Unit) {
-        delay(100)
-        focusRequester.requestFocus()
-        keyboardController?.show()
+    LaunchedEffect(autoFocus) {
+        if (autoFocus) {
+            focusRequester.requestFocus()
+        }
     }
 
     Surface(
@@ -168,7 +164,7 @@ fun RoutineNoteDialogContent(
             RoutineNoteField(
                 value = noteFieldValue,
                 onValueChange = ::updateNote,
-                placeholder = placeholder,
+                label = placeholder,
                 focusRequester = focusRequester,
             )
 
@@ -207,52 +203,23 @@ fun RoutineNoteDialogContent(
 private fun RoutineNoteField(
     value: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
-    placeholder: String,
+    label: String,
     focusRequester: FocusRequester,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        contentColor = MaterialTheme.colorScheme.onSurface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 128.dp)
-                .padding(12.dp),
-        ) {
-            BasicTextField(
-                value = value,
-                onValueChange = onValueChange,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 104.dp)
-                    .focusRequester(focusRequester),
-                textStyle = TextStyle.Default.merge(
-                    MaterialTheme.typography.bodyMedium.copy(
-                        color = MaterialTheme.colorScheme.onSurface,
-                    ),
-                ),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                keyboardOptions = KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Sentences,
-                ),
-                decorationBox = { innerTextField ->
-                    if (value.text.isBlank()) {
-                        Text(
-                            text = placeholder,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    innerTextField()
-                },
-            )
-        }
-    }
+    RoutineOutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = label,
+        modifier = modifier
+            .fillMaxWidth()
+            .focusRequester(focusRequester),
+        minLines = 6,
+        maxLines = 10,
+        keyboardOptions = KeyboardOptions(
+            capitalization = KeyboardCapitalization.Sentences,
+        ),
+    )
 }
 
 @Preview(showBackground = true, widthDp = 390)
@@ -266,6 +233,7 @@ private fun RoutineNoteDialogAddPreview() {
                 onNoteChange = { note = it },
                 onDismiss = {},
                 onSaveClick = {},
+                autoFocus = false,
             )
         }
     }
@@ -282,6 +250,7 @@ private fun RoutineNoteDialogEditPreview() {
                 onNoteChange = { note = it },
                 onDismiss = {},
                 onSaveClick = {},
+                autoFocus = false,
             )
         }
     }
@@ -300,6 +269,7 @@ private fun RoutineNoteDialogDarkPreview() {
                 onNoteChange = { note = it },
                 onDismiss = {},
                 onSaveClick = {},
+                autoFocus = false,
             )
         }
     }
