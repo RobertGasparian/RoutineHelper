@@ -30,12 +30,16 @@ fun WeeklyScreen(
                 )
                 DailyUiEvent.CreateActionClick -> onCreateActionClick()
                 is DailyUiEvent.EditActionClick -> onEditActionClick(event.actionId)
-                is DailyUiEvent.NoteChange -> viewModel.updateNote(
-                    routineItemId = event.routineItemId,
-                    note = event.note,
-                )
-                is DailyUiEvent.SummaryNoteChange -> viewModel.updateSummaryNote(event.note)
                 DailyUiEvent.SnapshotClick -> viewModel.snapshotWeek()
+                is DailyUiEvent.EditNoteClick -> viewModel.showItemNoteEditor(event.item)
+                DailyUiEvent.EditSummaryNoteClick -> viewModel.showSummaryNoteEditor(uiState.summaryNote)
+                is DailyUiEvent.NoteDraftChange -> viewModel.updateNoteDraft(event.value)
+                DailyUiEvent.NoteDraftClearClick -> viewModel.clearNoteDraft()
+                DailyUiEvent.NoteDraftDateClick -> viewModel.insertCurrentDateIntoNoteDraft()
+                DailyUiEvent.NoteDraftWeekdayClick -> viewModel.insertCurrentWeekdayIntoNoteDraft()
+                DailyUiEvent.NoteDraftTimeClick -> viewModel.insertCurrentTimeIntoNoteDraft()
+                DailyUiEvent.NoteEditorDismiss -> viewModel.dismissNoteEditor()
+                DailyUiEvent.NoteEditorSaveClick -> viewModel.saveNoteDraft()
             }
         },
         title = "Weekly",

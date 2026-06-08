@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -32,7 +34,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -42,18 +43,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
-import java.util.Date
 
 @Composable
 fun RoutineNoteDialog(
-    note: String,
-    onNoteChange: (String) -> Unit,
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
     onDismiss: () -> Unit,
     onSaveClick: () -> Unit,
+    onClearClick: () -> Unit,
+    onDateClick: () -> Unit,
+    onWeekdayClick: () -> Unit,
+    onTimeClick: () -> Unit,
     modifier: Modifier = Modifier,
-    title: String = if (note.isBlank()) "Add note" else "Edit note",
+    title: String = if (value.text.isBlank()) "Add note" else "Edit note",
     supportingText: String = "This note is saved for this day only.",
-    placeholder: String = "Note",
+    label: String = "Note",
     autoFocus: Boolean = true,
 ) {
     Dialog(
@@ -61,13 +65,17 @@ fun RoutineNoteDialog(
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         RoutineNoteDialogContent(
-            note = note,
-            onNoteChange = onNoteChange,
+            value = value,
+            onValueChange = onValueChange,
             onDismiss = onDismiss,
             onSaveClick = onSaveClick,
+            onClearClick = onClearClick,
+            onDateClick = onDateClick,
+            onWeekdayClick = onWeekdayClick,
+            onTimeClick = onTimeClick,
             title = title,
             supportingText = supportingText,
-            placeholder = placeholder,
+            label = label,
             autoFocus = autoFocus,
             modifier = modifier,
         )
@@ -76,32 +84,21 @@ fun RoutineNoteDialog(
 
 @Composable
 fun RoutineNoteDialogContent(
-    note: String,
-    onNoteChange: (String) -> Unit,
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
     onDismiss: () -> Unit,
     onSaveClick: () -> Unit,
+    onClearClick: () -> Unit,
+    onDateClick: () -> Unit,
+    onWeekdayClick: () -> Unit,
+    onTimeClick: () -> Unit,
     modifier: Modifier = Modifier,
-    title: String = if (note.isBlank()) "Add note" else "Edit note",
+    title: String = if (value.text.isBlank()) "Add note" else "Edit note",
     supportingText: String = "This note is saved for this day only.",
-    placeholder: String = "Note",
+    label: String = "Note",
     autoFocus: Boolean = true,
 ) {
-    val context = LocalContext.current
     val focusRequester = remember { FocusRequester() }
-    var noteFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue(note, selection = TextRange(note.length)))
-    }
-
-    LaunchedEffect(note) {
-        if (note != noteFieldValue.text) {
-            noteFieldValue = TextFieldValue(note, selection = TextRange(note.length))
-        }
-    }
-
-    fun updateNote(value: TextFieldValue) {
-        noteFieldValue = value
-        onNoteChange(value.text)
-    }
 
     LaunchedEffect(autoFocus) {
         if (autoFocus) {
@@ -127,10 +124,10 @@ fun RoutineNoteDialogContent(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.Top,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     Text(
@@ -144,14 +141,32 @@ fun RoutineNoteDialogContent(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+            }
 
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 IconButton(
-                    onClick = {
-                        val currentTime = android.text.format.DateFormat
-                            .getTimeFormat(context)
-                            .format(Date())
-                        updateNote(noteFieldValue.insertAtCursor(currentTime))
-                    },
+                    onClick = onWeekdayClick,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Event,
+                        contentDescription = "Add weekday",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                IconButton(
+                    onClick = onDateClick,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.DateRange,
+                        contentDescription = "Add today's date",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                IconButton(
+                    onClick = onTimeClick,
                 ) {
                     Icon(
                         imageVector = Icons.Default.Schedule,
@@ -162,9 +177,9 @@ fun RoutineNoteDialogContent(
             }
 
             RoutineNoteField(
-                value = noteFieldValue,
-                onValueChange = ::updateNote,
-                label = placeholder,
+                value = value,
+                onValueChange = onValueChange,
+                label = label,
                 focusRequester = focusRequester,
             )
 
@@ -172,12 +187,10 @@ fun RoutineNoteDialogContent(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (note.isNotBlank()) {
+                if (value.text.isNotBlank()) {
                     RoutineDialogTextButton(
                         text = "Clear",
-                        onClick = {
-                            updateNote(TextFieldValue("", selection = TextRange(0)))
-                        },
+                        onClick = onClearClick,
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
@@ -227,12 +240,18 @@ private fun RoutineNoteField(
 private fun RoutineNoteDialogAddPreview() {
     RoutineHelperTheme(dynamicColor = false) {
         RoutineNoteDialogPreviewContainer {
-            var note by rememberSaveable { mutableStateOf("") }
+            var note by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+                mutableStateOf(TextFieldValue(""))
+            }
             RoutineNoteDialogContent(
-                note = note,
-                onNoteChange = { note = it },
+                value = note,
+                onValueChange = { note = it },
                 onDismiss = {},
                 onSaveClick = {},
+                onClearClick = { note = TextFieldValue("") },
+                onDateClick = { note = note.insertAtCursor("June 8") },
+                onWeekdayClick = { note = note.insertAtCursor("Monday") },
+                onTimeClick = { note = note.insertAtCursor("8:30 AM") },
                 autoFocus = false,
             )
         }
@@ -244,12 +263,18 @@ private fun RoutineNoteDialogAddPreview() {
 private fun RoutineNoteDialogEditPreview() {
     RoutineHelperTheme(dynamicColor = false) {
         RoutineNoteDialogPreviewContainer {
-            var note by rememberSaveable { mutableStateOf("Bring the smaller water bottle next time.") }
+            var note by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+                mutableStateOf(TextFieldValue("Bring the smaller water bottle next time."))
+            }
             RoutineNoteDialogContent(
-                note = note,
-                onNoteChange = { note = it },
+                value = note,
+                onValueChange = { note = it },
                 onDismiss = {},
                 onSaveClick = {},
+                onClearClick = { note = TextFieldValue("") },
+                onDateClick = { note = note.insertAtCursor("June 8") },
+                onWeekdayClick = { note = note.insertAtCursor("Monday") },
+                onTimeClick = { note = note.insertAtCursor("8:30 AM") },
                 autoFocus = false,
             )
         }
@@ -261,14 +286,18 @@ private fun RoutineNoteDialogEditPreview() {
 private fun RoutineNoteDialogDarkPreview() {
     RoutineHelperTheme(dynamicColor = false) {
         RoutineNoteDialogPreviewContainer {
-            var note by rememberSaveable {
-                mutableStateOf("Felt better after moving this to the start of the routine.")
+            var note by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+                mutableStateOf(TextFieldValue("Felt better after moving this to the start of the routine."))
             }
             RoutineNoteDialogContent(
-                note = note,
-                onNoteChange = { note = it },
+                value = note,
+                onValueChange = { note = it },
                 onDismiss = {},
                 onSaveClick = {},
+                onClearClick = { note = TextFieldValue("") },
+                onDateClick = { note = note.insertAtCursor("June 8") },
+                onWeekdayClick = { note = note.insertAtCursor("Monday") },
+                onTimeClick = { note = note.insertAtCursor("8:30 AM") },
                 autoFocus = false,
             )
         }

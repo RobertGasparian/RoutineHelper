@@ -15,9 +15,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 import java.time.ZonedDateTime
 import javax.inject.Inject
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -30,18 +31,22 @@ class DailyViewModel @Inject constructor(
     private val updateTodayItemCompletedCountUseCase: UpdateTodayItemCompletedCountUseCase,
     private val updateTodayItemNoteUseCase: UpdateTodayItemNoteUseCase,
     private val updateTodaySummaryNoteUseCase: UpdateTodaySummaryNoteUseCase,
+    private val noteDateTimeTextProvider: NoteDateTimeTextProvider,
 ) : ViewModel() {
     private val todayDate = LocalDate.now().toString()
+    private val noteEditor = MutableStateFlow<NoteEditorUiState?>(null)
 
     val uiState: StateFlow<DailyUiState> =
         combine(
             todayItemsUseCase(todayDate),
             todaySummaryNoteUseCase(todayDate),
-        ) { items, summaryNote ->
+            noteEditor,
+        ) { items, summaryNote, noteEditor ->
             DailyUiState(
                 date = todayDate,
                 summaryNote = summaryNote.orEmpty(),
                 items = items.map(TodayRoutineItem::toUiState),
+                noteEditor = noteEditor,
             )
         }
             .stateIn(
@@ -82,6 +87,64 @@ class DailyViewModel @Inject constructor(
                 date = todayDate,
                 note = note,
             )
+        }
+    }
+
+    fun showItemNoteEditor(item: DailyItemUiState) {
+        noteEditor.value = NoteEditorUiState.item(
+            routineItemId = item.routineItemId,
+            note = item.note,
+            isWeekly = false,
+            itemTitle = item.title,
+        )
+    }
+
+    fun showSummaryNoteEditor(summaryNote: String) {
+        noteEditor.value = NoteEditorUiState.summary(
+            note = summaryNote,
+            isWeekly = false,
+        )
+    }
+
+    fun updateNoteDraft(value: NoteDraftUiState) {
+        noteEditor.value = noteEditor.value?.copy(value = value)
+    }
+
+    fun insertCurrentDateIntoNoteDraft() {
+        insertTextIntoNoteDraft(noteDateTimeTextProvider.currentDateText())
+    }
+
+    fun insertCurrentWeekdayIntoNoteDraft() {
+        insertTextIntoNoteDraft(noteDateTimeTextProvider.currentWeekdayText())
+    }
+
+    fun insertCurrentTimeIntoNoteDraft() {
+        insertTextIntoNoteDraft(noteDateTimeTextProvider.currentTimeText())
+    }
+
+    fun clearNoteDraft() {
+        noteEditor.value = noteEditor.value?.copy(value = NoteDraftUiState.fromText(""))
+    }
+
+    fun dismissNoteEditor() {
+        noteEditor.value = null
+    }
+
+    fun saveNoteDraft() {
+        val editor = noteEditor.value ?: return
+        when (val target = editor.target) {
+            is NoteEditorTarget.Item -> updateNote(
+                routineItemId = target.routineItemId,
+                note = editor.value.text,
+            )
+            NoteEditorTarget.Summary -> updateSummaryNote(editor.value.text)
+        }
+        noteEditor.value = null
+    }
+
+    private fun insertTextIntoNoteDraft(text: String) {
+        noteEditor.value = noteEditor.value?.let { editor ->
+            editor.copy(value = editor.value.insertAtCursor(text))
         }
     }
 

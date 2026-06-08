@@ -24,10 +24,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -58,16 +55,29 @@ sealed interface DailyUiEvent {
         val completedCount: Int,
     ) : DailyUiEvent
 
-    data class NoteChange(
-        val routineItemId: Long,
-        val note: String,
-    ) : DailyUiEvent
-
-    data class SummaryNoteChange(
-        val note: String,
-    ) : DailyUiEvent
-
     data object SnapshotClick : DailyUiEvent
+
+    data class EditNoteClick(
+        val item: DailyItemUiState,
+    ) : DailyUiEvent
+
+    data object EditSummaryNoteClick : DailyUiEvent
+
+    data class NoteDraftChange(
+        val value: NoteDraftUiState,
+    ) : DailyUiEvent
+
+    data object NoteDraftClearClick : DailyUiEvent
+
+    data object NoteDraftDateClick : DailyUiEvent
+
+    data object NoteDraftWeekdayClick : DailyUiEvent
+
+    data object NoteDraftTimeClick : DailyUiEvent
+
+    data object NoteEditorDismiss : DailyUiEvent
+
+    data object NoteEditorSaveClick : DailyUiEvent
 }
 
 @Composable
@@ -92,12 +102,16 @@ fun DailyScreen(
                 )
                 DailyUiEvent.CreateActionClick -> onCreateActionClick()
                 is DailyUiEvent.EditActionClick -> onEditActionClick(event.actionId)
-                is DailyUiEvent.NoteChange -> viewModel.updateNote(
-                    routineItemId = event.routineItemId,
-                    note = event.note,
-                )
-                is DailyUiEvent.SummaryNoteChange -> viewModel.updateSummaryNote(event.note)
                 DailyUiEvent.SnapshotClick -> viewModel.snapshotDaily()
+                is DailyUiEvent.EditNoteClick -> viewModel.showItemNoteEditor(event.item)
+                DailyUiEvent.EditSummaryNoteClick -> viewModel.showSummaryNoteEditor(uiState.summaryNote)
+                is DailyUiEvent.NoteDraftChange -> viewModel.updateNoteDraft(event.value)
+                DailyUiEvent.NoteDraftClearClick -> viewModel.clearNoteDraft()
+                DailyUiEvent.NoteDraftDateClick -> viewModel.insertCurrentDateIntoNoteDraft()
+                DailyUiEvent.NoteDraftWeekdayClick -> viewModel.insertCurrentWeekdayIntoNoteDraft()
+                DailyUiEvent.NoteDraftTimeClick -> viewModel.insertCurrentTimeIntoNoteDraft()
+                DailyUiEvent.NoteEditorDismiss -> viewModel.dismissNoteEditor()
+                DailyUiEvent.NoteEditorSaveClick -> viewModel.saveNoteDraft()
             }
         },
         showSnapshotAction = BuildConfig.DEBUG,
@@ -115,10 +129,6 @@ fun DailyComponent(
     emptyDescription: String = "Add your first daily action to start tracking.",
     showSnapshotAction: Boolean = true,
 ) {
-    var noteEditorItem by rememberSaveable { mutableStateOf<DailyItemUiState?>(null) }
-    var isSummaryNoteEditorVisible by rememberSaveable { mutableStateOf(false) }
-    var noteEditorText by rememberSaveable { mutableStateOf("") }
-    var summaryNoteEditorText by rememberSaveable { mutableStateOf("") }
     val listState = rememberLazyListState()
     val fabVisible by remember {
         derivedStateOf {
@@ -211,8 +221,7 @@ fun DailyComponent(
                         note = uiState.summaryNote,
                         label = if (title == "Weekly") "Week note" else "Day note",
                         onEditClick = {
-                            summaryNoteEditorText = uiState.summaryNote
-                            isSummaryNoteEditorVisible = true
+                            onEvent(DailyUiEvent.EditSummaryNoteClick)
                         },
                     )
                 }
@@ -237,8 +246,7 @@ fun DailyComponent(
                             onEvent(DailyUiEvent.EditActionClick(item.actionId))
                         },
                         onEditNoteClick = {
-                            noteEditorItem = item
-                            noteEditorText = item.note
+                            onEvent(DailyUiEvent.EditNoteClick(item))
                         },
                     )
                 }
@@ -246,39 +254,19 @@ fun DailyComponent(
         }
     }
 
-    noteEditorItem?.let { item ->
-        val itemNoteLabel = if (title == "Weekly") "Weekly note" else "Daily note"
+    uiState.noteEditor?.let { editor ->
         RoutineNoteDialog(
-            note = noteEditorText,
-            onNoteChange = { noteEditorText = it },
-            title = if (item.note.isBlank()) "Add note" else "Edit note",
-            supportingText = "$itemNoteLabel for ${item.title}",
-            placeholder = itemNoteLabel,
-            onDismiss = { noteEditorItem = null },
-            onSaveClick = {
-                onEvent(DailyUiEvent.NoteChange(item.routineItemId, noteEditorText))
-                noteEditorItem = null
-            },
-        )
-    }
-
-    if (isSummaryNoteEditorVisible) {
-        val label = if (title == "Weekly") "Week note" else "Day note"
-        RoutineNoteDialog(
-            note = summaryNoteEditorText,
-            onNoteChange = { summaryNoteEditorText = it },
-            title = label,
-            supportingText = if (title == "Weekly") {
-                "This note is saved for the current week."
-            } else {
-                "This note is saved for this day only."
-            },
-            placeholder = label,
-            onDismiss = { isSummaryNoteEditorVisible = false },
-            onSaveClick = {
-                onEvent(DailyUiEvent.SummaryNoteChange(summaryNoteEditorText))
-                isSummaryNoteEditorVisible = false
-            },
+            value = editor.value.toTextFieldValue(),
+            onValueChange = { value -> onEvent(DailyUiEvent.NoteDraftChange(value.toNoteDraftUiState())) },
+            title = editor.title,
+            supportingText = editor.supportingText,
+            label = editor.label,
+            onDismiss = { onEvent(DailyUiEvent.NoteEditorDismiss) },
+            onSaveClick = { onEvent(DailyUiEvent.NoteEditorSaveClick) },
+            onClearClick = { onEvent(DailyUiEvent.NoteDraftClearClick) },
+            onDateClick = { onEvent(DailyUiEvent.NoteDraftDateClick) },
+            onWeekdayClick = { onEvent(DailyUiEvent.NoteDraftWeekdayClick) },
+            onTimeClick = { onEvent(DailyUiEvent.NoteDraftTimeClick) },
         )
     }
 }

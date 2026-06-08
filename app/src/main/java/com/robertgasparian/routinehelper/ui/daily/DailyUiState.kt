@@ -4,6 +4,7 @@ data class DailyUiState(
     val date: String,
     val summaryNote: String = "",
     val items: List<DailyItemUiState> = emptyList(),
+    val noteEditor: NoteEditorUiState? = null,
 ) {
     companion object {
         fun preview(): DailyUiState =
@@ -47,6 +48,87 @@ data class DailyUiState(
         fun previewEmpty(): DailyUiState =
             DailyUiState(date = "2026-05-29")
     }
+}
+
+data class NoteEditorUiState(
+    val target: NoteEditorTarget,
+    val title: String,
+    val supportingText: String,
+    val label: String,
+    val value: NoteDraftUiState,
+) {
+    val canClear: Boolean = value.text.isNotBlank()
+
+    companion object {
+        fun item(
+            routineItemId: Long,
+            note: String,
+            isWeekly: Boolean,
+            itemTitle: String,
+        ): NoteEditorUiState {
+            val label = if (isWeekly) "Weekly note" else "Daily note"
+            return NoteEditorUiState(
+                target = NoteEditorTarget.Item(routineItemId),
+                title = if (note.isBlank()) "Add note" else "Edit note",
+                supportingText = "$label for $itemTitle",
+                label = label,
+                value = NoteDraftUiState.fromText(note),
+            )
+        }
+
+        fun summary(
+            note: String,
+            isWeekly: Boolean,
+        ): NoteEditorUiState {
+            val label = if (isWeekly) "Week note" else "Day note"
+            return NoteEditorUiState(
+                target = NoteEditorTarget.Summary,
+                title = label,
+                supportingText = if (isWeekly) {
+                    "This note is saved for the current week."
+                } else {
+                    "This note is saved for this day only."
+                },
+                label = label,
+                value = NoteDraftUiState.fromText(note),
+            )
+        }
+    }
+}
+
+sealed interface NoteEditorTarget {
+    data class Item(
+        val routineItemId: Long,
+    ) : NoteEditorTarget
+
+    data object Summary : NoteEditorTarget
+}
+
+data class NoteDraftUiState(
+    val text: String,
+    val selectionStart: Int,
+    val selectionEnd: Int = selectionStart,
+) {
+    companion object {
+        fun fromText(text: String): NoteDraftUiState =
+            NoteDraftUiState(
+                text = text,
+                selectionStart = text.length,
+                selectionEnd = text.length,
+            )
+    }
+}
+
+fun NoteDraftUiState.insertAtCursor(textToInsert: String): NoteDraftUiState {
+    val start = minOf(selectionStart, selectionEnd).coerceIn(0, text.length)
+    val end = maxOf(selectionStart, selectionEnd).coerceIn(0, text.length)
+    val updatedText = text.replaceRange(start, end, textToInsert)
+    val updatedCursor = start + textToInsert.length
+    return NoteDraftUiState(
+        text = updatedText,
+        selectionStart = updatedCursor,
+        selectionEnd = updatedCursor,
+    )
 }
 
 data class DailyItemUiState(

@@ -1,0 +1,38 @@
+package com.robertgasparian.routinehelper.ui.daily
+
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import javax.inject.Inject
+
+class NoteDateTimeTextProvider @Inject constructor(
+    @param:ApplicationContext private val context: Context,
+) {
+    fun currentTimeText(): String =
+        android.text.format.DateFormat
+            .getTimeFormat(context)
+            .format(Date())
+
+    fun currentDateText(): String {
+        val locale = context.currentLocale()
+        return currentText(patternSkeleton = "MMMd", locale = locale)
+    }
+
+    fun currentWeekdayText(): String {
+        val locale = context.currentLocale()
+        return currentText(patternSkeleton = "EEEE", locale = locale)
+    }
+
+    private fun currentText(
+        patternSkeleton: String,
+        locale: Locale,
+    ): String {
+        val pattern = android.text.format.DateFormat.getBestDateTimePattern(locale, patternSkeleton)
+        return SimpleDateFormat(pattern, locale).format(Date())
+    }
+}
+
+private fun Context.currentLocale(): Locale =
+    resources.configuration.locales[0]

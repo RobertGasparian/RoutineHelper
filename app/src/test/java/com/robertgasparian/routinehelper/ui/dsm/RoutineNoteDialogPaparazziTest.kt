@@ -2,6 +2,7 @@ package com.robertgasparian.routinehelper.ui.dsm
 
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
+import androidx.compose.ui.text.input.TextFieldValue
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 import org.junit.Rule
 import org.junit.Test
@@ -17,13 +18,17 @@ class RoutineNoteDialogPaparazziTest {
         paparazzi.snapshot {
             RoutineHelperTheme {
                 RoutineNoteDialogContent(
-                    note = "08:30 Walked before breakfast.",
-                    onNoteChange = {},
+                    value = TextFieldValue("08:30 Walked before breakfast."),
+                    onValueChange = {},
                     onDismiss = {},
                     onSaveClick = {},
+                    onClearClick = {},
+                    onDateClick = {},
+                    onWeekdayClick = {},
+                    onTimeClick = {},
                     title = "Edit note",
                     supportingText = "Daily note for Walk",
-                    placeholder = "Daily note",
+                    label = "Daily note",
                     autoFocus = false,
                 )
             }
@@ -35,13 +40,17 @@ class RoutineNoteDialogPaparazziTest {
         paparazzi.snapshot {
             RoutineHelperTheme {
                 RoutineNoteDialogContent(
-                    note = "",
-                    onNoteChange = {},
+                    value = TextFieldValue(""),
+                    onValueChange = {},
                     onDismiss = {},
                     onSaveClick = {},
+                    onClearClick = {},
+                    onDateClick = {},
+                    onWeekdayClick = {},
+                    onTimeClick = {},
                     title = "Add note",
                     supportingText = "This note is saved for this day only.",
-                    placeholder = "Day note",
+                    label = "Day note",
                     autoFocus = false,
                 )
             }

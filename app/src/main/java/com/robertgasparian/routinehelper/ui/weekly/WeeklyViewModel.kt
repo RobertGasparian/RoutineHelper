@@ -12,15 +12,21 @@ import com.robertgasparian.routinehelper.domain.usecase.WeeklyItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.WeeklySummaryNoteUseCase
 import com.robertgasparian.routinehelper.ui.daily.DailyItemUiState
 import com.robertgasparian.routinehelper.ui.daily.DailyUiState
+import com.robertgasparian.routinehelper.ui.daily.NoteDateTimeTextProvider
+import com.robertgasparian.routinehelper.ui.daily.NoteDraftUiState
+import com.robertgasparian.routinehelper.ui.daily.NoteEditorTarget
+import com.robertgasparian.routinehelper.ui.daily.NoteEditorUiState
+import com.robertgasparian.routinehelper.ui.daily.insertAtCursor
 import com.robertgasparian.routinehelper.work.SnapshotWorkDates
 import com.robertgasparian.routinehelper.work.startOfCalendarWeek
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 import java.time.ZonedDateTime
 import javax.inject.Inject
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -33,18 +39,22 @@ class WeeklyViewModel @Inject constructor(
     private val updateWeeklyItemCompletedCountUseCase: UpdateWeeklyItemCompletedCountUseCase,
     private val updateWeeklyItemNoteUseCase: UpdateWeeklyItemNoteUseCase,
     private val updateWeeklySummaryNoteUseCase: UpdateWeeklySummaryNoteUseCase,
+    private val noteDateTimeTextProvider: NoteDateTimeTextProvider,
 ) : ViewModel() {
     private val weekStartDate = LocalDate.now().startOfWeek().toString()
+    private val noteEditor = MutableStateFlow<NoteEditorUiState?>(null)
 
     val uiState: StateFlow<DailyUiState> =
         combine(
             weeklyItemsUseCase(weekStartDate),
             weeklySummaryNoteUseCase(weekStartDate),
-        ) { items, summaryNote ->
+            noteEditor,
+        ) { items, summaryNote, noteEditor ->
             DailyUiState(
                 date = "Week of $weekStartDate",
                 summaryNote = summaryNote.orEmpty(),
                 items = items.map(WeeklyRoutineItem::toUiState),
+                noteEditor = noteEditor,
             )
         }
             .stateIn(
@@ -85,6 +95,64 @@ class WeeklyViewModel @Inject constructor(
                 weekStartDate = weekStartDate,
                 note = note,
             )
+        }
+    }
+
+    fun showItemNoteEditor(item: DailyItemUiState) {
+        noteEditor.value = NoteEditorUiState.item(
+            routineItemId = item.routineItemId,
+            note = item.note,
+            isWeekly = true,
+            itemTitle = item.title,
+        )
+    }
+
+    fun showSummaryNoteEditor(summaryNote: String) {
+        noteEditor.value = NoteEditorUiState.summary(
+            note = summaryNote,
+            isWeekly = true,
+        )
+    }
+
+    fun updateNoteDraft(value: NoteDraftUiState) {
+        noteEditor.value = noteEditor.value?.copy(value = value)
+    }
+
+    fun insertCurrentDateIntoNoteDraft() {
+        insertTextIntoNoteDraft(noteDateTimeTextProvider.currentDateText())
+    }
+
+    fun insertCurrentWeekdayIntoNoteDraft() {
+        insertTextIntoNoteDraft(noteDateTimeTextProvider.currentWeekdayText())
+    }
+
+    fun insertCurrentTimeIntoNoteDraft() {
+        insertTextIntoNoteDraft(noteDateTimeTextProvider.currentTimeText())
+    }
+
+    fun clearNoteDraft() {
+        noteEditor.value = noteEditor.value?.copy(value = NoteDraftUiState.fromText(""))
+    }
+
+    fun dismissNoteEditor() {
+        noteEditor.value = null
+    }
+
+    fun saveNoteDraft() {
+        val editor = noteEditor.value ?: return
+        when (val target = editor.target) {
+            is NoteEditorTarget.Item -> updateNote(
+                routineItemId = target.routineItemId,
+                note = editor.value.text,
+            )
+            NoteEditorTarget.Summary -> updateSummaryNote(editor.value.text)
+        }
+        noteEditor.value = null
+    }
+
+    private fun insertTextIntoNoteDraft(text: String) {
+        noteEditor.value = noteEditor.value?.let { editor ->
+            editor.copy(value = editor.value.insertAtCursor(text))
         }
     }
 
