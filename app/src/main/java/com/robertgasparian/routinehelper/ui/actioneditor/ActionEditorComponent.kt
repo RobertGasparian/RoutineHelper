@@ -46,7 +46,6 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -60,6 +59,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.ui.dsm.RoutineDialogTextButton
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -441,19 +441,17 @@ private fun DeleteActionConfirmationDialog(
             Text(text = "This removes the action from this routine list. Existing saved history snapshots stay unchanged.")
         },
         confirmButton = {
-            TextButton(
+            RoutineDialogTextButton(
+                text = "Delete",
                 onClick = onDeleteClick,
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = MaterialTheme.colorScheme.error,
-                ),
-            ) {
-                Text(text = "Delete")
-            }
+                isDestructive = true,
+            )
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = "Cancel")
-            }
+            RoutineDialogTextButton(
+                text = "Cancel",
+                onClick = onDismiss,
+            )
         },
     )
 }

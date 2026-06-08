@@ -5,6 +5,7 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
+import com.robertgasparian.routinehelper.domain.usecase.ResetTodayUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.time.ZonedDateTime
@@ -15,6 +16,7 @@ class DailySnapshotWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted workerParameters: WorkerParameters,
     private val finalizeTodayUseCase: FinalizeTodayUseCase,
+    private val resetTodayUseCase: ResetTodayUseCase,
 ) : CoroutineWorker(appContext, workerParameters) {
     override suspend fun doWork(): Result {
         val snapshotDate = SnapshotWorkDates.dailySnapshotDate(ZonedDateTime.now()).toString()
@@ -24,6 +26,7 @@ class DailySnapshotWorker @AssistedInject constructor(
                 snapshotDate = snapshotDate,
                 finalizedAtMillis = System.currentTimeMillis(),
             )
+            resetTodayUseCase(snapshotDate)
             Result.success()
         } catch (cancellationException: CancellationException) {
             throw cancellationException

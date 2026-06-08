@@ -102,7 +102,7 @@ class DailyViewModel @Inject constructor(
         viewModelScope.launch {
             val snapshotDate = SnapshotWorkDates.dailySnapshotDate(ZonedDateTime.now()).toString()
             finalizeTodayUseCase(
-                date = snapshotDate,
+                date = todayDate,
                 snapshotDate = snapshotDate,
                 finalizedAtMillis = System.currentTimeMillis(),
             )

@@ -75,7 +75,12 @@ class HistoryDetailViewModel @AssistedInject constructor(
         shareDraft.value = ShareDraft.file(
             messageText = "Here is the ${snapshot.cadence.label.lowercase()} routine snapshot from ${snapshot.displayDate}.",
             fileText = snapshotShareTextUseCase(snapshot),
+            fileName = "routine-snapshot-${snapshot.displayDate}.txt",
         )
+    }
+
+    fun updateShareFileName(fileName: String) {
+        shareDraft.value = shareDraft.value?.copy(fileName = fileName)
     }
 
     fun updateShareText(text: String) {

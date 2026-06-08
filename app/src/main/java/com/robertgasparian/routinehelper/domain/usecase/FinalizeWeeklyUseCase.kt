@@ -15,17 +15,8 @@ class FinalizeWeeklyUseCase @Inject constructor(
         weekStartDate: String,
         finalizedAtMillis: Long,
         snapshotWeekStartDate: String = weekStartDate,
-    ): Long {
-        routineHistoryRepository.snapshotForDate(
-            date = snapshotWeekStartDate,
-            cadence = RoutineCadence.Weekly,
-        ).first()?.let { existing ->
-            weeklyRoutineRepository.resetWeek(weekStartDate)
-            return existing.snapshotId
-        }
-
+    ): Long? {
         val weeklyItems = weeklyRoutineRepository.weeklyItems(weekStartDate).first()
-        val summaryNote = weeklyRoutineRepository.summaryNote(weekStartDate).first()
         val snapshotItems = weeklyItems.map { item ->
             RoutineDaySnapshotItem(
                 actionId = item.actionId,
@@ -38,6 +29,9 @@ class FinalizeWeeklyUseCase @Inject constructor(
                 note = item.note,
             )
         }
+        if (snapshotItems.isEmpty()) return null
+
+        val summaryNote = weeklyRoutineRepository.summaryNote(weekStartDate).first()
 
         val snapshotId = routineHistoryRepository.saveSnapshot(
             date = snapshotWeekStartDate,
@@ -46,7 +40,6 @@ class FinalizeWeeklyUseCase @Inject constructor(
             summaryNote = summaryNote,
             cadence = RoutineCadence.Weekly,
         )
-        weeklyRoutineRepository.resetWeek(weekStartDate)
         return snapshotId
     }
 }

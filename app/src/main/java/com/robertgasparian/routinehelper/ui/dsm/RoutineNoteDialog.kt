@@ -23,7 +23,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -178,18 +177,18 @@ fun RoutineNoteDialogContent(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 if (note.isNotBlank()) {
-                    TextButton(
+                    RoutineDialogTextButton(
+                        text = "Clear",
                         onClick = {
                             updateNote(TextFieldValue("", selection = TextRange(0)))
                         },
-                    ) {
-                        Text(text = "Clear")
-                    }
+                    )
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                TextButton(onClick = onDismiss) {
-                    Text(text = "Cancel")
-                }
+                RoutineDialogTextButton(
+                    text = "Cancel",
+                    onClick = onDismiss,
+                )
                 Button(
                     onClick = onSaveClick,
                     colors = ButtonDefaults.buttonColors(

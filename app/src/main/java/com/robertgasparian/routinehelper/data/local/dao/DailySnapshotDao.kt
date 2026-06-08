@@ -30,6 +30,9 @@ interface DailySnapshotDao {
     @Query("SELECT * FROM daily_snapshots WHERE id = :id")
     fun snapshot(id: Long): Flow<DailySnapshotWithEntries?>
 
+    @Query("SELECT * FROM daily_snapshots WHERE id = :id")
+    fun snapshotHeader(id: Long): Flow<DailySnapshotEntity?>
+
     @Query("SELECT * FROM daily_snapshot_entries WHERE snapshotId = :snapshotId ORDER BY positionSnapshot")
     fun snapshotEntries(snapshotId: Long): Flow<List<DailySnapshotEntryEntity>>
 
@@ -39,11 +42,34 @@ interface DailySnapshotDao {
         cadence: String,
     ): Flow<DailySnapshotEntity?>
 
+    @Query("SELECT * FROM daily_snapshots WHERE date = :date AND cadence = :cadence")
+    suspend fun snapshotForDateOnce(
+        date: String,
+        cadence: String,
+    ): DailySnapshotEntity?
+
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertSnapshot(snapshot: DailySnapshotEntity): Long
 
+    @Query(
+        """
+        UPDATE daily_snapshots
+        SET finalizedAtMillis = :finalizedAtMillis,
+            summaryNote = :summaryNote
+        WHERE id = :id
+        """,
+    )
+    suspend fun updateSnapshot(
+        id: Long,
+        finalizedAtMillis: Long,
+        summaryNote: String?,
+    )
+
     @Insert
     suspend fun insertEntries(entries: List<DailySnapshotEntryEntity>)
+
+    @Query("DELETE FROM daily_snapshot_entries WHERE snapshotId = :snapshotId")
+    suspend fun deleteEntries(snapshotId: Long)
 
     @Query("DELETE FROM daily_snapshots WHERE id = :id")
     suspend fun deleteSnapshot(id: Long)

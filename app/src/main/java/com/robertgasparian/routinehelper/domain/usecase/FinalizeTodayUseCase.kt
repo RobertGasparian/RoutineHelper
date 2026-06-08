@@ -15,14 +15,8 @@ class FinalizeTodayUseCase @Inject constructor(
         date: String,
         finalizedAtMillis: Long,
         snapshotDate: String = date,
-    ): Long {
-        routineHistoryRepository.snapshotForDate(snapshotDate, cadence = RoutineCadence.Daily).first()?.let { existing ->
-            todayRoutineRepository.resetDate(date)
-            return existing.snapshotId
-        }
-
+    ): Long? {
         val todayItems = todayRoutineRepository.todayItems(date).first()
-        val summaryNote = todayRoutineRepository.summaryNote(date).first()
         val snapshotItems = todayItems.map { item ->
             RoutineDaySnapshotItem(
                 actionId = item.actionId,
@@ -35,6 +29,9 @@ class FinalizeTodayUseCase @Inject constructor(
                 note = item.note,
             )
         }
+        if (snapshotItems.isEmpty()) return null
+
+        val summaryNote = todayRoutineRepository.summaryNote(date).first()
 
         val snapshotId = routineHistoryRepository.saveSnapshot(
             date = snapshotDate,
@@ -43,7 +40,6 @@ class FinalizeTodayUseCase @Inject constructor(
             summaryNote = summaryNote,
             cadence = RoutineCadence.Daily,
         )
-        todayRoutineRepository.resetDate(date)
         return snapshotId
     }
 }

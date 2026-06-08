@@ -26,6 +26,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,8 +38,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.ui.dsm.RoutineHistoryItemCard
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
+import com.robertgasparian.routinehelper.ui.share.ShareFileDialog
 import com.robertgasparian.routinehelper.ui.share.ShareFormatDialog
-import com.robertgasparian.routinehelper.ui.share.ShareTextDialog
 import com.robertgasparian.routinehelper.ui.share.shareText
 import com.robertgasparian.routinehelper.ui.share.shareTextFile
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
@@ -70,6 +71,10 @@ sealed interface HistoryUiEvent {
         val text: String,
     ) : HistoryUiEvent
 
+    data class ShareFileNameChange(
+        val fileName: String,
+    ) : HistoryUiEvent
+
     data object ShareDismiss : HistoryUiEvent
 
     data class ShareTextConfirm(
@@ -84,11 +89,20 @@ sealed interface HistoryUiEvent {
 @Composable
 fun HistoryScreen(
     onSnapshotClick: (snapshotId: Long) -> Unit,
+    onShareTextPreviewClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HistoryViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(uiState.shareDraft) {
+        val draft = uiState.shareDraft
+        if (draft != null && !draft.isFileShare) {
+            viewModel.dismissSharePreview()
+            onShareTextPreviewClick(draft.messageText)
+        }
+    }
 
     HistoryComponent(
         uiState = uiState,
@@ -105,10 +119,11 @@ fun HistoryScreen(
                         fileText = event.draft.fileText.orEmpty(),
                         messageText = event.draft.messageText,
                         title = "Share routine snapshots",
-                        fileName = "routine-snapshots-export.txt",
+                        fileName = event.draft.fileName.orEmpty(),
                     )
                     viewModel.dismissSharePreview()
                 }
+                is HistoryUiEvent.ShareFileNameChange -> viewModel.updateShareFileName(event.fileName)
                 HistoryUiEvent.ShareSelectedClick -> viewModel.showShareOptions()
                 is HistoryUiEvent.ShareTextChange -> viewModel.updateShareText(event.text)
                 is HistoryUiEvent.ShareTextConfirm -> {
@@ -237,18 +252,13 @@ fun HistoryComponent(
         )
     }
 
-    uiState.shareDraft?.let { draft ->
-        ShareTextDialog(
+    uiState.shareDraft?.takeIf { draft -> draft.isFileShare }?.let { draft ->
+        ShareFileDialog(
             draft = draft,
+            onFileNameChange = { fileName -> onEvent(HistoryUiEvent.ShareFileNameChange(fileName)) },
             onTextChange = { text -> onEvent(HistoryUiEvent.ShareTextChange(text)) },
             onDismiss = { onEvent(HistoryUiEvent.ShareDismiss) },
-            onShareClick = {
-                if (draft.isFileShare) {
-                    onEvent(HistoryUiEvent.ShareFileConfirm(draft))
-                } else {
-                    onEvent(HistoryUiEvent.ShareTextConfirm(draft.messageText))
-                }
-            },
+            onShareClick = { onEvent(HistoryUiEvent.ShareFileConfirm(draft)) },
         )
     }
 }

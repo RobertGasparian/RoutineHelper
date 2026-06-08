@@ -6,7 +6,7 @@ import com.robertgasparian.routinehelper.domain.model.RoutineDaySummary
 import com.robertgasparian.routinehelper.domain.model.WeeklyRoutineItem
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 class FinalizeWeeklyUseCaseTest {
@@ -18,7 +18,7 @@ class FinalizeWeeklyUseCaseTest {
     )
 
     @Test
-    fun savesCurrentWeeklyItemsAsWeeklySnapshotAndResetsWeek() = runTest {
+    fun savesCurrentWeeklyItemsAsWeeklySnapshot() = runTest {
         weeklyRepository.setItems(
             weekStartDate = "2026-05-24",
             items = listOf(
@@ -55,7 +55,7 @@ class FinalizeWeeklyUseCaseTest {
         )
 
         assertEquals(1L, snapshotId)
-        assertEquals(listOf("2026-05-24"), weeklyRepository.resetWeeks)
+        assertEquals(emptyList<String>(), weeklyRepository.resetWeeks)
         assertEquals(
             SavedSnapshot(
                 date = "2026-05-24",
@@ -86,13 +86,28 @@ class FinalizeWeeklyUseCaseTest {
     }
 
     @Test
-    fun existingWeeklySnapshotIsNotSavedAgainButWeekIsReset() = runTest {
+    fun existingWeeklySnapshotIsReplaced() = runTest {
         historyRepository.setSnapshot(
             RoutineDaySummary(
                 snapshotId = 77L,
                 date = "2026-05-24",
                 finalizedAtMillis = 100L,
                 cadence = RoutineCadence.Weekly,
+            ),
+        )
+        weeklyRepository.setItems(
+            weekStartDate = "2026-05-24",
+            items = listOf(
+                WeeklyRoutineItem(
+                    routineItemId = 10L,
+                    actionId = 100L,
+                    title = "Meal prep",
+                    description = null,
+                    position = 0,
+                    weekStartDate = "2026-05-24",
+                    isChecked = true,
+                    note = "Updated weekly note.",
+                ),
             ),
         )
 
@@ -102,8 +117,25 @@ class FinalizeWeeklyUseCaseTest {
         )
 
         assertEquals(77L, snapshotId)
-        assertEquals(listOf("2026-05-24"), weeklyRepository.resetWeeks)
-        assertTrue(historyRepository.savedSnapshots.isEmpty())
+        assertEquals(emptyList<String>(), weeklyRepository.resetWeeks)
+        assertEquals(
+            SavedSnapshot(
+                date = "2026-05-24",
+                finalizedAtMillis = 200L,
+                cadence = RoutineCadence.Weekly,
+                items = listOf(
+                    RoutineDaySnapshotItem(
+                        actionId = 100L,
+                        title = "Meal prep",
+                        description = null,
+                        position = 0,
+                        isChecked = true,
+                        note = "Updated weekly note.",
+                    ),
+                ),
+            ),
+            historyRepository.savedSnapshots.single(),
+        )
     }
 
     @Test
@@ -132,6 +164,59 @@ class FinalizeWeeklyUseCaseTest {
 
         assertEquals("2026-05-17", historyRepository.savedSnapshots.single().date)
         assertEquals(RoutineCadence.Weekly, historyRepository.savedSnapshots.single().cadence)
-        assertEquals(listOf("2026-05-24"), weeklyRepository.resetWeeks)
+        assertEquals(emptyList<String>(), weeklyRepository.resetWeeks)
+    }
+
+    @Test
+    fun savesWeeklyItemsUnderSelectedSnapshotWeekWithoutResettingWeek() = runTest {
+        weeklyRepository.setItems(
+            weekStartDate = "2026-05-24",
+            items = listOf(
+                WeeklyRoutineItem(
+                    routineItemId = 10L,
+                    actionId = 100L,
+                    title = "Workout",
+                    description = null,
+                    position = 0,
+                    weekStartDate = "2026-05-24",
+                    repeatTargetCount = 9,
+                    completedCount = 9,
+                    isChecked = true,
+                    note = "Kept for debug weekly snapshot.",
+                ),
+            ),
+        )
+
+        useCase(
+            weekStartDate = "2026-05-24",
+            snapshotWeekStartDate = "2026-05-17",
+            finalizedAtMillis = 123L,
+        )
+
+        assertEquals("2026-05-17", historyRepository.savedSnapshots.single().date)
+        assertEquals(RoutineCadence.Weekly, historyRepository.savedSnapshots.single().cadence)
+        assertEquals(9, historyRepository.savedSnapshots.single().items.single().completedCount)
+        assertEquals(
+            "Kept for debug weekly snapshot.",
+            historyRepository.savedSnapshots.single().items.single().note,
+        )
+        assertEquals(emptyList<String>(), weeklyRepository.resetWeeks)
+    }
+
+    @Test
+    fun doesNotSaveSnapshotWhenThereAreNoItems() = runTest {
+        weeklyRepository.setSummaryNote(
+            weekStartDate = "2026-05-24",
+            note = "Note without actions should not create a snapshot.",
+        )
+
+        val snapshotId = useCase(
+            weekStartDate = "2026-05-24",
+            finalizedAtMillis = 123L,
+        )
+
+        assertNull(snapshotId)
+        assertEquals(emptyList<SavedSnapshot>(), historyRepository.savedSnapshots)
+        assertEquals(emptyList<String>(), weeklyRepository.resetWeeks)
     }
 }

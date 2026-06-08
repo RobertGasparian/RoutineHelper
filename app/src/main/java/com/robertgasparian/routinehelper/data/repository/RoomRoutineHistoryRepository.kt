@@ -11,6 +11,7 @@ import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshotItem
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySummary
 import com.robertgasparian.routinehelper.domain.repository.RoutineHistoryRepository
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -27,8 +28,11 @@ class RoomRoutineHistoryRepository(
         }
 
     override fun snapshot(snapshotId: Long): Flow<RoutineDaySnapshot?> =
-        dailySnapshotDao.snapshot(snapshotId).map { snapshotWithEntries ->
-            snapshotWithEntries?.toDomain()
+        combine(
+            dailySnapshotDao.snapshotHeader(snapshotId),
+            dailySnapshotDao.snapshotEntries(snapshotId),
+        ) { snapshot, entries ->
+            snapshot?.toDomain(entries)
         }
 
     override fun snapshotForDate(
@@ -54,14 +58,25 @@ class RoomRoutineHistoryRepository(
         summaryNote: String?,
         cadence: RoutineCadence,
     ): Long = database.withTransaction {
-        val snapshotId = dailySnapshotDao.insertSnapshot(
+        val storageCadence = cadence.toStorageValue()
+        val normalizedSummaryNote = summaryNote?.trim()?.takeIf(String::isNotEmpty)
+        val existingSnapshot = dailySnapshotDao.snapshotForDateOnce(date, storageCadence)
+        val snapshotId = existingSnapshot?.id ?: dailySnapshotDao.insertSnapshot(
             DailySnapshotEntity(
                 date = date,
                 finalizedAtMillis = finalizedAtMillis,
-                cadence = cadence.toStorageValue(),
-                summaryNote = summaryNote?.trim()?.takeIf(String::isNotEmpty),
+                cadence = storageCadence,
+                summaryNote = normalizedSummaryNote,
             ),
         )
+        if (existingSnapshot != null) {
+            dailySnapshotDao.updateSnapshot(
+                id = snapshotId,
+                finalizedAtMillis = finalizedAtMillis,
+                summaryNote = normalizedSummaryNote,
+            )
+            dailySnapshotDao.deleteEntries(snapshotId)
+        }
         dailySnapshotDao.insertEntries(
             items.sortedBy { it.position }.map { item ->
                 DailySnapshotEntryEntity(
@@ -98,27 +113,33 @@ private fun String.toRoutineCadence(): RoutineCadence =
     }
 
 private fun DailySnapshotWithEntries.toDomain(): RoutineDaySnapshot =
+    snapshot.toDomain(entries)
+
+private fun DailySnapshotEntity.toDomain(
+    entries: List<DailySnapshotEntryEntity>,
+): RoutineDaySnapshot =
     RoutineDaySnapshot(
-        snapshotId = snapshot.id,
-        date = snapshot.date,
-        finalizedAtMillis = snapshot.finalizedAtMillis,
-        cadence = snapshot.cadence.toRoutineCadence(),
-        summaryNote = snapshot.summaryNote,
-        items = entries
-            .sortedBy { it.positionSnapshot }
-            .map { entry ->
-                RoutineDaySnapshotItem(
-                    actionId = entry.actionId,
-                    title = entry.titleSnapshot,
-                    description = entry.descriptionSnapshot,
-                    repeatTargetCount = entry.repeatTargetCountSnapshot,
-                    completedCount = entry.completedCount,
-                    position = entry.positionSnapshot,
-                    isChecked = entry.isChecked,
-                    note = entry.note,
-                )
-            },
+        snapshotId = id,
+        date = date,
+        finalizedAtMillis = finalizedAtMillis,
+        cadence = cadence.toRoutineCadence(),
+        summaryNote = summaryNote,
+        items = entries.toDomainItems(),
     )
+
+private fun List<DailySnapshotEntryEntity>.toDomainItems(): List<RoutineDaySnapshotItem> =
+    sortedBy { it.positionSnapshot }.map { entry ->
+        RoutineDaySnapshotItem(
+            actionId = entry.actionId,
+            title = entry.titleSnapshot,
+            description = entry.descriptionSnapshot,
+            repeatTargetCount = entry.repeatTargetCountSnapshot,
+            completedCount = entry.completedCount,
+            position = entry.positionSnapshot,
+            isChecked = entry.isChecked,
+            note = entry.note,
+        )
+    }
 
 private fun DailySnapshotWithEntries.toSummary(): RoutineDaySummary =
     RoutineDaySummary(

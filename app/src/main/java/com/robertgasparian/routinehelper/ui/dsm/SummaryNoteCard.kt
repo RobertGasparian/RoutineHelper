@@ -41,6 +41,7 @@ fun SummaryNoteCard(
     label: String,
     onEditClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isEditable: Boolean = true,
 ) {
     val hasNote = note.isNotBlank()
 
@@ -80,10 +81,12 @@ fun SummaryNoteCard(
                     )
                 }
 
-                SummaryNoteEditButton(
-                    hasNote = hasNote,
-                    onClick = onEditClick,
-                )
+                if (isEditable) {
+                    SummaryNoteEditButton(
+                        hasNote = hasNote,
+                        onClick = onEditClick,
+                    )
+                }
             }
 
             if (hasNote) {
@@ -210,6 +213,12 @@ private fun SummaryNoteCardPreviewContent() {
             note = "This is a longer note preview to check wrapping. It should stay compact and stop after a few lines instead of turning the summary area into a large writing surface.",
             label = "Day note",
             onEditClick = {},
+        )
+        SummaryNoteCard(
+            note = "Read-only snapshot note with no edit action.",
+            label = "Snapshot note",
+            onEditClick = {},
+            isEditable = false,
         )
     }
 }

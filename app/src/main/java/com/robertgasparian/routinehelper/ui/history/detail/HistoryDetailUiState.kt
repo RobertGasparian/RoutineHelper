@@ -74,6 +74,7 @@ data class HistoryDetailUiState(
                 shareDraft = ShareDraft.file(
                     messageText = "Here is the routine snapshot from 2026-05-29.",
                     fileText = previewShare().shareDraft?.messageText.orEmpty(),
+                    fileName = "routine-snapshot-2026-05-29.txt",
                 ),
             )
 

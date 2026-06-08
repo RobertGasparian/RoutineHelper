@@ -3,11 +3,8 @@ package com.robertgasparian.routinehelper.ui.history.detail
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
@@ -15,17 +12,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -33,18 +28,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.robertgasparian.routinehelper.ui.dsm.CadenceChip
-import com.robertgasparian.routinehelper.ui.dsm.CompletionChip as RoutineCompletionChip
-import com.robertgasparian.routinehelper.ui.dsm.RoutineNoteBlock
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.ui.dsm.RoutineDialogTextButton
+import com.robertgasparian.routinehelper.ui.dsm.SummaryNoteCard
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
+import com.robertgasparian.routinehelper.ui.share.ShareFileDialog
 import com.robertgasparian.routinehelper.ui.share.ShareFormatDialog
-import com.robertgasparian.routinehelper.ui.share.ShareTextDialog
 import com.robertgasparian.routinehelper.ui.share.shareText
 import com.robertgasparian.routinehelper.ui.share.shareTextFile
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
@@ -60,6 +53,10 @@ sealed interface HistoryDetailUiEvent {
 
     data class ShareTextChange(
         val text: String,
+    ) : HistoryDetailUiEvent
+
+    data class ShareFileNameChange(
+        val fileName: String,
     ) : HistoryDetailUiEvent
 
     data object ShareDismiss : HistoryDetailUiEvent
@@ -79,6 +76,7 @@ sealed interface HistoryDetailUiEvent {
 fun HistoryDetailScreen(
     snapshotId: Long,
     onBackClick: () -> Unit,
+    onShareTextPreviewClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HistoryDetailViewModel = hiltViewModel<HistoryDetailViewModel, HistoryDetailViewModel.Factory>(
         creationCallback = { factory -> factory.create(snapshotId) },
@@ -88,6 +86,14 @@ fun HistoryDetailScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle(
         initialValue = HistoryDetailUiState(),
     )
+
+    LaunchedEffect(uiState.shareDraft) {
+        val draft = uiState.shareDraft
+        if (draft != null && !draft.isFileShare) {
+            viewModel.dismissSharePreview()
+            onShareTextPreviewClick(draft.messageText)
+        }
+    }
 
     HistoryDetailComponent(
         uiState = uiState,
@@ -104,10 +110,11 @@ fun HistoryDetailScreen(
                         fileText = event.draft.fileText.orEmpty(),
                         messageText = event.draft.messageText,
                         title = "Share routine snapshot",
-                        fileName = "routine-snapshot-${uiState.date.ifBlank { "export" }}.txt",
+                        fileName = event.draft.fileName.orEmpty(),
                     )
                     viewModel.dismissSharePreview()
                 }
+                is HistoryDetailUiEvent.ShareFileNameChange -> viewModel.updateShareFileName(event.fileName)
                 is HistoryDetailUiEvent.ShareTextChange -> viewModel.updateShareText(event.text)
                 is HistoryDetailUiEvent.ShareTextConfirm -> {
                     context.shareText(text = event.messageText, title = "Share routine snapshot")
@@ -141,15 +148,7 @@ fun HistoryDetailComponent(
                     }
                 },
                 title = {
-                    Column {
-                        Text(text = if (uiState.date.isBlank()) "Snapshot" else uiState.date)
-                        if (uiState.finalizedLabel.isNotBlank()) {
-                            Text(
-                                text = uiState.finalizedLabel,
-                                style = MaterialTheme.typography.bodySmall,
-                            )
-                        }
-                    }
+                    Text(text = "Snapshot")
                 },
                 actions = {
                     IconButton(
@@ -202,18 +201,27 @@ fun HistoryDetailComponent(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 item {
-                    SnapshotHeaderCard(uiState = uiState)
+                    HistoryDetailHeaderCard(uiState = uiState)
                 }
                 if (uiState.summaryNote.isNotBlank()) {
                     item {
-                        SummaryNoteDetailCard(note = uiState.summaryNote)
+                        SummaryNoteCard(
+                            note = uiState.summaryNote,
+                            label = if (uiState.cadence == RoutineCadence.Weekly) {
+                                "Week note"
+                            } else {
+                                "Day note"
+                            },
+                            onEditClick = {},
+                            isEditable = false,
+                        )
                     }
                 }
                 items(
                     items = uiState.items,
                     key = { item -> item.actionId },
                 ) { item ->
-                    HistoryDetailItemCard(item = item)
+                    HistoryDetailActionItemCard(item = item)
                 }
             }
         }
@@ -225,19 +233,20 @@ fun HistoryDetailComponent(
             title = { Text(text = "Delete snapshot?") },
             text = { Text(text = "This removes this saved history entry from the test database.") },
             confirmButton = {
-                TextButton(
+                RoutineDialogTextButton(
+                    text = "Delete",
                     onClick = {
                         showDeleteConfirmation = false
                         onEvent(HistoryDetailUiEvent.DeleteClick)
                     },
-                ) {
-                    Text(text = "Delete")
-                }
+                    isDestructive = true,
+                )
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteConfirmation = false }) {
-                    Text(text = "Cancel")
-                }
+                RoutineDialogTextButton(
+                    text = "Cancel",
+                    onClick = { showDeleteConfirmation = false },
+                )
             },
         )
     }
@@ -250,18 +259,13 @@ fun HistoryDetailComponent(
         )
     }
 
-    uiState.shareDraft?.let { draft ->
+    uiState.shareDraft?.takeIf { draft -> draft.isFileShare }?.let { draft ->
         ShareSnapshotDialog(
             draft = draft,
+            onFileNameChange = { fileName -> onEvent(HistoryDetailUiEvent.ShareFileNameChange(fileName)) },
             onTextChange = { text -> onEvent(HistoryDetailUiEvent.ShareTextChange(text)) },
             onDismiss = { onEvent(HistoryDetailUiEvent.ShareDismiss) },
-            onShareClick = {
-                if (draft.isFileShare) {
-                    onEvent(HistoryDetailUiEvent.ShareFileConfirm(draft))
-                } else {
-                    onEvent(HistoryDetailUiEvent.ShareTextConfirm(draft.messageText))
-                }
-            },
+            onShareClick = { onEvent(HistoryDetailUiEvent.ShareFileConfirm(draft)) },
         )
     }
 }
@@ -269,12 +273,14 @@ fun HistoryDetailComponent(
 @Composable
 private fun ShareSnapshotDialog(
     draft: ShareDraft,
+    onFileNameChange: (String) -> Unit,
     onTextChange: (String) -> Unit,
     onDismiss: () -> Unit,
     onShareClick: () -> Unit,
 ) {
-    ShareTextDialog(
+    ShareFileDialog(
         draft = draft,
+        onFileNameChange = onFileNameChange,
         onTextChange = onTextChange,
         onDismiss = onDismiss,
         onShareClick = onShareClick,
@@ -309,167 +315,6 @@ private fun EmptySnapshotContent(
         Text(
             text = "No items in this snapshot",
             style = MaterialTheme.typography.headlineSmall,
-        )
-    }
-}
-
-@Composable
-private fun SnapshotHeaderCard(
-    uiState: HistoryDetailUiState,
-    modifier: Modifier = Modifier,
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-        ),
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            CadenceChip(cadence = uiState.cadence)
-            Text(
-                text = uiState.date,
-                style = MaterialTheme.typography.titleLarge,
-            )
-            Text(
-                text = uiState.finalizedLabel,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
-}
-
-@Composable
-private fun SummaryNoteDetailCard(
-    note: String,
-    modifier: Modifier = Modifier,
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-        ),
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-        ) {
-            Text(
-                text = "Summary note",
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Text(
-                text = note,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(top = 4.dp),
-            )
-        }
-    }
-}
-
-@Composable
-private fun HistoryDetailItemCard(
-    item: HistoryDetailItemUiState,
-    modifier: Modifier = Modifier,
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (item.isChecked) {
-                MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.54f)
-            } else {
-                MaterialTheme.colorScheme.surfaceContainerLow
-            },
-        ),
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top,
-            ) {
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(end = 12.dp),
-                ) {
-                    Text(
-                        text = item.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        textDecoration = if (item.isChecked) {
-                            TextDecoration.LineThrough
-                        } else {
-                            null
-                        },
-                    )
-                }
-
-                CompletionChip(item = item)
-            }
-
-            if (!item.description.isNullOrBlank()) {
-                DetailSection(
-                    label = "Action description",
-                    text = item.description,
-                )
-            }
-
-            if (!item.note.isNullOrBlank()) {
-                RoutineNoteBlock(
-                    note = item.note,
-                    label = "Note",
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun CompletionChip(
-    item: HistoryDetailItemUiState,
-    modifier: Modifier = Modifier,
-) {
-    RoutineCompletionChip(
-        modifier = modifier,
-        isChecked = item.isChecked,
-        isRepeatAction = item.isRepeatAction,
-        completedCount = item.completedCount,
-        repeatTargetCount = item.repeatTargetCount,
-    )
-}
-
-@Composable
-private fun DetailSection(
-    label: String,
-    text: String?,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier.fillMaxWidth(),
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.primary,
-        )
-        Text(
-            text = text.orEmpty(),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(top = 4.dp),
         )
     }
 }

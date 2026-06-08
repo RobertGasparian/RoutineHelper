@@ -5,7 +5,7 @@ import com.robertgasparian.routinehelper.domain.model.RoutineDaySummary
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 class FinalizeTodayUseCaseTest {
@@ -17,7 +17,7 @@ class FinalizeTodayUseCaseTest {
     )
 
     @Test
-    fun savesCurrentTodayItemsAsSnapshotAndResetsDate() = runTest {
+    fun savesCurrentTodayItemsAsSnapshot() = runTest {
         todayRepository.setItems(
             date = "2026-05-29",
             items = listOf(
@@ -54,7 +54,7 @@ class FinalizeTodayUseCaseTest {
         )
 
         assertEquals(1L, snapshotId)
-        assertEquals(listOf("2026-05-29"), todayRepository.resetDates)
+        assertEquals(emptyList<String>(), todayRepository.resetDates)
         assertEquals(
             SavedSnapshot(
                 date = "2026-05-29",
@@ -84,12 +84,27 @@ class FinalizeTodayUseCaseTest {
     }
 
     @Test
-    fun existingSnapshotIsNotSavedAgainButDateIsReset() = runTest {
+    fun existingSnapshotIsReplaced() = runTest {
         historyRepository.setSnapshot(
             RoutineDaySummary(
                 snapshotId = 77L,
                 date = "2026-05-29",
                 finalizedAtMillis = 100L,
+            ),
+        )
+        todayRepository.setItems(
+            date = "2026-05-29",
+            items = listOf(
+                TodayRoutineItem(
+                    routineItemId = 10L,
+                    actionId = 100L,
+                    title = "Drink water",
+                    description = null,
+                    position = 0,
+                    date = "2026-05-29",
+                    isChecked = true,
+                    note = "Updated note.",
+                ),
             ),
         )
 
@@ -99,8 +114,24 @@ class FinalizeTodayUseCaseTest {
         )
 
         assertEquals(77L, snapshotId)
-        assertEquals(listOf("2026-05-29"), todayRepository.resetDates)
-        assertTrue(historyRepository.savedSnapshots.isEmpty())
+        assertEquals(emptyList<String>(), todayRepository.resetDates)
+        assertEquals(
+            SavedSnapshot(
+                date = "2026-05-29",
+                finalizedAtMillis = 200L,
+                items = listOf(
+                    RoutineDaySnapshotItem(
+                        actionId = 100L,
+                        title = "Drink water",
+                        description = null,
+                        position = 0,
+                        isChecked = true,
+                        note = "Updated note.",
+                    ),
+                ),
+            ),
+            historyRepository.savedSnapshots.single(),
+        )
     }
 
     @Test
@@ -128,6 +159,55 @@ class FinalizeTodayUseCaseTest {
         )
 
         assertEquals("2026-05-27", historyRepository.savedSnapshots.single().date)
-        assertEquals(listOf("2026-05-29"), todayRepository.resetDates)
+        assertEquals(emptyList<String>(), todayRepository.resetDates)
+    }
+
+    @Test
+    fun savesTodayItemsUnderSelectedSnapshotDateWithoutResettingDate() = runTest {
+        todayRepository.setItems(
+            date = "2026-05-29",
+            items = listOf(
+                TodayRoutineItem(
+                    routineItemId = 10L,
+                    actionId = 100L,
+                    title = "Drink water",
+                    description = null,
+                    position = 0,
+                    date = "2026-05-29",
+                    isChecked = true,
+                    note = "Kept for debug snapshot.",
+                ),
+            ),
+        )
+
+        useCase(
+            date = "2026-05-29",
+            snapshotDate = "2026-05-28",
+            finalizedAtMillis = 123L,
+        )
+
+        assertEquals("2026-05-28", historyRepository.savedSnapshots.single().date)
+        assertEquals(
+            "Kept for debug snapshot.",
+            historyRepository.savedSnapshots.single().items.single().note,
+        )
+        assertEquals(emptyList<String>(), todayRepository.resetDates)
+    }
+
+    @Test
+    fun doesNotSaveSnapshotWhenThereAreNoItems() = runTest {
+        todayRepository.setSummaryNote(
+            date = "2026-05-29",
+            note = "Note without actions should not create a snapshot.",
+        )
+
+        val snapshotId = useCase(
+            date = "2026-05-29",
+            finalizedAtMillis = 123L,
+        )
+
+        assertNull(snapshotId)
+        assertEquals(emptyList<SavedSnapshot>(), historyRepository.savedSnapshots)
+        assertEquals(emptyList<String>(), todayRepository.resetDates)
     }
 }

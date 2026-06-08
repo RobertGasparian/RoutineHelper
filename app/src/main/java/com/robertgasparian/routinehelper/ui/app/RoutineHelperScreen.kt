@@ -45,9 +45,12 @@ import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.ui.actioneditor.ActionEditorScreen
 import com.robertgasparian.routinehelper.ui.history.detail.HistoryDetailScreen
 import com.robertgasparian.routinehelper.ui.history.HistoryScreen
+import com.robertgasparian.routinehelper.ui.share.ShareTextPreviewScreen
+import com.robertgasparian.routinehelper.ui.share.shareText
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 import com.robertgasparian.routinehelper.ui.daily.DailyScreen
 import com.robertgasparian.routinehelper.ui.weekly.WeeklyScreen
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun RoutineHelperScreen() {
@@ -65,6 +68,7 @@ fun RoutineHelperComponent(
     modifier: Modifier = Modifier,
 ) {
     val currentDestination = topLevelBackStack.backStack.lastOrNull()
+    val context = LocalContext.current
     val showBottomNavigation = currentDestination is TopLevelDestination
     var navigationTransitionDirection by remember { mutableStateOf(HorizontalDirection.Right) }
 
@@ -155,6 +159,14 @@ fun RoutineHelperComponent(
                             onSnapshotClick = { snapshotId ->
                                 navigateToDetail(HistoryDetailDestination(snapshotId))
                             },
+                            onShareTextPreviewClick = { text ->
+                                navigateToDetail(
+                                    ShareTextPreviewDestination(
+                                        initialText = text,
+                                        shareTitle = "Share routine snapshots",
+                                    ),
+                                )
+                            },
                         )
                     }
 
@@ -162,6 +174,14 @@ fun RoutineHelperComponent(
                         HistoryDetailScreen(
                             snapshotId = destination.snapshotId,
                             onBackClick = { navigateBack() },
+                            onShareTextPreviewClick = { text ->
+                                navigateToDetail(
+                                    ShareTextPreviewDestination(
+                                        initialText = text,
+                                        shareTitle = "Share routine snapshot",
+                                    ),
+                                )
+                            },
                         )
                 }
 
@@ -170,6 +190,20 @@ fun RoutineHelperComponent(
                         actionId = destination.actionId,
                         cadence = destination.cadence,
                         onBackClick = { navigateBack() },
+                    )
+                }
+
+                entry<ShareTextPreviewDestination> { destination ->
+                    ShareTextPreviewScreen(
+                        initialText = destination.initialText,
+                        onBackClick = { navigateBack() },
+                        onShareClick = { text ->
+                            context.shareText(
+                                text = text,
+                                title = destination.shareTitle,
+                            )
+                            navigateBack()
+                        },
                     )
                 }
             },

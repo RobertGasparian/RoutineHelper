@@ -2,6 +2,8 @@ package com.robertgasparian.routinehelper.work
 
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeWeeklyUseCase
+import com.robertgasparian.routinehelper.domain.usecase.ResetTodayUseCase
+import com.robertgasparian.routinehelper.domain.usecase.ResetWeeklyUseCase
 import java.time.ZonedDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -11,6 +13,8 @@ import kotlinx.coroutines.CancellationException
 class RoutineSnapshotBackfill @Inject constructor(
     private val finalizeTodayUseCase: FinalizeTodayUseCase,
     private val finalizeWeeklyUseCase: FinalizeWeeklyUseCase,
+    private val resetTodayUseCase: ResetTodayUseCase,
+    private val resetWeeklyUseCase: ResetWeeklyUseCase,
 ) {
     suspend fun backfillMissedSnapshots(now: ZonedDateTime = ZonedDateTime.now()) {
         if (SnapshotWorkDates.shouldBackfillDailyOnAppStart(now)) {
@@ -21,6 +25,7 @@ class RoutineSnapshotBackfill @Inject constructor(
                     snapshotDate = snapshotDate,
                     finalizedAtMillis = System.currentTimeMillis(),
                 )
+                resetTodayUseCase(snapshotDate)
             }
         }
 
@@ -32,6 +37,7 @@ class RoutineSnapshotBackfill @Inject constructor(
                     snapshotWeekStartDate = snapshotWeekStartDate,
                     finalizedAtMillis = System.currentTimeMillis(),
                 )
+                resetWeeklyUseCase(snapshotWeekStartDate)
             }
         }
     }

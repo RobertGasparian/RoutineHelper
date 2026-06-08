@@ -18,3 +18,8 @@ data class ActionEditorDestination(
     val actionId: Long? = null,
     val cadence: RoutineCadence = RoutineCadence.Daily,
 )
+
+data class ShareTextPreviewDestination(
+    val initialText: String,
+    val shareTitle: String,
+)

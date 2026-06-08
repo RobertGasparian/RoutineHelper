@@ -109,10 +109,15 @@ class HistoryViewModel @Inject constructor(
                     ShareMode.File -> ShareDraft.file(
                         messageText = snapshots.toFileShareMessage(),
                         fileText = exportText,
+                        fileName = "routine-snapshots-export.txt",
                     )
                 }
             }
         }
+    }
+
+    fun updateShareFileName(fileName: String) {
+        shareDraft.value = shareDraft.value?.copy(fileName = fileName)
     }
 
     fun updateShareText(text: String) {

@@ -4,6 +4,7 @@ data class ShareDraft(
     val mode: ShareMode,
     val messageText: String,
     val fileText: String? = null,
+    val fileName: String? = null,
 ) {
     val isFileShare: Boolean = mode == ShareMode.File
 
@@ -17,11 +18,13 @@ data class ShareDraft(
         fun file(
             messageText: String,
             fileText: String,
+            fileName: String,
         ): ShareDraft =
             ShareDraft(
                 mode = ShareMode.File,
                 messageText = messageText,
                 fileText = fileText,
+                fileName = fileName,
             )
     }
 }

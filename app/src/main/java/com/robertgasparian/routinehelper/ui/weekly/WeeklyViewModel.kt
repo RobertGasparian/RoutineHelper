@@ -107,7 +107,7 @@ class WeeklyViewModel @Inject constructor(
                 .previousCompletedCalendarWeekStartDate(ZonedDateTime.now())
                 .toString()
             finalizeWeeklyUseCase(
-                weekStartDate = snapshotWeekStartDate,
+                weekStartDate = weekStartDate,
                 snapshotWeekStartDate = snapshotWeekStartDate,
                 finalizedAtMillis = System.currentTimeMillis(),
             )

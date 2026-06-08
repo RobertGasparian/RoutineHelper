@@ -61,15 +61,22 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
         summaryNote: String?,
         cadence: RoutineCadence,
     ): Long {
-        val snapshotId = savedSnapshots.size + 1L
-        savedSnapshots += SavedSnapshot(
+        val existingSnapshot = snapshots.value.firstOrNull { snapshot ->
+            snapshot.date == date && snapshot.cadence == cadence
+        }
+        val snapshotId = existingSnapshot?.snapshotId ?: (snapshots.value.maxOfOrNull { it.snapshotId } ?: 0L) + 1L
+        val savedSnapshot = SavedSnapshot(
             date = date,
             finalizedAtMillis = finalizedAtMillis,
             items = items,
             summaryNote = summaryNote,
             cadence = cadence,
         )
-        snapshots.value = snapshots.value + RoutineDaySnapshot(
+        savedSnapshots.removeAll { snapshot -> snapshot.date == date && snapshot.cadence == cadence }
+        savedSnapshots += savedSnapshot
+        snapshots.value = snapshots.value.filterNot { snapshot ->
+            snapshot.date == date && snapshot.cadence == cadence
+        } + RoutineDaySnapshot(
             snapshotId = snapshotId,
             date = date,
             finalizedAtMillis = finalizedAtMillis,
