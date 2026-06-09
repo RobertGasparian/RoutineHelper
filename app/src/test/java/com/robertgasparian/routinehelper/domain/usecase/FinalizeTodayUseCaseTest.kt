@@ -195,6 +195,34 @@ class FinalizeTodayUseCaseTest {
     }
 
     @Test
+    fun savesHiddenItemsInSnapshot() = runTest {
+        todayRepository.setItems(
+            date = "2026-05-29",
+            items = listOf(
+                TodayRoutineItem(
+                    routineItemId = 10L,
+                    actionId = 100L,
+                    title = "Run",
+                    description = null,
+                    position = 0,
+                    date = "2026-05-29",
+                    isChecked = false,
+                    isHidden = true,
+                    note = "Rest day.",
+                ),
+            ),
+        )
+
+        useCase(
+            date = "2026-05-29",
+            finalizedAtMillis = 123L,
+        )
+
+        assertEquals(true, historyRepository.savedSnapshots.single().items.single().isHidden)
+        assertEquals("Rest day.", historyRepository.savedSnapshots.single().items.single().note)
+    }
+
+    @Test
     fun doesNotSaveSnapshotWhenThereAreNoItems() = runTest {
         todayRepository.setSummaryNote(
             date = "2026-05-29",

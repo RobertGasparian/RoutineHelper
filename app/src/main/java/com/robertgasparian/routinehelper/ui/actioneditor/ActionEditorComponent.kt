@@ -8,9 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,7 +23,6 @@ import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.ViewWeek
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,7 +32,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -56,6 +52,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.ui.dsm.RoutineDialogTextButton
+import com.robertgasparian.routinehelper.ui.dsm.RoutineKeyboardAwareBottomActions
 import com.robertgasparian.routinehelper.ui.dsm.RoutineOutlinedTextField
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 
@@ -389,31 +386,14 @@ private fun ActionEditorBottomActions(
     onSaveClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .navigationBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        Button(
-            enabled = canSave,
-            onClick = onSaveClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-        ) {
-            Text(text = "Save")
-        }
-        OutlinedButton(
-            onClick = onCancelClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-        ) {
-            Text(text = "Cancel")
-        }
-    }
+    RoutineKeyboardAwareBottomActions(
+        primaryText = "Save",
+        primaryEnabled = canSave,
+        onPrimaryClick = onSaveClick,
+        secondaryText = "Cancel",
+        onSecondaryClick = onCancelClick,
+        modifier = modifier,
+    )
 }
 
 @Composable

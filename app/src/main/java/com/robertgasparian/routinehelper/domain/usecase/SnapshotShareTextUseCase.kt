@@ -51,7 +51,11 @@ class SnapshotShareTextUseCase @Inject constructor() {
             .joinToString(separator = "\n\n---\n\n") { snapshot -> invoke(snapshot) }
 
     private val RoutineDaySnapshotItem.statusLabel: String
-        get() = if (isChecked) "[x]" else "[ ]"
+        get() = when {
+            isHidden -> "[skipped]"
+            isChecked -> "[x]"
+            else -> "[ ]"
+        }
 }
 
 private val RoutineCadence.label: String

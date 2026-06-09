@@ -42,6 +42,17 @@ data class DailyUiState(
                         isChecked = false,
                         note = "Finish the last chapter tonight.",
                     ),
+                    DailyItemUiState(
+                        routineItemId = 4,
+                        actionId = 104,
+                        title = "Run",
+                        description = "Rest day for the knee",
+                        repeatTargetCount = null,
+                        completedCount = 0,
+                        isChecked = false,
+                        isHidden = true,
+                        note = "Skipped intentionally today.",
+                    ),
                 ),
             )
 
@@ -139,6 +150,7 @@ data class DailyItemUiState(
     val repeatTargetCount: Int?,
     val completedCount: Int,
     val isChecked: Boolean,
+    val isHidden: Boolean = false,
     val note: String,
 ) {
     val isRepeatAction: Boolean = repeatTargetCount != null

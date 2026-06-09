@@ -28,9 +28,14 @@ fun WeeklyScreen(
                     routineItemId = event.routineItemId,
                     completedCount = event.completedCount,
                 )
+                is DailyUiEvent.HiddenChange -> viewModel.setHidden(
+                    routineItemId = event.routineItemId,
+                    isHidden = event.isHidden,
+                )
                 DailyUiEvent.CreateActionClick -> onCreateActionClick()
                 is DailyUiEvent.EditActionClick -> onEditActionClick(event.actionId)
                 DailyUiEvent.SnapshotClick -> viewModel.snapshotWeek()
+                is DailyUiEvent.SnapshotDateSelected -> viewModel.snapshotWeek(snapshotWeekStartDate = event.date)
                 is DailyUiEvent.EditNoteClick -> viewModel.showItemNoteEditor(event.item)
                 DailyUiEvent.EditSummaryNoteClick -> viewModel.showSummaryNoteEditor(uiState.summaryNote)
                 is DailyUiEvent.NoteDraftChange -> viewModel.updateNoteDraft(event.value)

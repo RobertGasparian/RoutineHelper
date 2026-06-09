@@ -1,6 +1,7 @@
 package com.robertgasparian.routinehelper.ui.daily
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,21 +14,28 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Button
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -37,6 +45,9 @@ import com.robertgasparian.routinehelper.ui.dsm.RoutineNoteDialog
 import com.robertgasparian.routinehelper.ui.dsm.SummaryNoteCard
 import com.robertgasparian.routinehelper.ui.dsm.RoutineActionItemCard
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneOffset
 
 sealed interface DailyUiEvent {
     data object CreateActionClick : DailyUiEvent
@@ -55,7 +66,16 @@ sealed interface DailyUiEvent {
         val completedCount: Int,
     ) : DailyUiEvent
 
+    data class HiddenChange(
+        val routineItemId: Long,
+        val isHidden: Boolean,
+    ) : DailyUiEvent
+
     data object SnapshotClick : DailyUiEvent
+
+    data class SnapshotDateSelected(
+        val date: String,
+    ) : DailyUiEvent
 
     data class EditNoteClick(
         val item: DailyItemUiState,
@@ -100,9 +120,14 @@ fun DailyScreen(
                     routineItemId = event.routineItemId,
                     completedCount = event.completedCount,
                 )
+                is DailyUiEvent.HiddenChange -> viewModel.setHidden(
+                    routineItemId = event.routineItemId,
+                    isHidden = event.isHidden,
+                )
                 DailyUiEvent.CreateActionClick -> onCreateActionClick()
                 is DailyUiEvent.EditActionClick -> onEditActionClick(event.actionId)
                 DailyUiEvent.SnapshotClick -> viewModel.snapshotDaily()
+                is DailyUiEvent.SnapshotDateSelected -> viewModel.snapshotDaily(snapshotDate = event.date)
                 is DailyUiEvent.EditNoteClick -> viewModel.showItemNoteEditor(event.item)
                 DailyUiEvent.EditSummaryNoteClick -> viewModel.showSummaryNoteEditor(uiState.summaryNote)
                 is DailyUiEvent.NoteDraftChange -> viewModel.updateNoteDraft(event.value)
@@ -129,19 +154,18 @@ fun DailyComponent(
     emptyDescription: String = "Add your first daily action to start tracking.",
     showSnapshotAction: Boolean = true,
 ) {
+    // TODO Remove this debug/test-only date picker before the first public release.
+    var isSnapshotDatePickerVisible by rememberSaveable { mutableStateOf(false) }
     val listState = rememberLazyListState()
     val fabVisible by remember {
         derivedStateOf {
-            listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset < 32
+            !listState.isScrollInProgress
         }
     }
     val fabScale by animateFloatAsState(
         targetValue = if (fabVisible) 1f else 0f,
+        animationSpec = tween(durationMillis = 180),
         label = "DailyFabScale",
-    )
-    val fabAlpha by animateFloatAsState(
-        targetValue = if (fabVisible) 1f else 0f,
-        label = "DailyFabAlpha",
     )
 
     Scaffold(
@@ -162,7 +186,7 @@ fun DailyComponent(
                         TextButton(
                             onClick = {
                                 // TODO Remove this debug-only action when worker triggering has a dedicated test tool.
-                                onEvent(DailyUiEvent.SnapshotClick)
+                                isSnapshotDatePickerVisible = true
                             },
                         ) {
                             Text(text = "Snapshot")
@@ -172,23 +196,20 @@ fun DailyComponent(
             )
         },
         floatingActionButton = {
-            if (fabScale > 0.01f) {
-                FloatingActionButton(
-                    modifier = Modifier
-                        .padding(bottom = DailyFabBottomClearance)
-                        .graphicsLayer {
-                            scaleX = fabScale
-                            scaleY = fabScale
-                            alpha = fabAlpha
-                            transformOrigin = androidx.compose.ui.graphics.TransformOrigin(1f, 1f)
-                        },
-                    onClick = { onEvent(DailyUiEvent.CreateActionClick) },
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add action",
-                    )
-                }
+            FloatingActionButton(
+                modifier = Modifier
+                    .padding(bottom = DailyFabBottomClearance)
+                    .scale(fabScale),
+                onClick = {
+                    if (fabVisible) {
+                        onEvent(DailyUiEvent.CreateActionClick)
+                    }
+                },
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add action",
+                )
             }
         },
         floatingActionButtonPosition = FabPosition.End,
@@ -229,25 +250,9 @@ fun DailyComponent(
                     items = uiState.items,
                     key = { item -> item.routineItemId },
                 ) { item ->
-                    RoutineActionItemCard(
-                        title = item.title,
-                        description = item.description,
-                        note = item.note.takeIf(String::isNotBlank),
-                        isChecked = item.isChecked,
-                        repeatTargetCount = item.repeatTargetCount,
-                        completedCount = item.completedCount,
-                        onCheckedChange = { isChecked ->
-                            onEvent(DailyUiEvent.CheckedChange(item.routineItemId, isChecked))
-                        },
-                        onCompletedCountChange = { completedCount ->
-                            onEvent(DailyUiEvent.CompletedCountChange(item.routineItemId, completedCount))
-                        },
-                        onEditActionClick = {
-                            onEvent(DailyUiEvent.EditActionClick(item.actionId))
-                        },
-                        onEditNoteClick = {
-                            onEvent(DailyUiEvent.EditNoteClick(item))
-                        },
+                    DailyRoutineItem(
+                        item = item,
+                        onEvent = onEvent,
                     )
                 }
             }
@@ -269,10 +274,107 @@ fun DailyComponent(
             onTimeClick = { onEvent(DailyUiEvent.NoteDraftTimeClick) },
         )
     }
+
+    if (isSnapshotDatePickerVisible) {
+        DebugSnapshotDatePickerDialog(
+            onDismiss = { isSnapshotDatePickerVisible = false },
+            onDateSelected = { date ->
+                isSnapshotDatePickerVisible = false
+                onEvent(DailyUiEvent.SnapshotDateSelected(date))
+            },
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DebugSnapshotDatePickerDialog(
+    onDismiss: () -> Unit,
+    onDateSelected: (String) -> Unit,
+) {
+    // TODO Remove this debug/test-only date picker before the first public release.
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = LocalDate.now().toUtcStartOfDayMillis(),
+        selectableDates = object : SelectableDates {},
+    )
+
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                enabled = datePickerState.selectedDateMillis != null,
+                onClick = {
+                    datePickerState.selectedDateMillis
+                        ?.toLocalDateString()
+                        ?.let(onDateSelected)
+                },
+            ) {
+                Text(text = "Snapshot")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = "Cancel")
+            }
+        },
+    ) {
+        DatePicker(
+            state = datePickerState,
+            title = {
+                Text(
+                    text = "Snapshot date",
+                    modifier = Modifier.padding(start = 24.dp, end = 12.dp, top = 16.dp),
+                )
+            },
+            headline = {
+                Text(
+                    text = "Test snapshot target",
+                    modifier = Modifier.padding(start = 24.dp, end = 12.dp, bottom = 12.dp),
+                )
+            },
+        )
+    }
+}
+
+@Composable
+private fun DailyRoutineItem(
+    item: DailyItemUiState,
+    onEvent: (DailyUiEvent) -> Unit,
+) {
+    RoutineActionItemCard(
+        title = item.title,
+        description = item.description,
+        note = item.note.takeIf(String::isNotBlank),
+        isChecked = item.isChecked,
+        isHidden = item.isHidden,
+        repeatTargetCount = item.repeatTargetCount,
+        completedCount = item.completedCount,
+        onCheckedChange = { isChecked ->
+            onEvent(DailyUiEvent.CheckedChange(item.routineItemId, isChecked))
+        },
+        onCompletedCountChange = { completedCount ->
+            onEvent(DailyUiEvent.CompletedCountChange(item.routineItemId, completedCount))
+        },
+        onEditActionClick = {
+            onEvent(DailyUiEvent.EditActionClick(item.actionId))
+        },
+        onEditNoteClick = {
+            onEvent(DailyUiEvent.EditNoteClick(item))
+        },
+        onHiddenChange = { isHidden ->
+            onEvent(DailyUiEvent.HiddenChange(item.routineItemId, isHidden))
+        },
+    )
 }
 
 private val DailyListBottomSafeSpace = 128.dp
 private val DailyFabBottomClearance = 78.dp
+
+private fun LocalDate.toUtcStartOfDayMillis(): Long =
+    atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli()
+
+private fun Long.toLocalDateString(): String =
+    Instant.ofEpochMilli(this).atZone(ZoneOffset.UTC).toLocalDate().toString()
 
 @Composable
 private fun EmptyDailyContent(

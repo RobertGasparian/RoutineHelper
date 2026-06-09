@@ -100,6 +100,25 @@ class RoomTodayRoutineRepository(
         )
     }
 
+    override suspend fun setHidden(
+        date: String,
+        routineItemId: Long,
+        isHidden: Boolean,
+    ) {
+        val existing = todayEntryDao.entryForDate(date, routineItemId).first()
+        todayEntryDao.upsert(
+            existing?.copy(
+                isHidden = isHidden,
+                updatedAtMillis = clock(),
+            ) ?: TodayEntryEntity(
+                routineItemId = routineItemId,
+                date = date,
+                isHidden = isHidden,
+                updatedAtMillis = clock(),
+            ),
+        )
+    }
+
     override suspend fun updateSummaryNote(
         date: String,
         note: String?,
@@ -143,6 +162,7 @@ private fun RoutineItemWithAction.toTodayDomain(
         isChecked = action.repeatTargetCount?.let { targetCount ->
             completedCount >= targetCount
         } ?: (todayEntry?.isChecked ?: false),
+        isHidden = todayEntry?.isHidden ?: false,
         note = todayEntry?.note,
     )
 }

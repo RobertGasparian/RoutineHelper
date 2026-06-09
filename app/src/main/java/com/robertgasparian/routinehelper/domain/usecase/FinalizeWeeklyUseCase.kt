@@ -26,6 +26,7 @@ class FinalizeWeeklyUseCase @Inject constructor(
                 completedCount = item.completedCount,
                 position = item.position,
                 isChecked = item.isChecked,
+                isHidden = item.isHidden,
                 note = item.note,
             )
         }

@@ -13,6 +13,9 @@ data class HistoryDetailUiState(
     val isShareFormatDialogVisible: Boolean = false,
     val shareDraft: ShareDraft? = null,
 ) {
+    val visibleItems: List<HistoryDetailItemUiState> = items.filterNot { item -> item.isHidden }
+    val hiddenItems: List<HistoryDetailItemUiState> = items.filter { item -> item.isHidden }
+
     companion object {
         fun preview(): HistoryDetailUiState =
             HistoryDetailUiState(
@@ -37,6 +40,7 @@ data class HistoryDetailUiState(
                         repeatTargetCount = 3,
                         completedCount = 1,
                         isChecked = false,
+                        isHidden = true,
                         note = null,
                     ),
                 ),
@@ -95,6 +99,7 @@ data class HistoryDetailItemUiState(
     val repeatTargetCount: Int?,
     val completedCount: Int,
     val isChecked: Boolean,
+    val isHidden: Boolean = false,
     val note: String?,
 ) {
     val isRepeatAction: Boolean = repeatTargetCount != null

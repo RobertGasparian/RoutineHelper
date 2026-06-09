@@ -86,6 +86,7 @@ class RoomRoutineHistoryRepository(
                     descriptionSnapshot = item.description,
                     positionSnapshot = item.position,
                     isChecked = item.isChecked,
+                    isHidden = item.isHidden,
                     repeatTargetCountSnapshot = item.repeatTargetCount,
                     completedCount = item.completedCount,
                     note = item.note,
@@ -134,21 +135,24 @@ private fun List<DailySnapshotEntryEntity>.toDomainItems(): List<RoutineDaySnaps
             completedCount = entry.completedCount,
             position = entry.positionSnapshot,
             isChecked = entry.isChecked,
+            isHidden = entry.isHidden,
             note = entry.note,
         )
     }
 
-private fun DailySnapshotWithEntries.toSummary(): RoutineDaySummary =
-    RoutineDaySummary(
+private fun DailySnapshotWithEntries.toSummary(): RoutineDaySummary {
+    val countableEntries = entries.filterNot { entry -> entry.isHidden }
+    return RoutineDaySummary(
         snapshotId = snapshot.id,
         date = snapshot.date,
         finalizedAtMillis = snapshot.finalizedAtMillis,
         cadence = snapshot.cadence.toRoutineCadence(),
-        completedCount = entries.count { entry ->
+        completedCount = countableEntries.count { entry ->
             entry.repeatTargetCountSnapshot?.let { target ->
                 entry.completedCount >= target
             } ?: entry.isChecked
         },
-        totalCount = entries.size,
+        totalCount = countableEntries.size,
         hasSummaryNote = !snapshot.summaryNote.isNullOrBlank(),
     )
+}

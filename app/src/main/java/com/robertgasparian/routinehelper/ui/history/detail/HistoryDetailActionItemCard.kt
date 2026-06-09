@@ -17,6 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.CardDefaults
@@ -44,6 +45,7 @@ fun HistoryDetailActionItemCard(
     modifier: Modifier = Modifier,
 ) {
     val isComplete = item.isComplete
+    val isHidden = item.isHidden
 
     OutlinedCard(
         modifier = modifier.fillMaxWidth(),
@@ -52,7 +54,11 @@ fun HistoryDetailActionItemCard(
             brush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.outlineVariant),
         ),
         colors = CardDefaults.outlinedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            containerColor = if (isHidden) {
+                MaterialTheme.colorScheme.surfaceContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceContainerLow
+            },
             contentColor = MaterialTheme.colorScheme.onSurface,
         ),
     ) {
@@ -65,9 +71,11 @@ fun HistoryDetailActionItemCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                SnapshotCompletionMark(
-                    isComplete = isComplete,
-                )
+                if (isHidden) {
+                    SnapshotHiddenMark()
+                } else {
+                    SnapshotCompletionMark(isComplete = isComplete)
+                }
 
                 Column(
                     modifier = Modifier.weight(1f),
@@ -77,7 +85,12 @@ fun HistoryDetailActionItemCard(
                         text = item.title,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Medium,
-                        textDecoration = if (isComplete) TextDecoration.LineThrough else null,
+                        textDecoration = if (isComplete && !isHidden) TextDecoration.LineThrough else null,
+                        color = if (isHidden) {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        },
                     )
                     if (!item.description.isNullOrBlank()) {
                         Text(
@@ -86,7 +99,7 @@ fun HistoryDetailActionItemCard(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                    if (item.isRepeatAction) {
+                    if (item.isRepeatAction && !isHidden) {
                         SnapshotRepeatProgress(
                             completedCount = item.completedCount,
                             repeatTargetCount = item.repeatTargetCount.orZero(),
@@ -100,6 +113,34 @@ fun HistoryDetailActionItemCard(
                 SnapshotActionNote(text = item.note)
             }
         }
+    }
+}
+
+@Composable
+private fun SnapshotHiddenMark(
+    modifier: Modifier = Modifier,
+) {
+    val shape = RoundedCornerShape(8.dp)
+
+    Box(
+        modifier = modifier
+            .size(40.dp)
+            .background(
+                color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                shape = shape,
+            )
+            .border(
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                shape = shape,
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            modifier = Modifier.size(22.dp),
+            imageVector = Icons.Default.Block,
+            contentDescription = "Hidden action",
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -209,7 +250,7 @@ private fun SnapshotActionNote(
 }
 
 private val HistoryDetailItemUiState.isComplete: Boolean
-    get() = if (isRepeatAction) {
+    get() = !isHidden && if (isRepeatAction) {
         completedCount >= repeatTargetCount.orZero()
     } else {
         isChecked
@@ -303,6 +344,7 @@ private fun HistoryDetailActionItemCardPreviewContent() {
                     repeatTargetCount = 2,
                     completedCount = 1,
                     isChecked = false,
+                    isHidden = true,
                     note = null,
                 ),
             )

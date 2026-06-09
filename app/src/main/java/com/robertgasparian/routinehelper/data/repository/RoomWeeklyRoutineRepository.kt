@@ -97,6 +97,25 @@ class RoomWeeklyRoutineRepository(
         )
     }
 
+    override suspend fun setHidden(
+        weekStartDate: String,
+        routineItemId: Long,
+        isHidden: Boolean,
+    ) {
+        val existing = weeklyEntryDao.entryForWeek(weekStartDate, routineItemId).first()
+        weeklyEntryDao.upsert(
+            existing?.copy(
+                isHidden = isHidden,
+                updatedAtMillis = clock(),
+            ) ?: WeeklyEntryEntity(
+                routineItemId = routineItemId,
+                weekStartDate = weekStartDate,
+                isHidden = isHidden,
+                updatedAtMillis = clock(),
+            ),
+        )
+    }
+
     override suspend fun updateSummaryNote(
         weekStartDate: String,
         note: String?,
@@ -140,6 +159,7 @@ private fun RoutineItemWithAction.toWeeklyDomain(
         isChecked = action.repeatTargetCount?.let { targetCount ->
             completedCount >= targetCount
         } ?: (weeklyEntry?.isChecked ?: false),
+        isHidden = weeklyEntry?.isHidden ?: false,
         note = weeklyEntry?.note,
     )
 }

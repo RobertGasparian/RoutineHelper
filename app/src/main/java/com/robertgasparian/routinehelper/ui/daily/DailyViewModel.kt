@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
+import com.robertgasparian.routinehelper.domain.usecase.SetTodayItemHiddenUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetTodayItemCheckedUseCase
 import com.robertgasparian.routinehelper.domain.usecase.TodayItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.TodaySummaryNoteUseCase
@@ -28,6 +29,7 @@ class DailyViewModel @Inject constructor(
     todaySummaryNoteUseCase: TodaySummaryNoteUseCase,
     private val finalizeTodayUseCase: FinalizeTodayUseCase,
     private val setTodayItemCheckedUseCase: SetTodayItemCheckedUseCase,
+    private val setTodayItemHiddenUseCase: SetTodayItemHiddenUseCase,
     private val updateTodayItemCompletedCountUseCase: UpdateTodayItemCompletedCountUseCase,
     private val updateTodayItemNoteUseCase: UpdateTodayItemNoteUseCase,
     private val updateTodaySummaryNoteUseCase: UpdateTodaySummaryNoteUseCase,
@@ -64,6 +66,19 @@ class DailyViewModel @Inject constructor(
                 date = todayDate,
                 routineItemId = routineItemId,
                 isChecked = isChecked,
+            )
+        }
+    }
+
+    fun setHidden(
+        routineItemId: Long,
+        isHidden: Boolean,
+    ) {
+        viewModelScope.launch {
+            setTodayItemHiddenUseCase(
+                date = todayDate,
+                routineItemId = routineItemId,
+                isHidden = isHidden,
             )
         }
     }
@@ -161,9 +176,11 @@ class DailyViewModel @Inject constructor(
         }
     }
 
-    fun snapshotDaily() {
+    fun snapshotDaily(
+        // TODO Remove this test-only override when debug snapshot controls are removed.
+        snapshotDate: String = SnapshotWorkDates.dailySnapshotDate(ZonedDateTime.now()).toString(),
+    ) {
         viewModelScope.launch {
-            val snapshotDate = SnapshotWorkDates.dailySnapshotDate(ZonedDateTime.now()).toString()
             finalizeTodayUseCase(
                 date = todayDate,
                 snapshotDate = snapshotDate,
@@ -182,5 +199,6 @@ private fun TodayRoutineItem.toUiState(): DailyItemUiState =
         repeatTargetCount = repeatTargetCount,
         completedCount = completedCount,
         isChecked = isChecked,
+        isHidden = isHidden,
         note = note.orEmpty(),
     )

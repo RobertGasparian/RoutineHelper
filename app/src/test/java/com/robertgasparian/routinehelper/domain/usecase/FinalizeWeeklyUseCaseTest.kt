@@ -204,6 +204,34 @@ class FinalizeWeeklyUseCaseTest {
     }
 
     @Test
+    fun savesHiddenItemsInWeeklySnapshot() = runTest {
+        weeklyRepository.setItems(
+            weekStartDate = "2026-05-24",
+            items = listOf(
+                WeeklyRoutineItem(
+                    routineItemId = 10L,
+                    actionId = 100L,
+                    title = "Workout",
+                    description = null,
+                    position = 0,
+                    weekStartDate = "2026-05-24",
+                    isChecked = false,
+                    isHidden = true,
+                    note = "Travel week.",
+                ),
+            ),
+        )
+
+        useCase(
+            weekStartDate = "2026-05-24",
+            finalizedAtMillis = 123L,
+        )
+
+        assertEquals(true, historyRepository.savedSnapshots.single().items.single().isHidden)
+        assertEquals("Travel week.", historyRepository.savedSnapshots.single().items.single().note)
+    }
+
+    @Test
     fun doesNotSaveSnapshotWhenThereAreNoItems() = runTest {
         weeklyRepository.setSummaryNote(
             weekStartDate = "2026-05-24",

@@ -19,9 +19,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.StickyNote2
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalIconButton
@@ -51,15 +54,17 @@ fun RoutineActionItemCard(
     description: String? = null,
     note: String? = null,
     isChecked: Boolean = false,
+    isHidden: Boolean = false,
     repeatTargetCount: Int? = null,
     completedCount: Int = 0,
     onCheckedChange: (Boolean) -> Unit = {},
     onCompletedCountChange: (Int) -> Unit = {},
     onEditActionClick: () -> Unit = {},
     onEditNoteClick: () -> Unit = {},
+    onHiddenChange: (Boolean) -> Unit = {},
 ) {
     val isRepeatAction = repeatTargetCount != null
-    val isComplete = if (isRepeatAction) {
+    val isComplete = !isHidden && if (isRepeatAction) {
         completedCount >= repeatTargetCount.orZero()
     } else {
         isChecked
@@ -72,7 +77,11 @@ fun RoutineActionItemCard(
             brush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.outlineVariant),
         ),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            containerColor = if (isHidden) {
+                MaterialTheme.colorScheme.surfaceContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceContainerLow
+            },
             contentColor = MaterialTheme.colorScheme.onSurface,
         ),
     ) {
@@ -85,16 +94,18 @@ fun RoutineActionItemCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                if (isRepeatAction) {
-                    RoutineActionItemCardRepeatCounter(
+                when {
+                    isHidden -> RoutineActionItemCardHiddenMarker()
+                    isRepeatAction -> RoutineActionItemCardRepeatCounter(
                         completedCount = completedCount,
                         repeatTargetCount = repeatTargetCount.orZero(),
                         isComplete = isComplete,
+                        enabled = true,
                         onCompletedCountChange = onCompletedCountChange,
                     )
-                } else {
-                    RoutineActionItemCardCheckControl(
+                    else -> RoutineActionItemCardCheckControl(
                         checked = isChecked,
+                        enabled = true,
                         onClick = { onCheckedChange(!isChecked) },
                     )
                 }
@@ -109,9 +120,21 @@ fun RoutineActionItemCard(
                         text = title,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Medium,
-                        textDecoration = if (isComplete) TextDecoration.LineThrough else null,
+                        textDecoration = if (isComplete && !isHidden) TextDecoration.LineThrough else null,
+                        color = if (isHidden) {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        },
                     )
-                    if (!description.isNullOrBlank()) {
+                    if (isHidden) {
+                        Text(
+                            text = "Action is hidden for today",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    } else if (!description.isNullOrBlank()) {
                         Text(
                             text = description,
                             style = MaterialTheme.typography.bodyMedium,
@@ -121,10 +144,13 @@ fun RoutineActionItemCard(
                 }
 
                 RoutineActionItemCardActionColumn(
+                    modifier = Modifier.align(Alignment.Top),
                     noteContentDescription = if (note.isNullOrBlank()) "Add note" else "Edit note",
                     isComplete = isComplete,
+                    isHidden = isHidden,
                     onEditActionClick = onEditActionClick,
                     onEditNoteClick = onEditNoteClick,
+                    onHiddenChange = onHiddenChange,
                 )
             }
 
@@ -139,15 +165,37 @@ fun RoutineActionItemCard(
 }
 
 @Composable
+private fun RoutineActionItemCardHiddenMarker(
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier.size(32.dp),
+        shape = RoundedCornerShape(8.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                modifier = Modifier.size(18.dp),
+                imageVector = Icons.Default.Block,
+                contentDescription = "Hidden action",
+            )
+        }
+    }
+}
+
+@Composable
 private fun RoutineActionItemCardCheckControl(
     checked: Boolean,
+    enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Surface(
         modifier = modifier
             .size(32.dp)
-            .clickable(onClick = onClick),
+            .clickable(enabled = enabled, onClick = onClick),
         shape = RoundedCornerShape(8.dp),
         color = if (checked) {
             routineCompletedContainerColor()
@@ -183,6 +231,7 @@ private fun RoutineActionItemCardRepeatCounter(
     completedCount: Int,
     repeatTargetCount: Int,
     isComplete: Boolean,
+    enabled: Boolean,
     onCompletedCountChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -216,7 +265,7 @@ private fun RoutineActionItemCardRepeatCounter(
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             RoutineActionItemCardCounterButton(
-                enabled = completedCount < repeatTargetCount,
+                enabled = enabled && completedCount < repeatTargetCount,
                 onClick = { onCompletedCountChange((completedCount + 1).coerceAtMost(repeatTargetCount)) },
                 contentDescription = "Increase completed count",
                 icon = if (isComplete) Icons.Default.Check else Icons.Default.Add,
@@ -228,7 +277,7 @@ private fun RoutineActionItemCardRepeatCounter(
                 fontWeight = FontWeight.SemiBold,
             )
             RoutineActionItemCardCounterButton(
-                enabled = completedCount > 0,
+                enabled = enabled && completedCount > 0,
                 onClick = { onCompletedCountChange((completedCount - 1).coerceAtLeast(0)) },
                 contentDescription = "Decrease completed count",
                 icon = Icons.Default.Remove,
@@ -286,23 +335,35 @@ private fun RoutineActionItemCardCounterButton(
 private fun RoutineActionItemCardActionColumn(
     noteContentDescription: String,
     isComplete: Boolean,
+    isHidden: Boolean,
     onEditActionClick: () -> Unit,
     onEditNoteClick: () -> Unit,
+    onHiddenChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(2.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.Top),
     ) {
         RoutineActionItemCardSmallIconButton(
-            onClick = onEditActionClick,
-            contentDescription = "Edit action",
-            icon = Icons.Default.Edit,
+            onClick = { onHiddenChange(!isHidden) },
+            contentDescription = if (isHidden) "Show action" else "Hide action",
+            icon = if (isHidden) Icons.Default.Visibility else Icons.Default.VisibilityOff,
             tint = LocalActionTint(isComplete),
             buttonSize = 32.dp,
             iconSize = 20.dp,
         )
+        if (!isHidden) {
+            RoutineActionItemCardSmallIconButton(
+                onClick = onEditActionClick,
+                contentDescription = "Edit action",
+                icon = Icons.Default.Edit,
+                tint = LocalActionTint(isComplete),
+                buttonSize = 32.dp,
+                iconSize = 20.dp,
+            )
+        }
         RoutineActionItemCardSmallIconButton(
             onClick = onEditNoteClick,
             contentDescription = noteContentDescription,

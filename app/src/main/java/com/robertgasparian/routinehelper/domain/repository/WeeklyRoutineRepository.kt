@@ -26,6 +26,12 @@ interface WeeklyRoutineRepository {
         completedCount: Int,
     )
 
+    suspend fun setHidden(
+        weekStartDate: String,
+        routineItemId: Long,
+        isHidden: Boolean,
+    )
+
     suspend fun updateSummaryNote(
         weekStartDate: String,
         note: String?,

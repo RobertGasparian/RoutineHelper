@@ -30,6 +30,7 @@ data class DailySnapshotEntryEntity(
     val descriptionSnapshot: String? = null,
     val positionSnapshot: Int,
     val isChecked: Boolean,
+    val isHidden: Boolean = false,
     val repeatTargetCountSnapshot: Int? = null,
     val completedCount: Int = 0,
     val note: String? = null,

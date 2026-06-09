@@ -11,6 +11,7 @@ class FakeTodayRoutineRepository : TodayRoutineRepository {
     private val itemsByDate = mutableMapOf<String, MutableStateFlow<List<TodayRoutineItem>>>()
     private val summaryNotesByDate = MutableStateFlow<Map<String, String>>(emptyMap())
     val checkedChanges = mutableListOf<CheckedChange>()
+    val hiddenChanges = mutableListOf<HiddenChange>()
     val noteChanges = mutableListOf<NoteChange>()
     val countChanges = mutableListOf<CountChange>()
     val summaryNoteChanges = mutableListOf<SummaryNoteChange>()
@@ -75,6 +76,18 @@ class FakeTodayRoutineRepository : TodayRoutineRepository {
         )
     }
 
+    override suspend fun setHidden(
+        date: String,
+        routineItemId: Long,
+        isHidden: Boolean,
+    ) {
+        hiddenChanges += HiddenChange(
+            date = date,
+            routineItemId = routineItemId,
+            isHidden = isHidden,
+        )
+    }
+
     override suspend fun updateSummaryNote(
         date: String,
         note: String?,
@@ -97,6 +110,12 @@ data class CheckedChange(
     val date: String,
     val routineItemId: Long,
     val isChecked: Boolean,
+)
+
+data class HiddenChange(
+    val date: String,
+    val routineItemId: Long,
+    val isHidden: Boolean,
 )
 
 data class NoteChange(

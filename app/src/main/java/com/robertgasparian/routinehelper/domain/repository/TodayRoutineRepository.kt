@@ -30,6 +30,12 @@ interface TodayRoutineRepository {
         completedCount: Int,
     )
 
+    suspend fun setHidden(
+        date: String,
+        routineItemId: Long,
+        isHidden: Boolean,
+    )
+
     suspend fun updateSummaryNote(
         date: String,
         note: String?,

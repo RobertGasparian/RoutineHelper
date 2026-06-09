@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robertgasparian.routinehelper.domain.model.WeeklyRoutineItem
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeWeeklyUseCase
+import com.robertgasparian.routinehelper.domain.usecase.SetWeeklyItemHiddenUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetWeeklyItemCheckedUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyItemCompletedCountUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyItemNoteUseCase
@@ -36,6 +37,7 @@ class WeeklyViewModel @Inject constructor(
     weeklySummaryNoteUseCase: WeeklySummaryNoteUseCase,
     private val finalizeWeeklyUseCase: FinalizeWeeklyUseCase,
     private val setWeeklyItemCheckedUseCase: SetWeeklyItemCheckedUseCase,
+    private val setWeeklyItemHiddenUseCase: SetWeeklyItemHiddenUseCase,
     private val updateWeeklyItemCompletedCountUseCase: UpdateWeeklyItemCompletedCountUseCase,
     private val updateWeeklyItemNoteUseCase: UpdateWeeklyItemNoteUseCase,
     private val updateWeeklySummaryNoteUseCase: UpdateWeeklySummaryNoteUseCase,
@@ -72,6 +74,19 @@ class WeeklyViewModel @Inject constructor(
                 weekStartDate = weekStartDate,
                 routineItemId = routineItemId,
                 isChecked = isChecked,
+            )
+        }
+    }
+
+    fun setHidden(
+        routineItemId: Long,
+        isHidden: Boolean,
+    ) {
+        viewModelScope.launch {
+            setWeeklyItemHiddenUseCase(
+                weekStartDate = weekStartDate,
+                routineItemId = routineItemId,
+                isHidden = isHidden,
             )
         }
     }
@@ -169,11 +184,13 @@ class WeeklyViewModel @Inject constructor(
         }
     }
 
-    fun snapshotWeek() {
+    fun snapshotWeek(
+        // TODO Remove this test-only override when debug snapshot controls are removed.
+        snapshotWeekStartDate: String = SnapshotWorkDates
+            .previousCompletedCalendarWeekStartDate(ZonedDateTime.now())
+            .toString(),
+    ) {
         viewModelScope.launch {
-            val snapshotWeekStartDate = SnapshotWorkDates
-                .previousCompletedCalendarWeekStartDate(ZonedDateTime.now())
-                .toString()
             finalizeWeeklyUseCase(
                 weekStartDate = weekStartDate,
                 snapshotWeekStartDate = snapshotWeekStartDate,
@@ -196,5 +213,6 @@ private fun WeeklyRoutineItem.toUiState(): DailyItemUiState =
         repeatTargetCount = repeatTargetCount,
         completedCount = completedCount,
         isChecked = isChecked,
+        isHidden = isHidden,
         note = note.orEmpty(),
     )

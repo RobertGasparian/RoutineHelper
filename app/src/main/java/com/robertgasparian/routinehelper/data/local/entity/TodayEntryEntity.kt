@@ -27,6 +27,7 @@ data class TodayEntryEntity(
     val date: String,
     val isChecked: Boolean = false,
     val completedCount: Int = 0,
+    val isHidden: Boolean = false,
     val note: String? = null,
     val updatedAtMillis: Long,
 )

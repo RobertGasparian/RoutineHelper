@@ -8,6 +8,7 @@ data class TodayRoutineItem(
     val position: Int,
     val date: String,
     val isChecked: Boolean,
+    val isHidden: Boolean = false,
     val note: String?,
     val repeatTargetCount: Int? = null,
     val completedCount: Int = 0,

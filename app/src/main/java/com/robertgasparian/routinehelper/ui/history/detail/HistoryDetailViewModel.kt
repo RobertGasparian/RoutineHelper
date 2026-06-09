@@ -124,6 +124,7 @@ private fun RoutineDaySnapshotItem.toUiState(): HistoryDetailItemUiState =
         repeatTargetCount = repeatTargetCount,
         completedCount = completedCount,
         isChecked = isChecked,
+        isHidden = isHidden,
         note = note,
     )
 

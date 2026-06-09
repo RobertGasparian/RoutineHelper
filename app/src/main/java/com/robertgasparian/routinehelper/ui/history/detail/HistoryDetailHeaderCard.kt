@@ -124,10 +124,11 @@ private fun CompletionSummaryChip(
 
 private val HistoryDetailUiState.completionSummary: CompletionSummary
     get() {
-        val totalCount = items.size
+        val countableItems = items.filterNot { item -> item.isHidden }
+        val totalCount = countableItems.size
         if (totalCount == 0) return CompletionSummary.Empty
 
-        val completedCount = items.count(HistoryDetailItemUiState::isComplete)
+        val completedCount = countableItems.count(HistoryDetailItemUiState::isComplete)
         return if (completedCount == totalCount) {
             CompletionSummary.AllComplete
         } else {
