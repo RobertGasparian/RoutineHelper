@@ -10,6 +10,8 @@ data object WeeklyDestination : TopLevelDestination
 
 data object HistoryDestination : TopLevelDestination
 
+data object SettingsDestination
+
 data class HistoryDetailDestination(
     val snapshotId: Long,
 )

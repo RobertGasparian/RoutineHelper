@@ -12,6 +12,7 @@ import com.robertgasparian.routinehelper.ui.daily.DailyUiEvent
 fun WeeklyScreen(
     onCreateActionClick: () -> Unit,
     onEditActionClick: (actionId: Long) -> Unit,
+    onSettingsClick: () -> Unit,
     viewModel: WeeklyViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -52,5 +53,6 @@ fun WeeklyScreen(
         emptyTitle = "No weekly items yet",
         emptyDescription = "Add your first weekly action to start tracking this week.",
         showSnapshotAction = BuildConfig.DEBUG,
+        onSettingsClick = onSettingsClick,
     )
 }

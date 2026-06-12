@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
@@ -17,6 +18,7 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -109,6 +111,7 @@ sealed interface DailyUiEvent {
 fun DailyScreen(
     onCreateActionClick: () -> Unit,
     onEditActionClick: (actionId: Long) -> Unit,
+    onSettingsClick: () -> Unit,
     viewModel: DailyViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -146,6 +149,7 @@ fun DailyScreen(
             }
         },
         showSnapshotAction = BuildConfig.DEBUG,
+        onSettingsClick = onSettingsClick,
     )
 }
 
@@ -159,6 +163,7 @@ fun DailyComponent(
     emptyTitle: String = "No routine items yet",
     emptyDescription: String = "Add your first daily action to start tracking.",
     showSnapshotAction: Boolean = true,
+    onSettingsClick: () -> Unit = {},
 ) {
     // TODO Remove this debug/test-only date picker before the first public release.
     var isSnapshotDatePickerVisible by rememberSaveable { mutableStateOf(false) }
@@ -199,6 +204,12 @@ fun DailyComponent(
                         ) {
                             Text(text = "Snapshot")
                         }
+                    }
+                    IconButton(onClick = onSettingsClick) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Open settings",
+                        )
                     }
                 },
             )

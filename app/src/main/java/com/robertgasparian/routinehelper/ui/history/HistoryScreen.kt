@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.ViewWeek
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -89,6 +90,7 @@ sealed interface HistoryUiEvent {
 fun HistoryScreen(
     onSnapshotClick: (snapshotId: Long) -> Unit,
     onShareTextPreviewClick: (String) -> Unit,
+    onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HistoryViewModel = hiltViewModel(),
 ) {
@@ -140,6 +142,7 @@ fun HistoryScreen(
             }
         },
         modifier = modifier,
+        onSettingsClick = onSettingsClick,
     )
 }
 
@@ -149,6 +152,7 @@ fun HistoryComponent(
     uiState: HistoryUiState,
     onEvent: (HistoryUiEvent) -> Unit,
     modifier: Modifier = Modifier,
+    onSettingsClick: () -> Unit = {},
 ) {
     Scaffold(
         modifier = modifier,
@@ -191,6 +195,13 @@ fun HistoryComponent(
                             Icon(
                                 imageVector = Icons.Default.Delete,
                                 contentDescription = "Delete selected snapshots",
+                            )
+                        }
+                    } else {
+                        IconButton(onClick = onSettingsClick) {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = "Open settings",
                             )
                         }
                     }

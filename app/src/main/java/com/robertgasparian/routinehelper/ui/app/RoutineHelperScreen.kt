@@ -45,6 +45,7 @@ import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.ui.actioneditor.ActionEditorScreen
 import com.robertgasparian.routinehelper.ui.history.detail.HistoryDetailScreen
 import com.robertgasparian.routinehelper.ui.history.HistoryScreen
+import com.robertgasparian.routinehelper.ui.settings.SettingsScreen
 import com.robertgasparian.routinehelper.ui.share.ShareTextPreviewScreen
 import com.robertgasparian.routinehelper.ui.share.shareText
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
@@ -133,6 +134,9 @@ fun RoutineHelperComponent(
                         onEditActionClick = { actionId ->
                             navigateToDetail(ActionEditorDestination(actionId))
                         },
+                        onSettingsClick = {
+                            navigateToDetail(SettingsDestination)
+                        },
                     )
                 }
 
@@ -151,6 +155,9 @@ fun RoutineHelperComponent(
                                 ),
                             )
                         },
+                        onSettingsClick = {
+                            navigateToDetail(SettingsDestination)
+                        },
                     )
                 }
 
@@ -167,8 +174,17 @@ fun RoutineHelperComponent(
                                     ),
                                 )
                             },
+                            onSettingsClick = {
+                                navigateToDetail(SettingsDestination)
+                            },
                         )
                     }
+
+                entry<SettingsDestination> {
+                    SettingsScreen(
+                        onBackClick = { navigateBack() },
+                    )
+                }
 
                 entry<HistoryDetailDestination> { destination ->
                         HistoryDetailScreen(

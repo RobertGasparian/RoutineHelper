@@ -355,7 +355,7 @@ private fun RoutineActionItemCardActionColumn(
             onClick = {},
             contentDescription = "Reorder action",
             icon = Icons.Default.DragIndicator,
-            tint = LocalActionTint(isComplete),
+            tint = localActionTint(isComplete),
             buttonSize = 32.dp,
             iconSize = 20.dp,
         )
@@ -363,7 +363,7 @@ private fun RoutineActionItemCardActionColumn(
             onClick = { onHiddenChange(!isHidden) },
             contentDescription = if (isHidden) "Show action" else "Hide action",
             icon = if (isHidden) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-            tint = LocalActionTint(isComplete),
+            tint = localActionTint(isComplete),
             buttonSize = 32.dp,
             iconSize = 20.dp,
         )
@@ -372,7 +372,7 @@ private fun RoutineActionItemCardActionColumn(
                 onClick = onEditActionClick,
                 contentDescription = "Edit action",
                 icon = Icons.Default.Edit,
-                tint = LocalActionTint(isComplete),
+                tint = localActionTint(isComplete),
                 buttonSize = 32.dp,
                 iconSize = 20.dp,
             )
@@ -381,7 +381,7 @@ private fun RoutineActionItemCardActionColumn(
             onClick = onEditNoteClick,
             contentDescription = noteContentDescription,
             icon = Icons.AutoMirrored.Filled.StickyNote2,
-            tint = LocalActionTint(isComplete),
+            tint = localActionTint(isComplete),
             buttonSize = 32.dp,
             iconSize = 20.dp,
         )
@@ -416,7 +416,7 @@ private fun RoutineActionItemCardSmallIconButton(
 }
 
 @Composable
-private fun LocalActionTint(isComplete: Boolean): Color =
+private fun localActionTint(isComplete: Boolean): Color =
     if (isComplete) {
         MaterialTheme.colorScheme.onSurfaceVariant
     } else {
