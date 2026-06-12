@@ -21,6 +21,7 @@ import androidx.compose.material.icons.automirrored.filled.StickyNote2
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.DragIndicator
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Visibility
@@ -62,6 +63,7 @@ fun RoutineActionItemCard(
     onEditActionClick: () -> Unit = {},
     onEditNoteClick: () -> Unit = {},
     onHiddenChange: (Boolean) -> Unit = {},
+    dragHandleModifier: Modifier = Modifier,
 ) {
     val isRepeatAction = repeatTargetCount != null
     val isComplete = !isHidden && if (isRepeatAction) {
@@ -145,6 +147,7 @@ fun RoutineActionItemCard(
 
                 RoutineActionItemCardActionColumn(
                     modifier = Modifier.align(Alignment.Top),
+                    dragHandleModifier = dragHandleModifier,
                     noteContentDescription = if (note.isNullOrBlank()) "Add note" else "Edit note",
                     isComplete = isComplete,
                     isHidden = isHidden,
@@ -333,6 +336,7 @@ private fun RoutineActionItemCardCounterButton(
 
 @Composable
 private fun RoutineActionItemCardActionColumn(
+    dragHandleModifier: Modifier,
     noteContentDescription: String,
     isComplete: Boolean,
     isHidden: Boolean,
@@ -346,6 +350,15 @@ private fun RoutineActionItemCardActionColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.Top),
     ) {
+        RoutineActionItemCardSmallIconButton(
+            modifier = dragHandleModifier,
+            onClick = {},
+            contentDescription = "Reorder action",
+            icon = Icons.Default.DragIndicator,
+            tint = LocalActionTint(isComplete),
+            buttonSize = 32.dp,
+            iconSize = 20.dp,
+        )
         RoutineActionItemCardSmallIconButton(
             onClick = { onHiddenChange(!isHidden) },
             contentDescription = if (isHidden) "Show action" else "Hide action",

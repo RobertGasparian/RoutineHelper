@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -31,6 +29,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -44,6 +43,8 @@ import com.robertgasparian.routinehelper.BuildConfig
 import com.robertgasparian.routinehelper.ui.dsm.RoutineNoteDialog
 import com.robertgasparian.routinehelper.ui.dsm.SummaryNoteCard
 import com.robertgasparian.routinehelper.ui.dsm.RoutineActionItemCard
+import com.robertgasparian.routinehelper.ui.reorder.RoutineReorderList
+import com.robertgasparian.routinehelper.ui.reorder.rememberRoutineReorderState
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 import java.time.Instant
 import java.time.LocalDate
@@ -69,6 +70,10 @@ sealed interface DailyUiEvent {
     data class HiddenChange(
         val routineItemId: Long,
         val isHidden: Boolean,
+    ) : DailyUiEvent
+
+    data class ReorderItems(
+        val routineItemIdsInOrder: List<Long>,
     ) : DailyUiEvent
 
     data object SnapshotClick : DailyUiEvent
@@ -124,6 +129,7 @@ fun DailyScreen(
                     routineItemId = event.routineItemId,
                     isHidden = event.isHidden,
                 )
+                is DailyUiEvent.ReorderItems -> viewModel.reorderItems(event.routineItemIdsInOrder)
                 DailyUiEvent.CreateActionClick -> onCreateActionClick()
                 is DailyUiEvent.EditActionClick -> onEditActionClick(event.actionId)
                 DailyUiEvent.SnapshotClick -> viewModel.snapshotDaily()
@@ -157,6 +163,8 @@ fun DailyComponent(
     // TODO Remove this debug/test-only date picker before the first public release.
     var isSnapshotDatePickerVisible by rememberSaveable { mutableStateOf(false) }
     val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+    val reorderState = rememberRoutineReorderState()
     val fabVisible by remember {
         derivedStateOf {
             !listState.isScrollInProgress
@@ -224,38 +232,44 @@ fun DailyComponent(
                     .padding(innerPadding),
             )
         } else {
-            LazyColumn(
-                state = listState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentPadding = PaddingValues(
-                    start = 16.dp,
-                    top = 16.dp,
-                    end = 16.dp,
-                    bottom = DailyListBottomSafeSpace,
-                ),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                item {
-                    SummaryNoteCard(
-                        note = uiState.summaryNote,
-                        label = if (title == "Weekly") "Week note" else "Day note",
-                        onEditClick = {
-                            onEvent(DailyUiEvent.EditSummaryNoteClick)
-                        },
-                    )
-                }
-                items(
-                    items = uiState.items,
-                    key = { item -> item.routineItemId },
-                ) { item ->
+            val contentPadding = PaddingValues(
+                start = 16.dp,
+                top = 16.dp,
+                end = 16.dp,
+                bottom = DailyListBottomSafeSpace,
+            )
+            val summaryContent: @Composable () -> Unit = {
+                SummaryNoteCard(
+                    note = uiState.summaryNote,
+                    label = if (title == "Weekly") "Week note" else "Day note",
+                    onEditClick = {
+                        onEvent(DailyUiEvent.EditSummaryNoteClick)
+                    },
+                )
+            }
+            val itemContent:
+                @Composable (DailyItemUiState, Modifier, Modifier) -> Unit = { item, itemModifier, dragHandleModifier ->
                     DailyRoutineItem(
                         item = item,
                         onEvent = onEvent,
+                        modifier = itemModifier,
+                        dragHandleModifier = dragHandleModifier,
                     )
                 }
-            }
+
+            RoutineReorderList(
+                sourceItems = uiState.items,
+                reorderState = reorderState,
+                listState = listState,
+                coroutineScope = coroutineScope,
+                contentPadding = contentPadding,
+                summaryContent = summaryContent,
+                onDropOrder = { orderedIds -> onEvent(DailyUiEvent.ReorderItems(orderedIds)) },
+                itemContent = itemContent,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+            )
         }
     }
 
@@ -340,8 +354,11 @@ private fun DebugSnapshotDatePickerDialog(
 private fun DailyRoutineItem(
     item: DailyItemUiState,
     onEvent: (DailyUiEvent) -> Unit,
+    modifier: Modifier = Modifier,
+    dragHandleModifier: Modifier = Modifier,
 ) {
     RoutineActionItemCard(
+        modifier = modifier,
         title = item.title,
         description = item.description,
         note = item.note.takeIf(String::isNotBlank),
@@ -364,6 +381,7 @@ private fun DailyRoutineItem(
         onHiddenChange = { isHidden ->
             onEvent(DailyUiEvent.HiddenChange(item.routineItemId, isHidden))
         },
+        dragHandleModifier = dragHandleModifier,
     )
 }
 

@@ -32,6 +32,7 @@ fun WeeklyScreen(
                     routineItemId = event.routineItemId,
                     isHidden = event.isHidden,
                 )
+                is DailyUiEvent.ReorderItems -> viewModel.reorderItems(event.routineItemIdsInOrder)
                 DailyUiEvent.CreateActionClick -> onCreateActionClick()
                 is DailyUiEvent.EditActionClick -> onEditActionClick(event.actionId)
                 DailyUiEvent.SnapshotClick -> viewModel.snapshotWeek()

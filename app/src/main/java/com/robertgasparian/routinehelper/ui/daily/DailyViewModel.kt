@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
+import com.robertgasparian.routinehelper.domain.usecase.ReorderDailyRoutineItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetTodayItemHiddenUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetTodayItemCheckedUseCase
 import com.robertgasparian.routinehelper.domain.usecase.TodayItemsUseCase
@@ -28,6 +29,7 @@ class DailyViewModel @Inject constructor(
     todayItemsUseCase: TodayItemsUseCase,
     todaySummaryNoteUseCase: TodaySummaryNoteUseCase,
     private val finalizeTodayUseCase: FinalizeTodayUseCase,
+    private val reorderDailyRoutineItemsUseCase: ReorderDailyRoutineItemsUseCase,
     private val setTodayItemCheckedUseCase: SetTodayItemCheckedUseCase,
     private val setTodayItemHiddenUseCase: SetTodayItemHiddenUseCase,
     private val updateTodayItemCompletedCountUseCase: UpdateTodayItemCompletedCountUseCase,
@@ -80,6 +82,12 @@ class DailyViewModel @Inject constructor(
                 routineItemId = routineItemId,
                 isHidden = isHidden,
             )
+        }
+    }
+
+    fun reorderItems(routineItemIdsInOrder: List<Long>) {
+        viewModelScope.launch {
+            reorderDailyRoutineItemsUseCase(routineItemIdsInOrder)
         }
     }
 

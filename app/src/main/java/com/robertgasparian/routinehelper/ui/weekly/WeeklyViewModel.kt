@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robertgasparian.routinehelper.domain.model.WeeklyRoutineItem
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeWeeklyUseCase
+import com.robertgasparian.routinehelper.domain.usecase.ReorderWeeklyRoutineItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetWeeklyItemHiddenUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetWeeklyItemCheckedUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyItemCompletedCountUseCase
@@ -36,6 +37,7 @@ class WeeklyViewModel @Inject constructor(
     weeklyItemsUseCase: WeeklyItemsUseCase,
     weeklySummaryNoteUseCase: WeeklySummaryNoteUseCase,
     private val finalizeWeeklyUseCase: FinalizeWeeklyUseCase,
+    private val reorderWeeklyRoutineItemsUseCase: ReorderWeeklyRoutineItemsUseCase,
     private val setWeeklyItemCheckedUseCase: SetWeeklyItemCheckedUseCase,
     private val setWeeklyItemHiddenUseCase: SetWeeklyItemHiddenUseCase,
     private val updateWeeklyItemCompletedCountUseCase: UpdateWeeklyItemCompletedCountUseCase,
@@ -88,6 +90,12 @@ class WeeklyViewModel @Inject constructor(
                 routineItemId = routineItemId,
                 isHidden = isHidden,
             )
+        }
+    }
+
+    fun reorderItems(routineItemIdsInOrder: List<Long>) {
+        viewModelScope.launch {
+            reorderWeeklyRoutineItemsUseCase(routineItemIdsInOrder)
         }
     }
 
