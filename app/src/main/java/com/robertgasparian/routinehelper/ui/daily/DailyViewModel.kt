@@ -59,7 +59,36 @@ class DailyViewModel @Inject constructor(
                 initialValue = DailyUiState(date = todayDate),
             )
 
-    fun setChecked(
+    fun onEvent(event: DailyUiEvent.State) {
+        when (event) {
+            is DailyUiEvent.CheckedChange -> setChecked(
+                routineItemId = event.routineItemId,
+                isChecked = event.isChecked,
+            )
+            is DailyUiEvent.CompletedCountChange -> updateCompletedCount(
+                routineItemId = event.routineItemId,
+                completedCount = event.completedCount,
+            )
+            is DailyUiEvent.HiddenChange -> setHidden(
+                routineItemId = event.routineItemId,
+                isHidden = event.isHidden,
+            )
+            is DailyUiEvent.ReorderItems -> reorderItems(event.routineItemIdsInOrder)
+            DailyUiEvent.SnapshotClick -> snapshotDaily()
+            is DailyUiEvent.SnapshotDateSelected -> snapshotDaily(snapshotDate = event.date)
+            is DailyUiEvent.EditNoteClick -> showItemNoteEditor(event.item)
+            DailyUiEvent.EditSummaryNoteClick -> showSummaryNoteEditor(uiState.value.summaryNote)
+            is DailyUiEvent.NoteDraftChange -> updateNoteDraft(event.value)
+            DailyUiEvent.NoteDraftClearClick -> clearNoteDraft()
+            DailyUiEvent.NoteDraftDateClick -> insertCurrentDateIntoNoteDraft()
+            DailyUiEvent.NoteDraftWeekdayClick -> insertCurrentWeekdayIntoNoteDraft()
+            DailyUiEvent.NoteDraftTimeClick -> insertCurrentTimeIntoNoteDraft()
+            DailyUiEvent.NoteEditorDismiss -> dismissNoteEditor()
+            DailyUiEvent.NoteEditorSaveClick -> saveNoteDraft()
+        }
+    }
+
+    private fun setChecked(
         routineItemId: Long,
         isChecked: Boolean,
     ) {
@@ -72,7 +101,7 @@ class DailyViewModel @Inject constructor(
         }
     }
 
-    fun setHidden(
+    private fun setHidden(
         routineItemId: Long,
         isHidden: Boolean,
     ) {
@@ -85,13 +114,13 @@ class DailyViewModel @Inject constructor(
         }
     }
 
-    fun reorderItems(routineItemIdsInOrder: List<Long>) {
+    private fun reorderItems(routineItemIdsInOrder: List<Long>) {
         viewModelScope.launch {
             reorderDailyRoutineItemsUseCase(routineItemIdsInOrder)
         }
     }
 
-    fun updateNote(
+    private fun updateNote(
         routineItemId: Long,
         note: String,
     ) {
@@ -104,7 +133,7 @@ class DailyViewModel @Inject constructor(
         }
     }
 
-    fun updateSummaryNote(note: String) {
+    private fun updateSummaryNote(note: String) {
         viewModelScope.launch {
             updateTodaySummaryNoteUseCase(
                 date = todayDate,
@@ -113,7 +142,7 @@ class DailyViewModel @Inject constructor(
         }
     }
 
-    fun showItemNoteEditor(item: DailyItemUiState) {
+    private fun showItemNoteEditor(item: DailyItemUiState) {
         noteEditor.value = NoteEditorUiState.item(
             routineItemId = item.routineItemId,
             note = item.note,
@@ -122,38 +151,38 @@ class DailyViewModel @Inject constructor(
         )
     }
 
-    fun showSummaryNoteEditor(summaryNote: String) {
+    private fun showSummaryNoteEditor(summaryNote: String) {
         noteEditor.value = NoteEditorUiState.summary(
             note = summaryNote,
             isWeekly = false,
         )
     }
 
-    fun updateNoteDraft(value: NoteDraftUiState) {
+    private fun updateNoteDraft(value: NoteDraftUiState) {
         noteEditor.value = noteEditor.value?.copy(value = value)
     }
 
-    fun insertCurrentDateIntoNoteDraft() {
+    private fun insertCurrentDateIntoNoteDraft() {
         insertTextIntoNoteDraft(noteDateTimeTextProvider.currentDateText())
     }
 
-    fun insertCurrentWeekdayIntoNoteDraft() {
+    private fun insertCurrentWeekdayIntoNoteDraft() {
         insertTextIntoNoteDraft(noteDateTimeTextProvider.currentWeekdayText())
     }
 
-    fun insertCurrentTimeIntoNoteDraft() {
+    private fun insertCurrentTimeIntoNoteDraft() {
         insertTextIntoNoteDraft(noteDateTimeTextProvider.currentTimeText())
     }
 
-    fun clearNoteDraft() {
+    private fun clearNoteDraft() {
         noteEditor.value = noteEditor.value?.copy(value = NoteDraftUiState.fromText(""))
     }
 
-    fun dismissNoteEditor() {
+    private fun dismissNoteEditor() {
         noteEditor.value = null
     }
 
-    fun saveNoteDraft() {
+    private fun saveNoteDraft() {
         val editor = noteEditor.value ?: return
         when (val target = editor.target) {
             is NoteEditorTarget.Item -> updateNote(
@@ -171,7 +200,7 @@ class DailyViewModel @Inject constructor(
         }
     }
 
-    fun updateCompletedCount(
+    private fun updateCompletedCount(
         routineItemId: Long,
         completedCount: Int,
     ) {
@@ -184,7 +213,7 @@ class DailyViewModel @Inject constructor(
         }
     }
 
-    fun snapshotDaily(
+    private fun snapshotDaily(
         // TODO Remove this test-only override when debug snapshot controls are removed.
         snapshotDate: String = SnapshotWorkDates.dailySnapshotDate(timeProvider.now()).toString(),
     ) {

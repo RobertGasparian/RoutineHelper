@@ -52,61 +52,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
 
-sealed interface DailyUiEvent {
-    data object CreateActionClick : DailyUiEvent
-
-    data class EditActionClick(
-        val actionId: Long,
-    ) : DailyUiEvent
-
-    data class CheckedChange(
-        val routineItemId: Long,
-        val isChecked: Boolean,
-    ) : DailyUiEvent
-
-    data class CompletedCountChange(
-        val routineItemId: Long,
-        val completedCount: Int,
-    ) : DailyUiEvent
-
-    data class HiddenChange(
-        val routineItemId: Long,
-        val isHidden: Boolean,
-    ) : DailyUiEvent
-
-    data class ReorderItems(
-        val routineItemIdsInOrder: List<Long>,
-    ) : DailyUiEvent
-
-    data object SnapshotClick : DailyUiEvent
-
-    data class SnapshotDateSelected(
-        val date: String,
-    ) : DailyUiEvent
-
-    data class EditNoteClick(
-        val item: DailyItemUiState,
-    ) : DailyUiEvent
-
-    data object EditSummaryNoteClick : DailyUiEvent
-
-    data class NoteDraftChange(
-        val value: NoteDraftUiState,
-    ) : DailyUiEvent
-
-    data object NoteDraftClearClick : DailyUiEvent
-
-    data object NoteDraftDateClick : DailyUiEvent
-
-    data object NoteDraftWeekdayClick : DailyUiEvent
-
-    data object NoteDraftTimeClick : DailyUiEvent
-
-    data object NoteEditorDismiss : DailyUiEvent
-
-    data object NoteEditorSaveClick : DailyUiEvent
-}
-
 @Composable
 fun DailyScreen(
     onCreateActionClick: () -> Unit,
@@ -120,32 +65,9 @@ fun DailyScreen(
         uiState = uiState,
         onEvent = { event ->
             when (event) {
-                is DailyUiEvent.CheckedChange -> viewModel.setChecked(
-                    routineItemId = event.routineItemId,
-                    isChecked = event.isChecked,
-                )
-                is DailyUiEvent.CompletedCountChange -> viewModel.updateCompletedCount(
-                    routineItemId = event.routineItemId,
-                    completedCount = event.completedCount,
-                )
-                is DailyUiEvent.HiddenChange -> viewModel.setHidden(
-                    routineItemId = event.routineItemId,
-                    isHidden = event.isHidden,
-                )
-                is DailyUiEvent.ReorderItems -> viewModel.reorderItems(event.routineItemIdsInOrder)
                 DailyUiEvent.CreateActionClick -> onCreateActionClick()
                 is DailyUiEvent.EditActionClick -> onEditActionClick(event.actionId)
-                DailyUiEvent.SnapshotClick -> viewModel.snapshotDaily()
-                is DailyUiEvent.SnapshotDateSelected -> viewModel.snapshotDaily(snapshotDate = event.date)
-                is DailyUiEvent.EditNoteClick -> viewModel.showItemNoteEditor(event.item)
-                DailyUiEvent.EditSummaryNoteClick -> viewModel.showSummaryNoteEditor(uiState.summaryNote)
-                is DailyUiEvent.NoteDraftChange -> viewModel.updateNoteDraft(event.value)
-                DailyUiEvent.NoteDraftClearClick -> viewModel.clearNoteDraft()
-                DailyUiEvent.NoteDraftDateClick -> viewModel.insertCurrentDateIntoNoteDraft()
-                DailyUiEvent.NoteDraftWeekdayClick -> viewModel.insertCurrentWeekdayIntoNoteDraft()
-                DailyUiEvent.NoteDraftTimeClick -> viewModel.insertCurrentTimeIntoNoteDraft()
-                DailyUiEvent.NoteEditorDismiss -> viewModel.dismissNoteEditor()
-                DailyUiEvent.NoteEditorSaveClick -> viewModel.saveNoteDraft()
+                is DailyUiEvent.State -> viewModel.onEvent(event)
             }
         },
         showSnapshotAction = BuildConfig.DEBUG,
@@ -300,7 +222,7 @@ fun DailyComponent(
         )
     }
 
-    if (isSnapshotDatePickerVisible) {
+    if (showSnapshotAction && isSnapshotDatePickerVisible) {
         DebugSnapshotDatePickerDialog(
             onDismiss = { isSnapshotDatePickerVisible = false },
             onDateSelected = { date ->
