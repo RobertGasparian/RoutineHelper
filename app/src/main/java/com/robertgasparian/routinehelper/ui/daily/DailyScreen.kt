@@ -67,7 +67,7 @@ fun DailyScreen(
             when (event) {
                 DailyUiEvent.CreateActionClick -> onCreateActionClick()
                 is DailyUiEvent.EditActionClick -> onEditActionClick(event.actionId)
-                is DailyUiEvent.State -> viewModel.onEvent(event)
+                is DailyUiEvent.Intent -> viewModel.onEvent(event)
             }
         },
         showSnapshotAction = BuildConfig.DEBUG,

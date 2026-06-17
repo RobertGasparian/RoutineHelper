@@ -1,7 +1,7 @@
 package com.robertgasparian.routinehelper.ui.daily
 
 sealed interface DailyUiEvent {
-    sealed interface State : DailyUiEvent
+    sealed interface Intent : DailyUiEvent
 
     data object CreateActionClick : DailyUiEvent
 
@@ -12,47 +12,47 @@ sealed interface DailyUiEvent {
     data class CheckedChange(
         val routineItemId: Long,
         val isChecked: Boolean,
-    ) : State
+    ) : Intent
 
     data class CompletedCountChange(
         val routineItemId: Long,
         val completedCount: Int,
-    ) : State
+    ) : Intent
 
     data class HiddenChange(
         val routineItemId: Long,
         val isHidden: Boolean,
-    ) : State
+    ) : Intent
 
     data class ReorderItems(
         val routineItemIdsInOrder: List<Long>,
-    ) : State
+    ) : Intent
 
-    data object SnapshotClick : State
+    data object SnapshotClick : Intent
 
     data class SnapshotDateSelected(
         val date: String,
-    ) : State
+    ) : Intent
 
     data class EditNoteClick(
         val item: DailyItemUiState,
-    ) : State
+    ) : Intent
 
-    data object EditSummaryNoteClick : State
+    data object EditSummaryNoteClick : Intent
 
     data class NoteDraftChange(
         val value: NoteDraftUiState,
-    ) : State
+    ) : Intent
 
-    data object NoteDraftClearClick : State
+    data object NoteDraftClearClick : Intent
 
-    data object NoteDraftDateClick : State
+    data object NoteDraftDateClick : Intent
 
-    data object NoteDraftWeekdayClick : State
+    data object NoteDraftWeekdayClick : Intent
 
-    data object NoteDraftTimeClick : State
+    data object NoteDraftTimeClick : Intent
 
-    data object NoteEditorDismiss : State
+    data object NoteEditorDismiss : Intent
 
-    data object NoteEditorSaveClick : State
+    data object NoteEditorSaveClick : Intent
 }

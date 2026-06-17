@@ -1,26 +1,28 @@
-package com.robertgasparian.routinehelper.ui.daily
+package com.robertgasparian.routinehelper.ui.weekly
 
-import com.robertgasparian.routinehelper.core.time.TimeProvider
-import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
-import com.robertgasparian.routinehelper.domain.usecase.CheckedChange
-import com.robertgasparian.routinehelper.domain.usecase.CountChange
+import com.robertgasparian.routinehelper.domain.model.WeeklyRoutineItem
 import com.robertgasparian.routinehelper.domain.usecase.FakeRoutineHistoryRepository
 import com.robertgasparian.routinehelper.domain.usecase.FakeRoutineTemplateRepository
-import com.robertgasparian.routinehelper.domain.usecase.FakeTodayRoutineRepository
-import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
-import com.robertgasparian.routinehelper.domain.usecase.HiddenChange
-import com.robertgasparian.routinehelper.domain.usecase.NoteChange
-import com.robertgasparian.routinehelper.domain.usecase.ReorderDailyRoutineItemsUseCase
-import com.robertgasparian.routinehelper.domain.usecase.SetTodayItemCheckedUseCase
-import com.robertgasparian.routinehelper.domain.usecase.SetTodayItemHiddenUseCase
-import com.robertgasparian.routinehelper.domain.usecase.TodayItemsUseCase
-import com.robertgasparian.routinehelper.domain.usecase.TodaySummaryNoteUseCase
-import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayItemCompletedCountUseCase
-import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayItemNoteUseCase
-import com.robertgasparian.routinehelper.domain.usecase.UpdateTodaySummaryNoteUseCase
+import com.robertgasparian.routinehelper.domain.usecase.FakeWeeklyRoutineRepository
+import com.robertgasparian.routinehelper.domain.usecase.FinalizeWeeklyUseCase
+import com.robertgasparian.routinehelper.domain.usecase.ReorderWeeklyRoutineItemsUseCase
+import com.robertgasparian.routinehelper.domain.usecase.SetWeeklyItemCheckedUseCase
+import com.robertgasparian.routinehelper.domain.usecase.SetWeeklyItemHiddenUseCase
+import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyItemCompletedCountUseCase
+import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyItemNoteUseCase
+import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklySummaryNoteUseCase
+import com.robertgasparian.routinehelper.domain.usecase.WeeklyCheckedChange
+import com.robertgasparian.routinehelper.domain.usecase.WeeklyCountChange
+import com.robertgasparian.routinehelper.domain.usecase.WeeklyHiddenChange
+import com.robertgasparian.routinehelper.domain.usecase.WeeklyItemsUseCase
+import com.robertgasparian.routinehelper.domain.usecase.WeeklyNoteChange
+import com.robertgasparian.routinehelper.domain.usecase.WeeklySummaryNoteUseCase
 import com.robertgasparian.routinehelper.test.FakeNoteDateTimeTextProvider
 import com.robertgasparian.routinehelper.test.FixedTimeProvider
 import com.robertgasparian.routinehelper.test.MainDispatcherRule
+import com.robertgasparian.routinehelper.ui.daily.DailyItemUiState
+import com.robertgasparian.routinehelper.ui.daily.DailyUiEvent
+import com.robertgasparian.routinehelper.ui.daily.NoteDraftUiState
 import java.time.Instant
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -30,18 +32,18 @@ import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class DailyViewModelTest {
+class WeeklyViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val todayRepository = FakeTodayRoutineRepository()
+    private val weeklyRepository = FakeWeeklyRoutineRepository()
     private val templateRepository = FakeRoutineTemplateRepository()
     private val historyRepository = FakeRoutineHistoryRepository()
     private val noteDateTimeTextProvider = FakeNoteDateTimeTextProvider()
     private val timeProvider = FixedTimeProvider()
 
     @Test
-    fun `when item events are received then forwards them to daily use cases`() = runTest {
+    fun `when item events are received then forwards them to weekly use cases`() = runTest {
         val viewModel = createViewModel()
 
         viewModel.onEvent(DailyUiEvent.CheckedChange(routineItemId = 10L, isChecked = true))
@@ -52,39 +54,39 @@ class DailyViewModelTest {
 
         assertEquals(
             listOf(
-                CheckedChange(
-                    date = TodayDate,
+                WeeklyCheckedChange(
+                    weekStartDate = WeekStartDate,
                     routineItemId = 10L,
                     isChecked = true,
                 ),
             ),
-            todayRepository.checkedChanges,
+            weeklyRepository.checkedChanges,
         )
         assertEquals(
             listOf(
-                CountChange(
-                    date = TodayDate,
+                WeeklyCountChange(
+                    weekStartDate = WeekStartDate,
                     routineItemId = 10L,
                     completedCount = 3,
                 ),
             ),
-            todayRepository.countChanges,
+            weeklyRepository.countChanges,
         )
         assertEquals(
             listOf(
-                HiddenChange(
-                    date = TodayDate,
+                WeeklyHiddenChange(
+                    weekStartDate = WeekStartDate,
                     routineItemId = 10L,
                     isHidden = true,
                 ),
             ),
-            todayRepository.hiddenChanges,
+            weeklyRepository.hiddenChanges,
         )
         assertEquals(listOf(listOf(10L, 11L)), templateRepository.reorderedTemplateItemIds)
     }
 
     @Test
-    fun `given item note editor is open when save is clicked then updates item note`() = runTest {
+    fun `given item note editor is open when save is clicked then updates weekly item note`() = runTest {
         val viewModel = createViewModel()
 
         viewModel.onEvent(DailyUiEvent.EditNoteClick(itemUiState(note = "old note")))
@@ -94,13 +96,13 @@ class DailyViewModelTest {
 
         assertEquals(
             listOf(
-                NoteChange(
-                    date = TodayDate,
+                WeeklyNoteChange(
+                    weekStartDate = WeekStartDate,
                     routineItemId = 10L,
                     note = "updated note",
                 ),
             ),
-            todayRepository.noteChanges,
+            weeklyRepository.noteChanges,
         )
     }
 
@@ -116,22 +118,22 @@ class DailyViewModelTest {
 
         assertEquals(
             "Completed on May 29",
-            todayRepository.noteChanges.single().note,
+            weeklyRepository.noteChanges.single().note,
         )
     }
 
     @Test
-    fun `given current day has items when snapshot date is selected then finalizes current day under selected date`() = runTest {
-        todayRepository.setItems(
-            date = TodayDate,
+    fun `given current week has items when snapshot week is selected then finalizes current week under selected week`() = runTest {
+        weeklyRepository.setItems(
+            weekStartDate = WeekStartDate,
             items = listOf(
-                TodayRoutineItem(
+                WeeklyRoutineItem(
                     routineItemId = 10L,
                     actionId = 100L,
-                    title = "Drink water",
+                    title = "Stretch",
                     description = null,
                     position = 0,
-                    date = TodayDate,
+                    weekStartDate = WeekStartDate,
                     isChecked = true,
                     note = "Done.",
                 ),
@@ -139,30 +141,30 @@ class DailyViewModelTest {
         )
         val viewModel = createViewModel()
 
-        viewModel.onEvent(DailyUiEvent.SnapshotDateSelected("2026-05-28"))
+        viewModel.onEvent(DailyUiEvent.SnapshotDateSelected("2026-05-18"))
         advanceUntilIdle()
 
-        assertEquals("2026-05-28", historyRepository.savedSnapshots.single().date)
+        assertEquals("2026-05-18", historyRepository.savedSnapshots.single().date)
         assertEquals(
             Instant.parse("2026-05-29T14:30:00Z").toEpochMilli(),
             historyRepository.savedSnapshots.single().finalizedAtMillis,
         )
     }
 
-    private fun createViewModel(): DailyViewModel =
-        DailyViewModel(
-            todayItemsUseCase = TodayItemsUseCase(todayRepository),
-            todaySummaryNoteUseCase = TodaySummaryNoteUseCase(todayRepository),
-            finalizeTodayUseCase = FinalizeTodayUseCase(
-                todayRoutineRepository = todayRepository,
+    private fun createViewModel(): WeeklyViewModel =
+        WeeklyViewModel(
+            weeklyItemsUseCase = WeeklyItemsUseCase(weeklyRepository),
+            weeklySummaryNoteUseCase = WeeklySummaryNoteUseCase(weeklyRepository),
+            finalizeWeeklyUseCase = FinalizeWeeklyUseCase(
+                weeklyRoutineRepository = weeklyRepository,
                 routineHistoryRepository = historyRepository,
             ),
-            reorderDailyRoutineItemsUseCase = ReorderDailyRoutineItemsUseCase(templateRepository),
-            setTodayItemCheckedUseCase = SetTodayItemCheckedUseCase(todayRepository),
-            setTodayItemHiddenUseCase = SetTodayItemHiddenUseCase(todayRepository),
-            updateTodayItemCompletedCountUseCase = UpdateTodayItemCompletedCountUseCase(todayRepository),
-            updateTodayItemNoteUseCase = UpdateTodayItemNoteUseCase(todayRepository),
-            updateTodaySummaryNoteUseCase = UpdateTodaySummaryNoteUseCase(todayRepository),
+            reorderWeeklyRoutineItemsUseCase = ReorderWeeklyRoutineItemsUseCase(templateRepository),
+            setWeeklyItemCheckedUseCase = SetWeeklyItemCheckedUseCase(weeklyRepository),
+            setWeeklyItemHiddenUseCase = SetWeeklyItemHiddenUseCase(weeklyRepository),
+            updateWeeklyItemCompletedCountUseCase = UpdateWeeklyItemCompletedCountUseCase(weeklyRepository),
+            updateWeeklyItemNoteUseCase = UpdateWeeklyItemNoteUseCase(weeklyRepository),
+            updateWeeklySummaryNoteUseCase = UpdateWeeklySummaryNoteUseCase(weeklyRepository),
             noteDateTimeTextProvider = noteDateTimeTextProvider,
             timeProvider = timeProvider,
         )
@@ -171,7 +173,7 @@ class DailyViewModelTest {
         DailyItemUiState(
             routineItemId = 10L,
             actionId = 100L,
-            title = "Drink water",
+            title = "Stretch",
             description = null,
             repeatTargetCount = null,
             completedCount = 0,
@@ -180,6 +182,6 @@ class DailyViewModelTest {
         )
 
     private companion object {
-        const val TodayDate = "2026-05-29"
+        const val WeekStartDate = "2026-05-25"
     }
 }

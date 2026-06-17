@@ -59,7 +59,7 @@ class DailyViewModel @Inject constructor(
                 initialValue = DailyUiState(date = todayDate),
             )
 
-    fun onEvent(event: DailyUiEvent.State) {
+    fun onEvent(event: DailyUiEvent.Intent) {
         when (event) {
             is DailyUiEvent.CheckedChange -> setChecked(
                 routineItemId = event.routineItemId,

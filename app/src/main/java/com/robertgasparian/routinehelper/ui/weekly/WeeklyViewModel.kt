@@ -14,6 +14,7 @@ import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklySummaryNoteU
 import com.robertgasparian.routinehelper.domain.usecase.WeeklyItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.WeeklySummaryNoteUseCase
 import com.robertgasparian.routinehelper.ui.daily.DailyItemUiState
+import com.robertgasparian.routinehelper.ui.daily.DailyUiEvent
 import com.robertgasparian.routinehelper.ui.daily.DailyUiState
 import com.robertgasparian.routinehelper.ui.daily.NoteDateTimeTextProvider
 import com.robertgasparian.routinehelper.ui.daily.NoteDraftUiState
@@ -68,7 +69,36 @@ class WeeklyViewModel @Inject constructor(
                 initialValue = DailyUiState(date = "Week of $weekStartDate"),
             )
 
-    fun setChecked(
+    fun onEvent(event: DailyUiEvent.Intent) {
+        when (event) {
+            is DailyUiEvent.CheckedChange -> setChecked(
+                routineItemId = event.routineItemId,
+                isChecked = event.isChecked,
+            )
+            is DailyUiEvent.CompletedCountChange -> updateCompletedCount(
+                routineItemId = event.routineItemId,
+                completedCount = event.completedCount,
+            )
+            is DailyUiEvent.HiddenChange -> setHidden(
+                routineItemId = event.routineItemId,
+                isHidden = event.isHidden,
+            )
+            is DailyUiEvent.ReorderItems -> reorderItems(event.routineItemIdsInOrder)
+            DailyUiEvent.SnapshotClick -> snapshotWeek()
+            is DailyUiEvent.SnapshotDateSelected -> snapshotWeek(snapshotWeekStartDate = event.date)
+            is DailyUiEvent.EditNoteClick -> showItemNoteEditor(event.item)
+            DailyUiEvent.EditSummaryNoteClick -> showSummaryNoteEditor(uiState.value.summaryNote)
+            is DailyUiEvent.NoteDraftChange -> updateNoteDraft(event.value)
+            DailyUiEvent.NoteDraftClearClick -> clearNoteDraft()
+            DailyUiEvent.NoteDraftDateClick -> insertCurrentDateIntoNoteDraft()
+            DailyUiEvent.NoteDraftWeekdayClick -> insertCurrentWeekdayIntoNoteDraft()
+            DailyUiEvent.NoteDraftTimeClick -> insertCurrentTimeIntoNoteDraft()
+            DailyUiEvent.NoteEditorDismiss -> dismissNoteEditor()
+            DailyUiEvent.NoteEditorSaveClick -> saveNoteDraft()
+        }
+    }
+
+    private fun setChecked(
         routineItemId: Long,
         isChecked: Boolean,
     ) {
@@ -81,7 +111,7 @@ class WeeklyViewModel @Inject constructor(
         }
     }
 
-    fun setHidden(
+    private fun setHidden(
         routineItemId: Long,
         isHidden: Boolean,
     ) {
@@ -94,13 +124,13 @@ class WeeklyViewModel @Inject constructor(
         }
     }
 
-    fun reorderItems(routineItemIdsInOrder: List<Long>) {
+    private fun reorderItems(routineItemIdsInOrder: List<Long>) {
         viewModelScope.launch {
             reorderWeeklyRoutineItemsUseCase(routineItemIdsInOrder)
         }
     }
 
-    fun updateNote(
+    private fun updateNote(
         routineItemId: Long,
         note: String,
     ) {
@@ -113,7 +143,7 @@ class WeeklyViewModel @Inject constructor(
         }
     }
 
-    fun updateSummaryNote(note: String) {
+    private fun updateSummaryNote(note: String) {
         viewModelScope.launch {
             updateWeeklySummaryNoteUseCase(
                 weekStartDate = weekStartDate,
@@ -122,7 +152,7 @@ class WeeklyViewModel @Inject constructor(
         }
     }
 
-    fun showItemNoteEditor(item: DailyItemUiState) {
+    private fun showItemNoteEditor(item: DailyItemUiState) {
         noteEditor.value = NoteEditorUiState.item(
             routineItemId = item.routineItemId,
             note = item.note,
@@ -131,38 +161,38 @@ class WeeklyViewModel @Inject constructor(
         )
     }
 
-    fun showSummaryNoteEditor(summaryNote: String) {
+    private fun showSummaryNoteEditor(summaryNote: String) {
         noteEditor.value = NoteEditorUiState.summary(
             note = summaryNote,
             isWeekly = true,
         )
     }
 
-    fun updateNoteDraft(value: NoteDraftUiState) {
+    private fun updateNoteDraft(value: NoteDraftUiState) {
         noteEditor.value = noteEditor.value?.copy(value = value)
     }
 
-    fun insertCurrentDateIntoNoteDraft() {
+    private fun insertCurrentDateIntoNoteDraft() {
         insertTextIntoNoteDraft(noteDateTimeTextProvider.currentDateText())
     }
 
-    fun insertCurrentWeekdayIntoNoteDraft() {
+    private fun insertCurrentWeekdayIntoNoteDraft() {
         insertTextIntoNoteDraft(noteDateTimeTextProvider.currentWeekdayText())
     }
 
-    fun insertCurrentTimeIntoNoteDraft() {
+    private fun insertCurrentTimeIntoNoteDraft() {
         insertTextIntoNoteDraft(noteDateTimeTextProvider.currentTimeText())
     }
 
-    fun clearNoteDraft() {
+    private fun clearNoteDraft() {
         noteEditor.value = noteEditor.value?.copy(value = NoteDraftUiState.fromText(""))
     }
 
-    fun dismissNoteEditor() {
+    private fun dismissNoteEditor() {
         noteEditor.value = null
     }
 
-    fun saveNoteDraft() {
+    private fun saveNoteDraft() {
         val editor = noteEditor.value ?: return
         when (val target = editor.target) {
             is NoteEditorTarget.Item -> updateNote(
@@ -180,7 +210,7 @@ class WeeklyViewModel @Inject constructor(
         }
     }
 
-    fun updateCompletedCount(
+    private fun updateCompletedCount(
         routineItemId: Long,
         completedCount: Int,
     ) {
@@ -193,7 +223,7 @@ class WeeklyViewModel @Inject constructor(
         }
     }
 
-    fun snapshotWeek(
+    private fun snapshotWeek(
         // TODO Remove this test-only override when debug snapshot controls are removed.
         snapshotWeekStartDate: String = SnapshotWorkDates
             .previousCompletedCalendarWeekStartDate(timeProvider.now())

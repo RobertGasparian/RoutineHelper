@@ -21,32 +21,9 @@ fun WeeklyScreen(
         uiState = uiState,
         onEvent = { event ->
             when (event) {
-                is DailyUiEvent.CheckedChange -> viewModel.setChecked(
-                    routineItemId = event.routineItemId,
-                    isChecked = event.isChecked,
-                )
-                is DailyUiEvent.CompletedCountChange -> viewModel.updateCompletedCount(
-                    routineItemId = event.routineItemId,
-                    completedCount = event.completedCount,
-                )
-                is DailyUiEvent.HiddenChange -> viewModel.setHidden(
-                    routineItemId = event.routineItemId,
-                    isHidden = event.isHidden,
-                )
-                is DailyUiEvent.ReorderItems -> viewModel.reorderItems(event.routineItemIdsInOrder)
                 DailyUiEvent.CreateActionClick -> onCreateActionClick()
                 is DailyUiEvent.EditActionClick -> onEditActionClick(event.actionId)
-                DailyUiEvent.SnapshotClick -> viewModel.snapshotWeek()
-                is DailyUiEvent.SnapshotDateSelected -> viewModel.snapshotWeek(snapshotWeekStartDate = event.date)
-                is DailyUiEvent.EditNoteClick -> viewModel.showItemNoteEditor(event.item)
-                DailyUiEvent.EditSummaryNoteClick -> viewModel.showSummaryNoteEditor(uiState.summaryNote)
-                is DailyUiEvent.NoteDraftChange -> viewModel.updateNoteDraft(event.value)
-                DailyUiEvent.NoteDraftClearClick -> viewModel.clearNoteDraft()
-                DailyUiEvent.NoteDraftDateClick -> viewModel.insertCurrentDateIntoNoteDraft()
-                DailyUiEvent.NoteDraftWeekdayClick -> viewModel.insertCurrentWeekdayIntoNoteDraft()
-                DailyUiEvent.NoteDraftTimeClick -> viewModel.insertCurrentTimeIntoNoteDraft()
-                DailyUiEvent.NoteEditorDismiss -> viewModel.dismissNoteEditor()
-                DailyUiEvent.NoteEditorSaveClick -> viewModel.saveNoteDraft()
+                is DailyUiEvent.Intent -> viewModel.onEvent(event)
             }
         },
         title = "Weekly",
