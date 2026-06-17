@@ -5,8 +5,8 @@ import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robertgasparian.routinehelper.BuildConfig
-import com.robertgasparian.routinehelper.ui.daily.DailyComponent
-import com.robertgasparian.routinehelper.ui.daily.DailyUiEvent
+import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingComponent
+import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingUiEvent
 
 @Composable
 fun WeeklyScreen(
@@ -17,13 +17,13 @@ fun WeeklyScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    DailyComponent(
+    RoutineTrackingComponent(
         uiState = uiState,
         onEvent = { event ->
             when (event) {
-                DailyUiEvent.CreateActionClick -> onCreateActionClick()
-                is DailyUiEvent.EditActionClick -> onEditActionClick(event.actionId)
-                is DailyUiEvent.Intent -> viewModel.onEvent(event)
+                RoutineTrackingUiEvent.CreateActionClick -> onCreateActionClick()
+                is RoutineTrackingUiEvent.EditActionClick -> onEditActionClick(event.actionId)
+                is RoutineTrackingUiEvent.Intent -> viewModel.onEvent(event)
             }
         },
         title = "Weekly",

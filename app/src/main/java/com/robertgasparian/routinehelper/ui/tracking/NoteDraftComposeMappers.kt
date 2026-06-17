@@ -1,4 +1,4 @@
-package com.robertgasparian.routinehelper.ui.daily
+package com.robertgasparian.routinehelper.ui.tracking
 
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue

@@ -3,7 +3,6 @@ package com.robertgasparian.routinehelper.ui.weekly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robertgasparian.routinehelper.core.time.TimeProvider
-import com.robertgasparian.routinehelper.domain.model.WeeklyRoutineItem
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeWeeklyUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ReorderWeeklyRoutineItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetWeeklyItemHiddenUseCase
@@ -13,14 +12,14 @@ import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyItemNoteUseC
 import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklySummaryNoteUseCase
 import com.robertgasparian.routinehelper.domain.usecase.WeeklyItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.WeeklySummaryNoteUseCase
-import com.robertgasparian.routinehelper.ui.daily.DailyItemUiState
-import com.robertgasparian.routinehelper.ui.daily.DailyUiEvent
-import com.robertgasparian.routinehelper.ui.daily.DailyUiState
 import com.robertgasparian.routinehelper.ui.daily.NoteDateTimeTextProvider
-import com.robertgasparian.routinehelper.ui.daily.NoteDraftUiState
-import com.robertgasparian.routinehelper.ui.daily.NoteEditorTarget
-import com.robertgasparian.routinehelper.ui.daily.NoteEditorUiState
-import com.robertgasparian.routinehelper.ui.daily.insertAtCursor
+import com.robertgasparian.routinehelper.ui.tracking.NoteDraftUiState
+import com.robertgasparian.routinehelper.ui.tracking.NoteEditorTarget
+import com.robertgasparian.routinehelper.ui.tracking.NoteEditorUiState
+import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingItemUiState
+import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingUiEvent
+import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingUiState
+import com.robertgasparian.routinehelper.ui.tracking.insertAtCursor
 import com.robertgasparian.routinehelper.work.SnapshotWorkDates
 import com.robertgasparian.routinehelper.work.startOfCalendarWeek
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -50,51 +49,51 @@ class WeeklyViewModel @Inject constructor(
     private val weekStartDate = timeProvider.currentDate().startOfWeek().toString()
     private val noteEditor = MutableStateFlow<NoteEditorUiState?>(null)
 
-    val uiState: StateFlow<DailyUiState> =
+    val uiState: StateFlow<RoutineTrackingUiState> =
         combine(
             weeklyItemsUseCase(weekStartDate),
             weeklySummaryNoteUseCase(weekStartDate),
             noteEditor,
         ) { items, summaryNote, noteEditor ->
-            DailyUiState(
+            RoutineTrackingUiState(
                 date = "Week of $weekStartDate",
                 summaryNote = summaryNote.orEmpty(),
-                items = items.map(WeeklyRoutineItem::toUiState),
+                items = items.map { item -> item.toRoutineTrackingItemUiState() },
                 noteEditor = noteEditor,
             )
         }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = DailyUiState(date = "Week of $weekStartDate"),
+                initialValue = RoutineTrackingUiState(date = "Week of $weekStartDate"),
             )
 
-    fun onEvent(event: DailyUiEvent.Intent) {
+    fun onEvent(event: RoutineTrackingUiEvent.Intent) {
         when (event) {
-            is DailyUiEvent.CheckedChange -> setChecked(
+            is RoutineTrackingUiEvent.CheckedChange -> setChecked(
                 routineItemId = event.routineItemId,
                 isChecked = event.isChecked,
             )
-            is DailyUiEvent.CompletedCountChange -> updateCompletedCount(
+            is RoutineTrackingUiEvent.CompletedCountChange -> updateCompletedCount(
                 routineItemId = event.routineItemId,
                 completedCount = event.completedCount,
             )
-            is DailyUiEvent.HiddenChange -> setHidden(
+            is RoutineTrackingUiEvent.HiddenChange -> setHidden(
                 routineItemId = event.routineItemId,
                 isHidden = event.isHidden,
             )
-            is DailyUiEvent.ReorderItems -> reorderItems(event.routineItemIdsInOrder)
-            DailyUiEvent.SnapshotClick -> snapshotWeek()
-            is DailyUiEvent.SnapshotDateSelected -> snapshotWeek(snapshotWeekStartDate = event.date)
-            is DailyUiEvent.EditNoteClick -> showItemNoteEditor(event.item)
-            DailyUiEvent.EditSummaryNoteClick -> showSummaryNoteEditor(uiState.value.summaryNote)
-            is DailyUiEvent.NoteDraftChange -> updateNoteDraft(event.value)
-            DailyUiEvent.NoteDraftClearClick -> clearNoteDraft()
-            DailyUiEvent.NoteDraftDateClick -> insertCurrentDateIntoNoteDraft()
-            DailyUiEvent.NoteDraftWeekdayClick -> insertCurrentWeekdayIntoNoteDraft()
-            DailyUiEvent.NoteDraftTimeClick -> insertCurrentTimeIntoNoteDraft()
-            DailyUiEvent.NoteEditorDismiss -> dismissNoteEditor()
-            DailyUiEvent.NoteEditorSaveClick -> saveNoteDraft()
+            is RoutineTrackingUiEvent.ReorderItems -> reorderItems(event.routineItemIdsInOrder)
+            RoutineTrackingUiEvent.SnapshotClick -> snapshotWeek()
+            is RoutineTrackingUiEvent.SnapshotDateSelected -> snapshotWeek(snapshotWeekStartDate = event.date)
+            is RoutineTrackingUiEvent.EditNoteClick -> showItemNoteEditor(event.item)
+            RoutineTrackingUiEvent.EditSummaryNoteClick -> showSummaryNoteEditor(uiState.value.summaryNote)
+            is RoutineTrackingUiEvent.NoteDraftChange -> updateNoteDraft(event.value)
+            RoutineTrackingUiEvent.NoteDraftClearClick -> clearNoteDraft()
+            RoutineTrackingUiEvent.NoteDraftDateClick -> insertCurrentDateIntoNoteDraft()
+            RoutineTrackingUiEvent.NoteDraftWeekdayClick -> insertCurrentWeekdayIntoNoteDraft()
+            RoutineTrackingUiEvent.NoteDraftTimeClick -> insertCurrentTimeIntoNoteDraft()
+            RoutineTrackingUiEvent.NoteEditorDismiss -> dismissNoteEditor()
+            RoutineTrackingUiEvent.NoteEditorSaveClick -> saveNoteDraft()
         }
     }
 
@@ -152,7 +151,7 @@ class WeeklyViewModel @Inject constructor(
         }
     }
 
-    private fun showItemNoteEditor(item: DailyItemUiState) {
+    private fun showItemNoteEditor(item: RoutineTrackingItemUiState) {
         noteEditor.value = NoteEditorUiState.item(
             routineItemId = item.routineItemId,
             note = item.note,
@@ -242,16 +241,3 @@ class WeeklyViewModel @Inject constructor(
 private fun LocalDate.startOfWeek(): LocalDate {
     return startOfCalendarWeek()
 }
-
-private fun WeeklyRoutineItem.toUiState(): DailyItemUiState =
-    DailyItemUiState(
-        routineItemId = routineItemId,
-        actionId = actionId,
-        title = title,
-        description = description,
-        repeatTargetCount = repeatTargetCount,
-        completedCount = completedCount,
-        isChecked = isChecked,
-        isHidden = isHidden,
-        note = note.orEmpty(),
-    )

@@ -23,13 +23,13 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.robertgasparian.routinehelper.ui.daily.DailyItemUiState
+import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingItemUiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Stable
 class RoutineReorderState {
-    var displayedItems by mutableStateOf<List<DailyItemUiState>>(emptyList())
+    var displayedItems by mutableStateOf<List<RoutineTrackingItemUiState>>(emptyList())
         private set
     var draggedItemId by mutableStateOf<Long?>(null)
         private set
@@ -37,7 +37,7 @@ class RoutineReorderState {
         private set
     private var phase by mutableStateOf<RoutineReorderPhase>(RoutineReorderPhase.Idle)
 
-    fun syncFromSource(items: List<DailyItemUiState>) {
+    fun syncFromSource(items: List<RoutineTrackingItemUiState>) {
         phase = when (val currentPhase = phase) {
             RoutineReorderPhase.Idle -> {
                 displayedItems = items
@@ -48,7 +48,7 @@ class RoutineReorderState {
                 currentPhase
             }
             is RoutineReorderPhase.Saving -> {
-                if (items.map(DailyItemUiState::routineItemId) == currentPhase.orderedIds) {
+                if (items.map(RoutineTrackingItemUiState::routineItemId) == currentPhase.orderedIds) {
                     displayedItems = items
                     RoutineReorderPhase.Idle
                 } else {
@@ -74,16 +74,16 @@ class RoutineReorderState {
         draggedItemOffset += offsetAdjustment
     }
 
-    fun onDragCancel(sourceItems: List<DailyItemUiState>) {
+    fun onDragCancel(sourceItems: List<RoutineTrackingItemUiState>) {
         draggedItemId = null
         draggedItemOffset = 0f
         displayedItems = sourceItems
         phase = RoutineReorderPhase.Idle
     }
 
-    fun onDragEnd(sourceItems: List<DailyItemUiState>): List<Long>? {
-        val orderedIds = displayedItems.map(DailyItemUiState::routineItemId)
-        val sourceIds = sourceItems.map(DailyItemUiState::routineItemId)
+    fun onDragEnd(sourceItems: List<RoutineTrackingItemUiState>): List<Long>? {
+        val orderedIds = displayedItems.map(RoutineTrackingItemUiState::routineItemId)
+        val sourceIds = sourceItems.map(RoutineTrackingItemUiState::routineItemId)
         draggedItemId = null
         draggedItemOffset = 0f
         if (orderedIds == sourceIds) {
@@ -102,7 +102,7 @@ fun rememberRoutineReorderState(): RoutineReorderState =
 
 @Composable
 fun RoutineReorderList(
-    sourceItems: List<DailyItemUiState>,
+    sourceItems: List<RoutineTrackingItemUiState>,
     reorderState: RoutineReorderState,
     listState: LazyListState,
     coroutineScope: CoroutineScope,
@@ -110,7 +110,7 @@ fun RoutineReorderList(
     summaryContent: @Composable () -> Unit,
     onDropOrder: (List<Long>) -> Unit,
     itemContent: @Composable (
-        item: DailyItemUiState,
+        item: RoutineTrackingItemUiState,
         modifier: Modifier,
         dragHandleModifier: Modifier,
     ) -> Unit,
@@ -200,7 +200,7 @@ private data class ReorderMove(
 )
 
 private fun calculateReorderMove(
-    items: List<DailyItemUiState>,
+    items: List<RoutineTrackingItemUiState>,
     itemInfos: List<LazyListItemInfo>,
     draggedItemId: Long,
     draggedItemOffset: Float,
@@ -262,17 +262,19 @@ private fun autoScrollIfNeeded(
     }
 }
 
-private fun List<DailyItemUiState>.moveItem(
+private fun List<RoutineTrackingItemUiState>.moveItem(
     fromIndex: Int,
     toIndex: Int,
-): List<DailyItemUiState> =
+): List<RoutineTrackingItemUiState> =
     toMutableList().apply {
         add(toIndex, removeAt(fromIndex))
     }
 
-private fun List<DailyItemUiState>.mergeItemContent(sourceItems: List<DailyItemUiState>): List<DailyItemUiState> {
-    val sourceById = sourceItems.associateBy(DailyItemUiState::routineItemId)
-    val orderedIds = map(DailyItemUiState::routineItemId).toSet()
+private fun List<RoutineTrackingItemUiState>.mergeItemContent(
+    sourceItems: List<RoutineTrackingItemUiState>,
+): List<RoutineTrackingItemUiState> {
+    val sourceById = sourceItems.associateBy(RoutineTrackingItemUiState::routineItemId)
+    val orderedIds = map(RoutineTrackingItemUiState::routineItemId).toSet()
     val updatedOrderedItems = map { item -> sourceById[item.routineItemId] ?: item }
     val newItems = sourceItems.filterNot { item -> item.routineItemId in orderedIds }
 

@@ -1,13 +1,13 @@
-package com.robertgasparian.routinehelper.ui.daily
+package com.robertgasparian.routinehelper.ui.tracking
 
-sealed interface DailyUiEvent {
-    sealed interface Intent : DailyUiEvent
+sealed interface RoutineTrackingUiEvent {
+    sealed interface Intent : RoutineTrackingUiEvent
 
-    data object CreateActionClick : DailyUiEvent
+    data object CreateActionClick : RoutineTrackingUiEvent
 
     data class EditActionClick(
         val actionId: Long,
-    ) : DailyUiEvent
+    ) : RoutineTrackingUiEvent
 
     data class CheckedChange(
         val routineItemId: Long,
@@ -35,7 +35,7 @@ sealed interface DailyUiEvent {
     ) : Intent
 
     data class EditNoteClick(
-        val item: DailyItemUiState,
+        val item: RoutineTrackingItemUiState,
     ) : Intent
 
     data object EditSummaryNoteClick : Intent

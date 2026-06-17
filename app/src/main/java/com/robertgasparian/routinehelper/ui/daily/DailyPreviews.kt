@@ -4,6 +4,8 @@ import android.content.res.Configuration
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
+import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingComponent
+import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingUiState
 
 @Preview(
     name = "Phone - Light",
@@ -21,7 +23,7 @@ import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 @Composable
 private fun DailyComponentPhonePreview() {
     RoutineHelperTheme {
-        DailyComponentPreviewContent(uiState = DailyUiState.preview())
+        DailyComponentPreviewContent(uiState = RoutineTrackingUiState.preview())
     }
 }
 
@@ -41,7 +43,7 @@ private fun DailyComponentPhonePreview() {
 @Composable
 private fun DailyComponentLandscapePreview() {
     RoutineHelperTheme {
-        DailyComponentPreviewContent(uiState = DailyUiState.preview())
+        DailyComponentPreviewContent(uiState = RoutineTrackingUiState.preview())
     }
 }
 
@@ -54,7 +56,7 @@ private fun DailyComponentLandscapePreview() {
 @Composable
 private fun DailyComponentTabletPreview() {
     RoutineHelperTheme {
-        DailyComponentPreviewContent(uiState = DailyUiState.preview())
+        DailyComponentPreviewContent(uiState = RoutineTrackingUiState.preview())
     }
 }
 
@@ -67,7 +69,7 @@ private fun DailyComponentTabletPreview() {
 @Composable
 private fun DailyComponentFoldablePreview() {
     RoutineHelperTheme {
-        DailyComponentPreviewContent(uiState = DailyUiState.preview())
+        DailyComponentPreviewContent(uiState = RoutineTrackingUiState.preview())
     }
 }
 
@@ -80,15 +82,15 @@ private fun DailyComponentFoldablePreview() {
 @Composable
 private fun DailyComponentEmptyPreview() {
     RoutineHelperTheme {
-        DailyComponentPreviewContent(uiState = DailyUiState.previewEmpty())
+        DailyComponentPreviewContent(uiState = RoutineTrackingUiState.previewEmpty())
     }
 }
 
 @Composable
 private fun DailyComponentPreviewContent(
-        uiState: DailyUiState,
+    uiState: RoutineTrackingUiState,
 ) {
-    DailyComponent(
+    RoutineTrackingComponent(
         uiState = uiState,
         onEvent = {},
     )

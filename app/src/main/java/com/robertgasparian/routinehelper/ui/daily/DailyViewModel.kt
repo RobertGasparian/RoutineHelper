@@ -3,7 +3,6 @@ package com.robertgasparian.routinehelper.ui.daily
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robertgasparian.routinehelper.core.time.TimeProvider
-import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ReorderDailyRoutineItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetTodayItemHiddenUseCase
@@ -13,6 +12,13 @@ import com.robertgasparian.routinehelper.domain.usecase.TodaySummaryNoteUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayItemCompletedCountUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayItemNoteUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTodaySummaryNoteUseCase
+import com.robertgasparian.routinehelper.ui.tracking.NoteDraftUiState
+import com.robertgasparian.routinehelper.ui.tracking.NoteEditorTarget
+import com.robertgasparian.routinehelper.ui.tracking.NoteEditorUiState
+import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingItemUiState
+import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingUiEvent
+import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingUiState
+import com.robertgasparian.routinehelper.ui.tracking.insertAtCursor
 import com.robertgasparian.routinehelper.work.SnapshotWorkDates
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -40,51 +46,51 @@ class DailyViewModel @Inject constructor(
     private val todayDate = timeProvider.currentDate().toString()
     private val noteEditor = MutableStateFlow<NoteEditorUiState?>(null)
 
-    val uiState: StateFlow<DailyUiState> =
+    val uiState: StateFlow<RoutineTrackingUiState> =
         combine(
             todayItemsUseCase(todayDate),
             todaySummaryNoteUseCase(todayDate),
             noteEditor,
         ) { items, summaryNote, noteEditor ->
-            DailyUiState(
+            RoutineTrackingUiState(
                 date = todayDate,
                 summaryNote = summaryNote.orEmpty(),
-                items = items.map(TodayRoutineItem::toUiState),
+                items = items.map { item -> item.toRoutineTrackingItemUiState() },
                 noteEditor = noteEditor,
             )
         }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = DailyUiState(date = todayDate),
+                initialValue = RoutineTrackingUiState(date = todayDate),
             )
 
-    fun onEvent(event: DailyUiEvent.Intent) {
+    fun onEvent(event: RoutineTrackingUiEvent.Intent) {
         when (event) {
-            is DailyUiEvent.CheckedChange -> setChecked(
+            is RoutineTrackingUiEvent.CheckedChange -> setChecked(
                 routineItemId = event.routineItemId,
                 isChecked = event.isChecked,
             )
-            is DailyUiEvent.CompletedCountChange -> updateCompletedCount(
+            is RoutineTrackingUiEvent.CompletedCountChange -> updateCompletedCount(
                 routineItemId = event.routineItemId,
                 completedCount = event.completedCount,
             )
-            is DailyUiEvent.HiddenChange -> setHidden(
+            is RoutineTrackingUiEvent.HiddenChange -> setHidden(
                 routineItemId = event.routineItemId,
                 isHidden = event.isHidden,
             )
-            is DailyUiEvent.ReorderItems -> reorderItems(event.routineItemIdsInOrder)
-            DailyUiEvent.SnapshotClick -> snapshotDaily()
-            is DailyUiEvent.SnapshotDateSelected -> snapshotDaily(snapshotDate = event.date)
-            is DailyUiEvent.EditNoteClick -> showItemNoteEditor(event.item)
-            DailyUiEvent.EditSummaryNoteClick -> showSummaryNoteEditor(uiState.value.summaryNote)
-            is DailyUiEvent.NoteDraftChange -> updateNoteDraft(event.value)
-            DailyUiEvent.NoteDraftClearClick -> clearNoteDraft()
-            DailyUiEvent.NoteDraftDateClick -> insertCurrentDateIntoNoteDraft()
-            DailyUiEvent.NoteDraftWeekdayClick -> insertCurrentWeekdayIntoNoteDraft()
-            DailyUiEvent.NoteDraftTimeClick -> insertCurrentTimeIntoNoteDraft()
-            DailyUiEvent.NoteEditorDismiss -> dismissNoteEditor()
-            DailyUiEvent.NoteEditorSaveClick -> saveNoteDraft()
+            is RoutineTrackingUiEvent.ReorderItems -> reorderItems(event.routineItemIdsInOrder)
+            RoutineTrackingUiEvent.SnapshotClick -> snapshotDaily()
+            is RoutineTrackingUiEvent.SnapshotDateSelected -> snapshotDaily(snapshotDate = event.date)
+            is RoutineTrackingUiEvent.EditNoteClick -> showItemNoteEditor(event.item)
+            RoutineTrackingUiEvent.EditSummaryNoteClick -> showSummaryNoteEditor(uiState.value.summaryNote)
+            is RoutineTrackingUiEvent.NoteDraftChange -> updateNoteDraft(event.value)
+            RoutineTrackingUiEvent.NoteDraftClearClick -> clearNoteDraft()
+            RoutineTrackingUiEvent.NoteDraftDateClick -> insertCurrentDateIntoNoteDraft()
+            RoutineTrackingUiEvent.NoteDraftWeekdayClick -> insertCurrentWeekdayIntoNoteDraft()
+            RoutineTrackingUiEvent.NoteDraftTimeClick -> insertCurrentTimeIntoNoteDraft()
+            RoutineTrackingUiEvent.NoteEditorDismiss -> dismissNoteEditor()
+            RoutineTrackingUiEvent.NoteEditorSaveClick -> saveNoteDraft()
         }
     }
 
@@ -142,7 +148,7 @@ class DailyViewModel @Inject constructor(
         }
     }
 
-    private fun showItemNoteEditor(item: DailyItemUiState) {
+    private fun showItemNoteEditor(item: RoutineTrackingItemUiState) {
         noteEditor.value = NoteEditorUiState.item(
             routineItemId = item.routineItemId,
             note = item.note,
@@ -226,16 +232,3 @@ class DailyViewModel @Inject constructor(
         }
     }
 }
-
-private fun TodayRoutineItem.toUiState(): DailyItemUiState =
-    DailyItemUiState(
-        routineItemId = routineItemId,
-        actionId = actionId,
-        title = title,
-        description = description,
-        repeatTargetCount = repeatTargetCount,
-        completedCount = completedCount,
-        isChecked = isChecked,
-        isHidden = isHidden,
-        note = note.orEmpty(),
-    )

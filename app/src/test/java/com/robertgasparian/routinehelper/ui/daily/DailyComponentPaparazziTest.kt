@@ -4,6 +4,8 @@ import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import androidx.compose.runtime.Composable
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
+import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingComponent
+import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingUiState
 import org.junit.Rule
 import org.junit.Test
 
@@ -17,7 +19,7 @@ class DailyComponentPaparazziTest {
     fun populated() {
         paparazzi.snapshot {
             RoutineHelperTheme {
-                DailyComponentPaparazziContent(uiState = DailyUiState.preview())
+                DailyComponentPaparazziContent(uiState = RoutineTrackingUiState.preview())
             }
         }
     }
@@ -26,7 +28,7 @@ class DailyComponentPaparazziTest {
     fun empty() {
         paparazzi.snapshot {
             RoutineHelperTheme {
-                DailyComponentPaparazziContent(uiState = DailyUiState.previewEmpty())
+                DailyComponentPaparazziContent(uiState = RoutineTrackingUiState.previewEmpty())
             }
         }
     }
@@ -34,9 +36,9 @@ class DailyComponentPaparazziTest {
 
 @Composable
 private fun DailyComponentPaparazziContent(
-    uiState: DailyUiState,
+    uiState: RoutineTrackingUiState,
 ) {
-    DailyComponent(
+    RoutineTrackingComponent(
         uiState = uiState,
         onEvent = {},
     )

@@ -20,9 +20,9 @@ import com.robertgasparian.routinehelper.domain.usecase.WeeklySummaryNoteUseCase
 import com.robertgasparian.routinehelper.test.FakeNoteDateTimeTextProvider
 import com.robertgasparian.routinehelper.test.FixedTimeProvider
 import com.robertgasparian.routinehelper.test.MainDispatcherRule
-import com.robertgasparian.routinehelper.ui.daily.DailyItemUiState
-import com.robertgasparian.routinehelper.ui.daily.DailyUiEvent
-import com.robertgasparian.routinehelper.ui.daily.NoteDraftUiState
+import com.robertgasparian.routinehelper.ui.tracking.NoteDraftUiState
+import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingItemUiState
+import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingUiEvent
 import java.time.Instant
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -46,10 +46,10 @@ class WeeklyViewModelTest {
     fun `when item events are received then forwards them to weekly use cases`() = runTest {
         val viewModel = createViewModel()
 
-        viewModel.onEvent(DailyUiEvent.CheckedChange(routineItemId = 10L, isChecked = true))
-        viewModel.onEvent(DailyUiEvent.CompletedCountChange(routineItemId = 10L, completedCount = 3))
-        viewModel.onEvent(DailyUiEvent.HiddenChange(routineItemId = 10L, isHidden = true))
-        viewModel.onEvent(DailyUiEvent.ReorderItems(listOf(10L, 11L)))
+        viewModel.onEvent(RoutineTrackingUiEvent.CheckedChange(routineItemId = 10L, isChecked = true))
+        viewModel.onEvent(RoutineTrackingUiEvent.CompletedCountChange(routineItemId = 10L, completedCount = 3))
+        viewModel.onEvent(RoutineTrackingUiEvent.HiddenChange(routineItemId = 10L, isHidden = true))
+        viewModel.onEvent(RoutineTrackingUiEvent.ReorderItems(listOf(10L, 11L)))
         advanceUntilIdle()
 
         assertEquals(
@@ -89,9 +89,9 @@ class WeeklyViewModelTest {
     fun `given item note editor is open when save is clicked then updates weekly item note`() = runTest {
         val viewModel = createViewModel()
 
-        viewModel.onEvent(DailyUiEvent.EditNoteClick(itemUiState(note = "old note")))
-        viewModel.onEvent(DailyUiEvent.NoteDraftChange(NoteDraftUiState.fromText("updated note")))
-        viewModel.onEvent(DailyUiEvent.NoteEditorSaveClick)
+        viewModel.onEvent(RoutineTrackingUiEvent.EditNoteClick(itemUiState(note = "old note")))
+        viewModel.onEvent(RoutineTrackingUiEvent.NoteDraftChange(NoteDraftUiState.fromText("updated note")))
+        viewModel.onEvent(RoutineTrackingUiEvent.NoteEditorSaveClick)
         advanceUntilIdle()
 
         assertEquals(
@@ -111,9 +111,9 @@ class WeeklyViewModelTest {
         noteDateTimeTextProvider.dateText = "May 29"
         val viewModel = createViewModel()
 
-        viewModel.onEvent(DailyUiEvent.EditNoteClick(itemUiState(note = "Completed on ")))
-        viewModel.onEvent(DailyUiEvent.NoteDraftDateClick)
-        viewModel.onEvent(DailyUiEvent.NoteEditorSaveClick)
+        viewModel.onEvent(RoutineTrackingUiEvent.EditNoteClick(itemUiState(note = "Completed on ")))
+        viewModel.onEvent(RoutineTrackingUiEvent.NoteDraftDateClick)
+        viewModel.onEvent(RoutineTrackingUiEvent.NoteEditorSaveClick)
         advanceUntilIdle()
 
         assertEquals(
@@ -141,7 +141,7 @@ class WeeklyViewModelTest {
         )
         val viewModel = createViewModel()
 
-        viewModel.onEvent(DailyUiEvent.SnapshotDateSelected("2026-05-18"))
+        viewModel.onEvent(RoutineTrackingUiEvent.SnapshotDateSelected("2026-05-18"))
         advanceUntilIdle()
 
         assertEquals("2026-05-18", historyRepository.savedSnapshots.single().date)
@@ -169,8 +169,8 @@ class WeeklyViewModelTest {
             timeProvider = timeProvider,
         )
 
-    private fun itemUiState(note: String): DailyItemUiState =
-        DailyItemUiState(
+    private fun itemUiState(note: String): RoutineTrackingItemUiState =
+        RoutineTrackingItemUiState(
             routineItemId = 10L,
             actionId = 100L,
             title = "Stretch",

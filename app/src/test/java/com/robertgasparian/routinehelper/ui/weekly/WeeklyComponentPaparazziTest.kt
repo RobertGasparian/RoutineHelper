@@ -4,8 +4,8 @@ import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import androidx.compose.runtime.Composable
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
-import com.robertgasparian.routinehelper.ui.daily.DailyComponent
-import com.robertgasparian.routinehelper.ui.daily.DailyUiState
+import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingComponent
+import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingUiState
 import org.junit.Rule
 import org.junit.Test
 
@@ -19,7 +19,7 @@ class WeeklyComponentPaparazziTest {
     fun populated() {
         paparazzi.snapshot {
             RoutineHelperTheme {
-                WeeklyComponent(uiState = DailyUiState.preview().copy(date = "Week of 2026-05-24"))
+                WeeklyComponent(uiState = RoutineTrackingUiState.preview().copy(date = "Week of 2026-05-24"))
             }
         }
     }
@@ -28,15 +28,15 @@ class WeeklyComponentPaparazziTest {
     fun empty() {
         paparazzi.snapshot {
             RoutineHelperTheme {
-                WeeklyComponent(uiState = DailyUiState.previewEmpty().copy(date = "Week of 2026-05-24"))
+                WeeklyComponent(uiState = RoutineTrackingUiState.previewEmpty().copy(date = "Week of 2026-05-24"))
             }
         }
     }
 }
 
 @Composable
-private fun WeeklyComponent(uiState: DailyUiState) {
-    DailyComponent(
+private fun WeeklyComponent(uiState: RoutineTrackingUiState) {
+    RoutineTrackingComponent(
         uiState = uiState,
         onEvent = {},
         title = "Weekly",

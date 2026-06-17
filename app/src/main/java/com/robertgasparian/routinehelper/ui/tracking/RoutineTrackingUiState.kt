@@ -1,18 +1,18 @@
-package com.robertgasparian.routinehelper.ui.daily
+package com.robertgasparian.routinehelper.ui.tracking
 
-data class DailyUiState(
+data class RoutineTrackingUiState(
     val date: String,
     val summaryNote: String = "",
-    val items: List<DailyItemUiState> = emptyList(),
+    val items: List<RoutineTrackingItemUiState> = emptyList(),
     val noteEditor: NoteEditorUiState? = null,
 ) {
     companion object {
-        fun preview(): DailyUiState =
-            DailyUiState(
+        fun preview(): RoutineTrackingUiState =
+            RoutineTrackingUiState(
                 date = "2026-05-29",
                 summaryNote = "Low-energy day, but I kept the basics moving.",
                 items = listOf(
-                    DailyItemUiState(
+                    RoutineTrackingItemUiState(
                         routineItemId = 1,
                         actionId = 101,
                         title = "Drink water",
@@ -22,7 +22,7 @@ data class DailyUiState(
                         isChecked = true,
                         note = "One liter was diet soda.",
                     ),
-                    DailyItemUiState(
+                    RoutineTrackingItemUiState(
                         routineItemId = 2,
                         actionId = 102,
                         title = "Stretch",
@@ -32,7 +32,7 @@ data class DailyUiState(
                         isChecked = false,
                         note = "",
                     ),
-                    DailyItemUiState(
+                    RoutineTrackingItemUiState(
                         routineItemId = 3,
                         actionId = 103,
                         title = "Read",
@@ -42,7 +42,7 @@ data class DailyUiState(
                         isChecked = false,
                         note = "Finish the last chapter tonight.",
                     ),
-                    DailyItemUiState(
+                    RoutineTrackingItemUiState(
                         routineItemId = 4,
                         actionId = 104,
                         title = "Run",
@@ -56,8 +56,8 @@ data class DailyUiState(
                 ),
             )
 
-        fun previewEmpty(): DailyUiState =
-            DailyUiState(date = "2026-05-29")
+        fun previewEmpty(): RoutineTrackingUiState =
+            RoutineTrackingUiState(date = "2026-05-29")
     }
 }
 
@@ -142,7 +142,7 @@ fun NoteDraftUiState.insertAtCursor(textToInsert: String): NoteDraftUiState {
     )
 }
 
-data class DailyItemUiState(
+data class RoutineTrackingItemUiState(
     val routineItemId: Long,
     val actionId: Long,
     val title: String,
