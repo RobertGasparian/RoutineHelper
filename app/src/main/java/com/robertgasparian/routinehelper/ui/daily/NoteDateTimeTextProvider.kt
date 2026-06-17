@@ -1,6 +1,7 @@
 package com.robertgasparian.routinehelper.ui.daily
 
 import android.content.Context
+import com.robertgasparian.routinehelper.core.time.TimeProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -9,11 +10,12 @@ import javax.inject.Inject
 
 class NoteDateTimeTextProvider @Inject constructor(
     @param:ApplicationContext private val context: Context,
+    private val timeProvider: TimeProvider,
 ) {
     fun currentTimeText(): String =
         android.text.format.DateFormat
             .getTimeFormat(context)
-            .format(Date())
+            .format(currentDate())
 
     fun currentDateText(): String {
         val locale = context.currentLocale()
@@ -30,8 +32,11 @@ class NoteDateTimeTextProvider @Inject constructor(
         locale: Locale,
     ): String {
         val pattern = android.text.format.DateFormat.getBestDateTimePattern(locale, patternSkeleton)
-        return SimpleDateFormat(pattern, locale).format(Date())
+        return SimpleDateFormat(pattern, locale).format(currentDate())
     }
+
+    private fun currentDate(): Date =
+        Date.from(timeProvider.now().toInstant())
 }
 
 private fun Context.currentLocale(): Locale =

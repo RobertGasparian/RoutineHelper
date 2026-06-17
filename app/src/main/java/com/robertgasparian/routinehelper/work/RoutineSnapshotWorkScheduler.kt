@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.robertgasparian.routinehelper.core.time.TimeProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.time.ZonedDateTime
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -13,9 +13,10 @@ import javax.inject.Singleton
 @Singleton
 class RoutineSnapshotWorkScheduler @Inject constructor(
     @param:ApplicationContext private val context: Context,
+    private val timeProvider: TimeProvider,
 ) {
     fun scheduleRecurringSnapshots() {
-        val now = ZonedDateTime.now()
+        val now = timeProvider.now()
         val workManager = WorkManager.getInstance(context)
 
         workManager.enqueueUniquePeriodicWork(

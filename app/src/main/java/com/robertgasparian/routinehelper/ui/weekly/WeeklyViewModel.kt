@@ -2,6 +2,7 @@ package com.robertgasparian.routinehelper.ui.weekly
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.domain.model.WeeklyRoutineItem
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeWeeklyUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ReorderWeeklyRoutineItemsUseCase
@@ -23,7 +24,6 @@ import com.robertgasparian.routinehelper.work.SnapshotWorkDates
 import com.robertgasparian.routinehelper.work.startOfCalendarWeek
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
-import java.time.ZonedDateTime
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -44,8 +44,9 @@ class WeeklyViewModel @Inject constructor(
     private val updateWeeklyItemNoteUseCase: UpdateWeeklyItemNoteUseCase,
     private val updateWeeklySummaryNoteUseCase: UpdateWeeklySummaryNoteUseCase,
     private val noteDateTimeTextProvider: NoteDateTimeTextProvider,
+    private val timeProvider: TimeProvider,
 ) : ViewModel() {
-    private val weekStartDate = LocalDate.now().startOfWeek().toString()
+    private val weekStartDate = timeProvider.currentDate().startOfWeek().toString()
     private val noteEditor = MutableStateFlow<NoteEditorUiState?>(null)
 
     val uiState: StateFlow<DailyUiState> =
@@ -195,14 +196,14 @@ class WeeklyViewModel @Inject constructor(
     fun snapshotWeek(
         // TODO Remove this test-only override when debug snapshot controls are removed.
         snapshotWeekStartDate: String = SnapshotWorkDates
-            .previousCompletedCalendarWeekStartDate(ZonedDateTime.now())
+            .previousCompletedCalendarWeekStartDate(timeProvider.now())
             .toString(),
     ) {
         viewModelScope.launch {
             finalizeWeeklyUseCase(
                 weekStartDate = weekStartDate,
                 snapshotWeekStartDate = snapshotWeekStartDate,
-                finalizedAtMillis = System.currentTimeMillis(),
+                finalizedAtMillis = timeProvider.currentTimeMillis(),
             )
         }
     }

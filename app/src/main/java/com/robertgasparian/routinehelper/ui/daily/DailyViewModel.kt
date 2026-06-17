@@ -2,6 +2,7 @@ package com.robertgasparian.routinehelper.ui.daily
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ReorderDailyRoutineItemsUseCase
@@ -14,8 +15,6 @@ import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayItemNoteUseCa
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTodaySummaryNoteUseCase
 import com.robertgasparian.routinehelper.work.SnapshotWorkDates
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.time.LocalDate
-import java.time.ZonedDateTime
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -36,8 +35,9 @@ class DailyViewModel @Inject constructor(
     private val updateTodayItemNoteUseCase: UpdateTodayItemNoteUseCase,
     private val updateTodaySummaryNoteUseCase: UpdateTodaySummaryNoteUseCase,
     private val noteDateTimeTextProvider: NoteDateTimeTextProvider,
+    private val timeProvider: TimeProvider,
 ) : ViewModel() {
-    private val todayDate = LocalDate.now().toString()
+    private val todayDate = timeProvider.currentDate().toString()
     private val noteEditor = MutableStateFlow<NoteEditorUiState?>(null)
 
     val uiState: StateFlow<DailyUiState> =
@@ -186,13 +186,13 @@ class DailyViewModel @Inject constructor(
 
     fun snapshotDaily(
         // TODO Remove this test-only override when debug snapshot controls are removed.
-        snapshotDate: String = SnapshotWorkDates.dailySnapshotDate(ZonedDateTime.now()).toString(),
+        snapshotDate: String = SnapshotWorkDates.dailySnapshotDate(timeProvider.now()).toString(),
     ) {
         viewModelScope.launch {
             finalizeTodayUseCase(
                 date = todayDate,
                 snapshotDate = snapshotDate,
-                finalizedAtMillis = System.currentTimeMillis(),
+                finalizedAtMillis = timeProvider.currentTimeMillis(),
             )
         }
     }

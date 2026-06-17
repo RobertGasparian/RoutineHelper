@@ -1,5 +1,6 @@
 package com.robertgasparian.routinehelper.work
 
+import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeWeeklyUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ResetTodayUseCase
@@ -15,15 +16,16 @@ class RoutineSnapshotBackfill @Inject constructor(
     private val finalizeWeeklyUseCase: FinalizeWeeklyUseCase,
     private val resetTodayUseCase: ResetTodayUseCase,
     private val resetWeeklyUseCase: ResetWeeklyUseCase,
+    private val timeProvider: TimeProvider,
 ) {
-    suspend fun backfillMissedSnapshots(now: ZonedDateTime = ZonedDateTime.now()) {
+    suspend fun backfillMissedSnapshots(now: ZonedDateTime = timeProvider.now()) {
         if (SnapshotWorkDates.shouldBackfillDailyOnAppStart(now)) {
             val snapshotDate = SnapshotWorkDates.dailySnapshotDate(now).toString()
             attemptBackfill {
                 finalizeTodayUseCase(
                     date = snapshotDate,
                     snapshotDate = snapshotDate,
-                    finalizedAtMillis = System.currentTimeMillis(),
+                    finalizedAtMillis = timeProvider.currentTimeMillis(),
                 )
                 resetTodayUseCase(snapshotDate)
             }
@@ -35,7 +37,7 @@ class RoutineSnapshotBackfill @Inject constructor(
                 finalizeWeeklyUseCase(
                     weekStartDate = snapshotWeekStartDate,
                     snapshotWeekStartDate = snapshotWeekStartDate,
-                    finalizedAtMillis = System.currentTimeMillis(),
+                    finalizedAtMillis = timeProvider.currentTimeMillis(),
                 )
                 resetWeeklyUseCase(snapshotWeekStartDate)
             }

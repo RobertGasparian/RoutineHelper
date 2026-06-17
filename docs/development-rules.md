@@ -10,6 +10,13 @@
 - Do not mix module moves, behavior changes, UI design changes, and opportunistic cleanup in the same review chunk.
 - When touching debug/test-only production-source affordances, keep the affordance only when it is gated by debug build behavior.
 
+## Kotlin First
+
+- Prefer Kotlin-based frameworks, APIs, and patterns over Java-based alternatives when both satisfy the requirement well.
+- Use a Java-based solution when it is materially simpler in this codebase, required for Android/framework interop, or provides essential capabilities that the Kotlin alternative does not provide.
+- When using a Java-based solution by exception, keep it behind the smallest reasonable boundary so feature and business code can stay Kotlin-oriented.
+- Prefer Kotlin idioms such as function types, immutable data, extension functions, and sealed types over Java-style callback interfaces, mutable holders, or framework abstractions when the Kotlin version is clear and testable.
+
 ## Modules
 
 - The target architecture is multimodule. The current `:app` module should be split incrementally as boundaries stabilize.

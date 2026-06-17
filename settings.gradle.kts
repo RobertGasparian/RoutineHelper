@@ -19,3 +19,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "RoutineHelper"
 include(":app")
+include(":core:time")

@@ -204,3 +204,4 @@ Disallowed examples:
 - Android common modularization patterns: feature modules usually represent screens or flows and depend on data/business modules; data modules encapsulate data and business logic for a domain and hide data sources.
 - Android dependency inversion guidance: consumers should depend on APIs/abstractions, while implementations are supplied externally, usually through app-level dependency injection.
 - Now in Android sample: app, feature, and core/library modules form an acyclic dependency graph, and library modules may depend on other library modules when the dependency direction is clear.
+- Kotlin-first guidance: prefer Kotlin-based APIs and patterns when they meet the need; use Java-based APIs only when they are simpler, required for Android interop, or provide missing capabilities.
