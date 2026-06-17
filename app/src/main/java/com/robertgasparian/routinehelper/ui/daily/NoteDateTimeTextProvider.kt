@@ -8,21 +8,29 @@ import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 
-class NoteDateTimeTextProvider @Inject constructor(
+interface NoteDateTimeTextProvider {
+    fun currentTimeText(): String
+
+    fun currentDateText(): String
+
+    fun currentWeekdayText(): String
+}
+
+class AndroidNoteDateTimeTextProvider @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val timeProvider: TimeProvider,
-) {
-    fun currentTimeText(): String =
+) : NoteDateTimeTextProvider {
+    override fun currentTimeText(): String =
         android.text.format.DateFormat
             .getTimeFormat(context)
             .format(currentDate())
 
-    fun currentDateText(): String {
+    override fun currentDateText(): String {
         val locale = context.currentLocale()
         return currentText(patternSkeleton = "MMMd", locale = locale)
     }
 
-    fun currentWeekdayText(): String {
+    override fun currentWeekdayText(): String {
         val locale = context.currentLocale()
         return currentText(patternSkeleton = "EEEE", locale = locale)
     }

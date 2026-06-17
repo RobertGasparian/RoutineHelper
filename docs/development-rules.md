@@ -77,6 +77,7 @@
 - Feasible unit-test targets include domain use cases, pure Kotlin models/mappers/formatters, repository logic that can run against fakes or in-memory stores, and ViewModel state/event behavior with fake use cases.
 - Prefer Paparazzi for component rendering states and regular unit tests for logic/state transformations.
 - Do not force unit tests around thin DI modules, generated framework glue, simple data classes with no behavior, or code that is better covered by a UI/snapshot/integration test.
+- Test function names should be descriptive Kotlin backtick names using `given ... when ... then ...`; omit `given ...` when there is no meaningful setup condition.
 - Paparazzi snapshots are regression checks during refactors.
 - Do not run Paparazzi record/update tasks unless explicitly approved.
 - Do not update existing snapshot images unless explicitly approved.
