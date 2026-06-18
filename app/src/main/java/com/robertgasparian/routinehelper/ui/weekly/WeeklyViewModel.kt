@@ -12,7 +12,7 @@ import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyItemNoteUseC
 import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklySummaryNoteUseCase
 import com.robertgasparian.routinehelper.domain.usecase.WeeklyItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.WeeklySummaryNoteUseCase
-import com.robertgasparian.routinehelper.ui.daily.NoteDateTimeTextProvider
+import com.robertgasparian.routinehelper.ui.tracking.NoteDateTimeTextProvider
 import com.robertgasparian.routinehelper.ui.tracking.NoteDraftUiState
 import com.robertgasparian.routinehelper.ui.tracking.NoteEditorTarget
 import com.robertgasparian.routinehelper.ui.tracking.NoteEditorUiState

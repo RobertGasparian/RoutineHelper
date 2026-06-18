@@ -1,4 +1,4 @@
-package com.robertgasparian.routinehelper.ui.daily
+package com.robertgasparian.routinehelper.ui.tracking
 
 import android.content.Context
 import com.robertgasparian.routinehelper.core.time.TimeProvider

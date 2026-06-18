@@ -1,6 +1,6 @@
 package com.robertgasparian.routinehelper.test
 
-import com.robertgasparian.routinehelper.ui.daily.NoteDateTimeTextProvider
+import com.robertgasparian.routinehelper.ui.tracking.NoteDateTimeTextProvider
 
 class FakeNoteDateTimeTextProvider : NoteDateTimeTextProvider {
     var timeText = "10:30 AM"
