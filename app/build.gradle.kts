@@ -51,6 +51,7 @@ room {
 
 dependencies {
     implementation(project(":core:time"))
+    implementation(project(":core:ui"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

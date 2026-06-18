@@ -1,4 +1,4 @@
-package com.robertgasparian.routinehelper.ui.reorder
+package com.robertgasparian.routinehelper.ui.tracking
 
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.scrollBy
@@ -23,7 +23,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingItemUiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

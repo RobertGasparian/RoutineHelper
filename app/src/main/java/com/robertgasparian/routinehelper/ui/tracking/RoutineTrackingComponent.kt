@@ -42,8 +42,6 @@ import androidx.compose.ui.unit.dp
 import com.robertgasparian.routinehelper.ui.dsm.RoutineActionItemCard
 import com.robertgasparian.routinehelper.ui.dsm.RoutineNoteDialog
 import com.robertgasparian.routinehelper.ui.dsm.SummaryNoteCard
-import com.robertgasparian.routinehelper.ui.reorder.RoutineReorderList
-import com.robertgasparian.routinehelper.ui.reorder.rememberRoutineReorderState
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 import java.time.Instant
 import java.time.LocalDate
