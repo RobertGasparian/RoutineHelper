@@ -1,4 +1,4 @@
-package com.robertgasparian.routinehelper.ui.dsm
+package com.robertgasparian.routinehelper.ui.history
 
 import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
