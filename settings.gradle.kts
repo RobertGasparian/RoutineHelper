@@ -21,6 +21,7 @@ rootProject.name = "RoutineHelper"
 include(":app")
 include(":core:time")
 include(":core:ui")
+include(":core:testing")
 include(":libs:routine:template:domain")
 include(":libs:routine:template:data")
 include(":libs:routine:tracking:domain")

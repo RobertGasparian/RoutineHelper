@@ -56,6 +56,7 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(project(":core:testing"))
     testImplementation(testFixtures(project(":libs:routine:snapshot:domain")))
     testImplementation(testFixtures(project(":libs:routine:template:domain")))
     testImplementation(testFixtures(project(":libs:routine:tracking:domain")))
