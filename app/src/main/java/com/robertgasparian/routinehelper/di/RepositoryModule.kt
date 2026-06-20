@@ -62,5 +62,9 @@ object RepositoryModule {
     @Singleton
     fun provideRoutineHistoryRepository(
         database: RoutineDatabase,
-    ): RoutineHistoryRepository = RoomRoutineHistoryRepository(database)
+    ): RoutineHistoryRepository =
+        RoomRoutineHistoryRepository(
+            database = database,
+            dailySnapshotDao = database.dailySnapshotDao(),
+        )
 }

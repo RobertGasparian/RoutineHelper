@@ -56,6 +56,7 @@ dependencies {
     implementation(project(":libs:routine:template:domain"))
     implementation(project(":libs:routine:tracking:data"))
     implementation(project(":libs:routine:tracking:domain"))
+    implementation(project(":libs:routine:snapshot:data"))
     implementation(project(":libs:routine:snapshot:domain"))
 
     implementation(libs.androidx.core.ktx)

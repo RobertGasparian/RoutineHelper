@@ -1,7 +1,7 @@
 package com.robertgasparian.routinehelper.data.repository
 
+import androidx.room.RoomDatabase
 import androidx.room.withTransaction
-import com.robertgasparian.routinehelper.data.local.RoutineDatabase
 import com.robertgasparian.routinehelper.data.local.dao.DailySnapshotDao
 import com.robertgasparian.routinehelper.data.local.entity.DailySnapshotEntity
 import com.robertgasparian.routinehelper.data.local.entity.DailySnapshotEntryEntity
@@ -11,13 +11,13 @@ import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshotItem
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySummary
 import com.robertgasparian.routinehelper.domain.repository.RoutineHistoryRepository
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
 class RoomRoutineHistoryRepository(
-    private val database: RoutineDatabase,
-    private val dailySnapshotDao: DailySnapshotDao = database.dailySnapshotDao(),
+    private val database: RoomDatabase,
+    private val dailySnapshotDao: DailySnapshotDao,
 ) : RoutineHistoryRepository {
     override fun snapshotSummaries(cadence: RoutineCadence?): Flow<List<RoutineDaySummary>> =
         (cadence?.let { dailySnapshotDao.snapshotsWithEntries(it.toStorageValue()) }

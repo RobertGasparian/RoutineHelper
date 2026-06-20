@@ -86,7 +86,7 @@ Proposed module families:
 - `:libs:routine:snapshot:domain`
   - Platform-independent snapshot models, history repository contracts, finalization, queries, deletion, and share-text use cases.
 - `:libs:routine:snapshot:data`
-  - Future Room-backed snapshot entities, DAOs, relation models, and repository implementations.
+  - Room-backed snapshot entities, DAOs, relation models, and repository implementations.
 - `:libs:reflection`
   - Future reflection business rules, data, and use cases.
 - `:libs:reminder`
