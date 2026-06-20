@@ -36,13 +36,27 @@ object RepositoryModule {
     @Singleton
     fun provideTodayRoutineRepository(
         database: RoutineDatabase,
-    ): TodayRoutineRepository = RoomTodayRoutineRepository(database)
+        timeProvider: TimeProvider,
+    ): TodayRoutineRepository =
+        RoomTodayRoutineRepository(
+            routineItemDao = database.routineItemDao(),
+            todayEntryDao = database.todayEntryDao(),
+            dailySummaryNoteDao = database.dailySummaryNoteDao(),
+            timeProvider = timeProvider,
+        )
 
     @Provides
     @Singleton
     fun provideWeeklyRoutineRepository(
         database: RoutineDatabase,
-    ): WeeklyRoutineRepository = RoomWeeklyRoutineRepository(database)
+        timeProvider: TimeProvider,
+    ): WeeklyRoutineRepository =
+        RoomWeeklyRoutineRepository(
+            routineItemDao = database.routineItemDao(),
+            weeklyEntryDao = database.weeklyEntryDao(),
+            weeklySummaryNoteDao = database.weeklySummaryNoteDao(),
+            timeProvider = timeProvider,
+        )
 
     @Provides
     @Singleton

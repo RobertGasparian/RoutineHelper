@@ -1,0 +1,32 @@
+plugins {
+    alias(libs.plugins.android.library)
+}
+
+android {
+    namespace = "com.robertgasparian.routinehelper.libs.routine.tracking.data"
+    compileSdk {
+        version =
+            release(36) {
+                minorApiLevel = 1
+            }
+    }
+
+    defaultConfig {
+        minSdk = 29
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+}
+
+dependencies {
+    api(project(":core:time"))
+    api(project(":libs:routine:template:data"))
+    implementation(project(":libs:routine:template:domain"))
+    api(project(":libs:routine:tracking:domain"))
+
+    api(libs.androidx.room.runtime)
+    api(libs.kotlinx.coroutines.core)
+}

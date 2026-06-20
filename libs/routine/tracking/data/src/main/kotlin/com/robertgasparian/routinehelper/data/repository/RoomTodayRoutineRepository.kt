@@ -1,6 +1,6 @@
 package com.robertgasparian.routinehelper.data.repository
 
-import com.robertgasparian.routinehelper.data.local.RoutineDatabase
+import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.data.local.dao.DailySummaryNoteDao
 import com.robertgasparian.routinehelper.data.local.dao.RoutineItemDao
 import com.robertgasparian.routinehelper.data.local.dao.TodayEntryDao
@@ -16,11 +16,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 class RoomTodayRoutineRepository(
-    database: RoutineDatabase,
-    private val routineItemDao: RoutineItemDao = database.routineItemDao(),
-    private val todayEntryDao: TodayEntryDao = database.todayEntryDao(),
-    private val dailySummaryNoteDao: DailySummaryNoteDao = database.dailySummaryNoteDao(),
-    private val clock: () -> Long = System::currentTimeMillis,
+    private val routineItemDao: RoutineItemDao,
+    private val todayEntryDao: TodayEntryDao,
+    private val dailySummaryNoteDao: DailySummaryNoteDao,
+    private val timeProvider: TimeProvider,
 ) : TodayRoutineRepository {
     override fun todayItems(
         date: String,
@@ -51,12 +50,12 @@ class RoomTodayRoutineRepository(
         todayEntryDao.upsert(
             existing?.copy(
                 isChecked = isChecked,
-                updatedAtMillis = clock(),
+                updatedAtMillis = timeProvider.currentTimeMillis(),
             ) ?: TodayEntryEntity(
                 routineItemId = routineItemId,
                 date = date,
                 isChecked = isChecked,
-                updatedAtMillis = clock(),
+                updatedAtMillis = timeProvider.currentTimeMillis(),
             ),
         )
     }
@@ -71,12 +70,12 @@ class RoomTodayRoutineRepository(
         todayEntryDao.upsert(
             existing?.copy(
                 note = normalizedNote,
-                updatedAtMillis = clock(),
+                updatedAtMillis = timeProvider.currentTimeMillis(),
             ) ?: TodayEntryEntity(
                 routineItemId = routineItemId,
                 date = date,
                 note = normalizedNote,
-                updatedAtMillis = clock(),
+                updatedAtMillis = timeProvider.currentTimeMillis(),
             ),
         )
     }
@@ -90,12 +89,12 @@ class RoomTodayRoutineRepository(
         todayEntryDao.upsert(
             existing?.copy(
                 completedCount = completedCount.coerceAtLeast(0),
-                updatedAtMillis = clock(),
+                updatedAtMillis = timeProvider.currentTimeMillis(),
             ) ?: TodayEntryEntity(
                 routineItemId = routineItemId,
                 date = date,
                 completedCount = completedCount.coerceAtLeast(0),
-                updatedAtMillis = clock(),
+                updatedAtMillis = timeProvider.currentTimeMillis(),
             ),
         )
     }
@@ -109,12 +108,12 @@ class RoomTodayRoutineRepository(
         todayEntryDao.upsert(
             existing?.copy(
                 isHidden = isHidden,
-                updatedAtMillis = clock(),
+                updatedAtMillis = timeProvider.currentTimeMillis(),
             ) ?: TodayEntryEntity(
                 routineItemId = routineItemId,
                 date = date,
                 isHidden = isHidden,
-                updatedAtMillis = clock(),
+                updatedAtMillis = timeProvider.currentTimeMillis(),
             ),
         )
     }
@@ -131,7 +130,7 @@ class RoomTodayRoutineRepository(
                 DailySummaryNoteEntity(
                     date = date,
                     note = normalizedNote,
-                    updatedAtMillis = clock(),
+                    updatedAtMillis = timeProvider.currentTimeMillis(),
                 ),
             )
         }

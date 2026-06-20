@@ -1,10 +1,10 @@
 package com.robertgasparian.routinehelper.data.repository
 
-import com.robertgasparian.routinehelper.data.local.RoutineDatabase
+import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.data.local.dao.RoutineItemDao
 import com.robertgasparian.routinehelper.data.local.dao.WeeklyEntryDao
-import com.robertgasparian.routinehelper.data.local.entity.WeeklyEntryEntity
 import com.robertgasparian.routinehelper.data.local.dao.WeeklySummaryNoteDao
+import com.robertgasparian.routinehelper.data.local.entity.WeeklyEntryEntity
 import com.robertgasparian.routinehelper.data.local.entity.WeeklySummaryNoteEntity
 import com.robertgasparian.routinehelper.data.local.model.RoutineItemWithAction
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
@@ -16,11 +16,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 class RoomWeeklyRoutineRepository(
-    database: RoutineDatabase,
-    private val routineItemDao: RoutineItemDao = database.routineItemDao(),
-    private val weeklyEntryDao: WeeklyEntryDao = database.weeklyEntryDao(),
-    private val weeklySummaryNoteDao: WeeklySummaryNoteDao = database.weeklySummaryNoteDao(),
-    private val clock: () -> Long = System::currentTimeMillis,
+    private val routineItemDao: RoutineItemDao,
+    private val weeklyEntryDao: WeeklyEntryDao,
+    private val weeklySummaryNoteDao: WeeklySummaryNoteDao,
+    private val timeProvider: TimeProvider,
 ) : WeeklyRoutineRepository {
     override fun weeklyItems(weekStartDate: String): Flow<List<WeeklyRoutineItem>> =
         combine(
@@ -48,12 +47,12 @@ class RoomWeeklyRoutineRepository(
         weeklyEntryDao.upsert(
             existing?.copy(
                 isChecked = isChecked,
-                updatedAtMillis = clock(),
+                updatedAtMillis = timeProvider.currentTimeMillis(),
             ) ?: WeeklyEntryEntity(
                 routineItemId = routineItemId,
                 weekStartDate = weekStartDate,
                 isChecked = isChecked,
-                updatedAtMillis = clock(),
+                updatedAtMillis = timeProvider.currentTimeMillis(),
             ),
         )
     }
@@ -68,12 +67,12 @@ class RoomWeeklyRoutineRepository(
         weeklyEntryDao.upsert(
             existing?.copy(
                 note = normalizedNote,
-                updatedAtMillis = clock(),
+                updatedAtMillis = timeProvider.currentTimeMillis(),
             ) ?: WeeklyEntryEntity(
                 routineItemId = routineItemId,
                 weekStartDate = weekStartDate,
                 note = normalizedNote,
-                updatedAtMillis = clock(),
+                updatedAtMillis = timeProvider.currentTimeMillis(),
             ),
         )
     }
@@ -87,12 +86,12 @@ class RoomWeeklyRoutineRepository(
         weeklyEntryDao.upsert(
             existing?.copy(
                 completedCount = completedCount.coerceAtLeast(0),
-                updatedAtMillis = clock(),
+                updatedAtMillis = timeProvider.currentTimeMillis(),
             ) ?: WeeklyEntryEntity(
                 routineItemId = routineItemId,
                 weekStartDate = weekStartDate,
                 completedCount = completedCount.coerceAtLeast(0),
-                updatedAtMillis = clock(),
+                updatedAtMillis = timeProvider.currentTimeMillis(),
             ),
         )
     }
@@ -106,12 +105,12 @@ class RoomWeeklyRoutineRepository(
         weeklyEntryDao.upsert(
             existing?.copy(
                 isHidden = isHidden,
-                updatedAtMillis = clock(),
+                updatedAtMillis = timeProvider.currentTimeMillis(),
             ) ?: WeeklyEntryEntity(
                 routineItemId = routineItemId,
                 weekStartDate = weekStartDate,
                 isHidden = isHidden,
-                updatedAtMillis = clock(),
+                updatedAtMillis = timeProvider.currentTimeMillis(),
             ),
         )
     }
@@ -128,7 +127,7 @@ class RoomWeeklyRoutineRepository(
                 WeeklySummaryNoteEntity(
                     weekStartDate = weekStartDate,
                     note = normalizedNote,
-                    updatedAtMillis = clock(),
+                    updatedAtMillis = timeProvider.currentTimeMillis(),
                 ),
             )
         }
