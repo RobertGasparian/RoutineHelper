@@ -1,7 +1,8 @@
 package com.robertgasparian.routinehelper.data.repository
 
+import androidx.room.RoomDatabase
 import androidx.room.withTransaction
-import com.robertgasparian.routinehelper.data.local.RoutineDatabase
+import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.data.local.dao.ActionDao
 import com.robertgasparian.routinehelper.data.local.dao.RoutineItemDao
 import com.robertgasparian.routinehelper.data.local.entity.ActionEntity
@@ -16,10 +17,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 class RoomRoutineTemplateRepository(
-    private val database: RoutineDatabase,
-    private val actionDao: ActionDao = database.actionDao(),
-    private val routineItemDao: RoutineItemDao = database.routineItemDao(),
-    private val clock: () -> Long = System::currentTimeMillis,
+    private val database: RoomDatabase,
+    private val actionDao: ActionDao,
+    private val routineItemDao: RoutineItemDao,
+    private val timeProvider: TimeProvider,
 ) : RoutineTemplateRepository {
     override fun templateItems(cadence: RoutineCadence): Flow<List<RoutineTemplateItem>> =
         routineItemDao.routineItems(cadence.toStorageValue()).map { items ->
@@ -40,7 +41,7 @@ class RoomRoutineTemplateRepository(
         repeatTargetCount: Int?,
         cadence: RoutineCadence,
     ): Long = database.withTransaction {
-        val now = clock()
+        val now = timeProvider.currentTimeMillis()
         val actionId = actionDao.insert(
             ActionEntity(
                 title = title.trim(),
@@ -72,7 +73,7 @@ class RoomRoutineTemplateRepository(
                 title = title.trim(),
                 description = description?.trim()?.takeIf(String::isNotEmpty),
                 repeatTargetCount = repeatTargetCount,
-                updatedAtMillis = clock(),
+                updatedAtMillis = timeProvider.currentTimeMillis(),
             ),
         )
     }

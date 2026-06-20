@@ -1,5 +1,6 @@
 package com.robertgasparian.routinehelper.di
 
+import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.data.local.RoutineDatabase
 import com.robertgasparian.routinehelper.data.repository.RoomRoutineHistoryRepository
 import com.robertgasparian.routinehelper.data.repository.RoomRoutineTemplateRepository
@@ -22,7 +23,14 @@ object RepositoryModule {
     @Singleton
     fun provideRoutineTemplateRepository(
         database: RoutineDatabase,
-    ): RoutineTemplateRepository = RoomRoutineTemplateRepository(database)
+        timeProvider: TimeProvider,
+    ): RoutineTemplateRepository =
+        RoomRoutineTemplateRepository(
+            database = database,
+            actionDao = database.actionDao(),
+            routineItemDao = database.routineItemDao(),
+            timeProvider = timeProvider,
+        )
 
     @Provides
     @Singleton

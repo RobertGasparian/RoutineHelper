@@ -76,8 +76,8 @@ Proposed module families:
 - `:libs:routine:template:domain`
   - Platform-independent template models, repository contracts, and use cases for reusable action definitions such as title, description, cadence, repeat target count, and future deadline configuration if deadlines are configured on actions.
 - `:libs:routine:template:data`
-  - Future Room-backed template data sources and repository implementations.
-  - Until the shared Room schema is separated safely, the existing template Room implementation remains temporarily in `:app` and implements the domain repository contract.
+  - Room-backed template entities, DAOs, relation models, and repository implementations.
+  - The shared `RoutineDatabase` remains temporarily in `:app` as schema composition while capability-owned Room types move into their data modules.
 - `:libs:routine:tracking`
   - Per-period routine state such as today/weekly entries, checked state, hidden state, notes, completed count, and future check availability or lock state.
 - `:libs:routine:snapshot`

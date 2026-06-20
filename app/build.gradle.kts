@@ -52,6 +52,7 @@ room {
 dependencies {
     implementation(project(":core:time"))
     implementation(project(":core:ui"))
+    implementation(project(":libs:routine:template:data"))
     implementation(project(":libs:routine:template:domain"))
 
     implementation(libs.androidx.core.ktx)
