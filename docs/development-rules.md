@@ -25,6 +25,8 @@
 - `:app` is the Android shell. It owns app entry points, root navigation, app startup, and dependency aggregation.
 - `:features:*` modules are presentation entry points. They own screens, components, ViewModels, UI state, UI events, previews, and Paparazzi tests.
 - `:libs:*` modules are business capability modules. They own app data, business rules, repositories, use cases, and implementation details for a specific capability.
+- When a capability earns separate submodules, use `:domain` for platform-independent models, repository contracts, and use cases, and `:data` for data sources and repository implementations.
+- A capability's `:data` submodule may depend on its `:domain` submodule; `:domain` must not depend on `:data`.
 - `:core:*` modules are cross-cutting building blocks that are not specific to RoutineHelper business capabilities.
 - Do not create a broad `routine`, `domain`, or `data` module whose job is "shared app logic." Prefer capability boundaries such as template, tracking, snapshot, reminders, reflection, and background work.
 - `:features:*` may depend on `:libs:*` APIs and `:core:*`.

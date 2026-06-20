@@ -51,7 +51,7 @@ The destination should use three large groups plus the app shell:
 - `:libs:*`
   - Business capability modules. They own application data, business rules, repositories, use cases, and implementation details for a specific capability.
   - These modules are not a dumping ground for "anything used in two places"; each lib must have a clear domain boundary.
-  - A lib may contain API and implementation code in one module at first. Split into `:api` and `:impl` only when that separation makes review, dependency direction, testing, or build performance meaningfully better.
+  - A lib may contain domain and data code in one module at first. Split into `:domain` and `:data` only when that separation makes review, dependency direction, testing, or build performance meaningfully better.
 - `:core:*`
   - Cross-cutting building blocks that are not specific to RoutineHelper business capabilities.
   - Examples include time abstractions, shared UI primitives/theme, small common utilities, test helpers, and platform wrappers.
@@ -73,8 +73,11 @@ Proposed module families:
   - Settings UI and future settings state management.
 - `:features:reflection`
   - Future reflection UI flows.
-- `:libs:routine:template`
-  - Reusable action definitions such as title, description, cadence, repeat target count, and future deadline configuration if deadlines are configured on actions.
+- `:libs:routine:template:domain`
+  - Platform-independent template models, repository contracts, and use cases for reusable action definitions such as title, description, cadence, repeat target count, and future deadline configuration if deadlines are configured on actions.
+- `:libs:routine:template:data`
+  - Future Room-backed template data sources and repository implementations.
+  - Until the shared Room schema is separated safely, the existing template Room implementation remains temporarily in `:app` and implements the domain repository contract.
 - `:libs:routine:tracking`
   - Per-period routine state such as today/weekly entries, checked state, hidden state, notes, completed count, and future check availability or lock state.
 - `:libs:routine:snapshot`
@@ -93,7 +96,7 @@ Proposed module families:
 - `:core:testing`
   - Shared test fakes, coroutine test setup, and test helpers when duplication across modules justifies it.
 
-Cadence is a horizontal dimension inside routine libs. Daily, weekly, and future monthly support should start as packages/classes inside modules such as `:libs:routine:template`, `:libs:routine:tracking`, and `:libs:routine:snapshot`, not as separate modules by default. Promote cadence to module level only if it earns an independent boundary through separate dependencies, complexity, ownership, or review lifecycle.
+Cadence is a horizontal dimension inside routine libs. Daily, weekly, and future monthly support should start as packages/classes inside capability module families such as `:libs:routine:template:*`, `:libs:routine:tracking:*`, and `:libs:routine:snapshot:*`, not as separate modules by default. Promote cadence to module level only if it earns an independent boundary through separate dependencies, complexity, ownership, or review lifecycle.
 
 ## Dependency Rules
 
@@ -115,13 +118,13 @@ Allowed examples:
 
 - `:features:daily` depends on `:libs:routine:tracking` APIs and `:core:ui`.
 - `:features:weekly` depends on `:libs:routine:tracking` APIs and `:core:ui`.
-- `:libs:routine:tracking` depends on `:libs:routine:template` APIs.
+- `:libs:routine:tracking` depends on `:libs:routine:template:domain` APIs.
 - `:libs:routine:snapshot` depends on `:libs:routine:tracking` APIs.
 - `:libs:background:work` depends on routine, reflection, or reminder use-case APIs.
 
 Disallowed examples:
 
-- `:libs:routine:template` depending on `:libs:routine:tracking`.
+- `:libs:routine:template:domain` depending on `:libs:routine:tracking:*`.
 - `:libs:routine:tracking` depending on `:libs:routine:snapshot`.
 - `:libs:*` depending on `:features:daily` or any other feature implementation.
 - `:features:daily` depending on `:features:weekly`.

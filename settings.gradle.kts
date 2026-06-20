@@ -21,3 +21,4 @@ rootProject.name = "RoutineHelper"
 include(":app")
 include(":core:time")
 include(":core:ui")
+include(":libs:routine:template:domain")

@@ -11,7 +11,7 @@ class AddTemplateItemUseCaseTest {
     private val useCase = AddTemplateItemUseCase(repository)
 
     @Test
-    fun trimsTitleAndDescriptionBeforeAddingItem() = runTest {
+    fun `given padded text when adding template item then values are trimmed`() = runTest {
         val id = useCase(
             title = "  Drink water  ",
             description = "  Drink 3L water  ",
@@ -29,7 +29,7 @@ class AddTemplateItemUseCaseTest {
     }
 
     @Test
-    fun convertsBlankDescriptionToNull() = runTest {
+    fun `given blank description when adding template item then description is null`() = runTest {
         useCase(
             title = "Stretch",
             description = "   ",
@@ -46,7 +46,7 @@ class AddTemplateItemUseCaseTest {
     }
 
     @Test
-    fun ignoresBlankTitle() = runTest {
+    fun `given blank title when adding template item then item is ignored`() = runTest {
         val id = useCase(
             title = "   ",
             description = "Ignored",

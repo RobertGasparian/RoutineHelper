@@ -52,6 +52,7 @@ room {
 dependencies {
     implementation(project(":core:time"))
     implementation(project(":core:ui"))
+    implementation(project(":libs:routine:template:domain"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -83,4 +84,5 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(testFixtures(project(":libs:routine:template:domain")))
 }

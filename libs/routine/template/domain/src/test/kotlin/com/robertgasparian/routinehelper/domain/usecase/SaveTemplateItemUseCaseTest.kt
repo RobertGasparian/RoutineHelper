@@ -11,7 +11,7 @@ class SaveTemplateItemUseCaseTest {
     private val useCase = SaveTemplateItemUseCase(repository)
 
     @Test
-    fun createsNewItemWhenActionIdIsNull() = runTest {
+    fun `given no action id when saving template item then a new item is created`() = runTest {
         useCase(
             actionId = null,
             title = "  Drink water  ",
@@ -29,7 +29,7 @@ class SaveTemplateItemUseCaseTest {
     }
 
     @Test
-    fun createsWeeklyItemWhenCadenceIsWeekly() = runTest {
+    fun `given weekly cadence when saving template item then a weekly item is created`() = runTest {
         useCase(
             actionId = null,
             title = "Review budget",
@@ -48,7 +48,7 @@ class SaveTemplateItemUseCaseTest {
     }
 
     @Test
-    fun updatesExistingItemWhenActionIdIsPresent() = runTest {
+    fun `given an action id when saving template item then the existing item is updated`() = runTest {
         useCase(
             actionId = 42L,
             title = "  Stretch  ",
@@ -66,7 +66,7 @@ class SaveTemplateItemUseCaseTest {
     }
 
     @Test
-    fun savesRepeatTargetCountWhenGreaterThanOne() = runTest {
+    fun `given repeat target above one when saving template item then target is preserved`() = runTest {
         useCase(
             actionId = null,
             title = "Pushups",
@@ -81,7 +81,7 @@ class SaveTemplateItemUseCaseTest {
     }
 
     @Test
-    fun ignoresRepeatTargetCountWhenLessThanTwo() = runTest {
+    fun `given repeat target below two when saving template item then target is discarded`() = runTest {
         useCase(
             actionId = null,
             title = "Pushups",
@@ -96,7 +96,7 @@ class SaveTemplateItemUseCaseTest {
     }
 
     @Test
-    fun ignoresBlankTitle() = runTest {
+    fun `given blank title when saving template item then item is ignored`() = runTest {
         useCase(
             actionId = null,
             title = "   ",

@@ -9,7 +9,7 @@ class RemoveTemplateItemUseCaseTest {
     private val useCase = RemoveTemplateItemUseCase(repository)
 
     @Test
-    fun removesTemplateItemByRoutineItemId() = runTest {
+    fun `when removing template item then repository receives routine item id`() = runTest {
         useCase(42L)
 
         assertEquals(listOf(42L), repository.removedTemplateItemIds)
