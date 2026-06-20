@@ -9,7 +9,7 @@ class DeleteSnapshotUseCaseTest {
     private val useCase = DeleteSnapshotUseCase(repository)
 
     @Test
-    fun deletesSnapshotById() = runTest {
+    fun `when deleting snapshot then repository receives snapshot id`() = runTest {
         useCase(snapshotId = 42L)
 
         assertEquals(listOf(42L), repository.deletedSnapshotIds)

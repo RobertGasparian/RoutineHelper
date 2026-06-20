@@ -83,8 +83,10 @@ Proposed module families:
 - `:libs:routine:tracking:data`
   - Room-backed per-period entities, DAOs, and repository implementations.
   - It depends on template data for the routine definitions that tracked entries reference.
-- `:libs:routine:snapshot`
-  - Snapshot finalization, snapshot summaries, snapshot detail data, snapshot deletion, and share-text source data.
+- `:libs:routine:snapshot:domain`
+  - Platform-independent snapshot models, history repository contracts, finalization, queries, deletion, and share-text use cases.
+- `:libs:routine:snapshot:data`
+  - Future Room-backed snapshot entities, DAOs, relation models, and repository implementations.
 - `:libs:reflection`
   - Future reflection business rules, data, and use cases.
 - `:libs:reminder`
@@ -122,7 +124,7 @@ Allowed examples:
 - `:features:daily` depends on `:libs:routine:tracking:domain` APIs and `:core:ui`.
 - `:features:weekly` depends on `:libs:routine:tracking:domain` APIs and `:core:ui`.
 - `:libs:routine:tracking:domain` depends on `:libs:routine:template:domain` APIs.
-- `:libs:routine:snapshot` depends on `:libs:routine:tracking:domain` APIs.
+- `:libs:routine:snapshot:domain` depends on `:libs:routine:tracking:domain` APIs.
 - `:libs:background:work` depends on routine, reflection, or reminder use-case APIs.
 
 Disallowed examples:

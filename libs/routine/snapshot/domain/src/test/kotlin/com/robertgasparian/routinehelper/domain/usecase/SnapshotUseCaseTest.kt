@@ -10,7 +10,7 @@ class SnapshotUseCaseTest {
     private val repository = FakeRoutineHistoryRepository()
 
     @Test
-    fun snapshotSummariesStreamsSavedSnapshots() = runTest {
+    fun `given saved snapshot when observing summaries then saved summary is emitted`() = runTest {
         repository.saveSnapshot(
             date = "2026-05-29",
             finalizedAtMillis = 123L,
@@ -25,7 +25,7 @@ class SnapshotUseCaseTest {
     }
 
     @Test
-    fun snapshotStreamsSnapshotById() = runTest {
+    fun `given saved snapshot when observing by id then snapshot is emitted`() = runTest {
         val snapshotId = repository.saveSnapshot(
             date = "2026-05-29",
             finalizedAtMillis = 123L,

@@ -10,7 +10,7 @@ class SnapshotShareTextUseCaseTest {
     private val useCase = SnapshotShareTextUseCase()
 
     @Test
-    fun formatsSnapshotForHumanReading() {
+    fun `given populated snapshot when formatting share text then human readable text is returned`() {
         val text = useCase(
             RoutineDaySnapshot(
                 snapshotId = 1L,
@@ -53,7 +53,7 @@ class SnapshotShareTextUseCaseTest {
     }
 
     @Test
-    fun formatsEmptySnapshot() {
+    fun `given empty snapshot when formatting share text then empty state text is returned`() {
         val text = useCase(
             RoutineDaySnapshot(
                 snapshotId = 1L,
@@ -68,7 +68,7 @@ class SnapshotShareTextUseCaseTest {
     }
 
     @Test
-    fun formatsMultipleSnapshotsNewestFirst() {
+    fun `given multiple snapshots when formatting share text then newest snapshot is first`() {
         val text = useCase(
             listOf(
                 RoutineDaySnapshot(
