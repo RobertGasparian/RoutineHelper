@@ -77,7 +77,6 @@ Proposed module families:
   - Platform-independent template models, repository contracts, and use cases for reusable action definitions such as title, description, cadence, repeat target count, and future deadline configuration if deadlines are configured on actions.
 - `:libs:routine:template:data`
   - Room-backed template entities, DAOs, relation models, and repository implementations.
-  - The shared `RoutineDatabase` remains temporarily in `:app` as schema composition while capability-owned Room types move into their data modules.
 - `:libs:routine:tracking:domain`
   - Platform-independent per-period models, repository contracts, and use cases for today/weekly entries, checked state, hidden state, notes, completed count, and future check availability or lock state.
 - `:libs:routine:tracking:data`
@@ -87,6 +86,9 @@ Proposed module families:
   - Platform-independent snapshot models, history repository contracts, finalization, queries, deletion, and share-text use cases.
 - `:libs:routine:snapshot:data`
   - Room-backed snapshot entities, DAOs, relation models, and repository implementations.
+- `:libs:routine:database`
+  - Shared Room database composition, schema export, and future migrations.
+  - It may depend on capability data modules to aggregate their entities and DAOs, but it must not own repositories or business rules.
 - `:libs:reflection`
   - Future reflection business rules, data, and use cases.
 - `:libs:reminder`
@@ -125,6 +127,7 @@ Allowed examples:
 - `:features:weekly` depends on `:libs:routine:tracking:domain` APIs and `:core:ui`.
 - `:libs:routine:tracking:domain` depends on `:libs:routine:template:domain` APIs.
 - `:libs:routine:snapshot:domain` depends on `:libs:routine:tracking:domain` APIs.
+- `:libs:routine:database` depends on routine capability data modules for Room schema composition.
 - `:libs:background:work` depends on routine, reflection, or reminder use-case APIs.
 
 Disallowed examples:

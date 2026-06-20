@@ -36,6 +36,7 @@
 - Avoid feature-to-feature implementation dependencies. Route cross-feature navigation through `:app` or a small feature API/navigation contract only when needed.
 - `:libs:*` may depend on `:core:*` and other `:libs:*` APIs when there is a clear one-way capability relationship.
 - `:libs:*` should avoid depending on other `:libs:*` implementations unless the module is explicit infrastructure wiring.
+- `:libs:routine:database` is infrastructure wiring only: it may aggregate capability-owned Room entities and DAOs, but must not contain repositories or business rules.
 - `:libs:*` must not depend on `:features:*`.
 - `:core:*` must not depend on features or business libs.
 - The module graph must stay acyclic. If two libs need each other both ways, split out a smaller shared API/model or merge them into one cohesive capability.
