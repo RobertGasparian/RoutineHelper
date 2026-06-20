@@ -5,6 +5,7 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.robertgasparian.routinehelper.core.time.TimeProvider
+import com.robertgasparian.routinehelper.domain.time.SnapshotDates
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeWeeklyUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ResetWeeklyUseCase
 import dagger.assisted.Assisted
@@ -20,7 +21,7 @@ class WeeklySnapshotWorker @AssistedInject constructor(
     private val timeProvider: TimeProvider,
 ) : CoroutineWorker(appContext, workerParameters) {
     override suspend fun doWork(): Result {
-        val snapshotWeekStartDate = SnapshotWorkDates.previousCompletedCalendarWeekStartDate(timeProvider.now()).toString()
+        val snapshotWeekStartDate = SnapshotDates.previousCompletedCalendarWeekStartDate(timeProvider.now()).toString()
         return try {
             finalizeWeeklyUseCase(
                 weekStartDate = snapshotWeekStartDate,

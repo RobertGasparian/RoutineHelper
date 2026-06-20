@@ -3,6 +3,7 @@ package com.robertgasparian.routinehelper.ui.daily
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robertgasparian.routinehelper.core.time.TimeProvider
+import com.robertgasparian.routinehelper.domain.time.SnapshotDates
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ReorderDailyRoutineItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetTodayItemHiddenUseCase
@@ -20,7 +21,6 @@ import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingItemUiState
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingUiEvent
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingUiState
 import com.robertgasparian.routinehelper.ui.tracking.insertAtCursor
-import com.robertgasparian.routinehelper.work.SnapshotWorkDates
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -222,7 +222,7 @@ class DailyViewModel @Inject constructor(
 
     private fun snapshotDaily(
         // TODO Remove this test-only override when debug snapshot controls are removed.
-        snapshotDate: String = SnapshotWorkDates.dailySnapshotDate(timeProvider.now()).toString(),
+        snapshotDate: String = SnapshotDates.dailySnapshotDate(timeProvider.now()).toString(),
     ) {
         viewModelScope.launch {
             finalizeTodayUseCase(

@@ -5,6 +5,7 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.robertgasparian.routinehelper.core.time.TimeProvider
+import com.robertgasparian.routinehelper.domain.time.SnapshotDates
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ResetTodayUseCase
 import dagger.assisted.Assisted
@@ -20,7 +21,7 @@ class DailySnapshotWorker @AssistedInject constructor(
     private val timeProvider: TimeProvider,
 ) : CoroutineWorker(appContext, workerParameters) {
     override suspend fun doWork(): Result {
-        val snapshotDate = SnapshotWorkDates.dailySnapshotDate(timeProvider.now()).toString()
+        val snapshotDate = SnapshotDates.dailySnapshotDate(timeProvider.now()).toString()
         return try {
             finalizeTodayUseCase(
                 date = snapshotDate,

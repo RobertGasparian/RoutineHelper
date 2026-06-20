@@ -3,6 +3,8 @@ package com.robertgasparian.routinehelper.ui.weekly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robertgasparian.routinehelper.core.time.TimeProvider
+import com.robertgasparian.routinehelper.domain.time.SnapshotDates
+import com.robertgasparian.routinehelper.domain.time.startOfCalendarWeek
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeWeeklyUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ReorderWeeklyRoutineItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetWeeklyItemHiddenUseCase
@@ -20,8 +22,6 @@ import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingItemUiState
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingUiEvent
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingUiState
 import com.robertgasparian.routinehelper.ui.tracking.insertAtCursor
-import com.robertgasparian.routinehelper.work.SnapshotWorkDates
-import com.robertgasparian.routinehelper.work.startOfCalendarWeek
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 import javax.inject.Inject
@@ -224,7 +224,7 @@ class WeeklyViewModel @Inject constructor(
 
     private fun snapshotWeek(
         // TODO Remove this test-only override when debug snapshot controls are removed.
-        snapshotWeekStartDate: String = SnapshotWorkDates
+        snapshotWeekStartDate: String = SnapshotDates
             .previousCompletedCalendarWeekStartDate(timeProvider.now())
             .toString(),
     ) {

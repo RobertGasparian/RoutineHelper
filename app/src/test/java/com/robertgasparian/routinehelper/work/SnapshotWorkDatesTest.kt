@@ -1,6 +1,5 @@
 package com.robertgasparian.routinehelper.work
 
-import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -13,27 +12,7 @@ class SnapshotWorkDatesTest {
     private val zoneId = ZoneId.of("America/New_York")
 
     @Test
-    fun dailySnapshotDateUsesPreviousDay() {
-        val now = ZonedDateTime.of(2026, 5, 30, 2, 30, 0, 0, zoneId)
-
-        assertEquals(
-            LocalDate.of(2026, 5, 29),
-            SnapshotWorkDates.dailySnapshotDate(now),
-        )
-    }
-
-    @Test
-    fun previousCompletedCalendarWeekStartDateUsesMondayOfPreviousWeek() {
-        val now = ZonedDateTime.of(2026, 6, 1, 2, 30, 0, 0, zoneId)
-
-        assertEquals(
-            LocalDate.of(2026, 5, 25),
-            SnapshotWorkDates.previousCompletedCalendarWeekStartDate(now),
-        )
-    }
-
-    @Test
-    fun dailyInitialDelayTargetsNextTwoThirty() {
+    fun `given time before daily cutoff when calculating delay then next cutoff is targeted`() {
         val now = ZonedDateTime.of(2026, 5, 29, 1, 30, 0, 0, zoneId)
 
         assertEquals(
@@ -46,7 +25,7 @@ class SnapshotWorkDatesTest {
     }
 
     @Test
-    fun weeklyInitialDelayTargetsUpcomingMondayTwoThirty() {
+    fun `given midweek time when calculating weekly delay then upcoming Monday is targeted`() {
         val now = ZonedDateTime.of(2026, 5, 27, 2, 30, 0, 0, zoneId)
 
         assertEquals(
@@ -59,7 +38,7 @@ class SnapshotWorkDatesTest {
     }
 
     @Test
-    fun weeklyInitialDelayTargetsNextMondayWhenCurrentMondayCutoffPassed() {
+    fun `given Monday after cutoff when calculating weekly delay then next Monday is targeted`() {
         val now = ZonedDateTime.of(2026, 6, 1, 3, 0, 0, 0, zoneId)
 
         assertEquals(
@@ -72,7 +51,7 @@ class SnapshotWorkDatesTest {
     }
 
     @Test
-    fun appStartDailyBackfillStartsAtSeven() {
+    fun `given times around deadline when checking daily backfill then seven is the cutoff`() {
         assertFalse(
             SnapshotWorkDates.shouldBackfillDailyOnAppStart(
                 ZonedDateTime.of(2026, 5, 30, 6, 59, 0, 0, zoneId),
@@ -86,7 +65,7 @@ class SnapshotWorkDatesTest {
     }
 
     @Test
-    fun appStartWeeklyBackfillRunsOnlyOnMondayAfterSeven() {
+    fun `given weekdays after deadline when checking weekly backfill then only Monday qualifies`() {
         assertTrue(
             SnapshotWorkDates.shouldBackfillWeeklyOnAppStart(
                 ZonedDateTime.of(2026, 6, 1, 7, 0, 0, 0, zoneId),

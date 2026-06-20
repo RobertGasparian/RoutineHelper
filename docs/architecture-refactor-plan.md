@@ -78,12 +78,12 @@ Proposed module families:
 - `:libs:routine:template:data`
   - Room-backed template entities, DAOs, relation models, and repository implementations.
 - `:libs:routine:tracking:domain`
-  - Platform-independent per-period models, repository contracts, and use cases for today/weekly entries, checked state, hidden state, notes, completed count, and future check availability or lock state.
+  - Platform-independent per-period models, period-date calculations, repository contracts, and use cases for today/weekly entries, checked state, hidden state, notes, completed count, and future check availability or lock state.
 - `:libs:routine:tracking:data`
   - Room-backed per-period entities, DAOs, and repository implementations.
   - It depends on template data for the routine definitions that tracked entries reference.
 - `:libs:routine:snapshot:domain`
-  - Platform-independent snapshot models, history repository contracts, finalization, queries, deletion, and share-text use cases.
+  - Platform-independent snapshot models, snapshot-period calculations, history repository contracts, finalization, queries, deletion, and share-text use cases.
 - `:libs:routine:snapshot:data`
   - Room-backed snapshot entities, DAOs, relation models, and repository implementations.
 - `:libs:routine:database`
