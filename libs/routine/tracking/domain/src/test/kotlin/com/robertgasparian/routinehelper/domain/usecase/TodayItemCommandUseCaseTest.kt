@@ -8,7 +8,7 @@ class TodayItemCommandUseCaseTest {
     private val repository = FakeTodayRoutineRepository()
 
     @Test
-    fun setCheckedForwardsDateItemAndCheckedState() = runTest {
+    fun `given checked state when updating today item then repository receives the change`() = runTest {
         SetTodayItemCheckedUseCase(repository)(
             date = "2026-05-29",
             routineItemId = 42L,
@@ -26,7 +26,25 @@ class TodayItemCommandUseCaseTest {
     }
 
     @Test
-    fun updateNoteForwardsDateItemAndNote() = runTest {
+    fun `given hidden state when updating today item then repository receives the change`() = runTest {
+        SetTodayItemHiddenUseCase(repository)(
+            date = "2026-05-29",
+            routineItemId = 42L,
+            isHidden = true,
+        )
+
+        assertEquals(
+            HiddenChange(
+                date = "2026-05-29",
+                routineItemId = 42L,
+                isHidden = true,
+            ),
+            repository.hiddenChanges.single(),
+        )
+    }
+
+    @Test
+    fun `given note when updating today item then repository receives the change`() = runTest {
         UpdateTodayItemNoteUseCase(repository)(
             date = "2026-05-29",
             routineItemId = 42L,
@@ -44,7 +62,7 @@ class TodayItemCommandUseCaseTest {
     }
 
     @Test
-    fun updateCompletedCountForwardsDateItemAndCount() = runTest {
+    fun `given completed count when updating today item then repository receives the change`() = runTest {
         UpdateTodayItemCompletedCountUseCase(repository)(
             date = "2026-05-29",
             routineItemId = 42L,
@@ -62,7 +80,7 @@ class TodayItemCommandUseCaseTest {
     }
 
     @Test
-    fun updateSummaryNoteForwardsDateAndNote() = runTest {
+    fun `given summary note when updating today then repository receives the change`() = runTest {
         UpdateTodaySummaryNoteUseCase(repository)(
             date = "2026-05-29",
             note = "Low-energy day.",

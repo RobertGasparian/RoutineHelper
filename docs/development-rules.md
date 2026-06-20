@@ -8,6 +8,7 @@
 - Do not create abstractions before they are earned by at least two concrete flows, unless the code is clearly shared infrastructure.
 - Keep explanations and examples grounded in this codebase. Mark general examples clearly when they are not taken from this project.
 - Do not mix module moves, behavior changes, UI design changes, and opportunistic cleanup in the same review chunk.
+- Every refactor handoff must classify the chunk as relocation-only, structural wiring, or behavior-changing, and explicitly list meaningful production, test, and documentation changes so reviewers know whether to inspect file contents or only ownership/location changes.
 - When touching debug/test-only production-source affordances, keep the affordance only when it is gated by debug build behavior.
 
 ## Kotlin First

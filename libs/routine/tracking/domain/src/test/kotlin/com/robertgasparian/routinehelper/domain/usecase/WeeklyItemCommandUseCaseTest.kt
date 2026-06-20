@@ -8,7 +8,7 @@ class WeeklyItemCommandUseCaseTest {
     private val repository = FakeWeeklyRoutineRepository()
 
     @Test
-    fun setCheckedForwardsWeekItemAndCheckedState() = runTest {
+    fun `given checked state when updating weekly item then repository receives the change`() = runTest {
         SetWeeklyItemCheckedUseCase(repository)(
             weekStartDate = "2026-05-24",
             routineItemId = 10L,
@@ -28,7 +28,27 @@ class WeeklyItemCommandUseCaseTest {
     }
 
     @Test
-    fun updateNoteForwardsWeekItemAndNote() = runTest {
+    fun `given hidden state when updating weekly item then repository receives the change`() = runTest {
+        SetWeeklyItemHiddenUseCase(repository)(
+            weekStartDate = "2026-05-24",
+            routineItemId = 10L,
+            isHidden = true,
+        )
+
+        assertEquals(
+            listOf(
+                WeeklyHiddenChange(
+                    weekStartDate = "2026-05-24",
+                    routineItemId = 10L,
+                    isHidden = true,
+                ),
+            ),
+            repository.hiddenChanges,
+        )
+    }
+
+    @Test
+    fun `given note when updating weekly item then repository receives the change`() = runTest {
         UpdateWeeklyItemNoteUseCase(repository)(
             weekStartDate = "2026-05-24",
             routineItemId = 10L,
@@ -48,7 +68,7 @@ class WeeklyItemCommandUseCaseTest {
     }
 
     @Test
-    fun updateCompletedCountForwardsWeekItemAndCount() = runTest {
+    fun `given completed count when updating weekly item then repository receives the change`() = runTest {
         UpdateWeeklyItemCompletedCountUseCase(repository)(
             weekStartDate = "2026-05-24",
             routineItemId = 10L,
@@ -68,7 +88,7 @@ class WeeklyItemCommandUseCaseTest {
     }
 
     @Test
-    fun updateSummaryNoteForwardsWeekAndNote() = runTest {
+    fun `given summary note when updating week then repository receives the change`() = runTest {
         UpdateWeeklySummaryNoteUseCase(repository)(
             weekStartDate = "2026-05-24",
             note = "Kept most weekly priorities moving.",

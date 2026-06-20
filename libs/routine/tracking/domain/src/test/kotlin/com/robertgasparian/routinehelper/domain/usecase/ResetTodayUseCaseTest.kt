@@ -9,7 +9,7 @@ class ResetTodayUseCaseTest {
     private val useCase = ResetTodayUseCase(todayRepository)
 
     @Test
-    fun resetsDate() = runTest {
+    fun `when resetting today then repository receives date`() = runTest {
         useCase("2026-05-29")
 
         assertEquals(listOf("2026-05-29"), todayRepository.resetDates)

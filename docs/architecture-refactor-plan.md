@@ -78,8 +78,10 @@ Proposed module families:
 - `:libs:routine:template:data`
   - Room-backed template entities, DAOs, relation models, and repository implementations.
   - The shared `RoutineDatabase` remains temporarily in `:app` as schema composition while capability-owned Room types move into their data modules.
-- `:libs:routine:tracking`
-  - Per-period routine state such as today/weekly entries, checked state, hidden state, notes, completed count, and future check availability or lock state.
+- `:libs:routine:tracking:domain`
+  - Platform-independent per-period models, repository contracts, and use cases for today/weekly entries, checked state, hidden state, notes, completed count, and future check availability or lock state.
+- `:libs:routine:tracking:data`
+  - Future Room-backed per-period entities, DAOs, relation models, and repository implementations.
 - `:libs:routine:snapshot`
   - Snapshot finalization, snapshot summaries, snapshot detail data, snapshot deletion, and share-text source data.
 - `:libs:reflection`
@@ -116,16 +118,16 @@ Cadence is a horizontal dimension inside routine libs. Daily, weekly, and future
 
 Allowed examples:
 
-- `:features:daily` depends on `:libs:routine:tracking` APIs and `:core:ui`.
-- `:features:weekly` depends on `:libs:routine:tracking` APIs and `:core:ui`.
-- `:libs:routine:tracking` depends on `:libs:routine:template:domain` APIs.
-- `:libs:routine:snapshot` depends on `:libs:routine:tracking` APIs.
+- `:features:daily` depends on `:libs:routine:tracking:domain` APIs and `:core:ui`.
+- `:features:weekly` depends on `:libs:routine:tracking:domain` APIs and `:core:ui`.
+- `:libs:routine:tracking:domain` depends on `:libs:routine:template:domain` APIs.
+- `:libs:routine:snapshot` depends on `:libs:routine:tracking:domain` APIs.
 - `:libs:background:work` depends on routine, reflection, or reminder use-case APIs.
 
 Disallowed examples:
 
 - `:libs:routine:template:domain` depending on `:libs:routine:tracking:*`.
-- `:libs:routine:tracking` depending on `:libs:routine:snapshot`.
+- `:libs:routine:tracking:domain` depending on `:libs:routine:snapshot:*`.
 - `:libs:*` depending on `:features:daily` or any other feature implementation.
 - `:features:daily` depending on `:features:weekly`.
 

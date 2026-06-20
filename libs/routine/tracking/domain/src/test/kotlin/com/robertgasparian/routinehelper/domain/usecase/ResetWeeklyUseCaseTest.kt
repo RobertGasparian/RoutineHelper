@@ -9,7 +9,7 @@ class ResetWeeklyUseCaseTest {
     private val useCase = ResetWeeklyUseCase(weeklyRepository)
 
     @Test
-    fun resetsWeek() = runTest {
+    fun `when resetting week then repository receives week start date`() = runTest {
         useCase("2026-05-24")
 
         assertEquals(listOf("2026-05-24"), weeklyRepository.resetWeeks)

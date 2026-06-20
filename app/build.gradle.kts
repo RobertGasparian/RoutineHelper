@@ -54,6 +54,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":libs:routine:template:data"))
     implementation(project(":libs:routine:template:domain"))
+    implementation(project(":libs:routine:tracking:domain"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -86,4 +87,5 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(testFixtures(project(":libs:routine:template:domain")))
+    testImplementation(testFixtures(project(":libs:routine:tracking:domain")))
 }
