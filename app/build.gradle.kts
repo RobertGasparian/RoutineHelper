@@ -47,6 +47,7 @@ android {
 dependencies {
     implementation(project(":core:time"))
     implementation(project(":core:ui"))
+    implementation(project(":features:routine-tracking"))
     implementation(project(":libs:routine:template:data"))
     implementation(project(":libs:routine:template:domain"))
     implementation(project(":libs:routine:tracking:data"))
@@ -81,8 +82,4 @@ dependencies {
     ksp(libs.hilt.compiler)
 
     testImplementation(libs.junit)
-    testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(testFixtures(project(":libs:routine:template:domain")))
-    testImplementation(testFixtures(project(":libs:routine:tracking:domain")))
-    testImplementation(testFixtures(project(":libs:routine:snapshot:domain")))
 }

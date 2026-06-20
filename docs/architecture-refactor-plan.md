@@ -59,10 +59,9 @@ The destination should use three large groups plus the app shell:
 
 Proposed module families:
 
-- `:features:daily`
-  - Daily tracking UI, ViewModel, UI state/events, previews, and Paparazzi tests.
-- `:features:weekly`
-  - Weekly tracking UI, ViewModel, UI state/events, previews, and Paparazzi tests.
+- `:features:routine-tracking`
+  - Daily and Weekly tracking screens, shared tracking components/state/events, cadence-specific ViewModels/mappers, previews, and Paparazzi tests.
+  - Daily and Weekly remain packages inside one feature because they are cadence variants of the same presentation workflow and share substantial UI behavior.
 - `:features:history`
   - Snapshot history list and snapshot detail UI flows.
 - `:features:action-editor`
@@ -123,8 +122,7 @@ Cadence is a horizontal dimension inside routine libs. Daily, weekly, and future
 
 Allowed examples:
 
-- `:features:daily` depends on `:libs:routine:tracking:domain` APIs and `:core:ui`.
-- `:features:weekly` depends on `:libs:routine:tracking:domain` APIs and `:core:ui`.
+- `:features:routine-tracking` depends on tracking, template, and snapshot domain APIs plus `:core:ui`.
 - `:libs:routine:tracking:domain` depends on `:libs:routine:template:domain` APIs.
 - `:libs:routine:snapshot:domain` depends on `:libs:routine:tracking:domain` APIs.
 - `:libs:routine:database` depends on routine capability data modules for Room schema composition.
@@ -135,7 +133,7 @@ Disallowed examples:
 - `:libs:routine:template:domain` depending on `:libs:routine:tracking:*`.
 - `:libs:routine:tracking:domain` depending on `:libs:routine:snapshot:*`.
 - `:libs:*` depending on `:features:daily` or any other feature implementation.
-- `:features:daily` depending on `:features:weekly`.
+- One cadence package inside `:features:routine-tracking` depending on another cadence package's implementation.
 
 ## Staged Work Plan
 

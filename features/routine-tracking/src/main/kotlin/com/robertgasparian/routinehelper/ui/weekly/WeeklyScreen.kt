@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.robertgasparian.routinehelper.BuildConfig
+import com.robertgasparian.routinehelper.features.routinetracking.BuildConfig
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingComponent
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingUiEvent
 
