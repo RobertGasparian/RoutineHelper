@@ -1,13 +1,9 @@
 package com.robertgasparian.routinehelper.data.repository
 
 import com.robertgasparian.routinehelper.data.local.dao.DailySummaryNoteDao
-import com.robertgasparian.routinehelper.data.local.dao.RoutineItemDao
 import com.robertgasparian.routinehelper.data.local.dao.TodayEntryDao
-import com.robertgasparian.routinehelper.data.local.entity.ActionEntity
 import com.robertgasparian.routinehelper.data.local.entity.DailySummaryNoteEntity
-import com.robertgasparian.routinehelper.data.local.entity.RoutineItemEntity
 import com.robertgasparian.routinehelper.data.local.entity.TodayEntryEntity
-import com.robertgasparian.routinehelper.data.local.model.RoutineItemWithAction
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import com.robertgasparian.routinehelper.test.FixedTimeProvider
@@ -33,20 +29,20 @@ class RoomTodayRoutineRepositoryTest {
     @Test
     fun `given routine items and entries when observing today then maps and clamps their state`() = runTest {
         routineItemDao.items = listOf(
-            routineItem(
+            routineItemFixture(
                 routineItemId = 10L,
                 actionId = 100L,
                 title = "Drink water",
                 position = 0,
                 repeatTargetCount = 3,
             ),
-            routineItem(
+            routineItemFixture(
                 routineItemId = 20L,
                 actionId = 200L,
                 title = "Read",
                 position = 1,
             ),
-            routineItem(
+            routineItemFixture(
                 routineItemId = 30L,
                 actionId = 300L,
                 title = "Stretch",
@@ -204,29 +200,6 @@ class RoomTodayRoutineRepositoryTest {
         assertEquals(listOf(DATE), dailySummaryNoteDao.deletedDates)
     }
 
-    private fun routineItem(
-        routineItemId: Long,
-        actionId: Long,
-        title: String,
-        position: Int,
-        repeatTargetCount: Int? = null,
-    ): RoutineItemWithAction =
-        RoutineItemWithAction(
-            routineItem = RoutineItemEntity(
-                id = routineItemId,
-                actionId = actionId,
-                position = position,
-                createdAtMillis = 1L,
-            ),
-            action = ActionEntity(
-                id = actionId,
-                title = title,
-                repeatTargetCount = repeatTargetCount,
-                createdAtMillis = 1L,
-                updatedAtMillis = 1L,
-            ),
-        )
-
     private fun todayEntry(
         id: Long = 0L,
         routineItemId: Long,
@@ -250,26 +223,6 @@ class RoomTodayRoutineRepositoryTest {
     private companion object {
         const val DATE = "2026-05-29"
     }
-}
-
-private class FakeRoutineItemDao : RoutineItemDao {
-    var items: List<RoutineItemWithAction> = emptyList()
-    var requestedCadence: String? = null
-
-    override fun routineItems(cadence: String): Flow<List<RoutineItemWithAction>> {
-        requestedCadence = cadence
-        return flowOf(items)
-    }
-
-    override fun maxPosition(cadence: String): Flow<Int> = flowOf(-1)
-
-    override fun routineItem(id: Long): Flow<RoutineItemEntity?> = flowOf(null)
-
-    override suspend fun insert(routineItem: RoutineItemEntity): Long = routineItem.id
-
-    override suspend fun update(routineItem: RoutineItemEntity) = Unit
-
-    override suspend fun deleteById(id: Long) = Unit
 }
 
 private class FakeTodayEntryDao : TodayEntryDao {
