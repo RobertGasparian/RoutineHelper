@@ -1,0 +1,321 @@
+package com.robertgasparian.routinehelper.data.repository
+
+import com.robertgasparian.routinehelper.data.local.dao.DailySummaryNoteDao
+import com.robertgasparian.routinehelper.data.local.dao.RoutineItemDao
+import com.robertgasparian.routinehelper.data.local.dao.TodayEntryDao
+import com.robertgasparian.routinehelper.data.local.entity.ActionEntity
+import com.robertgasparian.routinehelper.data.local.entity.DailySummaryNoteEntity
+import com.robertgasparian.routinehelper.data.local.entity.RoutineItemEntity
+import com.robertgasparian.routinehelper.data.local.entity.TodayEntryEntity
+import com.robertgasparian.routinehelper.data.local.model.RoutineItemWithAction
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
+import com.robertgasparian.routinehelper.test.FixedTimeProvider
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class RoomTodayRoutineRepositoryTest {
+    private val routineItemDao = FakeRoutineItemDao()
+    private val todayEntryDao = FakeTodayEntryDao()
+    private val dailySummaryNoteDao = FakeDailySummaryNoteDao()
+    private val timeProvider = FixedTimeProvider()
+    private val repository = RoomTodayRoutineRepository(
+        routineItemDao = routineItemDao,
+        todayEntryDao = todayEntryDao,
+        dailySummaryNoteDao = dailySummaryNoteDao,
+        timeProvider = timeProvider,
+    )
+
+    @Test
+    fun `given routine items and entries when observing today then maps and clamps their state`() = runTest {
+        routineItemDao.items = listOf(
+            routineItem(
+                routineItemId = 10L,
+                actionId = 100L,
+                title = "Drink water",
+                position = 0,
+                repeatTargetCount = 3,
+            ),
+            routineItem(
+                routineItemId = 20L,
+                actionId = 200L,
+                title = "Read",
+                position = 1,
+            ),
+            routineItem(
+                routineItemId = 30L,
+                actionId = 300L,
+                title = "Stretch",
+                position = 2,
+            ),
+        )
+        todayEntryDao.entries[DATE to 10L] = todayEntry(
+            routineItemId = 10L,
+            completedCount = 5,
+            isHidden = true,
+            note = "Finished early",
+        )
+        todayEntryDao.entries[DATE to 20L] = todayEntry(
+            routineItemId = 20L,
+            isChecked = true,
+            completedCount = 4,
+        )
+
+        val items = repository.todayItems(DATE, RoutineCadence.Daily).first()
+
+        assertEquals("DAILY", routineItemDao.requestedCadence)
+        assertEquals(
+            listOf(
+                TodayRoutineItem(
+                    routineItemId = 10L,
+                    actionId = 100L,
+                    title = "Drink water",
+                    description = null,
+                    position = 0,
+                    date = DATE,
+                    isChecked = true,
+                    isHidden = true,
+                    note = "Finished early",
+                    repeatTargetCount = 3,
+                    completedCount = 3,
+                ),
+                TodayRoutineItem(
+                    routineItemId = 20L,
+                    actionId = 200L,
+                    title = "Read",
+                    description = null,
+                    position = 1,
+                    date = DATE,
+                    isChecked = true,
+                    note = null,
+                ),
+                TodayRoutineItem(
+                    routineItemId = 30L,
+                    actionId = 300L,
+                    title = "Stretch",
+                    description = null,
+                    position = 2,
+                    date = DATE,
+                    isChecked = false,
+                    note = null,
+                ),
+            ),
+            items,
+        )
+    }
+
+    @Test
+    fun `given no entry when checking an item then creates a dated entry with the current timestamp`() = runTest {
+        repository.setChecked(
+            date = DATE,
+            routineItemId = 10L,
+            isChecked = true,
+        )
+
+        assertEquals(
+            todayEntry(
+                routineItemId = 10L,
+                isChecked = true,
+                updatedAtMillis = timeProvider.currentTimeMillis(),
+            ),
+            todayEntryDao.entries.getValue(DATE to 10L),
+        )
+    }
+
+    @Test
+    fun `given an existing entry when updating its fields then normalizes values and preserves unrelated state`() = runTest {
+        todayEntryDao.entries[DATE to 10L] = todayEntry(
+            id = 7L,
+            routineItemId = 10L,
+            isChecked = true,
+            completedCount = 2,
+            isHidden = true,
+            note = "Old note",
+            updatedAtMillis = 1L,
+        )
+
+        repository.setChecked(DATE, 10L, false)
+        repository.updateNote(DATE, 10L, "  New note  ")
+        repository.updateCompletedCount(DATE, 10L, -4)
+        repository.setHidden(DATE, 10L, false)
+
+        assertEquals(
+            todayEntry(
+                id = 7L,
+                routineItemId = 10L,
+                isChecked = false,
+                completedCount = 0,
+                isHidden = false,
+                note = "New note",
+                updatedAtMillis = timeProvider.currentTimeMillis(),
+            ),
+            todayEntryDao.entries.getValue(DATE to 10L),
+        )
+    }
+
+    @Test
+    fun `given persisted summary note when observing it then emits its text`() = runTest {
+        dailySummaryNoteDao.notes[DATE] = DailySummaryNoteEntity(
+            date = DATE,
+            note = "Steady day",
+            updatedAtMillis = 1L,
+        )
+
+        assertEquals("Steady day", repository.summaryNote(DATE).first())
+    }
+
+    @Test
+    fun `given summary note text when updating it then trims content and deletes blank content`() = runTest {
+        repository.updateSummaryNote(DATE, "  Steady day  ")
+
+        assertEquals(
+            DailySummaryNoteEntity(
+                date = DATE,
+                note = "Steady day",
+                updatedAtMillis = timeProvider.currentTimeMillis(),
+            ),
+            dailySummaryNoteDao.notes[DATE],
+        )
+
+        repository.updateSummaryNote(DATE, "   ")
+
+        assertEquals(emptyMap<String, DailySummaryNoteEntity>(), dailySummaryNoteDao.notes)
+        assertEquals(listOf(DATE), dailySummaryNoteDao.deletedDates)
+    }
+
+    @Test
+    fun `given stored daily state when resetting the date then deletes entries and summary note`() = runTest {
+        todayEntryDao.entries[DATE to 10L] = todayEntry(routineItemId = 10L)
+        dailySummaryNoteDao.notes[DATE] = DailySummaryNoteEntity(
+            date = DATE,
+            note = "Steady day",
+            updatedAtMillis = 1L,
+        )
+
+        repository.resetDate(DATE)
+
+        assertEquals(emptyMap<Pair<String, Long>, TodayEntryEntity>(), todayEntryDao.entries)
+        assertEquals(listOf(DATE), todayEntryDao.deletedDates)
+        assertEquals(emptyMap<String, DailySummaryNoteEntity>(), dailySummaryNoteDao.notes)
+        assertEquals(listOf(DATE), dailySummaryNoteDao.deletedDates)
+    }
+
+    private fun routineItem(
+        routineItemId: Long,
+        actionId: Long,
+        title: String,
+        position: Int,
+        repeatTargetCount: Int? = null,
+    ): RoutineItemWithAction =
+        RoutineItemWithAction(
+            routineItem = RoutineItemEntity(
+                id = routineItemId,
+                actionId = actionId,
+                position = position,
+                createdAtMillis = 1L,
+            ),
+            action = ActionEntity(
+                id = actionId,
+                title = title,
+                repeatTargetCount = repeatTargetCount,
+                createdAtMillis = 1L,
+                updatedAtMillis = 1L,
+            ),
+        )
+
+    private fun todayEntry(
+        id: Long = 0L,
+        routineItemId: Long,
+        isChecked: Boolean = false,
+        completedCount: Int = 0,
+        isHidden: Boolean = false,
+        note: String? = null,
+        updatedAtMillis: Long = 1L,
+    ): TodayEntryEntity =
+        TodayEntryEntity(
+            id = id,
+            routineItemId = routineItemId,
+            date = DATE,
+            isChecked = isChecked,
+            completedCount = completedCount,
+            isHidden = isHidden,
+            note = note,
+            updatedAtMillis = updatedAtMillis,
+        )
+
+    private companion object {
+        const val DATE = "2026-05-29"
+    }
+}
+
+private class FakeRoutineItemDao : RoutineItemDao {
+    var items: List<RoutineItemWithAction> = emptyList()
+    var requestedCadence: String? = null
+
+    override fun routineItems(cadence: String): Flow<List<RoutineItemWithAction>> {
+        requestedCadence = cadence
+        return flowOf(items)
+    }
+
+    override fun maxPosition(cadence: String): Flow<Int> = flowOf(-1)
+
+    override fun routineItem(id: Long): Flow<RoutineItemEntity?> = flowOf(null)
+
+    override suspend fun insert(routineItem: RoutineItemEntity): Long = routineItem.id
+
+    override suspend fun update(routineItem: RoutineItemEntity) = Unit
+
+    override suspend fun deleteById(id: Long) = Unit
+}
+
+private class FakeTodayEntryDao : TodayEntryDao {
+    val entries = mutableMapOf<Pair<String, Long>, TodayEntryEntity>()
+    val deletedDates = mutableListOf<String>()
+
+    override fun entriesForDate(date: String): Flow<List<TodayEntryEntity>> =
+        flowOf(entries.filterKeys { (entryDate, _) -> entryDate == date }.values.toList())
+
+    override fun entryForDate(
+        date: String,
+        routineItemId: Long,
+    ): Flow<TodayEntryEntity?> = flowOf(entries[date to routineItemId])
+
+    override suspend fun upsert(entry: TodayEntryEntity): Long {
+        entries[entry.date to entry.routineItemId] = entry
+        return entry.id
+    }
+
+    override suspend fun update(entry: TodayEntryEntity) {
+        entries[entry.date to entry.routineItemId] = entry
+    }
+
+    override suspend fun deleteEntriesForDate(date: String) {
+        entries.keys.removeAll { (entryDate, _) -> entryDate == date }
+        deletedDates += date
+    }
+
+    override suspend fun deleteEntriesBefore(date: String) {
+        entries.keys.removeAll { (entryDate, _) -> entryDate < date }
+    }
+}
+
+private class FakeDailySummaryNoteDao : DailySummaryNoteDao {
+    val notes = mutableMapOf<String, DailySummaryNoteEntity>()
+    val deletedDates = mutableListOf<String>()
+
+    override fun noteForDate(date: String): Flow<DailySummaryNoteEntity?> =
+        flowOf(notes[date])
+
+    override suspend fun upsert(note: DailySummaryNoteEntity) {
+        notes[note.date] = note
+    }
+
+    override suspend fun deleteForDate(date: String) {
+        notes.remove(date)
+        deletedDates += date
+    }
+}
