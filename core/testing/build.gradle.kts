@@ -8,6 +8,7 @@ kotlin {
 }
 
 dependencies {
+    api(project(":core:time"))
     api(libs.junit)
     api(libs.kotlinx.coroutines.test)
 }

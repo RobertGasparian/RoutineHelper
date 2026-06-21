@@ -44,6 +44,7 @@
 - Cadence is a horizontal dimension inside routine libs. Start daily, weekly, and future monthly support as packages/classes inside template/tracking/snapshot libs; promote cadence to modules only if the boundary becomes independently valuable.
 - Keep shared Compose components, theme, and design-system primitives in a shared UI boundary once modules are introduced.
 - Move WorkManager code out of `:app` before adding new unrelated background jobs.
+- Keep `CoroutineWorker` subclasses thin: delegate multi-step operations to injectable, unit-tested orchestrators while the worker retains WorkManager result, retry, and cancellation handling.
 
 ## UI
 

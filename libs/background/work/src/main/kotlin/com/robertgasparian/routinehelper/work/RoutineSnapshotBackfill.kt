@@ -1,11 +1,6 @@
 package com.robertgasparian.routinehelper.work
 
 import com.robertgasparian.routinehelper.core.time.TimeProvider
-import com.robertgasparian.routinehelper.domain.time.SnapshotDates
-import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
-import com.robertgasparian.routinehelper.domain.usecase.FinalizeWeeklyUseCase
-import com.robertgasparian.routinehelper.domain.usecase.ResetTodayUseCase
-import com.robertgasparian.routinehelper.domain.usecase.ResetWeeklyUseCase
 import java.time.ZonedDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -13,34 +8,19 @@ import kotlinx.coroutines.CancellationException
 
 @Singleton
 class RoutineSnapshotBackfill @Inject constructor(
-    private val finalizeTodayUseCase: FinalizeTodayUseCase,
-    private val finalizeWeeklyUseCase: FinalizeWeeklyUseCase,
-    private val resetTodayUseCase: ResetTodayUseCase,
-    private val resetWeeklyUseCase: ResetWeeklyUseCase,
+    private val snapshotFinalizer: RoutineSnapshotFinalizer,
     private val timeProvider: TimeProvider,
 ) {
     suspend fun backfillMissedSnapshots(now: ZonedDateTime = timeProvider.now()) {
         if (SnapshotWorkDates.shouldBackfillDailyOnAppStart(now)) {
-            val snapshotDate = SnapshotDates.dailySnapshotDate(now).toString()
             attemptBackfill {
-                finalizeTodayUseCase(
-                    date = snapshotDate,
-                    snapshotDate = snapshotDate,
-                    finalizedAtMillis = timeProvider.currentTimeMillis(),
-                )
-                resetTodayUseCase(snapshotDate)
+                snapshotFinalizer.finalizeDaily(now)
             }
         }
 
         if (SnapshotWorkDates.shouldBackfillWeeklyOnAppStart(now)) {
-            val snapshotWeekStartDate = SnapshotDates.previousCompletedCalendarWeekStartDate(now).toString()
             attemptBackfill {
-                finalizeWeeklyUseCase(
-                    weekStartDate = snapshotWeekStartDate,
-                    snapshotWeekStartDate = snapshotWeekStartDate,
-                    finalizedAtMillis = timeProvider.currentTimeMillis(),
-                )
-                resetWeeklyUseCase(snapshotWeekStartDate)
+                snapshotFinalizer.finalizeWeekly(now)
             }
         }
     }

@@ -36,4 +36,7 @@ dependencies {
     ksp(libs.hilt.compiler)
 
     testImplementation(libs.junit)
+    testImplementation(project(":core:testing"))
+    testImplementation(testFixtures(project(":libs:routine:snapshot:domain")))
+    testImplementation(testFixtures(project(":libs:routine:tracking:domain")))
 }
