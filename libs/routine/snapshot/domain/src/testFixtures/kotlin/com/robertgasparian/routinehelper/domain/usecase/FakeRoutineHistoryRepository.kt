@@ -11,29 +11,27 @@ import kotlinx.coroutines.flow.map
 
 class FakeRoutineHistoryRepository : RoutineHistoryRepository {
     private val snapshots = MutableStateFlow<List<RoutineDaySnapshot>>(emptyList())
+    private val summaries = MutableStateFlow<List<RoutineDaySummary>>(emptyList())
     val savedSnapshots = mutableListOf<SavedSnapshot>()
     val deletedSnapshotIds = mutableListOf<Long>()
 
     fun setSnapshot(summary: RoutineDaySummary) {
-        snapshots.value = snapshots.value + RoutineDaySnapshot(
-            snapshotId = summary.snapshotId,
-            date = summary.date,
-            finalizedAtMillis = summary.finalizedAtMillis,
-            cadence = summary.cadence,
-            items = emptyList(),
+        summaries.value = summaries.value.replaceById(summary)
+        snapshots.value = snapshots.value.replaceById(
+            RoutineDaySnapshot(
+                snapshotId = summary.snapshotId,
+                date = summary.date,
+                finalizedAtMillis = summary.finalizedAtMillis,
+                cadence = summary.cadence,
+                items = emptyList(),
+                summaryNote = "Summary note".takeIf { summary.hasSummaryNote },
+            ),
         )
     }
 
     override fun snapshotSummaries(cadence: RoutineCadence?): Flow<List<RoutineDaySummary>> =
-        snapshots.map { snapshotList ->
-            snapshotList.filter { snapshot -> cadence == null || snapshot.cadence == cadence }.map { snapshot ->
-                RoutineDaySummary(
-                    snapshotId = snapshot.snapshotId,
-                    date = snapshot.date,
-                    finalizedAtMillis = snapshot.finalizedAtMillis,
-                    cadence = snapshot.cadence,
-                )
-            }
+        summaries.map { summaryList ->
+            summaryList.filter { summary -> cadence == null || summary.cadence == cadence }
         }
 
     fun snapshotSummaries(): Flow<List<RoutineDaySummary>> = snapshotSummaries(cadence = null)
@@ -76,9 +74,7 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
         )
         savedSnapshots.removeAll { snapshot -> snapshot.date == date && snapshot.cadence == cadence }
         savedSnapshots += savedSnapshot
-        snapshots.value = snapshots.value.filterNot { snapshot ->
-            snapshot.date == date && snapshot.cadence == cadence
-        } + RoutineDaySnapshot(
+        val snapshot = RoutineDaySnapshot(
             snapshotId = snapshotId,
             date = date,
             finalizedAtMillis = finalizedAtMillis,
@@ -86,6 +82,12 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
             summaryNote = summaryNote,
             items = items,
         )
+        snapshots.value = snapshots.value.filterNot { snapshot ->
+            snapshot.date == date && snapshot.cadence == cadence
+        } + snapshot
+        summaries.value = summaries.value.filterNot { summary ->
+            summary.date == date && summary.cadence == cadence
+        } + snapshot.toSummary()
         return snapshotId
     }
 
@@ -105,7 +107,31 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
     override suspend fun deleteSnapshot(snapshotId: Long) {
         deletedSnapshotIds += snapshotId
         snapshots.value = snapshots.value.filterNot { it.snapshotId == snapshotId }
+        summaries.value = summaries.value.filterNot { it.snapshotId == snapshotId }
     }
+}
+
+private fun List<RoutineDaySnapshot>.replaceById(snapshot: RoutineDaySnapshot): List<RoutineDaySnapshot> =
+    filterNot { it.snapshotId == snapshot.snapshotId } + snapshot
+
+private fun List<RoutineDaySummary>.replaceById(summary: RoutineDaySummary): List<RoutineDaySummary> =
+    filterNot { it.snapshotId == summary.snapshotId } + summary
+
+private fun RoutineDaySnapshot.toSummary(): RoutineDaySummary {
+    val countableItems = items.filterNot(RoutineDaySnapshotItem::isHidden)
+    return RoutineDaySummary(
+        snapshotId = snapshotId,
+        date = date,
+        finalizedAtMillis = finalizedAtMillis,
+        cadence = cadence,
+        completedCount = countableItems.count { item ->
+            item.repeatTargetCount?.let { target ->
+                item.completedCount >= target
+            } ?: item.isChecked
+        },
+        totalCount = countableItems.size,
+        hasSummaryNote = !summaryNote.isNullOrBlank(),
+    )
 }
 
 data class SavedSnapshot(
