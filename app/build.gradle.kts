@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.paparazzi)
 }
 
 android {
@@ -83,6 +82,4 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     ksp(libs.hilt.compiler)
-
-    testImplementation(libs.junit)
 }
