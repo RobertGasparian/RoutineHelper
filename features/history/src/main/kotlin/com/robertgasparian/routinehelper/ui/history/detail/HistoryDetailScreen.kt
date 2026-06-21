@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.features.history.BuildConfig
 import com.robertgasparian.routinehelper.ui.dsm.RoutineDialogTextButton
 import com.robertgasparian.routinehelper.ui.dsm.SummaryNoteCard
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
@@ -143,6 +144,7 @@ fun HistoryDetailComponent(
     uiState: HistoryDetailUiState,
     onEvent: (HistoryDetailUiEvent) -> Unit,
     modifier: Modifier = Modifier,
+    showDeleteAction: Boolean = BuildConfig.DEBUG,
 ) {
     var showDeleteConfirmation by rememberSaveable { mutableStateOf(false) }
     var hiddenActionsExpanded by rememberSaveable { mutableStateOf(false) }
@@ -172,16 +174,18 @@ fun HistoryDetailComponent(
                             contentDescription = "Share snapshot",
                         )
                     }
-                    IconButton(
-                        onClick = {
-                            // TODO Remove this test-only delete affordance when history management UX is finalized.
-                            showDeleteConfirmation = true
-                        },
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete snapshot",
-                        )
+                    if (showDeleteAction) {
+                        IconButton(
+                            onClick = {
+                                // TODO Remove this test-only delete affordance when history management UX is finalized.
+                                showDeleteConfirmation = true
+                            },
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Delete snapshot",
+                            )
+                        }
                     }
                 },
             )

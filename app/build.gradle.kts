@@ -49,6 +49,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":features:routine-tracking"))
     implementation(project(":features:action-editor"))
+    implementation(project(":features:history"))
     implementation(project(":libs:routine:template:data"))
     implementation(project(":libs:routine:template:domain"))
     implementation(project(":libs:routine:tracking:data"))

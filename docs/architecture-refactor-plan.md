@@ -63,11 +63,10 @@ Proposed module families:
   - Daily and Weekly tracking screens, shared tracking components/state/events, cadence-specific ViewModels/mappers, previews, and Paparazzi tests.
   - Daily and Weekly remain packages inside one feature because they are cadence variants of the same presentation workflow and share substantial UI behavior.
 - `:features:history`
-  - Snapshot history list and snapshot detail UI flows.
+  - Snapshot history list, snapshot detail, and the snapshot-sharing presentation flow they own today.
 - `:features:action-editor`
   - Create/edit action UI flow.
-- `:features:share`
-  - Share preview UI, share dialogs, and share draft presentation state.
+- A separate share feature is not introduced while sharing is only part of History. If another feature later needs the same complete presentation flow, reevaluate the boundary without adding a feature-to-feature dependency.
 - `:features:settings`
   - Settings UI and future settings state management.
 - `:features:reflection`
