@@ -12,11 +12,11 @@ import kotlinx.coroutines.CancellationException
 class WeeklySnapshotWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted workerParameters: WorkerParameters,
-    private val snapshotFinalizer: RoutineSnapshotFinalizer,
+    private val snapshotOrchestrator: WeeklySnapshotOrchestrator,
 ) : CoroutineWorker(appContext, workerParameters) {
     override suspend fun doWork(): Result {
         return try {
-            snapshotFinalizer.finalizeWeekly()
+            snapshotOrchestrator.finalizePreviousWeek()
             Result.success()
         } catch (cancellationException: CancellationException) {
             throw cancellationException

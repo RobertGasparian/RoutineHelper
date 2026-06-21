@@ -12,11 +12,11 @@ import kotlinx.coroutines.CancellationException
 class DailySnapshotWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted workerParameters: WorkerParameters,
-    private val snapshotFinalizer: RoutineSnapshotFinalizer,
+    private val snapshotOrchestrator: DailySnapshotOrchestrator,
 ) : CoroutineWorker(appContext, workerParameters) {
     override suspend fun doWork(): Result {
         return try {
-            snapshotFinalizer.finalizeDaily()
+            snapshotOrchestrator.finalizePreviousDay()
             Result.success()
         } catch (cancellationException: CancellationException) {
             throw cancellationException

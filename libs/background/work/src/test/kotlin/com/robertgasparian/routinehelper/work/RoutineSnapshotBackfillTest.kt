@@ -108,10 +108,13 @@ class RoutineSnapshotBackfillTest {
     private fun createBackfill(now: ZonedDateTime): RoutineSnapshotBackfill {
         val timeProvider = FixedTimeProvider(now.toInstant(), zoneId)
         return RoutineSnapshotBackfill(
-            snapshotFinalizer = RoutineSnapshotFinalizer(
+            dailySnapshotOrchestrator = DailySnapshotOrchestrator(
                 finalizeTodayUseCase = FinalizeTodayUseCase(todayRepository, historyRepository),
-                finalizeWeeklyUseCase = FinalizeWeeklyUseCase(weeklyRepository, historyRepository),
                 resetTodayUseCase = ResetTodayUseCase(todayRepository),
+                timeProvider = timeProvider,
+            ),
+            weeklySnapshotOrchestrator = WeeklySnapshotOrchestrator(
+                finalizeWeeklyUseCase = FinalizeWeeklyUseCase(weeklyRepository, historyRepository),
                 resetWeeklyUseCase = ResetWeeklyUseCase(weeklyRepository),
                 timeProvider = timeProvider,
             ),

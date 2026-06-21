@@ -8,19 +8,20 @@ import kotlinx.coroutines.CancellationException
 
 @Singleton
 class RoutineSnapshotBackfill @Inject constructor(
-    private val snapshotFinalizer: RoutineSnapshotFinalizer,
+    private val dailySnapshotOrchestrator: DailySnapshotOrchestrator,
+    private val weeklySnapshotOrchestrator: WeeklySnapshotOrchestrator,
     private val timeProvider: TimeProvider,
 ) {
     suspend fun backfillMissedSnapshots(now: ZonedDateTime = timeProvider.now()) {
         if (SnapshotWorkDates.shouldBackfillDailyOnAppStart(now)) {
             attemptBackfill {
-                snapshotFinalizer.finalizeDaily(now)
+                dailySnapshotOrchestrator.finalizePreviousDay(now)
             }
         }
 
         if (SnapshotWorkDates.shouldBackfillWeeklyOnAppStart(now)) {
             attemptBackfill {
-                snapshotFinalizer.finalizeWeekly(now)
+                weeklySnapshotOrchestrator.finalizePreviousWeek(now)
             }
         }
     }
