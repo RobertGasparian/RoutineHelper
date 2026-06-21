@@ -1,42 +1,41 @@
 # Architecture Refactor Plan
 
-This plan describes the staged refactor from the current single-module Android app to a cleaner, multimodule architecture. The refactor must preserve business behavior and visual UI output unless a specific change is explicitly approved.
+This plan records the staged refactor from the original single-module Android app to the current multimodule architecture. The refactor must preserve business behavior and visual UI output unless a specific change is explicitly approved.
 
 ## Current Shape
 
-- `:app` is the only Gradle module.
-- `MainActivity` and `RoutineHelperApplication` are Android app shell entry points.
-- `RoutineHelperScreen` owns app navigation and imports every feature screen directly.
-- `di` wires Room-backed repositories to domain repository interfaces.
-- `data.local` owns the Room database, DAOs, entities, and Room relation models.
-- `data.repository` owns Room repository implementations.
-- `domain.model`, `domain.repository`, and `domain.usecase` already form a mostly clean domain layer.
-- `ui.daily`, `ui.weekly`, `ui.history`, `ui.history.detail`, `ui.actioneditor`, `ui.share`, and `ui.settings` are feature-like packages inside `:app`.
-- `ui.dsm`, `ui.reorder`, and `ui.theme` are shared UI packages.
-- `work` owns WorkManager scheduling, workers, backfill, and snapshot date calculations.
-- Unit tests cover domain use cases, and Paparazzi tests cover several stateless components.
+- The project has 16 Gradle modules across `:app`, `:features:*`, `:libs:*`, and `:core:*`.
+- `:app` is a thin Android shell. It owns `MainActivity`, `RoutineHelperApplication`, root Navigation 3 composition, app startup, and dependency aggregation.
+- Daily and Weekly presentation live together in `:features:routine-tracking`, with cadence-specific ViewModels/mappers and neutral shared tracking state/components.
+- History/detail/sharing, Action Editor, and Settings live in their own feature modules.
+- Template, tracking, and snapshot capabilities each have separate `:domain` and `:data` modules.
+- `:libs:routine:database` owns only Room database/schema/DAO composition. Capability data modules own repository implementations and their Hilt bindings.
+- `:libs:background:work` owns WorkManager integration. Thin workers delegate structured flows to Daily and Weekly snapshot orchestrators, which compose focused use cases.
+- `:core:time`, `:core:ui`, and `:core:testing` own cross-cutting time, design-system, and shared test infrastructure.
+- ViewModels depend on use cases or presentation collaborators rather than repositories. Feature modules do not import Room, repository implementations, or workers.
+- Repository, use-case, orchestrator, ViewModel, mapper, state-holder, and component snapshot coverage is distributed with the modules that own those behaviors.
 
-## Existing Strengths
+## Completed Outcomes
 
-- ViewModels mostly depend on use cases rather than repositories.
-- Repository interfaces are already separated from Room implementations.
-- Most screen packages follow the `XxxScreen` stateful boundary and `XxxComponent` stateless renderer pattern.
-- Component previews and Paparazzi snapshots are already present.
-- Daily and Weekly are intentionally similar, which gives us a useful pattern-migration path.
+- Module boundaries now enforce the intended feature/lib/core dependency direction.
+- Repository and cross-cutting DI bindings live with their implementations; `:app` no longer constructs repositories or providers.
+- Time-sensitive business and presentation code uses `TimeProvider`; direct system-clock access is isolated to the provider or debug-only UI tooling.
+- Daily and Weekly follow the same MVI naming and screen/component/state/event structure while retaining cadence-specific names and behavior.
+- Snapshot finalization uses explicit Daily and Weekly orchestrators rather than one broad use case.
+- WorkManager code is outside `:app` and ready to coexist with future unrelated workers.
+- Existing Paparazzi baselines remain unchanged.
 
-## Known Refactor Targets
+## Remaining Targets
 
-- The single `:app` module hides dependency direction and lets unrelated packages reference each other too easily.
-- Daily and Weekly duplicate ViewModel, repository, mapping, finalize, reset, and note-editor patterns.
-- `RoutineHelperScreen` is a central navigation shell that imports all feature screens.
-- Time is read directly from `LocalDate.now()`, `ZonedDateTime.now()`, `System.currentTimeMillis()`, `SimpleDateFormat`, and `Date`.
-- Debug/test snapshot affordances exist in production source and should be gated when touched.
-- Some shared UI state lives in Daily-named types even when Weekly reuses it.
-- Large UI component files, especially shared cards and feature screens, are harder to review and test in small pieces.
+- Finish final dependency-visibility and build/test-command audits, then document the supported verification commands.
+- Add Room migration tests when the schema first moves beyond version 1; there is no migration path to test yet.
+- Keep existing debug-only snapshot/delete affordances gated and remove them when their replacement tooling or UX is ready.
+- Defer visual cleanup and component redesign to the separately planned UI/UX overhaul.
+- Create reflection, reminder, deadline, or monthly modules only when those capabilities are implemented and their boundaries are concrete.
 
 ## Target Module Direction
 
-Do not create every module upfront. Add modules only when a boundary is stable enough that the move makes the code easier to understand.
+The target direction is implemented for current capabilities. Continue to add future modules only when a boundary is stable enough that the move makes the code easier to understand.
 
 The destination should use three large groups plus the app shell:
 
@@ -57,7 +56,7 @@ The destination should use three large groups plus the app shell:
   - Examples include time abstractions, shared UI primitives/theme, small common utilities, test helpers, and platform wrappers.
   - Core modules must stay small and boring. If a module contains routine, reflection, reminder, snapshot, or action-item business language, it is probably a lib, not core.
 
-Proposed module families:
+Current and planned module families:
 
 - `:features:routine-tracking`
   - Daily and Weekly tracking screens, shared tracking components/state/events, cadence-specific ViewModels/mappers, previews, and Paparazzi tests.
@@ -139,20 +138,20 @@ Disallowed examples:
 
 ## Staged Work Plan
 
-### Stage 1: Architecture Plan And Rules
+### Stage 1: Architecture Plan And Rules (Complete)
 
 - Update architecture and development rules.
 - Define guardrails for Paparazzi, review chunks, debug code, and module boundaries.
 - No production code movement.
 
-### Stage 2: Safety Baseline
+### Stage 2: Safety Baseline (Ongoing Guardrail)
 
 - Run unit tests.
 - Run Paparazzi verification, not recording.
 - Record any existing failures before refactoring.
 - Do not update screenshots unless explicitly approved.
 
-### Stage 3: Daily Reference Slice
+### Stage 3: Daily Reference Slice (Complete)
 
 - Refactor Daily as the first vertical slice.
 - Keep business behavior and visual output stable.
@@ -160,20 +159,20 @@ Disallowed examples:
 - Add or adjust tests only for changed behavior or moved pure logic.
 - If debug snapshot controls are touched, guard them behind debug build behavior.
 
-### Stage 4: Weekly Mirror Slice
+### Stage 4: Weekly Mirror Slice (Complete)
 
 - Apply the proven Daily pattern to Weekly.
 - Compare Daily and Weekly after both are refactored.
 - Extract shared code only where it removes real duplication without hiding cadence-specific behavior.
 
-### Stage 5: Shared Domain/Data Cleanup
+### Stage 5: Shared Domain/Data Cleanup (Complete For Current Capabilities)
 
 - Consolidate repeated finalize/reset/snapshot/item-mapping patterns when the Daily and Weekly shape is stable.
 - Introduce common time boundaries so date and clock behavior is testable.
 - Keep repository interfaces focused on domain behavior, not Room convenience.
 - Replace broad "shared routine" thinking with capability boundaries such as template, tracking, snapshot, reminders, reflection, and background work.
 
-### Stage 6: Incremental Module Split
+### Stage 6: Incremental Module Split (Complete For Current Capabilities)
 
 - Start with a low-risk module such as `:core:time`, `:core:ui`, or the smallest stable `:libs:*` capability API.
 - Move one stable boundary per review chunk.
@@ -181,12 +180,12 @@ Disallowed examples:
 - Move UI feature modules after their required lib APIs, shared UI dependencies, and navigation contracts are clean enough.
 - Move WorkManager code out of `:app` before introducing new background jobs.
 
-### Stage 7: Remaining Feature Passes
+### Stage 7: Remaining Feature Passes (Complete For Current Features)
 
 - Apply the established patterns to History, History Detail, Action Editor, Share, Settings, and WorkManager snapshot flows.
 - Keep each flow reviewable on its own.
 
-### Stage 8: Final Rules And Enforcement
+### Stage 8: Final Rules And Enforcement (In Progress)
 
 - Update rules with examples from the refactored code.
 - Add build/test guidance for future AI-agent work.
