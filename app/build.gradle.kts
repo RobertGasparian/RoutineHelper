@@ -51,6 +51,7 @@ dependencies {
     implementation(project(":features:action-editor"))
     implementation(project(":features:history"))
     implementation(project(":features:settings"))
+    implementation(project(":libs:background:work"))
     implementation(project(":libs:routine:template:data"))
     implementation(project(":libs:routine:template:domain"))
     implementation(project(":libs:routine:tracking:data"))
@@ -81,7 +82,6 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
-    ksp(libs.androidx.hilt.compiler)
     ksp(libs.hilt.compiler)
 
     testImplementation(libs.junit)
