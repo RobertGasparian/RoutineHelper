@@ -13,10 +13,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.ViewWeek
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -290,11 +288,7 @@ private fun HistoryFilterRow(
                 leadingIcon = filter.cadence?.let { cadence ->
                     {
                         Icon(
-                            imageVector = if (cadence == RoutineCadence.Weekly) {
-                                Icons.Default.ViewWeek
-                            } else {
-                                Icons.Default.Event
-                            },
+                            imageVector = cadence.historyIcon,
                             contentDescription = null,
                         )
                     }
@@ -331,11 +325,7 @@ private fun EmptyHistoryContent(
 }
 
 private val HistoryFilter.label: String
-    get() = when (this) {
-        HistoryFilter.All -> "All"
-        HistoryFilter.Daily -> "Daily"
-        HistoryFilter.Weekly -> "Weekly"
-    }
+    get() = cadence?.historyLabel ?: "All"
 
 private val HistoryFilter.cadence: RoutineCadence?
     get() = when (this) {

@@ -4,9 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -17,9 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.ui.history.historyIcon
+import com.robertgasparian.routinehelper.ui.history.historyLabel
 
 @Composable
-fun CadenceChip(
+internal fun HistoryCadenceChip(
     cadence: RoutineCadence,
     modifier: Modifier = Modifier,
 ) {
@@ -35,26 +34,14 @@ fun CadenceChip(
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             Icon(
-                imageVector = cadence.icon,
+                imageVector = cadence.historyIcon,
                 contentDescription = null,
             )
             Text(
-                text = cadence.label,
+                text = cadence.historyLabel,
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
             )
         }
     }
 }
-
-private val RoutineCadence.label: String
-    get() = when (this) {
-        RoutineCadence.Daily -> "Daily"
-        RoutineCadence.Weekly -> "Weekly"
-    }
-
-private val RoutineCadence.icon
-    get() = when (this) {
-        RoutineCadence.Daily -> Icons.Default.DateRange
-        RoutineCadence.Weekly -> Icons.Default.Refresh
-    }

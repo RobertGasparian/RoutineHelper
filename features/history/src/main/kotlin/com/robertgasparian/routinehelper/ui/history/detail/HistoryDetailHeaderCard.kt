@@ -58,7 +58,7 @@ fun HistoryDetailHeaderCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                CadenceChip(cadence = uiState.cadence)
+                HistoryCadenceChip(cadence = uiState.cadence)
                 CompletionSummaryChip(
                     summary = completionSummary,
                 )

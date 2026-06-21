@@ -57,6 +57,7 @@
   - a simple working `@Preview` near the component for fast local tweaking.
   - a separate `XxxPreviews.kt` file next to the component with normal mobile light/dark, landscape light/dark, tablet, and foldable previews.
 - Avoid visual redesign during architecture refactors. Touch UI code when it is needed for state, event, ViewModel, preview, snapshot, or module-boundary cleanup.
+- Keep feature-specific display mappings such as labels and icons in one feature-owned presentation mapping. Do not move business-specific mappings into `:core:ui` merely to reuse a visual component.
 - Debug-only UI actions in production source must be gated by debug build behavior when touched.
 
 ## Presentation

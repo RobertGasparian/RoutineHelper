@@ -18,8 +18,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.StickyNote2
-import androidx.compose.material.icons.filled.Event
-import androidx.compose.material.icons.filled.ViewWeek
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -182,11 +180,7 @@ private fun RoutineHistoryCadenceIcon(
         Box(contentAlignment = Alignment.Center) {
             Icon(
                 modifier = Modifier.size(20.dp),
-                imageVector = if (cadence == RoutineCadence.Weekly) {
-                    Icons.Default.ViewWeek
-                } else {
-                    Icons.Default.Event
-                },
+                imageVector = cadence.historyIcon,
                 contentDescription = null,
             )
         }

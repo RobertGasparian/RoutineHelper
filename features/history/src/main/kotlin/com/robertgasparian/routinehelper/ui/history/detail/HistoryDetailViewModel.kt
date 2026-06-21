@@ -8,6 +8,7 @@ import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotShareTextUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotUseCase
+import com.robertgasparian.routinehelper.ui.history.historyLabel
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -73,7 +74,7 @@ class HistoryDetailViewModel @AssistedInject constructor(
         val snapshot = currentSnapshot ?: return
         isShareFormatDialogVisible.value = false
         shareDraft.value = ShareDraft.file(
-            messageText = "Here is the ${snapshot.cadence.label.lowercase()} routine snapshot from ${snapshot.displayDate}.",
+            messageText = "Here is the ${snapshot.cadence.historyLabel.lowercase()} routine snapshot from ${snapshot.displayDate}.",
             fileText = snapshotShareTextUseCase(snapshot),
             fileName = "routine-snapshot-${snapshot.displayDate}.txt",
         )
@@ -109,12 +110,6 @@ private fun RoutineDaySnapshot.toUiState(): HistoryDetailUiState =
 
 private val RoutineDaySnapshot.displayDate: String
     get() = if (cadence == RoutineCadence.Weekly) "Week of $date" else date
-
-private val RoutineCadence.label: String
-    get() = when (this) {
-        RoutineCadence.Daily -> "Daily"
-        RoutineCadence.Weekly -> "Weekly"
-    }
 
 private fun RoutineDaySnapshotItem.toUiState(): HistoryDetailItemUiState =
     HistoryDetailItemUiState(
