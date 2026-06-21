@@ -96,7 +96,7 @@ Proposed module families:
   - WorkManager workers, scheduling, constraints, and app-start/background orchestration.
   - Workers should orchestrate use cases from other libs; workers should not own routine/reflection/reminder business rules.
 - `:core:time`
-  - Date, clock, and timezone abstractions.
+  - Date, clock, and timezone abstractions, including the default application `TimeProvider` binding.
 - `:core:ui`
   - Theme, design-system components from `ui.dsm`, reusable UI helpers, and shared component test helpers where appropriate.
 - `:core:testing`
@@ -119,6 +119,7 @@ Cadence is a horizontal dimension inside routine libs. Daily, weekly, and future
 - ViewModels depend on use cases or small presentation-specific collaborators, not repositories.
 - Repository implementations depend on data sources and map to business models before crossing into public APIs.
 - Repository implementation bindings live with their owning capability data module. Shared Room and DAO bindings live in `:libs:routine:database`; `:app` does not construct capability repositories.
+- Cross-cutting implementation bindings live with their owning core module, while feature-specific presentation collaborator bindings live with their feature module.
 - Shared code is extracted after the same pattern appears in at least two refactored flows, unless it is already clearly shared infrastructure.
 
 Allowed examples:

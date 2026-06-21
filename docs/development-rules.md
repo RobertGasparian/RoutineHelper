@@ -40,6 +40,8 @@
 - `:libs:*` should avoid depending on other `:libs:*` implementations unless the module is explicit infrastructure wiring.
 - `:libs:routine:database` is infrastructure wiring only: it may aggregate capability-owned Room entities and DAOs and provide the shared database/DAO bindings, but must not contain repositories or business rules.
 - `:app` aggregates the data and database modules but must not construct capability repository implementations itself.
+- Default cross-cutting bindings live with their `:core:*` implementation, and feature-specific presentation collaborator bindings live with their feature; `:app` aggregates these modules instead of constructing their implementations.
+- Modules declare direct dependencies for APIs their source imports. Dependencies used only to aggregate DI/runtime implementations are allowed in `:app`, but should be identifiable as composition dependencies rather than accidental transitive access.
 - `:libs:*` must not depend on `:features:*`.
 - `:core:*` must not depend on features or business libs.
 - The module graph must stay acyclic. If two libs need each other both ways, split out a smaller shared API/model or merge them into one cohesive capability.
