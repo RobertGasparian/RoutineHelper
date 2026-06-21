@@ -13,7 +13,7 @@ class SystemTimeProviderTest {
     )
 
     @Test
-    fun nowUsesConfiguredClock() {
+    fun `given configured clock when reading now then returns configured zoned time`() {
         assertEquals(
             instant.atZone(zoneId),
             timeProvider.now(),
@@ -21,7 +21,7 @@ class SystemTimeProviderTest {
     }
 
     @Test
-    fun currentDateUsesConfiguredClockZone() {
+    fun `given configured clock zone when reading current date then returns date in that zone`() {
         assertEquals(
             "2026-05-29",
             timeProvider.currentDate().toString(),
@@ -29,7 +29,7 @@ class SystemTimeProviderTest {
     }
 
     @Test
-    fun currentTimeMillisUsesConfiguredClock() {
+    fun `given configured clock when reading current time millis then returns configured epoch millis`() {
         assertEquals(
             instant.toEpochMilli(),
             timeProvider.currentTimeMillis(),

@@ -92,6 +92,7 @@
 - Prefer Paparazzi for component rendering states and regular unit tests for logic/state transformations.
 - Do not force unit tests around thin DI modules, generated framework glue, simple data classes with no behavior, or code that is better covered by a UI/snapshot/integration test.
 - Test function names should be descriptive Kotlin backtick names using `given ... when ... then ...`; omit `given ...` when there is no meaningful setup condition.
+- Existing Paparazzi test method names are part of their baseline image identity. Do not rename them solely for style compliance without explicit approval to update the corresponding baselines; new Paparazzi tests should follow the descriptive naming rule from the start.
 - Paparazzi snapshots are regression checks during refactors.
 - Do not run Paparazzi record/update tasks unless explicitly approved.
 - Do not update existing snapshot images unless explicitly approved.
