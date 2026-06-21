@@ -1,5 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.hilt.android)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -28,5 +30,8 @@ dependencies {
     api(project(":libs:routine:tracking:domain"))
 
     api(libs.androidx.room.runtime)
+    implementation(libs.hilt.android)
     api(libs.kotlinx.coroutines.core)
+
+    ksp(libs.hilt.compiler)
 }

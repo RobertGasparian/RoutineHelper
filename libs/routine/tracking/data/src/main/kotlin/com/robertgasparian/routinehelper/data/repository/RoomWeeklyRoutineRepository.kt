@@ -14,8 +14,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
-class RoomWeeklyRoutineRepository(
+class RoomWeeklyRoutineRepository @Inject constructor(
     private val routineItemDao: RoutineItemDao,
     private val weeklyEntryDao: WeeklyEntryDao,
     private val weeklySummaryNoteDao: WeeklySummaryNoteDao,

@@ -86,7 +86,8 @@ Proposed module families:
   - Room-backed snapshot entities, DAOs, relation models, and repository implementations.
 - `:libs:routine:database`
   - Shared Room database composition, schema export, and future migrations.
-  - It may depend on capability data modules to aggregate their entities and DAOs, but it must not own repositories or business rules.
+  - It may depend on capability data modules to aggregate their entities and DAOs and provide the shared database/DAO bindings, but it must not own repositories or business rules.
+  - Each capability data module owns the DI binding between its repository implementation and domain repository contract; `:app` only aggregates those modules.
 - `:libs:reflection`
   - Future reflection business rules, data, and use cases.
 - `:libs:reminder`
@@ -117,6 +118,7 @@ Cadence is a horizontal dimension inside routine libs. Daily, weekly, and future
 - The module graph must stay acyclic. If two libs need to know too much about each other, split out a smaller shared API/model or merge the code into one cohesive capability.
 - ViewModels depend on use cases or small presentation-specific collaborators, not repositories.
 - Repository implementations depend on data sources and map to business models before crossing into public APIs.
+- Repository implementation bindings live with their owning capability data module. Shared Room and DAO bindings live in `:libs:routine:database`; `:app` does not construct capability repositories.
 - Shared code is extracted after the same pattern appears in at least two refactored flows, unless it is already clearly shared infrastructure.
 
 Allowed examples:

@@ -28,6 +28,7 @@
 - `:libs:*` modules are business capability modules. They own app data, business rules, repositories, use cases, and implementation details for a specific capability.
 - When a capability earns separate submodules, use `:domain` for platform-independent models, repository contracts, and use cases, and `:data` for data sources and repository implementations.
 - A capability's `:data` submodule may depend on its `:domain` submodule; `:domain` must not depend on `:data`.
+- A capability's `:data` submodule owns the dependency-injection binding from its repository implementation to its domain repository contract.
 - `:core:*` modules are cross-cutting building blocks that are not specific to RoutineHelper business capabilities.
 - Do not create a broad `routine`, `domain`, or `data` module whose job is "shared app logic." Prefer capability boundaries such as template, tracking, snapshot, reminders, reflection, and background work.
 - `:features:*` may depend on `:libs:*` APIs and `:core:*`.
@@ -37,7 +38,8 @@
 - Cadence variants that share one presentation workflow may live as packages inside one cohesive feature module; cadence packages must share neutral presentation contracts rather than depend on one another.
 - `:libs:*` may depend on `:core:*` and other `:libs:*` APIs when there is a clear one-way capability relationship.
 - `:libs:*` should avoid depending on other `:libs:*` implementations unless the module is explicit infrastructure wiring.
-- `:libs:routine:database` is infrastructure wiring only: it may aggregate capability-owned Room entities and DAOs, but must not contain repositories or business rules.
+- `:libs:routine:database` is infrastructure wiring only: it may aggregate capability-owned Room entities and DAOs and provide the shared database/DAO bindings, but must not contain repositories or business rules.
+- `:app` aggregates the data and database modules but must not construct capability repository implementations itself.
 - `:libs:*` must not depend on `:features:*`.
 - `:core:*` must not depend on features or business libs.
 - The module graph must stay acyclic. If two libs need each other both ways, split out a smaller shared API/model or merge them into one cohesive capability.

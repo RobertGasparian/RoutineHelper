@@ -14,8 +14,9 @@ import com.robertgasparian.routinehelper.domain.repository.RoutineHistoryReposit
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
-class RoomRoutineHistoryRepository(
+class RoomRoutineHistoryRepository @Inject constructor(
     private val database: RoomDatabase,
     private val dailySnapshotDao: DailySnapshotDao,
 ) : RoutineHistoryRepository {

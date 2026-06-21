@@ -14,8 +14,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
-class RoomTodayRoutineRepository(
+class RoomTodayRoutineRepository @Inject constructor(
     private val routineItemDao: RoutineItemDao,
     private val todayEntryDao: TodayEntryDao,
     private val dailySummaryNoteDao: DailySummaryNoteDao,

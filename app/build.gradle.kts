@@ -51,12 +51,7 @@ dependencies {
     implementation(project(":features:history"))
     implementation(project(":features:settings"))
     implementation(project(":libs:background:work"))
-    implementation(project(":libs:routine:template:data"))
     implementation(project(":libs:routine:template:domain"))
-    implementation(project(":libs:routine:tracking:data"))
-    implementation(project(":libs:routine:tracking:domain"))
-    implementation(project(":libs:routine:snapshot:data"))
-    implementation(project(":libs:routine:snapshot:domain"))
     implementation(project(":libs:routine:database"))
 
     implementation(libs.androidx.core.ktx)

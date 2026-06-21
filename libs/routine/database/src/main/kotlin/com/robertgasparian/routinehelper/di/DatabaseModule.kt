@@ -2,7 +2,15 @@ package com.robertgasparian.routinehelper.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.RoomDatabase
 import com.robertgasparian.routinehelper.data.local.RoutineDatabase
+import com.robertgasparian.routinehelper.data.local.dao.ActionDao
+import com.robertgasparian.routinehelper.data.local.dao.DailySnapshotDao
+import com.robertgasparian.routinehelper.data.local.dao.DailySummaryNoteDao
+import com.robertgasparian.routinehelper.data.local.dao.RoutineItemDao
+import com.robertgasparian.routinehelper.data.local.dao.TodayEntryDao
+import com.robertgasparian.routinehelper.data.local.dao.WeeklyEntryDao
+import com.robertgasparian.routinehelper.data.local.dao.WeeklySummaryNoteDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,4 +31,28 @@ object DatabaseModule {
             RoutineDatabase::class.java,
             "routine-helper.db",
         ).build()
+
+    @Provides
+    fun provideRoomDatabase(database: RoutineDatabase): RoomDatabase = database
+
+    @Provides
+    fun provideActionDao(database: RoutineDatabase): ActionDao = database.actionDao()
+
+    @Provides
+    fun provideRoutineItemDao(database: RoutineDatabase): RoutineItemDao = database.routineItemDao()
+
+    @Provides
+    fun provideTodayEntryDao(database: RoutineDatabase): TodayEntryDao = database.todayEntryDao()
+
+    @Provides
+    fun provideWeeklyEntryDao(database: RoutineDatabase): WeeklyEntryDao = database.weeklyEntryDao()
+
+    @Provides
+    fun provideDailySummaryNoteDao(database: RoutineDatabase): DailySummaryNoteDao = database.dailySummaryNoteDao()
+
+    @Provides
+    fun provideWeeklySummaryNoteDao(database: RoutineDatabase): WeeklySummaryNoteDao = database.weeklySummaryNoteDao()
+
+    @Provides
+    fun provideDailySnapshotDao(database: RoutineDatabase): DailySnapshotDao = database.dailySnapshotDao()
 }
