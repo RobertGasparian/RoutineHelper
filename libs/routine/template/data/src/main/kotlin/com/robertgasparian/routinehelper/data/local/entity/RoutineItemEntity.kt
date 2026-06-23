@@ -26,7 +26,12 @@ data class RoutineItemEntity(
     val id: Long = 0,
     val actionId: Long,
     val position: Int,
-    @ColumnInfo(defaultValue = "DAILY")
-    val cadence: String = "DAILY",
+    @ColumnInfo(defaultValue = DAILY_CADENCE_STORAGE_VALUE)
+    val cadence: String = DAILY_CADENCE_STORAGE_VALUE,
     val createdAtMillis: Long,
-)
+) {
+    companion object {
+        const val DAILY_CADENCE_STORAGE_VALUE = "DAILY"
+        const val WEEKLY_CADENCE_STORAGE_VALUE = "WEEKLY"
+    }
+}

@@ -1,12 +1,13 @@
 package com.robertgasparian.routinehelper.data.repository
 
- ]import androidx.room.RoomDatabase
+import androidx.room.RoomDatabase
 import androidx.room.withTransaction
 import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.data.local.dao.DailySummaryNoteDao
 import com.robertgasparian.routinehelper.data.local.dao.RoutineItemDao
 import com.robertgasparian.routinehelper.data.local.dao.TodayEntryDao
 import com.robertgasparian.routinehelper.data.local.entity.DailySummaryNoteEntity
+import com.robertgasparian.routinehelper.data.local.entity.RoutineItemEntity
 import com.robertgasparian.routinehelper.data.local.entity.TodayEntryEntity
 import com.robertgasparian.routinehelper.data.local.model.RoutineItemWithAction
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
@@ -149,6 +150,6 @@ private fun RoutineItemWithAction.toTodayDomain(
 
 private fun RoutineCadence.toStorageValue(): String =
     when (this) {
-        RoutineCadence.Daily -> "DAILY"
-        RoutineCadence.Weekly -> "WEEKLY"
+        RoutineCadence.Daily -> RoutineItemEntity.DAILY_CADENCE_STORAGE_VALUE
+        RoutineCadence.Weekly -> RoutineItemEntity.WEEKLY_CADENCE_STORAGE_VALUE
     }

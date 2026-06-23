@@ -84,7 +84,7 @@
 - Business logic needed by multiple features, workers, app startup, or future surfaces belongs in a lib capability, not in a feature module.
 - Features render and coordinate UI-specific state. They do not own data/business rules that background work or other features must also respect.
 - Keep storage string conversions, such as cadence storage values, behind data-layer boundaries unless a business type explicitly owns the conversion.
-- Decode every supported stored enum value explicitly and fail on unknown values; never silently reinterpret malformed or newer data as an existing domain value.
+- Define persisted enum strings as named constants owned by their data schema. Decode every supported value explicitly and fail on unknown values; never silently reinterpret malformed or newer data as an existing domain value.
 - Normalize user-entered text at the boundary that persists it, and keep that rule consistent across similar flows.
 - Prefer field-specific, single-statement DAO updates/upserts when independent fields of one row can change concurrently; avoid read-copy-replace writes that can overwrite unrelated state.
 - Wrap repository operations that mutate multiple rows or DAOs as one logical action in a Room transaction.

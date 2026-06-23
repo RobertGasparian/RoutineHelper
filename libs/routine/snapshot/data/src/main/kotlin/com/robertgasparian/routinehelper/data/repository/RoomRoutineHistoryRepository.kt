@@ -84,14 +84,14 @@ class RoomRoutineHistoryRepository @Inject constructor(
 
 private fun RoutineCadence.toStorageValue(): String =
     when (this) {
-        RoutineCadence.Daily -> "DAILY"
-        RoutineCadence.Weekly -> "WEEKLY"
+        RoutineCadence.Daily -> DailySnapshotEntity.DAILY_CADENCE_STORAGE_VALUE
+        RoutineCadence.Weekly -> DailySnapshotEntity.WEEKLY_CADENCE_STORAGE_VALUE
     }
 
 private fun String.toRoutineCadence(): RoutineCadence =
     when (this) {
-        "DAILY" -> RoutineCadence.Daily
-        "WEEKLY" -> RoutineCadence.Weekly
+        DailySnapshotEntity.DAILY_CADENCE_STORAGE_VALUE -> RoutineCadence.Daily
+        DailySnapshotEntity.WEEKLY_CADENCE_STORAGE_VALUE -> RoutineCadence.Weekly
         else -> error("Unsupported routine cadence storage value: $this")
     }
 

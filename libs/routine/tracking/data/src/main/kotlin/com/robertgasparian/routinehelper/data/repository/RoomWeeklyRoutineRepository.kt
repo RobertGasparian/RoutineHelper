@@ -6,6 +6,7 @@ import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.data.local.dao.RoutineItemDao
 import com.robertgasparian.routinehelper.data.local.dao.WeeklyEntryDao
 import com.robertgasparian.routinehelper.data.local.dao.WeeklySummaryNoteDao
+import com.robertgasparian.routinehelper.data.local.entity.RoutineItemEntity
 import com.robertgasparian.routinehelper.data.local.entity.WeeklyEntryEntity
 import com.robertgasparian.routinehelper.data.local.entity.WeeklySummaryNoteEntity
 import com.robertgasparian.routinehelper.data.local.model.RoutineItemWithAction
@@ -146,6 +147,6 @@ private fun RoutineItemWithAction.toWeeklyDomain(
 
 private fun RoutineCadence.toStorageValue(): String =
     when (this) {
-        RoutineCadence.Daily -> "DAILY"
-        RoutineCadence.Weekly -> "WEEKLY"
+        RoutineCadence.Daily -> RoutineItemEntity.DAILY_CADENCE_STORAGE_VALUE
+        RoutineCadence.Weekly -> RoutineItemEntity.WEEKLY_CADENCE_STORAGE_VALUE
     }
