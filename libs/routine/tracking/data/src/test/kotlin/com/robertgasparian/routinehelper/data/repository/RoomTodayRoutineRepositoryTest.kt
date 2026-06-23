@@ -4,7 +4,6 @@ import com.robertgasparian.routinehelper.data.local.dao.DailySummaryNoteDao
 import com.robertgasparian.routinehelper.data.local.dao.TodayEntryDao
 import com.robertgasparian.routinehelper.data.local.entity.DailySummaryNoteEntity
 import com.robertgasparian.routinehelper.data.local.entity.TodayEntryEntity
-import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import com.robertgasparian.routinehelper.test.FixedTimeProvider
 import kotlinx.coroutines.flow.Flow
@@ -63,7 +62,7 @@ class RoomTodayRoutineRepositoryTest {
             completedCount = 4,
         )
 
-        val items = repository.todayItems(DATE, RoutineCadence.Daily).first()
+        val items = repository.todayItems(DATE).first()
 
         assertEquals("DAILY", routineItemDao.requestedCadence)
         assertEquals(

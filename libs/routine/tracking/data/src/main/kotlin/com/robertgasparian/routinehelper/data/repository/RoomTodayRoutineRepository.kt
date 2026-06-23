@@ -10,7 +10,6 @@ import com.robertgasparian.routinehelper.data.local.entity.DailySummaryNoteEntit
 import com.robertgasparian.routinehelper.data.local.entity.RoutineItemEntity
 import com.robertgasparian.routinehelper.data.local.entity.TodayEntryEntity
 import com.robertgasparian.routinehelper.data.local.model.RoutineItemWithAction
-import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import com.robertgasparian.routinehelper.domain.repository.TodayRoutineRepository
 import kotlinx.coroutines.flow.Flow
@@ -25,12 +24,9 @@ class RoomTodayRoutineRepository @Inject constructor(
     private val dailySummaryNoteDao: DailySummaryNoteDao,
     private val timeProvider: TimeProvider,
 ) : TodayRoutineRepository {
-    override fun todayItems(
-        date: String,
-        cadence: RoutineCadence,
-    ): Flow<List<TodayRoutineItem>> =
+    override fun todayItems(date: String): Flow<List<TodayRoutineItem>> =
         combine(
-            routineItemDao.routineItems(cadence.toStorageValue()),
+            routineItemDao.routineItems(RoutineItemEntity.DAILY_CADENCE_STORAGE_VALUE),
             todayEntryDao.entriesForDate(date),
         ) { routineItems, todayEntries ->
             val entriesByRoutineItemId = todayEntries.associateBy { it.routineItemId }
@@ -147,9 +143,3 @@ private fun RoutineItemWithAction.toTodayDomain(
         note = todayEntry?.note,
     )
 }
-
-private fun RoutineCadence.toStorageValue(): String =
-    when (this) {
-        RoutineCadence.Daily -> RoutineItemEntity.DAILY_CADENCE_STORAGE_VALUE
-        RoutineCadence.Weekly -> RoutineItemEntity.WEEKLY_CADENCE_STORAGE_VALUE
-    }

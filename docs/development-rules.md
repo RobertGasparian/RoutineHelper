@@ -46,6 +46,7 @@
 - `:core:*` must not depend on features or business libs.
 - The module graph must stay acyclic. If two libs need each other both ways, split out a smaller shared API/model or merge them into one cohesive capability.
 - Cadence is a horizontal dimension inside routine libs. Start daily, weekly, and future monthly support as packages/classes inside template/tracking/snapshot libs; promote cadence to modules only if the boundary becomes independently valuable.
+- Cadence-specific contracts encode their cadence in the API and must not accept a redundant cadence argument that permits invalid combinations.
 - Keep shared Compose components, theme, and design-system primitives in a shared UI boundary once modules are introduced.
 - Move WorkManager code out of `:app` before adding new unrelated background jobs.
 - Keep `CoroutineWorker` subclasses thin: delegate multi-step operations to injectable, unit-tested orchestrators while the worker retains WorkManager result, retry, and cancellation handling.

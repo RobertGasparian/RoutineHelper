@@ -10,7 +10,6 @@ import com.robertgasparian.routinehelper.data.local.entity.RoutineItemEntity
 import com.robertgasparian.routinehelper.data.local.entity.WeeklyEntryEntity
 import com.robertgasparian.routinehelper.data.local.entity.WeeklySummaryNoteEntity
 import com.robertgasparian.routinehelper.data.local.model.RoutineItemWithAction
-import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.WeeklyRoutineItem
 import com.robertgasparian.routinehelper.domain.repository.WeeklyRoutineRepository
 import kotlinx.coroutines.flow.Flow
@@ -27,7 +26,7 @@ class RoomWeeklyRoutineRepository @Inject constructor(
 ) : WeeklyRoutineRepository {
     override fun weeklyItems(weekStartDate: String): Flow<List<WeeklyRoutineItem>> =
         combine(
-            routineItemDao.routineItems(RoutineCadence.Weekly.toStorageValue()),
+            routineItemDao.routineItems(RoutineItemEntity.WEEKLY_CADENCE_STORAGE_VALUE),
             weeklyEntryDao.entriesForWeek(weekStartDate),
         ) { routineItems, weeklyEntries ->
             val entriesByRoutineItemId = weeklyEntries.associateBy { it.routineItemId }
@@ -144,9 +143,3 @@ private fun RoutineItemWithAction.toWeeklyDomain(
         note = weeklyEntry?.note,
     )
 }
-
-private fun RoutineCadence.toStorageValue(): String =
-    when (this) {
-        RoutineCadence.Daily -> RoutineItemEntity.DAILY_CADENCE_STORAGE_VALUE
-        RoutineCadence.Weekly -> RoutineItemEntity.WEEKLY_CADENCE_STORAGE_VALUE
-    }

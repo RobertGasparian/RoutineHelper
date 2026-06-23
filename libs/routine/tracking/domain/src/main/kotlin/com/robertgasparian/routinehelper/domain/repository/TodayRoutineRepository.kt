@@ -1,14 +1,10 @@
 package com.robertgasparian.routinehelper.domain.repository
 
-import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import kotlinx.coroutines.flow.Flow
 
 interface TodayRoutineRepository {
-    fun todayItems(
-        date: String,
-        cadence: RoutineCadence = RoutineCadence.Daily,
-    ): Flow<List<TodayRoutineItem>>
+    fun todayItems(date: String): Flow<List<TodayRoutineItem>>
 
     fun summaryNote(date: String): Flow<String?>
 

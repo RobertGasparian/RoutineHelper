@@ -1,6 +1,5 @@
 package com.robertgasparian.routinehelper.domain.usecase
 
-import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import com.robertgasparian.routinehelper.domain.repository.TodayRoutineRepository
 import kotlinx.coroutines.flow.Flow
@@ -24,10 +23,7 @@ class FakeTodayRoutineRepository : TodayRoutineRepository {
         itemsByDate.getOrPut(date) { MutableStateFlow(emptyList()) }.value = items
     }
 
-    override fun todayItems(
-        date: String,
-        cadence: RoutineCadence,
-    ): Flow<List<TodayRoutineItem>> =
+    override fun todayItems(date: String): Flow<List<TodayRoutineItem>> =
         itemsByDate.getOrPut(date) { MutableStateFlow(emptyList()) }
 
     override fun summaryNote(date: String): Flow<String?> =
