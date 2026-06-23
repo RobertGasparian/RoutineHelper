@@ -11,11 +11,6 @@ interface RoutineHistoryRepository {
 
     fun snapshot(snapshotId: Long): Flow<RoutineDaySnapshot?>
 
-    fun snapshotForDate(
-        date: String,
-        cadence: RoutineCadence = RoutineCadence.Daily,
-    ): Flow<RoutineDaySummary?>
-
     suspend fun saveSnapshot(
         date: String,
         finalizedAtMillis: Long,

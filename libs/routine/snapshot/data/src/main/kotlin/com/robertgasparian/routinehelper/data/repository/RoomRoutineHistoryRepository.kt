@@ -32,22 +32,6 @@ class RoomRoutineHistoryRepository @Inject constructor(
             snapshotWithEntries?.toDomain()
         }
 
-    override fun snapshotForDate(
-        date: String,
-        cadence: RoutineCadence,
-    ): Flow<RoutineDaySummary?> =
-        dailySnapshotDao.snapshotForDate(date, cadence.toStorageValue()).map { snapshot ->
-            snapshot?.let {
-                RoutineDaySummary(
-                    snapshotId = it.id,
-                    date = it.date,
-                    finalizedAtMillis = it.finalizedAtMillis,
-                    cadence = it.cadence.toRoutineCadence(),
-                    hasSummaryNote = !it.summaryNote.isNullOrBlank(),
-                )
-            }
-        }
-
     override suspend fun saveSnapshot(
         date: String,
         finalizedAtMillis: Long,

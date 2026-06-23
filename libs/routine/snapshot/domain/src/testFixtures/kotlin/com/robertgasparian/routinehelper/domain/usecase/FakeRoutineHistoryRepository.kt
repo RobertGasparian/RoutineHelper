@@ -41,17 +41,6 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
             snapshotList.firstOrNull { it.snapshotId == snapshotId }
         }
 
-    override fun snapshotForDate(
-        date: String,
-        cadence: RoutineCadence,
-    ): Flow<RoutineDaySummary?> =
-        snapshotSummaries().map { summaries ->
-            summaries.firstOrNull { it.date == date && it.cadence == cadence }
-        }
-
-    fun snapshotForDate(date: String): Flow<RoutineDaySummary?> =
-        snapshotForDate(date = date, cadence = RoutineCadence.Daily)
-
     override suspend fun saveSnapshot(
         date: String,
         finalizedAtMillis: Long,

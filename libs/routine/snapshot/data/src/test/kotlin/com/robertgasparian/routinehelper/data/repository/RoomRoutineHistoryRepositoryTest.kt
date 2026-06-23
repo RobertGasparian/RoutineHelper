@@ -140,35 +140,6 @@ class RoomRoutineHistoryRepositoryTest {
     }
 
     @Test
-    fun `given snapshot header when finding by date then maps cadence and summary-note presence`() = runTest {
-        dailySnapshotDao.storeSnapshot(
-            snapshot = snapshotEntity(
-                id = 20L,
-                date = "2026-05-25",
-                cadence = "WEEKLY",
-                summaryNote = "   ",
-            ),
-        )
-
-        val summary = repository.snapshotForDate(
-            date = "2026-05-25",
-            cadence = RoutineCadence.Weekly,
-        ).first()
-
-        assertEquals(
-            RoutineDaySummary(
-                snapshotId = 20L,
-                date = "2026-05-25",
-                finalizedAtMillis = FINALIZED_AT_MILLIS,
-                cadence = RoutineCadence.Weekly,
-                hasSummaryNote = false,
-            ),
-            summary,
-        )
-        assertEquals(listOf("2026-05-25" to "WEEKLY"), dailySnapshotDao.requestedDates)
-    }
-
-    @Test
     fun `given new snapshot when saving it then normalizes header and stores entries by position`() = runTest {
         val snapshotId = repository.saveSnapshot(
             date = "2026-05-29",
@@ -320,7 +291,6 @@ private class FakeDailySnapshotDao : DailySnapshotDao {
     val snapshots = mutableMapOf<Long, DailySnapshotEntity>()
     val entries = mutableMapOf<Long, List<DailySnapshotEntryEntity>>()
     val requestedCadences = mutableListOf<String>()
-    val requestedDates = mutableListOf<Pair<String, String>>()
     val requestedSnapshotIds = mutableListOf<Long>()
     val updatedSnapshotIds = mutableListOf<Long>()
     val deletedEntrySnapshotIds = mutableListOf<Long>()
@@ -349,14 +319,6 @@ private class FakeDailySnapshotDao : DailySnapshotDao {
     override fun snapshot(id: Long): Flow<DailySnapshotWithEntries?> {
         requestedSnapshotIds += id
         return flowOf(snapshots[id]?.let(::withEntries))
-    }
-
-    override fun snapshotForDate(
-        date: String,
-        cadence: String,
-    ): Flow<DailySnapshotEntity?> {
-        requestedDates += date to cadence
-        return flowOf(findSnapshot(date, cadence))
     }
 
     override suspend fun snapshotForDateOnce(

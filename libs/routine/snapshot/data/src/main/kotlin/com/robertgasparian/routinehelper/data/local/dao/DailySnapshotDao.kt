@@ -31,12 +31,6 @@ interface DailySnapshotDao {
     fun snapshot(id: Long): Flow<DailySnapshotWithEntries?>
 
     @Query("SELECT * FROM daily_snapshots WHERE date = :date AND cadence = :cadence")
-    fun snapshotForDate(
-        date: String,
-        cadence: String,
-    ): Flow<DailySnapshotEntity?>
-
-    @Query("SELECT * FROM daily_snapshots WHERE date = :date AND cadence = :cadence")
     suspend fun snapshotForDateOnce(
         date: String,
         cadence: String,

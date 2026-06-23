@@ -79,6 +79,7 @@
 ## Data And Domain
 
 - Public lib APIs describe app behavior, not Room operations.
+- Keep public repository contracts limited to demonstrated consumers; remove unused speculative queries instead of preserving incomplete behavior for possible future use.
 - Repository implementations map Room entities and relation models into business models before returning them.
 - Business logic needed by multiple features, workers, app startup, or future surfaces belongs in a lib capability, not in a feature module.
 - Features render and coordinate UI-specific state. They do not own data/business rules that background work or other features must also respect.
