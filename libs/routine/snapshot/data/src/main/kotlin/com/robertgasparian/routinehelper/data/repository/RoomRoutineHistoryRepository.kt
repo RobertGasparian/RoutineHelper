@@ -12,7 +12,6 @@ import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshotItem
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySummary
 import com.robertgasparian.routinehelper.domain.repository.RoutineHistoryRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -29,11 +28,8 @@ class RoomRoutineHistoryRepository @Inject constructor(
         }
 
     override fun snapshot(snapshotId: Long): Flow<RoutineDaySnapshot?> =
-        combine(
-            dailySnapshotDao.snapshotHeader(snapshotId),
-            dailySnapshotDao.snapshotEntries(snapshotId),
-        ) { snapshot, entries ->
-            snapshot?.toDomain(entries)
+        dailySnapshotDao.snapshot(snapshotId).map { snapshotWithEntries ->
+            snapshotWithEntries?.toDomain()
         }
 
     override fun snapshotForDate(
@@ -114,15 +110,13 @@ private fun String.toRoutineCadence(): RoutineCadence =
         else -> RoutineCadence.Daily
     }
 
-private fun DailySnapshotEntity.toDomain(
-    entries: List<DailySnapshotEntryEntity>,
-): RoutineDaySnapshot =
+private fun DailySnapshotWithEntries.toDomain(): RoutineDaySnapshot =
     RoutineDaySnapshot(
-        snapshotId = id,
-        date = date,
-        finalizedAtMillis = finalizedAtMillis,
-        cadence = cadence.toRoutineCadence(),
-        summaryNote = summaryNote,
+        snapshotId = snapshot.id,
+        date = snapshot.date,
+        finalizedAtMillis = snapshot.finalizedAtMillis,
+        cadence = snapshot.cadence.toRoutineCadence(),
+        summaryNote = snapshot.summaryNote,
         items = entries.toDomainItems(),
     )
 

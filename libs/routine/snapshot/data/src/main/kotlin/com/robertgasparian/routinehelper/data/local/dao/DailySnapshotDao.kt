@@ -30,12 +30,6 @@ interface DailySnapshotDao {
     @Query("SELECT * FROM daily_snapshots WHERE id = :id")
     fun snapshot(id: Long): Flow<DailySnapshotWithEntries?>
 
-    @Query("SELECT * FROM daily_snapshots WHERE id = :id")
-    fun snapshotHeader(id: Long): Flow<DailySnapshotEntity?>
-
-    @Query("SELECT * FROM daily_snapshot_entries WHERE snapshotId = :snapshotId ORDER BY positionSnapshot")
-    fun snapshotEntries(snapshotId: Long): Flow<List<DailySnapshotEntryEntity>>
-
     @Query("SELECT * FROM daily_snapshots WHERE date = :date AND cadence = :cadence")
     fun snapshotForDate(
         date: String,

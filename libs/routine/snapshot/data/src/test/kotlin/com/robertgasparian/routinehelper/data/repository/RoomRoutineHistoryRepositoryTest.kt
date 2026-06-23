@@ -136,6 +136,7 @@ class RoomRoutineHistoryRepositoryTest {
             ),
             snapshot,
         )
+        assertEquals(listOf(20L), dailySnapshotDao.requestedSnapshotIds)
     }
 
     @Test
@@ -320,6 +321,7 @@ private class FakeDailySnapshotDao : DailySnapshotDao {
     val entries = mutableMapOf<Long, List<DailySnapshotEntryEntity>>()
     val requestedCadences = mutableListOf<String>()
     val requestedDates = mutableListOf<Pair<String, String>>()
+    val requestedSnapshotIds = mutableListOf<Long>()
     val updatedSnapshotIds = mutableListOf<Long>()
     val deletedEntrySnapshotIds = mutableListOf<Long>()
     val deletedSnapshotIds = mutableListOf<Long>()
@@ -344,13 +346,10 @@ private class FakeDailySnapshotDao : DailySnapshotDao {
         )
     }
 
-    override fun snapshot(id: Long): Flow<DailySnapshotWithEntries?> =
-        flowOf(snapshots[id]?.let(::withEntries))
-
-    override fun snapshotHeader(id: Long): Flow<DailySnapshotEntity?> = flowOf(snapshots[id])
-
-    override fun snapshotEntries(snapshotId: Long): Flow<List<DailySnapshotEntryEntity>> =
-        flowOf(entries[snapshotId].orEmpty())
+    override fun snapshot(id: Long): Flow<DailySnapshotWithEntries?> {
+        requestedSnapshotIds += id
+        return flowOf(snapshots[id]?.let(::withEntries))
+    }
 
     override fun snapshotForDate(
         date: String,

@@ -86,6 +86,7 @@
 - Normalize user-entered text at the boundary that persists it, and keep that rule consistent across similar flows.
 - Prefer field-specific, single-statement DAO updates/upserts when independent fields of one row can change concurrently; avoid read-copy-replace writes that can overwrite unrelated state.
 - Wrap repository operations that mutate multiple rows or DAOs as one logical action in a Room transaction.
+- Read a Room-backed domain aggregate through one transactional relation query; do not combine independently observed parent and child queries in a repository.
 
 ## Testing
 
