@@ -2,6 +2,8 @@
 
 This plan records the staged refactor from the original single-module Android app to the current multimodule architecture. The refactor must preserve business behavior and visual UI output unless a specific change is explicitly approved.
 
+The post-modularization class-by-class review is tracked in [`refactor-review-checklist.md`](refactor-review-checklist.md).
+
 ## Current Shape
 
 - The project has 16 Gradle modules across `:app`, `:features:*`, `:libs:*`, and `:core:*`.
