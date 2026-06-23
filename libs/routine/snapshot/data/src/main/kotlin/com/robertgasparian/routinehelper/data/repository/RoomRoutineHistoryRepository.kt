@@ -90,8 +90,9 @@ private fun RoutineCadence.toStorageValue(): String =
 
 private fun String.toRoutineCadence(): RoutineCadence =
     when (this) {
+        "DAILY" -> RoutineCadence.Daily
         "WEEKLY" -> RoutineCadence.Weekly
-        else -> RoutineCadence.Daily
+        else -> error("Unsupported routine cadence storage value: $this")
     }
 
 private fun DailySnapshotWithEntries.toDomain(): RoutineDaySnapshot =

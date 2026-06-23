@@ -85,6 +85,22 @@ class RoomRoutineHistoryRepositoryTest {
     }
 
     @Test
+    fun `given unsupported stored cadence when observing summaries then fails explicitly`() = runTest {
+        dailySnapshotDao.storeSnapshot(
+            snapshot = snapshotEntity(
+                id = 10L,
+                date = "2026-05-29",
+                cadence = "MONTHLY",
+            ),
+        )
+
+        val failure = runCatching { repository.snapshotSummaries().first() }.exceptionOrNull()
+
+        assertEquals(IllegalStateException::class.java, failure?.javaClass)
+        assertEquals("Unsupported routine cadence storage value: MONTHLY", failure?.message)
+    }
+
+    @Test
     fun `given snapshot entries out of order when observing detail then maps them by position`() = runTest {
         dailySnapshotDao.storeSnapshot(
             snapshot = snapshotEntity(
