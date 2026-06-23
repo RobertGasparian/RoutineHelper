@@ -1,5 +1,7 @@
 package com.robertgasparian.routinehelper.data.repository
 
+import androidx.room.RoomDatabase
+import androidx.room.withTransaction
 import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.data.local.dao.RoutineItemDao
 import com.robertgasparian.routinehelper.data.local.dao.WeeklyEntryDao
@@ -12,11 +14,11 @@ import com.robertgasparian.routinehelper.domain.model.WeeklyRoutineItem
 import com.robertgasparian.routinehelper.domain.repository.WeeklyRoutineRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class RoomWeeklyRoutineRepository @Inject constructor(
+    private val database: RoomDatabase,
     private val routineItemDao: RoutineItemDao,
     private val weeklyEntryDao: WeeklyEntryDao,
     private val weeklySummaryNoteDao: WeeklySummaryNoteDao,
@@ -44,17 +46,11 @@ class RoomWeeklyRoutineRepository @Inject constructor(
         routineItemId: Long,
         isChecked: Boolean,
     ) {
-        val existing = weeklyEntryDao.entryForWeek(weekStartDate, routineItemId).first()
-        weeklyEntryDao.upsert(
-            existing?.copy(
-                isChecked = isChecked,
-                updatedAtMillis = timeProvider.currentTimeMillis(),
-            ) ?: WeeklyEntryEntity(
-                routineItemId = routineItemId,
-                weekStartDate = weekStartDate,
-                isChecked = isChecked,
-                updatedAtMillis = timeProvider.currentTimeMillis(),
-            ),
+        weeklyEntryDao.upsertChecked(
+            weekStartDate = weekStartDate,
+            routineItemId = routineItemId,
+            isChecked = isChecked,
+            updatedAtMillis = timeProvider.currentTimeMillis(),
         )
     }
 
@@ -64,17 +60,11 @@ class RoomWeeklyRoutineRepository @Inject constructor(
         note: String?,
     ) {
         val normalizedNote = note?.trim()?.takeIf(String::isNotEmpty)
-        val existing = weeklyEntryDao.entryForWeek(weekStartDate, routineItemId).first()
-        weeklyEntryDao.upsert(
-            existing?.copy(
-                note = normalizedNote,
-                updatedAtMillis = timeProvider.currentTimeMillis(),
-            ) ?: WeeklyEntryEntity(
-                routineItemId = routineItemId,
-                weekStartDate = weekStartDate,
-                note = normalizedNote,
-                updatedAtMillis = timeProvider.currentTimeMillis(),
-            ),
+        weeklyEntryDao.upsertNote(
+            weekStartDate = weekStartDate,
+            routineItemId = routineItemId,
+            note = normalizedNote,
+            updatedAtMillis = timeProvider.currentTimeMillis(),
         )
     }
 
@@ -83,17 +73,11 @@ class RoomWeeklyRoutineRepository @Inject constructor(
         routineItemId: Long,
         completedCount: Int,
     ) {
-        val existing = weeklyEntryDao.entryForWeek(weekStartDate, routineItemId).first()
-        weeklyEntryDao.upsert(
-            existing?.copy(
-                completedCount = completedCount.coerceAtLeast(0),
-                updatedAtMillis = timeProvider.currentTimeMillis(),
-            ) ?: WeeklyEntryEntity(
-                routineItemId = routineItemId,
-                weekStartDate = weekStartDate,
-                completedCount = completedCount.coerceAtLeast(0),
-                updatedAtMillis = timeProvider.currentTimeMillis(),
-            ),
+        weeklyEntryDao.upsertCompletedCount(
+            weekStartDate = weekStartDate,
+            routineItemId = routineItemId,
+            completedCount = completedCount.coerceAtLeast(0),
+            updatedAtMillis = timeProvider.currentTimeMillis(),
         )
     }
 
@@ -102,17 +86,11 @@ class RoomWeeklyRoutineRepository @Inject constructor(
         routineItemId: Long,
         isHidden: Boolean,
     ) {
-        val existing = weeklyEntryDao.entryForWeek(weekStartDate, routineItemId).first()
-        weeklyEntryDao.upsert(
-            existing?.copy(
-                isHidden = isHidden,
-                updatedAtMillis = timeProvider.currentTimeMillis(),
-            ) ?: WeeklyEntryEntity(
-                routineItemId = routineItemId,
-                weekStartDate = weekStartDate,
-                isHidden = isHidden,
-                updatedAtMillis = timeProvider.currentTimeMillis(),
-            ),
+        weeklyEntryDao.upsertHidden(
+            weekStartDate = weekStartDate,
+            routineItemId = routineItemId,
+            isHidden = isHidden,
+            updatedAtMillis = timeProvider.currentTimeMillis(),
         )
     }
 
@@ -135,8 +113,10 @@ class RoomWeeklyRoutineRepository @Inject constructor(
     }
 
     override suspend fun resetWeek(weekStartDate: String) {
-        weeklyEntryDao.deleteEntriesForWeek(weekStartDate)
-        weeklySummaryNoteDao.deleteForWeek(weekStartDate)
+        database.withTransaction {
+            weeklyEntryDao.deleteEntriesForWeek(weekStartDate)
+            weeklySummaryNoteDao.deleteForWeek(weekStartDate)
+        }
     }
 }
 

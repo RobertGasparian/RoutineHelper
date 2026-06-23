@@ -1,9 +1,12 @@
 package com.robertgasparian.routinehelper.data.repository
 
+import androidx.room.InvalidationTracker
+import androidx.room.RoomDatabase
 import com.robertgasparian.routinehelper.data.local.dao.RoutineItemDao
 import com.robertgasparian.routinehelper.data.local.entity.ActionEntity
 import com.robertgasparian.routinehelper.data.local.entity.RoutineItemEntity
 import com.robertgasparian.routinehelper.data.local.model.RoutineItemWithAction
+import java.util.concurrent.Executor
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
@@ -51,3 +54,32 @@ internal fun routineItemFixture(
             updatedAtMillis = 1L,
         ),
     )
+
+@Suppress("OVERRIDE_DEPRECATION")
+internal class TrackingTestRoomDatabase : RoomDatabase() {
+    var transactionBegins = 0
+        private set
+    var transactionSuccesses = 0
+        private set
+    var transactionEnds = 0
+        private set
+
+    override val transactionExecutor: Executor = Executor(Runnable::run)
+
+    override fun createInvalidationTracker(): InvalidationTracker =
+        error("Invalidation tracking is not used by repository unit tests")
+
+    override fun clearAllTables() = Unit
+
+    override fun beginTransaction() {
+        transactionBegins += 1
+    }
+
+    override fun setTransactionSuccessful() {
+        transactionSuccesses += 1
+    }
+
+    override fun endTransaction() {
+        transactionEnds += 1
+    }
+}

@@ -14,11 +14,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class RoomWeeklyRoutineRepositoryTest {
+    private val database = TrackingTestRoomDatabase()
     private val routineItemDao = FakeRoutineItemDao()
     private val weeklyEntryDao = FakeWeeklyEntryDao()
     private val weeklySummaryNoteDao = FakeWeeklySummaryNoteDao()
     private val timeProvider = FixedTimeProvider()
     private val repository = RoomWeeklyRoutineRepository(
+        database = database,
         routineItemDao = routineItemDao,
         weeklyEntryDao = weeklyEntryDao,
         weeklySummaryNoteDao = weeklySummaryNoteDao,
@@ -200,6 +202,9 @@ class RoomWeeklyRoutineRepositoryTest {
         assertEquals(listOf(WEEK_START_DATE), weeklyEntryDao.deletedWeekStartDates)
         assertEquals(emptyMap<String, WeeklySummaryNoteEntity>(), weeklySummaryNoteDao.notes)
         assertEquals(listOf(WEEK_START_DATE), weeklySummaryNoteDao.deletedWeekStartDates)
+        assertEquals(1, database.transactionBegins)
+        assertEquals(1, database.transactionSuccesses)
+        assertEquals(1, database.transactionEnds)
     }
 
     private fun weeklyEntry(
@@ -234,23 +239,68 @@ private class FakeWeeklyEntryDao : WeeklyEntryDao {
     override fun entriesForWeek(weekStartDate: String): Flow<List<WeeklyEntryEntity>> =
         flowOf(entries.filterKeys { (entryWeek, _) -> entryWeek == weekStartDate }.values.toList())
 
-    override fun entryForWeek(
+    override suspend fun upsertChecked(
         weekStartDate: String,
         routineItemId: Long,
-    ): Flow<WeeklyEntryEntity?> = flowOf(entries[weekStartDate to routineItemId])
-
-    override suspend fun upsert(entry: WeeklyEntryEntity): Long {
-        entries[entry.weekStartDate to entry.routineItemId] = entry
-        return entry.id
+        isChecked: Boolean,
+        updatedAtMillis: Long,
+    ) {
+        updateEntry(weekStartDate, routineItemId, updatedAtMillis) { entry ->
+            entry.copy(isChecked = isChecked)
+        }
     }
 
-    override suspend fun update(entry: WeeklyEntryEntity) {
-        entries[entry.weekStartDate to entry.routineItemId] = entry
+    override suspend fun upsertNote(
+        weekStartDate: String,
+        routineItemId: Long,
+        note: String?,
+        updatedAtMillis: Long,
+    ) {
+        updateEntry(weekStartDate, routineItemId, updatedAtMillis) { entry ->
+            entry.copy(note = note)
+        }
+    }
+
+    override suspend fun upsertCompletedCount(
+        weekStartDate: String,
+        routineItemId: Long,
+        completedCount: Int,
+        updatedAtMillis: Long,
+    ) {
+        updateEntry(weekStartDate, routineItemId, updatedAtMillis) { entry ->
+            entry.copy(completedCount = completedCount)
+        }
+    }
+
+    override suspend fun upsertHidden(
+        weekStartDate: String,
+        routineItemId: Long,
+        isHidden: Boolean,
+        updatedAtMillis: Long,
+    ) {
+        updateEntry(weekStartDate, routineItemId, updatedAtMillis) { entry ->
+            entry.copy(isHidden = isHidden)
+        }
     }
 
     override suspend fun deleteEntriesForWeek(weekStartDate: String) {
         entries.keys.removeAll { (entryWeek, _) -> entryWeek == weekStartDate }
         deletedWeekStartDates += weekStartDate
+    }
+
+    private fun updateEntry(
+        weekStartDate: String,
+        routineItemId: Long,
+        updatedAtMillis: Long,
+        update: (WeeklyEntryEntity) -> WeeklyEntryEntity,
+    ) {
+        val key = weekStartDate to routineItemId
+        val existing = entries[key] ?: WeeklyEntryEntity(
+            routineItemId = routineItemId,
+            weekStartDate = weekStartDate,
+            updatedAtMillis = updatedAtMillis,
+        )
+        entries[key] = update(existing).copy(updatedAtMillis = updatedAtMillis)
     }
 }
 

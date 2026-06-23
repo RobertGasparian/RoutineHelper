@@ -15,11 +15,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class RoomTodayRoutineRepositoryTest {
+    private val database = TrackingTestRoomDatabase()
     private val routineItemDao = FakeRoutineItemDao()
     private val todayEntryDao = FakeTodayEntryDao()
     private val dailySummaryNoteDao = FakeDailySummaryNoteDao()
     private val timeProvider = FixedTimeProvider()
     private val repository = RoomTodayRoutineRepository(
+        database = database,
         routineItemDao = routineItemDao,
         todayEntryDao = todayEntryDao,
         dailySummaryNoteDao = dailySummaryNoteDao,
@@ -198,6 +200,9 @@ class RoomTodayRoutineRepositoryTest {
         assertEquals(listOf(DATE), todayEntryDao.deletedDates)
         assertEquals(emptyMap<String, DailySummaryNoteEntity>(), dailySummaryNoteDao.notes)
         assertEquals(listOf(DATE), dailySummaryNoteDao.deletedDates)
+        assertEquals(1, database.transactionBegins)
+        assertEquals(1, database.transactionSuccesses)
+        assertEquals(1, database.transactionEnds)
     }
 
     private fun todayEntry(
@@ -232,18 +237,48 @@ private class FakeTodayEntryDao : TodayEntryDao {
     override fun entriesForDate(date: String): Flow<List<TodayEntryEntity>> =
         flowOf(entries.filterKeys { (entryDate, _) -> entryDate == date }.values.toList())
 
-    override fun entryForDate(
+    override suspend fun upsertChecked(
         date: String,
         routineItemId: Long,
-    ): Flow<TodayEntryEntity?> = flowOf(entries[date to routineItemId])
-
-    override suspend fun upsert(entry: TodayEntryEntity): Long {
-        entries[entry.date to entry.routineItemId] = entry
-        return entry.id
+        isChecked: Boolean,
+        updatedAtMillis: Long,
+    ) {
+        updateEntry(date, routineItemId, updatedAtMillis) { entry ->
+            entry.copy(isChecked = isChecked)
+        }
     }
 
-    override suspend fun update(entry: TodayEntryEntity) {
-        entries[entry.date to entry.routineItemId] = entry
+    override suspend fun upsertNote(
+        date: String,
+        routineItemId: Long,
+        note: String?,
+        updatedAtMillis: Long,
+    ) {
+        updateEntry(date, routineItemId, updatedAtMillis) { entry ->
+            entry.copy(note = note)
+        }
+    }
+
+    override suspend fun upsertCompletedCount(
+        date: String,
+        routineItemId: Long,
+        completedCount: Int,
+        updatedAtMillis: Long,
+    ) {
+        updateEntry(date, routineItemId, updatedAtMillis) { entry ->
+            entry.copy(completedCount = completedCount)
+        }
+    }
+
+    override suspend fun upsertHidden(
+        date: String,
+        routineItemId: Long,
+        isHidden: Boolean,
+        updatedAtMillis: Long,
+    ) {
+        updateEntry(date, routineItemId, updatedAtMillis) { entry ->
+            entry.copy(isHidden = isHidden)
+        }
     }
 
     override suspend fun deleteEntriesForDate(date: String) {
@@ -253,6 +288,21 @@ private class FakeTodayEntryDao : TodayEntryDao {
 
     override suspend fun deleteEntriesBefore(date: String) {
         entries.keys.removeAll { (entryDate, _) -> entryDate < date }
+    }
+
+    private fun updateEntry(
+        date: String,
+        routineItemId: Long,
+        updatedAtMillis: Long,
+        update: (TodayEntryEntity) -> TodayEntryEntity,
+    ) {
+        val key = date to routineItemId
+        val existing = entries[key] ?: TodayEntryEntity(
+            routineItemId = routineItemId,
+            date = date,
+            updatedAtMillis = updatedAtMillis,
+        )
+        entries[key] = update(existing).copy(updatedAtMillis = updatedAtMillis)
     }
 }
 

@@ -1,10 +1,7 @@
 package com.robertgasparian.routinehelper.data.local.dao
 
 import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
 import com.robertgasparian.routinehelper.data.local.entity.TodayEntryEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -13,14 +10,101 @@ interface TodayEntryDao {
     @Query("SELECT * FROM today_entries WHERE date = :date")
     fun entriesForDate(date: String): Flow<List<TodayEntryEntity>>
 
-    @Query("SELECT * FROM today_entries WHERE date = :date AND routineItemId = :routineItemId")
-    fun entryForDate(date: String, routineItemId: Long): Flow<TodayEntryEntity?>
+    @Query(
+        """
+        INSERT INTO today_entries (
+            routineItemId,
+            date,
+            isChecked,
+            completedCount,
+            isHidden,
+            note,
+            updatedAtMillis
+        )
+        VALUES (:routineItemId, :date, :isChecked, 0, 0, NULL, :updatedAtMillis)
+        ON CONFLICT(date, routineItemId) DO UPDATE SET
+            isChecked = :isChecked,
+            updatedAtMillis = :updatedAtMillis
+        """,
+    )
+    suspend fun upsertChecked(
+        date: String,
+        routineItemId: Long,
+        isChecked: Boolean,
+        updatedAtMillis: Long,
+    )
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsert(entry: TodayEntryEntity): Long
+    @Query(
+        """
+        INSERT INTO today_entries (
+            routineItemId,
+            date,
+            isChecked,
+            completedCount,
+            isHidden,
+            note,
+            updatedAtMillis
+        )
+        VALUES (:routineItemId, :date, 0, 0, 0, :note, :updatedAtMillis)
+        ON CONFLICT(date, routineItemId) DO UPDATE SET
+            note = :note,
+            updatedAtMillis = :updatedAtMillis
+        """,
+    )
+    suspend fun upsertNote(
+        date: String,
+        routineItemId: Long,
+        note: String?,
+        updatedAtMillis: Long,
+    )
 
-    @Update
-    suspend fun update(entry: TodayEntryEntity)
+    @Query(
+        """
+        INSERT INTO today_entries (
+            routineItemId,
+            date,
+            isChecked,
+            completedCount,
+            isHidden,
+            note,
+            updatedAtMillis
+        )
+        VALUES (:routineItemId, :date, 0, :completedCount, 0, NULL, :updatedAtMillis)
+        ON CONFLICT(date, routineItemId) DO UPDATE SET
+            completedCount = :completedCount,
+            updatedAtMillis = :updatedAtMillis
+        """,
+    )
+    suspend fun upsertCompletedCount(
+        date: String,
+        routineItemId: Long,
+        completedCount: Int,
+        updatedAtMillis: Long,
+    )
+
+    @Query(
+        """
+        INSERT INTO today_entries (
+            routineItemId,
+            date,
+            isChecked,
+            completedCount,
+            isHidden,
+            note,
+            updatedAtMillis
+        )
+        VALUES (:routineItemId, :date, 0, 0, :isHidden, NULL, :updatedAtMillis)
+        ON CONFLICT(date, routineItemId) DO UPDATE SET
+            isHidden = :isHidden,
+            updatedAtMillis = :updatedAtMillis
+        """,
+    )
+    suspend fun upsertHidden(
+        date: String,
+        routineItemId: Long,
+        isHidden: Boolean,
+        updatedAtMillis: Long,
+    )
 
     @Query("DELETE FROM today_entries WHERE date = :date")
     suspend fun deleteEntriesForDate(date: String)

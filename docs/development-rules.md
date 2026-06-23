@@ -84,6 +84,8 @@
 - Features render and coordinate UI-specific state. They do not own data/business rules that background work or other features must also respect.
 - Keep storage string conversions, such as cadence storage values, behind data-layer boundaries unless a business type explicitly owns the conversion.
 - Normalize user-entered text at the boundary that persists it, and keep that rule consistent across similar flows.
+- Prefer field-specific, single-statement DAO updates/upserts when independent fields of one row can change concurrently; avoid read-copy-replace writes that can overwrite unrelated state.
+- Wrap repository operations that mutate multiple rows or DAOs as one logical action in a Room transaction.
 
 ## Testing
 

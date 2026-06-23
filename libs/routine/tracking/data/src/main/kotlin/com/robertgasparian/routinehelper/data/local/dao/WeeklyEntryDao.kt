@@ -1,10 +1,7 @@
 package com.robertgasparian.routinehelper.data.local.dao
 
 import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
 import com.robertgasparian.routinehelper.data.local.entity.WeeklyEntryEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -14,18 +11,100 @@ interface WeeklyEntryDao {
     fun entriesForWeek(weekStartDate: String): Flow<List<WeeklyEntryEntity>>
 
     @Query(
-        "SELECT * FROM weekly_entries WHERE weekStartDate = :weekStartDate AND routineItemId = :routineItemId",
+        """
+        INSERT INTO weekly_entries (
+            routineItemId,
+            weekStartDate,
+            isChecked,
+            completedCount,
+            isHidden,
+            note,
+            updatedAtMillis
+        )
+        VALUES (:routineItemId, :weekStartDate, :isChecked, 0, 0, NULL, :updatedAtMillis)
+        ON CONFLICT(weekStartDate, routineItemId) DO UPDATE SET
+            isChecked = :isChecked,
+            updatedAtMillis = :updatedAtMillis
+        """,
     )
-    fun entryForWeek(
+    suspend fun upsertChecked(
         weekStartDate: String,
         routineItemId: Long,
-    ): Flow<WeeklyEntryEntity?>
+        isChecked: Boolean,
+        updatedAtMillis: Long,
+    )
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsert(entry: WeeklyEntryEntity): Long
+    @Query(
+        """
+        INSERT INTO weekly_entries (
+            routineItemId,
+            weekStartDate,
+            isChecked,
+            completedCount,
+            isHidden,
+            note,
+            updatedAtMillis
+        )
+        VALUES (:routineItemId, :weekStartDate, 0, 0, 0, :note, :updatedAtMillis)
+        ON CONFLICT(weekStartDate, routineItemId) DO UPDATE SET
+            note = :note,
+            updatedAtMillis = :updatedAtMillis
+        """,
+    )
+    suspend fun upsertNote(
+        weekStartDate: String,
+        routineItemId: Long,
+        note: String?,
+        updatedAtMillis: Long,
+    )
 
-    @Update
-    suspend fun update(entry: WeeklyEntryEntity)
+    @Query(
+        """
+        INSERT INTO weekly_entries (
+            routineItemId,
+            weekStartDate,
+            isChecked,
+            completedCount,
+            isHidden,
+            note,
+            updatedAtMillis
+        )
+        VALUES (:routineItemId, :weekStartDate, 0, :completedCount, 0, NULL, :updatedAtMillis)
+        ON CONFLICT(weekStartDate, routineItemId) DO UPDATE SET
+            completedCount = :completedCount,
+            updatedAtMillis = :updatedAtMillis
+        """,
+    )
+    suspend fun upsertCompletedCount(
+        weekStartDate: String,
+        routineItemId: Long,
+        completedCount: Int,
+        updatedAtMillis: Long,
+    )
+
+    @Query(
+        """
+        INSERT INTO weekly_entries (
+            routineItemId,
+            weekStartDate,
+            isChecked,
+            completedCount,
+            isHidden,
+            note,
+            updatedAtMillis
+        )
+        VALUES (:routineItemId, :weekStartDate, 0, 0, :isHidden, NULL, :updatedAtMillis)
+        ON CONFLICT(weekStartDate, routineItemId) DO UPDATE SET
+            isHidden = :isHidden,
+            updatedAtMillis = :updatedAtMillis
+        """,
+    )
+    suspend fun upsertHidden(
+        weekStartDate: String,
+        routineItemId: Long,
+        isHidden: Boolean,
+        updatedAtMillis: Long,
+    )
 
     @Query("DELETE FROM weekly_entries WHERE weekStartDate = :weekStartDate")
     suspend fun deleteEntriesForWeek(weekStartDate: String)

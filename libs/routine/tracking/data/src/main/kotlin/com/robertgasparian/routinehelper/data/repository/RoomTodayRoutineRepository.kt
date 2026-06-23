@@ -1,5 +1,7 @@
 package com.robertgasparian.routinehelper.data.repository
 
+ ]import androidx.room.RoomDatabase
+import androidx.room.withTransaction
 import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.data.local.dao.DailySummaryNoteDao
 import com.robertgasparian.routinehelper.data.local.dao.RoutineItemDao
@@ -12,11 +14,11 @@ import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import com.robertgasparian.routinehelper.domain.repository.TodayRoutineRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class RoomTodayRoutineRepository @Inject constructor(
+    private val database: RoomDatabase,
     private val routineItemDao: RoutineItemDao,
     private val todayEntryDao: TodayEntryDao,
     private val dailySummaryNoteDao: DailySummaryNoteDao,
@@ -47,17 +49,11 @@ class RoomTodayRoutineRepository @Inject constructor(
         routineItemId: Long,
         isChecked: Boolean,
     ) {
-        val existing = todayEntryDao.entryForDate(date, routineItemId).first()
-        todayEntryDao.upsert(
-            existing?.copy(
-                isChecked = isChecked,
-                updatedAtMillis = timeProvider.currentTimeMillis(),
-            ) ?: TodayEntryEntity(
-                routineItemId = routineItemId,
-                date = date,
-                isChecked = isChecked,
-                updatedAtMillis = timeProvider.currentTimeMillis(),
-            ),
+        todayEntryDao.upsertChecked(
+            date = date,
+            routineItemId = routineItemId,
+            isChecked = isChecked,
+            updatedAtMillis = timeProvider.currentTimeMillis(),
         )
     }
 
@@ -67,17 +63,11 @@ class RoomTodayRoutineRepository @Inject constructor(
         note: String?,
     ) {
         val normalizedNote = note?.trim()?.takeIf(String::isNotEmpty)
-        val existing = todayEntryDao.entryForDate(date, routineItemId).first()
-        todayEntryDao.upsert(
-            existing?.copy(
-                note = normalizedNote,
-                updatedAtMillis = timeProvider.currentTimeMillis(),
-            ) ?: TodayEntryEntity(
-                routineItemId = routineItemId,
-                date = date,
-                note = normalizedNote,
-                updatedAtMillis = timeProvider.currentTimeMillis(),
-            ),
+        todayEntryDao.upsertNote(
+            date = date,
+            routineItemId = routineItemId,
+            note = normalizedNote,
+            updatedAtMillis = timeProvider.currentTimeMillis(),
         )
     }
 
@@ -86,17 +76,11 @@ class RoomTodayRoutineRepository @Inject constructor(
         routineItemId: Long,
         completedCount: Int,
     ) {
-        val existing = todayEntryDao.entryForDate(date, routineItemId).first()
-        todayEntryDao.upsert(
-            existing?.copy(
-                completedCount = completedCount.coerceAtLeast(0),
-                updatedAtMillis = timeProvider.currentTimeMillis(),
-            ) ?: TodayEntryEntity(
-                routineItemId = routineItemId,
-                date = date,
-                completedCount = completedCount.coerceAtLeast(0),
-                updatedAtMillis = timeProvider.currentTimeMillis(),
-            ),
+        todayEntryDao.upsertCompletedCount(
+            date = date,
+            routineItemId = routineItemId,
+            completedCount = completedCount.coerceAtLeast(0),
+            updatedAtMillis = timeProvider.currentTimeMillis(),
         )
     }
 
@@ -105,17 +89,11 @@ class RoomTodayRoutineRepository @Inject constructor(
         routineItemId: Long,
         isHidden: Boolean,
     ) {
-        val existing = todayEntryDao.entryForDate(date, routineItemId).first()
-        todayEntryDao.upsert(
-            existing?.copy(
-                isHidden = isHidden,
-                updatedAtMillis = timeProvider.currentTimeMillis(),
-            ) ?: TodayEntryEntity(
-                routineItemId = routineItemId,
-                date = date,
-                isHidden = isHidden,
-                updatedAtMillis = timeProvider.currentTimeMillis(),
-            ),
+        todayEntryDao.upsertHidden(
+            date = date,
+            routineItemId = routineItemId,
+            isHidden = isHidden,
+            updatedAtMillis = timeProvider.currentTimeMillis(),
         )
     }
 
@@ -138,8 +116,10 @@ class RoomTodayRoutineRepository @Inject constructor(
     }
 
     override suspend fun resetDate(date: String) {
-        todayEntryDao.deleteEntriesForDate(date)
-        dailySummaryNoteDao.deleteForDate(date)
+        database.withTransaction {
+            todayEntryDao.deleteEntriesForDate(date)
+            dailySummaryNoteDao.deleteForDate(date)
+        }
     }
 }
 
