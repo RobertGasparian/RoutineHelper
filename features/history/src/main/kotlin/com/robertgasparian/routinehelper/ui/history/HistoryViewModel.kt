@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySummary
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.domain.formatter.SnapshotShareTextFormatter
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
-import com.robertgasparian.routinehelper.domain.usecase.SnapshotShareTextUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotSummariesUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotUseCase
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
     private val deleteSnapshotUseCase: DeleteSnapshotUseCase,
-    private val snapshotShareTextUseCase: SnapshotShareTextUseCase,
+    private val snapshotShareTextFormatter: SnapshotShareTextFormatter,
     snapshotSummariesUseCase: SnapshotSummariesUseCase,
     private val snapshotUseCase: SnapshotUseCase,
 ) : ViewModel() {
@@ -103,7 +103,7 @@ class HistoryViewModel @Inject constructor(
                 snapshotUseCase(snapshotId).first()
             }
             if (snapshots.isNotEmpty()) {
-                val exportText = snapshotShareTextUseCase(snapshots)
+                val exportText = snapshotShareTextFormatter(snapshots)
                 shareDraft.value = when (mode) {
                     ShareMode.Text -> ShareDraft.text(exportText)
                     ShareMode.File -> ShareDraft.file(

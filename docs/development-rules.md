@@ -53,6 +53,7 @@
 - Use cases model one focused business action. Multi-step flows, ordering, branching, and delivery-specific decisions belong to explicitly named orchestrators that compose those use cases.
 - Prefer focused add/update/delete use cases over a broad `Save...UseCase` when create and update paths call different repository operations or require different context.
 - Do not rename an orchestrator to `UseCase` when it still owns multiple commands or a decision tree.
+- Pure display/export string builders should be named as formatters, not use cases, and should receive time-sensitive context through providers instead of reading system time or timezone directly.
 
 ## UI
 

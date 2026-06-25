@@ -3,11 +3,12 @@ package com.robertgasparian.routinehelper.ui.history
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshotItem
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySummary
+import com.robertgasparian.routinehelper.domain.formatter.SnapshotShareTextFormatter
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
 import com.robertgasparian.routinehelper.domain.usecase.FakeRoutineHistoryRepository
-import com.robertgasparian.routinehelper.domain.usecase.SnapshotShareTextUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotSummariesUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotUseCase
+import com.robertgasparian.routinehelper.test.FixedTimeProvider
 import com.robertgasparian.routinehelper.test.MainDispatcherRule
 import com.robertgasparian.routinehelper.ui.share.ShareMode
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -187,7 +188,7 @@ class HistoryViewModelTest {
     private fun createViewModel(): HistoryViewModel =
         HistoryViewModel(
             deleteSnapshotUseCase = DeleteSnapshotUseCase(repository),
-            snapshotShareTextUseCase = SnapshotShareTextUseCase(),
+            snapshotShareTextFormatter = SnapshotShareTextFormatter(FixedTimeProvider()),
             snapshotSummariesUseCase = SnapshotSummariesUseCase(repository),
             snapshotUseCase = SnapshotUseCase(repository),
         )

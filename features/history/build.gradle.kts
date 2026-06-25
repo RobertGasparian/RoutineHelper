@@ -31,6 +31,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:time"))
     implementation(project(":core:ui"))
     implementation(project(":libs:routine:snapshot:domain"))
     api(project(":libs:routine:template:domain"))

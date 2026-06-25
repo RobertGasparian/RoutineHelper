@@ -2,10 +2,11 @@ package com.robertgasparian.routinehelper.ui.history.detail
 
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshotItem
+import com.robertgasparian.routinehelper.domain.formatter.SnapshotShareTextFormatter
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
 import com.robertgasparian.routinehelper.domain.usecase.FakeRoutineHistoryRepository
-import com.robertgasparian.routinehelper.domain.usecase.SnapshotShareTextUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotUseCase
+import com.robertgasparian.routinehelper.test.FixedTimeProvider
 import com.robertgasparian.routinehelper.test.MainDispatcherRule
 import com.robertgasparian.routinehelper.ui.share.ShareMode
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,7 +34,7 @@ class HistoryDetailViewModelTest {
 
         assertEquals("Week of 2026-05-25", state.date)
         assertEquals(RoutineCadence.Weekly, state.cadence)
-        assertTrue(state.finalizedLabel.startsWith("Finalized "))
+        assertEquals("Finalized 12:00 PM", state.finalizedLabel)
         assertEquals("Good week", state.summaryNote)
         assertEquals(
             listOf(
@@ -132,8 +133,9 @@ class HistoryDetailViewModelTest {
         HistoryDetailViewModel(
             snapshotId = snapshotId,
             deleteSnapshotUseCase = DeleteSnapshotUseCase(repository),
-            snapshotShareTextUseCase = SnapshotShareTextUseCase(),
+            snapshotShareTextFormatter = SnapshotShareTextFormatter(FixedTimeProvider()),
             snapshotUseCase = SnapshotUseCase(repository),
+            timeProvider = FixedTimeProvider(),
         )
 
     private suspend fun saveWeeklySnapshot(): Long =

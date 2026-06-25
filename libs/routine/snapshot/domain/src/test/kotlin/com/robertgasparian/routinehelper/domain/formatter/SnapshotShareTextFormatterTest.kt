@@ -1,21 +1,24 @@
-package com.robertgasparian.routinehelper.domain.usecase
+package com.robertgasparian.routinehelper.domain.formatter
 
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshotItem
+import com.robertgasparian.routinehelper.test.FixedTimeProvider
+import java.time.Instant
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class SnapshotShareTextUseCaseTest {
-    private val useCase = SnapshotShareTextUseCase()
+class SnapshotShareTextFormatterTest {
+    private val formatter = SnapshotShareTextFormatter(FixedTimeProvider())
 
     @Test
     fun `given populated snapshot when formatting share text then human readable text is returned`() {
-        val text = useCase(
+        val text = formatter(
             RoutineDaySnapshot(
                 snapshotId = 1L,
                 date = "2026-05-29",
-                finalizedAtMillis = 1_234L,
+                finalizedAtMillis = FINALIZED_AT_MILLIS,
                 summaryNote = "Low-energy day, but I kept the basics moving.",
                 items = listOf(
                     RoutineDaySnapshotItem(
@@ -42,6 +45,7 @@ class SnapshotShareTextUseCaseTest {
 
         assertTrue(text.contains("Daily routine snapshot"))
         assertTrue(text.contains("Date: 2026-05-29"))
+        assertTrue(text.contains("Finalized: 10:30 AM"))
         assertTrue(text.contains("Summary note:"))
         assertTrue(text.contains("Low-energy day, but I kept the basics moving."))
         assertTrue(text.contains("1. [x] Drink water"))
@@ -53,12 +57,13 @@ class SnapshotShareTextUseCaseTest {
     }
 
     @Test
-    fun `given empty snapshot when formatting share text then empty state text is returned`() {
-        val text = useCase(
+    fun `given empty daily snapshot when formatting share text then daily empty state text is returned`() {
+        val text = formatter(
             RoutineDaySnapshot(
                 snapshotId = 1L,
                 date = "2026-05-29",
-                finalizedAtMillis = 1_234L,
+                finalizedAtMillis = FINALIZED_AT_MILLIS,
+                cadence = RoutineCadence.Daily,
                 items = emptyList(),
             ),
         )
@@ -68,19 +73,37 @@ class SnapshotShareTextUseCaseTest {
     }
 
     @Test
+    fun `given empty weekly snapshot when formatting share text then weekly empty state text is returned`() {
+        val text = formatter(
+            RoutineDaySnapshot(
+                snapshotId = 1L,
+                date = "2026-05-25",
+                finalizedAtMillis = FINALIZED_AT_MILLIS,
+                cadence = RoutineCadence.Weekly,
+                items = emptyList(),
+            ),
+        )
+
+        assertTrue(text.contains("Weekly routine snapshot"))
+        assertTrue(text.contains("Week of: 2026-05-25"))
+        assertTrue(text.contains("No actions were saved for this week."))
+        assertFalse(text.contains("No actions were saved for this day."))
+    }
+
+    @Test
     fun `given multiple snapshots when formatting share text then newest snapshot is first`() {
-        val text = useCase(
+        val text = formatter(
             listOf(
                 RoutineDaySnapshot(
                     snapshotId = 1L,
                     date = "2026-05-28",
-                    finalizedAtMillis = 1_234L,
+                    finalizedAtMillis = FINALIZED_AT_MILLIS,
                     items = emptyList(),
                 ),
                 RoutineDaySnapshot(
                     snapshotId = 2L,
                     date = "2026-05-29",
-                    finalizedAtMillis = 1_234L,
+                    finalizedAtMillis = FINALIZED_AT_MILLIS,
                     items = emptyList(),
                 ),
             ),
@@ -88,5 +111,9 @@ class SnapshotShareTextUseCaseTest {
 
         assertTrue(text.indexOf("Date: 2026-05-29") < text.indexOf("Date: 2026-05-28"))
         assertTrue(text.contains("---"))
+    }
+
+    private companion object {
+        val FINALIZED_AT_MILLIS: Long = Instant.parse("2026-05-29T14:30:00Z").toEpochMilli()
     }
 }

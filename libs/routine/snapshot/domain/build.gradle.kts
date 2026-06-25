@@ -10,6 +10,8 @@ kotlin {
 }
 
 dependencies {
+    api(project(":core:time"))
+
     api(project(":libs:routine:template:domain"))
     api(project(":libs:routine:tracking:domain"))
 
@@ -19,6 +21,7 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(project(":core:testing"))
     testImplementation(testFixtures(project(":libs:routine:tracking:domain")))
 
     testFixturesImplementation(libs.kotlinx.coroutines.core)
