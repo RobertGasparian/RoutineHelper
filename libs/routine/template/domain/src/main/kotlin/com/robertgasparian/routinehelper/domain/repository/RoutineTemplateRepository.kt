@@ -25,5 +25,8 @@ interface RoutineTemplateRepository {
 
     suspend fun removeTemplateItem(routineItemId: Long)
 
-    suspend fun reorderTemplateItems(routineItemIdsInOrder: List<Long>)
+    suspend fun reorderTemplateItems(
+        cadence: RoutineCadence,
+        routineItemIdsInOrder: List<Long>,
+    )
 }

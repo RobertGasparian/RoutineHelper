@@ -11,6 +11,7 @@ class FakeRoutineTemplateRepository : RoutineTemplateRepository {
     private val items = MutableStateFlow<List<RoutineTemplateItem>>(emptyList())
     val addedItems = mutableListOf<AddedTemplateItem>()
     val removedTemplateItemIds = mutableListOf<Long>()
+    val reorderedTemplateItemCadences = mutableListOf<RoutineCadence>()
     val reorderedTemplateItemIds = mutableListOf<List<Long>>()
     val updatedItems = mutableListOf<UpdatedTemplateItem>()
 
@@ -59,7 +60,11 @@ class FakeRoutineTemplateRepository : RoutineTemplateRepository {
         removedTemplateItemIds += routineItemId
     }
 
-    override suspend fun reorderTemplateItems(routineItemIdsInOrder: List<Long>) {
+    override suspend fun reorderTemplateItems(
+        cadence: RoutineCadence,
+        routineItemIdsInOrder: List<Long>,
+    ) {
+        reorderedTemplateItemCadences += cadence
         reorderedTemplateItemIds += routineItemIdsInOrder
     }
 }

@@ -87,12 +87,20 @@ class RoomRoutineTemplateRepository @Inject constructor(
         }
     }
 
-    override suspend fun reorderTemplateItems(routineItemIdsInOrder: List<Long>) {
+    override suspend fun reorderTemplateItems(
+        cadence: RoutineCadence,
+        routineItemIdsInOrder: List<Long>,
+    ) {
+        val storageCadence = cadence.toStorageValue()
         database.withTransaction {
-            routineItemIdsInOrder.forEachIndexed { index, routineItemId ->
+            var nextPosition = 0
+            routineItemIdsInOrder.forEach { routineItemId ->
                 val routineItem = routineItemDao.routineItem(routineItemId).first()
-                if (routineItem != null && routineItem.position != index) {
-                    routineItemDao.update(routineItem.copy(position = index))
+                if (routineItem?.cadence == storageCadence) {
+                    if (routineItem.position != nextPosition) {
+                        routineItemDao.update(routineItem.copy(position = nextPosition))
+                    }
+                    nextPosition += 1
                 }
             }
         }

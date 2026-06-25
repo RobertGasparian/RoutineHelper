@@ -176,16 +176,73 @@ class RoomRoutineTemplateRepositoryTest {
 
     @Test
     fun `given template order when reordering then updates positions and ignores unknown ids`() = runTest {
-        storeTemplateItem(10L, 100L, "First", position = 0, cadence = "DAILY")
-        storeTemplateItem(20L, 200L, "Second", position = 1, cadence = "DAILY")
-        storeTemplateItem(30L, 300L, "Third", position = 2, cadence = "DAILY")
+        storeTemplateItem(
+            routineItemId = 10L,
+            actionId = 100L,
+            title = "First",
+            position = 0,
+            cadence = RoutineItemEntity.DAILY_CADENCE_STORAGE_VALUE,
+        )
+        storeTemplateItem(
+            routineItemId = 20L,
+            actionId = 200L,
+            title = "Second",
+            position = 1,
+            cadence = RoutineItemEntity.DAILY_CADENCE_STORAGE_VALUE,
+        )
+        storeTemplateItem(
+            routineItemId = 30L,
+            actionId = 300L,
+            title = "Third",
+            position = 2,
+            cadence = RoutineItemEntity.DAILY_CADENCE_STORAGE_VALUE,
+        )
 
-        repository.reorderTemplateItems(listOf(30L, 999L, 10L, 20L))
+        repository.reorderTemplateItems(
+            cadence = RoutineCadence.Daily,
+            routineItemIdsInOrder = listOf(30L, 999L, 10L, 20L),
+        )
 
-        assertEquals(2, routineItemDao.items.getValue(10L).position)
-        assertEquals(3, routineItemDao.items.getValue(20L).position)
+        assertEquals(1, routineItemDao.items.getValue(10L).position)
+        assertEquals(2, routineItemDao.items.getValue(20L).position)
         assertEquals(0, routineItemDao.items.getValue(30L).position)
         assertEquals(listOf(30L, 10L, 20L), routineItemDao.updatedIds)
+        assertEquals(1, database.transactionSuccesses)
+    }
+
+    @Test
+    fun `given mixed cadence item ids when reordering daily then updates only daily positions`() = runTest {
+        storeTemplateItem(
+            routineItemId = 10L,
+            actionId = 100L,
+            title = "Daily first",
+            position = 0,
+            cadence = RoutineItemEntity.DAILY_CADENCE_STORAGE_VALUE,
+        )
+        storeTemplateItem(
+            routineItemId = 20L,
+            actionId = 200L,
+            title = "Daily second",
+            position = 1,
+            cadence = RoutineItemEntity.DAILY_CADENCE_STORAGE_VALUE,
+        )
+        storeTemplateItem(
+            routineItemId = 30L,
+            actionId = 300L,
+            title = "Weekly first",
+            position = 0,
+            cadence = RoutineItemEntity.WEEKLY_CADENCE_STORAGE_VALUE,
+        )
+
+        repository.reorderTemplateItems(
+            cadence = RoutineCadence.Daily,
+            routineItemIdsInOrder = listOf(30L, 20L, 10L),
+        )
+
+        assertEquals(1, routineItemDao.items.getValue(10L).position)
+        assertEquals(0, routineItemDao.items.getValue(20L).position)
+        assertEquals(0, routineItemDao.items.getValue(30L).position)
+        assertEquals(listOf(20L, 10L), routineItemDao.updatedIds)
         assertEquals(1, database.transactionSuccesses)
     }
 
