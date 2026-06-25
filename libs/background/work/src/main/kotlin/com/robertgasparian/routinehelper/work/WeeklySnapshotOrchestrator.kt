@@ -17,7 +17,7 @@ class WeeklySnapshotOrchestrator @Inject internal constructor(
         finalizeWeeklyUseCase(
             weekStartDate = snapshotWeekStartDate,
             snapshotWeekStartDate = snapshotWeekStartDate,
-            finalizedAtMillis = timeProvider.currentTimeMillis(),
+            finalizedAtMillis = now.toInstant().toEpochMilli(),
         )
         resetWeeklyUseCase(snapshotWeekStartDate)
     }

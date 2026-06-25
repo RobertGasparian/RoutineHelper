@@ -17,7 +17,7 @@ class DailySnapshotOrchestrator @Inject internal constructor(
         finalizeTodayUseCase(
             date = snapshotDate,
             snapshotDate = snapshotDate,
-            finalizedAtMillis = timeProvider.currentTimeMillis(),
+            finalizedAtMillis = now.toInstant().toEpochMilli(),
         )
         resetTodayUseCase(snapshotDate)
     }
