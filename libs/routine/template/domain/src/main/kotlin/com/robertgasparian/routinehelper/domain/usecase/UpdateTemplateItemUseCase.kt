@@ -1,25 +1,24 @@
 package com.robertgasparian.routinehelper.domain.usecase
 
-import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.repository.RoutineTemplateRepository
 import javax.inject.Inject
 
-class AddTemplateItemUseCase @Inject constructor(
+class UpdateTemplateItemUseCase @Inject constructor(
     private val routineTemplateRepository: RoutineTemplateRepository,
 ) {
     suspend operator fun invoke(
+        actionId: Long,
         title: String,
         description: String?,
         repeatTargetCount: Int? = null,
-        cadence: RoutineCadence = RoutineCadence.Daily,
-    ): Long? {
-        val normalizedTitle = normalizeTemplateTitle(title) ?: return null
+    ) {
+        val normalizedTitle = normalizeTemplateTitle(title) ?: return
 
-        return routineTemplateRepository.addTemplateItem(
+        routineTemplateRepository.updateAction(
+            actionId = actionId,
             title = normalizedTitle,
             description = normalizeTemplateDescription(description),
             repeatTargetCount = normalizeTemplateRepeatTargetCount(repeatTargetCount),
-            cadence = cadence,
         )
     }
 }

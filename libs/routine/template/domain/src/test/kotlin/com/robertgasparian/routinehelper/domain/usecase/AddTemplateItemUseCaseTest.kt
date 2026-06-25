@@ -11,10 +11,12 @@ class AddTemplateItemUseCaseTest {
     private val useCase = AddTemplateItemUseCase(repository)
 
     @Test
-    fun `given padded text when adding template item then values are trimmed`() = runTest {
+    fun `given padded weekly values when adding template item then values are normalized and cadence is preserved`() = runTest {
         val id = useCase(
             title = "  Drink water  ",
             description = "  Drink 3L water  ",
+            repeatTargetCount = 5,
+            cadence = RoutineCadence.Weekly,
         )
 
         assertEquals(1L, id)
@@ -22,7 +24,8 @@ class AddTemplateItemUseCaseTest {
             AddedTemplateItem(
                 title = "Drink water",
                 description = "Drink 3L water",
-                cadence = RoutineCadence.Daily,
+                repeatTargetCount = 5,
+                cadence = RoutineCadence.Weekly,
             ),
             repository.addedItems.single(),
         )
@@ -46,13 +49,27 @@ class AddTemplateItemUseCaseTest {
     }
 
     @Test
+    fun `given repeat target below two when adding template item then target is discarded`() = runTest {
+        useCase(
+            title = "Pushups",
+            description = null,
+            repeatTargetCount = 1,
+        )
+
+        assertEquals(
+            null,
+            repository.addedItems.single().repeatTargetCount,
+        )
+    }
+
+    @Test
     fun `given blank title when adding template item then item is ignored`() = runTest {
         val id = useCase(
             title = "   ",
             description = "Ignored",
         )
 
-        assertEquals(0L, id)
+        assertEquals(null, id)
         assertTrue(repository.addedItems.isEmpty())
     }
 }

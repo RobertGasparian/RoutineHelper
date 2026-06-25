@@ -3,9 +3,10 @@ package com.robertgasparian.routinehelper.ui.actioneditor
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.domain.usecase.AddTemplateItemUseCase
 import com.robertgasparian.routinehelper.domain.usecase.RemoveTemplateItemUseCase
-import com.robertgasparian.routinehelper.domain.usecase.SaveTemplateItemUseCase
 import com.robertgasparian.routinehelper.domain.usecase.TemplateItemUseCase
+import com.robertgasparian.routinehelper.domain.usecase.UpdateTemplateItemUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -18,9 +19,10 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class ActionEditorViewModel @Inject constructor(
+    private val addTemplateItemUseCase: AddTemplateItemUseCase,
     private val removeTemplateItemUseCase: RemoveTemplateItemUseCase,
-    private val saveTemplateItemUseCase: SaveTemplateItemUseCase,
     private val templateItemUseCase: TemplateItemUseCase,
+    private val updateTemplateItemUseCase: UpdateTemplateItemUseCase,
 ) : ViewModel() {
     private val draftTitle = MutableStateFlow("")
     private val draftDescription = MutableStateFlow("")
@@ -81,13 +83,22 @@ class ActionEditorViewModel @Inject constructor(
         onSaved: () -> Unit,
     ) {
         viewModelScope.launch {
-            saveTemplateItemUseCase(
-                actionId = actionId,
-                title = draftTitle.value,
-                description = draftDescription.value,
-                repeatTargetCount = repeatTargetCount.value.takeIf { isRepeatEnabled.value },
-                cadence = cadence,
-            )
+            val targetCount = repeatTargetCount.value.takeIf { isRepeatEnabled.value }
+            if (actionId == null) {
+                addTemplateItemUseCase(
+                    title = draftTitle.value,
+                    description = draftDescription.value,
+                    repeatTargetCount = targetCount,
+                    cadence = cadence,
+                )
+            } else {
+                updateTemplateItemUseCase(
+                    actionId = actionId,
+                    title = draftTitle.value,
+                    description = draftDescription.value,
+                    repeatTargetCount = targetCount,
+                )
+            }
             onSaved()
         }
     }

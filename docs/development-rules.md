@@ -51,6 +51,7 @@
 - Move WorkManager code out of `:app` before adding new unrelated background jobs.
 - Keep `CoroutineWorker` subclasses thin: delegate multi-step operations to injectable, unit-tested orchestrators while the worker retains WorkManager result, retry, and cancellation handling.
 - Use cases model one focused business action. Multi-step flows, ordering, branching, and delivery-specific decisions belong to explicitly named orchestrators that compose those use cases.
+- Prefer focused add/update/delete use cases over a broad `Save...UseCase` when create and update paths call different repository operations or require different context.
 - Do not rename an orchestrator to `UseCase` when it still owns multiple commands or a decision tree.
 
 ## UI
