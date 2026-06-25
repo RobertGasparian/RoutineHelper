@@ -2,8 +2,8 @@ package com.robertgasparian.routinehelper.ui.history
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshot
-import com.robertgasparian.routinehelper.domain.model.RoutineDaySummary
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotSummary
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.formatter.SnapshotShareTextFormatter
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
@@ -43,7 +43,7 @@ class HistoryViewModel @Inject constructor(
             val filteredSummaries = summaries.filter { summary ->
                 selectedFilter.cadence == null || summary.cadence == selectedFilter.cadence
             }
-            val existingIds = filteredSummaries.map(RoutineDaySummary::snapshotId).toSet()
+            val existingIds = filteredSummaries.map(RoutineSnapshotSummary::snapshotId).toSet()
             val effectiveSelectedIds = selectedIds.intersect(existingIds)
             HistoryUiState(
                 snapshots = filteredSummaries.map { summary ->
@@ -147,7 +147,7 @@ private enum class ShareMode {
     File,
 }
 
-private fun List<RoutineDaySnapshot>.toFileShareMessage(): String {
+private fun List<RoutineSnapshot>.toFileShareMessage(): String {
     val dates = map { snapshot -> snapshot.date }.distinct().sorted()
     return when (dates.size) {
         0 -> "Here are the routine snapshots."
@@ -156,7 +156,7 @@ private fun List<RoutineDaySnapshot>.toFileShareMessage(): String {
     }
 }
 
-private fun RoutineDaySummary.toUiState(isSelected: Boolean): HistorySnapshotUiState =
+private fun RoutineSnapshotSummary.toUiState(isSelected: Boolean): HistorySnapshotUiState =
     HistorySnapshotUiState(
         snapshotId = snapshotId,
         date = if (cadence == RoutineCadence.Weekly) "Week of $date" else date,

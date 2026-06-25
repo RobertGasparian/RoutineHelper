@@ -1,6 +1,6 @@
 package com.robertgasparian.routinehelper.domain.model
 
-data class RoutineDaySnapshotItem(
+data class RoutineSnapshotItem(
     val actionId: Long,
     val title: String,
     val description: String?,

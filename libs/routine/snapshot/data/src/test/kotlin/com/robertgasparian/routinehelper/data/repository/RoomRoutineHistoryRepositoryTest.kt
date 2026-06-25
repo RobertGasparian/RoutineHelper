@@ -7,9 +7,9 @@ import com.robertgasparian.routinehelper.data.local.entity.DailySnapshotEntity
 import com.robertgasparian.routinehelper.data.local.entity.DailySnapshotEntryEntity
 import com.robertgasparian.routinehelper.data.local.model.DailySnapshotWithEntries
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
-import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshot
-import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshotItem
-import com.robertgasparian.routinehelper.domain.model.RoutineDaySummary
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotSummary
 import java.util.concurrent.Executor
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -69,7 +69,7 @@ class RoomRoutineHistoryRepositoryTest {
         assertEquals(2, allSummaries.size)
         assertEquals(
             listOf(
-                RoutineDaySummary(
+                RoutineSnapshotSummary(
                     snapshotId = 10L,
                     date = "2026-05-29",
                     finalizedAtMillis = FINALIZED_AT_MILLIS,
@@ -125,14 +125,14 @@ class RoomRoutineHistoryRepositoryTest {
         val snapshot = repository.snapshot(snapshotId = 20L).first()
 
         assertEquals(
-            RoutineDaySnapshot(
+            RoutineSnapshot(
                 snapshotId = 20L,
                 date = "2026-05-25",
                 finalizedAtMillis = FINALIZED_AT_MILLIS,
                 cadence = RoutineCadence.Weekly,
                 summaryNote = "Good week",
                 items = listOf(
-                    RoutineDaySnapshotItem(
+                    RoutineSnapshotItem(
                         actionId = 1L,
                         title = "Action 1",
                         description = "Details",
@@ -140,7 +140,7 @@ class RoomRoutineHistoryRepositoryTest {
                         isChecked = true,
                         note = "Done",
                     ),
-                    RoutineDaySnapshotItem(
+                    RoutineSnapshotItem(
                         actionId = 2L,
                         title = "Action 2",
                         description = null,
@@ -285,8 +285,8 @@ class RoomRoutineHistoryRepositoryTest {
         completedCount: Int = 0,
         isHidden: Boolean = false,
         note: String? = null,
-    ): RoutineDaySnapshotItem =
-        RoutineDaySnapshotItem(
+    ): RoutineSnapshotItem =
+        RoutineSnapshotItem(
             actionId = actionId,
             title = "Action $actionId",
             description = null,

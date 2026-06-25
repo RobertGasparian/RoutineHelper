@@ -1,6 +1,6 @@
 package com.robertgasparian.routinehelper.domain.usecase
 
-import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshotItem
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -30,7 +30,7 @@ class SnapshotUseCaseTest {
             date = "2026-05-29",
             finalizedAtMillis = 123L,
             items = listOf(
-                RoutineDaySnapshotItem(
+                RoutineSnapshotItem(
                     actionId = 100L,
                     title = "Drink water",
                     description = "Drink 3L water",

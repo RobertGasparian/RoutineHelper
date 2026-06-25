@@ -1,7 +1,7 @@
 package com.robertgasparian.routinehelper.domain.usecase
 
-import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshotItem
-import com.robertgasparian.routinehelper.domain.model.RoutineDaySummary
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotSummary
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -61,7 +61,7 @@ class FinalizeTodayUseCaseTest {
                 finalizedAtMillis = 123L,
                 summaryNote = "Low-energy day, but I kept the basics moving.",
                 items = listOf(
-                    RoutineDaySnapshotItem(
+                    RoutineSnapshotItem(
                         actionId = 100L,
                         title = "Drink water",
                         description = "Drink 3L water",
@@ -69,7 +69,7 @@ class FinalizeTodayUseCaseTest {
                         isChecked = true,
                         note = "One liter was diet soda.",
                     ),
-                    RoutineDaySnapshotItem(
+                    RoutineSnapshotItem(
                         actionId = 101L,
                         title = "Stretch",
                         description = null,
@@ -86,7 +86,7 @@ class FinalizeTodayUseCaseTest {
     @Test
     fun `given existing daily snapshot when finalizing today then snapshot is replaced`() = runTest {
         historyRepository.setSnapshot(
-            RoutineDaySummary(
+            RoutineSnapshotSummary(
                 snapshotId = 77L,
                 date = "2026-05-29",
                 finalizedAtMillis = 100L,
@@ -120,7 +120,7 @@ class FinalizeTodayUseCaseTest {
                 date = "2026-05-29",
                 finalizedAtMillis = 200L,
                 items = listOf(
-                    RoutineDaySnapshotItem(
+                    RoutineSnapshotItem(
                         actionId = 100L,
                         title = "Drink water",
                         description = null,

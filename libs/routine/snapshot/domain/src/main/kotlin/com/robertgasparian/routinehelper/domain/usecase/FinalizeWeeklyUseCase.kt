@@ -1,7 +1,7 @@
 package com.robertgasparian.routinehelper.domain.usecase
 
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
-import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshotItem
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
 import com.robertgasparian.routinehelper.domain.repository.RoutineHistoryRepository
 import com.robertgasparian.routinehelper.domain.repository.WeeklyRoutineRepository
 import javax.inject.Inject
@@ -18,7 +18,7 @@ class FinalizeWeeklyUseCase @Inject constructor(
     ): Long? {
         val weeklyItems = weeklyRoutineRepository.weeklyItems(weekStartDate).first()
         val snapshotItems = weeklyItems.map { item ->
-            RoutineDaySnapshotItem(
+            RoutineSnapshotItem(
                 actionId = item.actionId,
                 title = item.title,
                 description = item.description,

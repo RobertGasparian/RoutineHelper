@@ -1,8 +1,8 @@
 package com.robertgasparian.routinehelper.ui.history
 
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
-import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshotItem
-import com.robertgasparian.routinehelper.domain.model.RoutineDaySummary
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotSummary
 import com.robertgasparian.routinehelper.domain.formatter.SnapshotShareTextFormatter
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
 import com.robertgasparian.routinehelper.domain.usecase.FakeRoutineHistoryRepository
@@ -212,8 +212,8 @@ class HistoryViewModelTest {
         completedCount: Int = 0,
         totalCount: Int = 0,
         hasSummaryNote: Boolean = false,
-    ): RoutineDaySummary =
-        RoutineDaySummary(
+    ): RoutineSnapshotSummary =
+        RoutineSnapshotSummary(
             snapshotId = snapshotId,
             date = date,
             finalizedAtMillis = 1_748_534_400_000L,
@@ -223,8 +223,8 @@ class HistoryViewModelTest {
             hasSummaryNote = hasSummaryNote,
         )
 
-    private fun snapshotItem(): RoutineDaySnapshotItem =
-        RoutineDaySnapshotItem(
+    private fun snapshotItem(): RoutineSnapshotItem =
+        RoutineSnapshotItem(
             actionId = 100L,
             title = "Drink water",
             description = "Drink 3L",

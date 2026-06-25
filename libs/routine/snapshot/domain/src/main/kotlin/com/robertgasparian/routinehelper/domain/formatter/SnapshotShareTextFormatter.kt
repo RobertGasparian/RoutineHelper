@@ -2,8 +2,8 @@ package com.robertgasparian.routinehelper.domain.formatter
 
 import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
-import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshot
-import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshotItem
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
 import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -12,7 +12,7 @@ import javax.inject.Inject
 class SnapshotShareTextFormatter @Inject constructor(
     private val timeProvider: TimeProvider,
 ) {
-    operator fun invoke(snapshot: RoutineDaySnapshot): String {
+    operator fun invoke(snapshot: RoutineSnapshot): String {
         val timeFormatter = shareTimeFormatter.withZone(timeProvider.now().zone)
         return buildString {
             appendLine("${snapshot.cadence.label} routine snapshot")
@@ -34,7 +34,7 @@ class SnapshotShareTextFormatter @Inject constructor(
             }
 
             snapshot.items
-                .sortedBy(RoutineDaySnapshotItem::position)
+                .sortedBy(RoutineSnapshotItem::position)
                 .forEachIndexed { index, item ->
                     appendLine("${index + 1}. ${item.statusLabel} ${item.title}")
                     if (item.repeatTargetCount != null) {
@@ -51,12 +51,12 @@ class SnapshotShareTextFormatter @Inject constructor(
         }.trimEnd()
     }
 
-    operator fun invoke(snapshots: List<RoutineDaySnapshot>): String =
+    operator fun invoke(snapshots: List<RoutineSnapshot>): String =
         snapshots
-            .sortedWith(compareByDescending<RoutineDaySnapshot> { it.date }.thenByDescending { it.finalizedAtMillis })
+            .sortedWith(compareByDescending<RoutineSnapshot> { it.date }.thenByDescending { it.finalizedAtMillis })
             .joinToString(separator = "\n\n---\n\n") { snapshot -> invoke(snapshot) }
 
-    private val RoutineDaySnapshotItem.statusLabel: String
+    private val RoutineSnapshotItem.statusLabel: String
         get() = when {
             isHidden -> "[skipped]"
             isChecked -> "[x]"

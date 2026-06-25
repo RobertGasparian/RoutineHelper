@@ -1,7 +1,7 @@
 package com.robertgasparian.routinehelper.ui.history.detail
 
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
-import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshotItem
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
 import com.robertgasparian.routinehelper.domain.formatter.SnapshotShareTextFormatter
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
 import com.robertgasparian.routinehelper.domain.usecase.FakeRoutineHistoryRepository
@@ -143,7 +143,7 @@ class HistoryDetailViewModelTest {
             date = "2026-05-25",
             finalizedAtMillis = 1_748_534_400_000L,
             items = listOf(
-                RoutineDaySnapshotItem(
+                RoutineSnapshotItem(
                     actionId = 100L,
                     title = "Review goals",
                     description = "Review the weekly plan",
@@ -153,7 +153,7 @@ class HistoryDetailViewModelTest {
                     repeatTargetCount = 3,
                     completedCount = 2,
                 ),
-                RoutineDaySnapshotItem(
+                RoutineSnapshotItem(
                     actionId = 101L,
                     title = "Old task",
                     description = null,

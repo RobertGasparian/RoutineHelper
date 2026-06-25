@@ -3,8 +3,8 @@ package com.robertgasparian.routinehelper.ui.history.detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robertgasparian.routinehelper.core.time.TimeProvider
-import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshot
-import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshotItem
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.formatter.SnapshotShareTextFormatter
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
@@ -34,7 +34,7 @@ class HistoryDetailViewModel @AssistedInject constructor(
 ) : ViewModel() {
     private val isShareFormatDialogVisible = MutableStateFlow(false)
     private val shareDraft = MutableStateFlow<ShareDraft?>(null)
-    private var currentSnapshot: RoutineDaySnapshot? = null
+    private var currentSnapshot: RoutineSnapshot? = null
 
     val uiState: Flow<HistoryDetailUiState> =
         combine(
@@ -101,7 +101,7 @@ class HistoryDetailViewModel @AssistedInject constructor(
     }
 }
 
-private fun RoutineDaySnapshot.toUiState(timeProvider: TimeProvider): HistoryDetailUiState =
+private fun RoutineSnapshot.toUiState(timeProvider: TimeProvider): HistoryDetailUiState =
     HistoryDetailUiState(
         date = displayDate,
         cadence = cadence,
@@ -111,13 +111,13 @@ private fun RoutineDaySnapshot.toUiState(timeProvider: TimeProvider): HistoryDet
                 .format(Instant.ofEpochMilli(finalizedAtMillis))
         }",
         summaryNote = summaryNote.orEmpty(),
-        items = items.map(RoutineDaySnapshotItem::toUiState),
+        items = items.map(RoutineSnapshotItem::toUiState),
     )
 
-private val RoutineDaySnapshot.displayDate: String
+private val RoutineSnapshot.displayDate: String
     get() = if (cadence == RoutineCadence.Weekly) "Week of $date" else date
 
-private fun RoutineDaySnapshotItem.toUiState(): HistoryDetailItemUiState =
+private fun RoutineSnapshotItem.toUiState(): HistoryDetailItemUiState =
     HistoryDetailItemUiState(
         actionId = actionId,
         title = title,

@@ -1,11 +1,10 @@
 package com.robertgasparian.routinehelper.domain.model
 
-data class RoutineDaySummary(
+data class RoutineSnapshot(
     val snapshotId: Long,
     val date: String,
     val finalizedAtMillis: Long,
+    val items: List<RoutineSnapshotItem>,
     val cadence: RoutineCadence = RoutineCadence.Daily,
-    val completedCount: Int = 0,
-    val totalCount: Int = 0,
-    val hasSummaryNote: Boolean = false,
+    val summaryNote: String? = null,
 )

@@ -1,24 +1,24 @@
 package com.robertgasparian.routinehelper.domain.usecase
 
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
-import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshot
-import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshotItem
-import com.robertgasparian.routinehelper.domain.model.RoutineDaySummary
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotSummary
 import com.robertgasparian.routinehelper.domain.repository.RoutineHistoryRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 
 class FakeRoutineHistoryRepository : RoutineHistoryRepository {
-    private val snapshots = MutableStateFlow<List<RoutineDaySnapshot>>(emptyList())
-    private val summaries = MutableStateFlow<List<RoutineDaySummary>>(emptyList())
+    private val snapshots = MutableStateFlow<List<RoutineSnapshot>>(emptyList())
+    private val summaries = MutableStateFlow<List<RoutineSnapshotSummary>>(emptyList())
     val savedSnapshots = mutableListOf<SavedSnapshot>()
     val deletedSnapshotIds = mutableListOf<Long>()
 
-    fun setSnapshot(summary: RoutineDaySummary) {
+    fun setSnapshot(summary: RoutineSnapshotSummary) {
         summaries.value = summaries.value.replaceById(summary)
         snapshots.value = snapshots.value.replaceById(
-            RoutineDaySnapshot(
+            RoutineSnapshot(
                 snapshotId = summary.snapshotId,
                 date = summary.date,
                 finalizedAtMillis = summary.finalizedAtMillis,
@@ -29,14 +29,14 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
         )
     }
 
-    override fun snapshotSummaries(cadence: RoutineCadence?): Flow<List<RoutineDaySummary>> =
+    override fun snapshotSummaries(cadence: RoutineCadence?): Flow<List<RoutineSnapshotSummary>> =
         summaries.map { summaryList ->
             summaryList.filter { summary -> cadence == null || summary.cadence == cadence }
         }
 
-    fun snapshotSummaries(): Flow<List<RoutineDaySummary>> = snapshotSummaries(cadence = null)
+    fun snapshotSummaries(): Flow<List<RoutineSnapshotSummary>> = snapshotSummaries(cadence = null)
 
-    override fun snapshot(snapshotId: Long): Flow<RoutineDaySnapshot?> =
+    override fun snapshot(snapshotId: Long): Flow<RoutineSnapshot?> =
         snapshots.map { snapshotList ->
             snapshotList.firstOrNull { it.snapshotId == snapshotId }
         }
@@ -44,7 +44,7 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
     override suspend fun saveSnapshot(
         date: String,
         finalizedAtMillis: Long,
-        items: List<RoutineDaySnapshotItem>,
+        items: List<RoutineSnapshotItem>,
         summaryNote: String?,
         cadence: RoutineCadence,
     ): Long {
@@ -63,7 +63,7 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
         )
         savedSnapshots.removeAll { snapshot -> snapshot.date == date && snapshot.cadence == cadence }
         savedSnapshots += savedSnapshot
-        val snapshot = RoutineDaySnapshot(
+        val snapshot = RoutineSnapshot(
             snapshotId = snapshotId,
             date = date,
             finalizedAtMillis = finalizedAtMillis,
@@ -83,7 +83,7 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
     suspend fun saveSnapshot(
         date: String,
         finalizedAtMillis: Long,
-        items: List<RoutineDaySnapshotItem>,
+        items: List<RoutineSnapshotItem>,
     ): Long =
         saveSnapshot(
             date = date,
@@ -100,15 +100,15 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
     }
 }
 
-private fun List<RoutineDaySnapshot>.replaceById(snapshot: RoutineDaySnapshot): List<RoutineDaySnapshot> =
+private fun List<RoutineSnapshot>.replaceById(snapshot: RoutineSnapshot): List<RoutineSnapshot> =
     filterNot { it.snapshotId == snapshot.snapshotId } + snapshot
 
-private fun List<RoutineDaySummary>.replaceById(summary: RoutineDaySummary): List<RoutineDaySummary> =
+private fun List<RoutineSnapshotSummary>.replaceById(summary: RoutineSnapshotSummary): List<RoutineSnapshotSummary> =
     filterNot { it.snapshotId == summary.snapshotId } + summary
 
-private fun RoutineDaySnapshot.toSummary(): RoutineDaySummary {
-    val countableItems = items.filterNot(RoutineDaySnapshotItem::isHidden)
-    return RoutineDaySummary(
+private fun RoutineSnapshot.toSummary(): RoutineSnapshotSummary {
+    val countableItems = items.filterNot(RoutineSnapshotItem::isHidden)
+    return RoutineSnapshotSummary(
         snapshotId = snapshotId,
         date = date,
         finalizedAtMillis = finalizedAtMillis,
@@ -126,7 +126,7 @@ private fun RoutineDaySnapshot.toSummary(): RoutineDaySummary {
 data class SavedSnapshot(
     val date: String,
     val finalizedAtMillis: Long,
-    val items: List<RoutineDaySnapshotItem>,
+    val items: List<RoutineSnapshotItem>,
     val summaryNote: String? = null,
     val cadence: RoutineCadence = RoutineCadence.Daily,
 )

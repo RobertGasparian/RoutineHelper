@@ -1,8 +1,8 @@
 package com.robertgasparian.routinehelper.domain.formatter
 
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
-import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshot
-import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshotItem
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
 import com.robertgasparian.routinehelper.test.FixedTimeProvider
 import java.time.Instant
 import org.junit.Assert.assertFalse
@@ -15,13 +15,13 @@ class SnapshotShareTextFormatterTest {
     @Test
     fun `given populated snapshot when formatting share text then human readable text is returned`() {
         val text = formatter(
-            RoutineDaySnapshot(
+            RoutineSnapshot(
                 snapshotId = 1L,
                 date = "2026-05-29",
                 finalizedAtMillis = FINALIZED_AT_MILLIS,
                 summaryNote = "Low-energy day, but I kept the basics moving.",
                 items = listOf(
-                    RoutineDaySnapshotItem(
+                    RoutineSnapshotItem(
                         actionId = 101L,
                         title = "Stretch",
                         description = null,
@@ -31,7 +31,7 @@ class SnapshotShareTextFormatterTest {
                         repeatTargetCount = 3,
                         completedCount = 1,
                     ),
-                    RoutineDaySnapshotItem(
+                    RoutineSnapshotItem(
                         actionId = 100L,
                         title = "Drink water",
                         description = "Drink 3L water",
@@ -59,7 +59,7 @@ class SnapshotShareTextFormatterTest {
     @Test
     fun `given empty daily snapshot when formatting share text then daily empty state text is returned`() {
         val text = formatter(
-            RoutineDaySnapshot(
+            RoutineSnapshot(
                 snapshotId = 1L,
                 date = "2026-05-29",
                 finalizedAtMillis = FINALIZED_AT_MILLIS,
@@ -75,7 +75,7 @@ class SnapshotShareTextFormatterTest {
     @Test
     fun `given empty weekly snapshot when formatting share text then weekly empty state text is returned`() {
         val text = formatter(
-            RoutineDaySnapshot(
+            RoutineSnapshot(
                 snapshotId = 1L,
                 date = "2026-05-25",
                 finalizedAtMillis = FINALIZED_AT_MILLIS,
@@ -94,13 +94,13 @@ class SnapshotShareTextFormatterTest {
     fun `given multiple snapshots when formatting share text then newest snapshot is first`() {
         val text = formatter(
             listOf(
-                RoutineDaySnapshot(
+                RoutineSnapshot(
                     snapshotId = 1L,
                     date = "2026-05-28",
                     finalizedAtMillis = FINALIZED_AT_MILLIS,
                     items = emptyList(),
                 ),
-                RoutineDaySnapshot(
+                RoutineSnapshot(
                     snapshotId = 2L,
                     date = "2026-05-29",
                     finalizedAtMillis = FINALIZED_AT_MILLIS,

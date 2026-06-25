@@ -1,8 +1,8 @@
 package com.robertgasparian.routinehelper.domain.usecase
 
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
-import com.robertgasparian.routinehelper.domain.model.RoutineDaySnapshotItem
-import com.robertgasparian.routinehelper.domain.model.RoutineDaySummary
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotSummary
 import com.robertgasparian.routinehelper.domain.model.WeeklyRoutineItem
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -63,7 +63,7 @@ class FinalizeWeeklyUseCaseTest {
                 summaryNote = "Solid weekly reset.",
                 cadence = RoutineCadence.Weekly,
                 items = listOf(
-                    RoutineDaySnapshotItem(
+                    RoutineSnapshotItem(
                         actionId = 100L,
                         title = "Meal prep",
                         description = "Cook lunches",
@@ -71,7 +71,7 @@ class FinalizeWeeklyUseCaseTest {
                         isChecked = true,
                         note = "Prepared four portions.",
                     ),
-                    RoutineDaySnapshotItem(
+                    RoutineSnapshotItem(
                         actionId = 101L,
                         title = "Budget review",
                         description = null,
@@ -88,7 +88,7 @@ class FinalizeWeeklyUseCaseTest {
     @Test
     fun `given existing weekly snapshot when finalizing week then snapshot is replaced`() = runTest {
         historyRepository.setSnapshot(
-            RoutineDaySummary(
+            RoutineSnapshotSummary(
                 snapshotId = 77L,
                 date = "2026-05-24",
                 finalizedAtMillis = 100L,
@@ -124,7 +124,7 @@ class FinalizeWeeklyUseCaseTest {
                 finalizedAtMillis = 200L,
                 cadence = RoutineCadence.Weekly,
                 items = listOf(
-                    RoutineDaySnapshotItem(
+                    RoutineSnapshotItem(
                         actionId = 100L,
                         title = "Meal prep",
                         description = null,
