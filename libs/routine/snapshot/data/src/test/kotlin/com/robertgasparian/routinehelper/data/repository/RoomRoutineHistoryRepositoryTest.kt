@@ -2,10 +2,10 @@ package com.robertgasparian.routinehelper.data.repository
 
 import androidx.room.InvalidationTracker
 import androidx.room.RoomDatabase
-import com.robertgasparian.routinehelper.data.local.dao.DailySnapshotDao
-import com.robertgasparian.routinehelper.data.local.entity.DailySnapshotEntity
-import com.robertgasparian.routinehelper.data.local.entity.DailySnapshotEntryEntity
-import com.robertgasparian.routinehelper.data.local.model.DailySnapshotWithEntries
+import com.robertgasparian.routinehelper.data.local.dao.RoutineSnapshotDao
+import com.robertgasparian.routinehelper.data.local.entity.RoutineSnapshotEntity
+import com.robertgasparian.routinehelper.data.local.entity.RoutineSnapshotEntryEntity
+import com.robertgasparian.routinehelper.data.local.model.RoutineSnapshotWithEntries
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
@@ -20,18 +20,18 @@ import org.junit.Test
 
 class RoomRoutineHistoryRepositoryTest {
     private val database = TestRoomDatabase()
-    private val dailySnapshotDao = FakeDailySnapshotDao()
+    private val routineSnapshotDao = FakeRoutineSnapshotDao()
     private val repository = RoomRoutineHistoryRepository(
         database = database,
-        dailySnapshotDao = dailySnapshotDao,
+        routineSnapshotDao = routineSnapshotDao,
     )
 
     @Test
     fun `given stored snapshots when observing summaries then calculates completion and filters cadence`() = runTest {
-        dailySnapshotDao.storeSnapshot(
+        routineSnapshotDao.storeSnapshot(
             snapshot = snapshotEntity(
                 id = 10L,
-                date = "2026-05-29",
+                periodStartDate = "2026-05-29",
                 cadence = "DAILY",
                 summaryNote = "Good day",
             ),
@@ -55,10 +55,10 @@ class RoomRoutineHistoryRepositoryTest {
                 ),
             ),
         )
-        dailySnapshotDao.storeSnapshot(
+        routineSnapshotDao.storeSnapshot(
             snapshot = snapshotEntity(
                 id = 20L,
-                date = "2026-05-25",
+                periodStartDate = "2026-05-25",
                 cadence = "WEEKLY",
             ),
         )
@@ -71,7 +71,7 @@ class RoomRoutineHistoryRepositoryTest {
             listOf(
                 RoutineSnapshotSummary(
                     snapshotId = 10L,
-                    date = "2026-05-29",
+                    periodStartDate = "2026-05-29",
                     finalizedAtMillis = FINALIZED_AT_MILLIS,
                     cadence = RoutineCadence.Daily,
                     completedCount = 2,
@@ -81,15 +81,15 @@ class RoomRoutineHistoryRepositoryTest {
             ),
             dailySummaries,
         )
-        assertEquals(listOf("DAILY"), dailySnapshotDao.requestedCadences)
+        assertEquals(listOf("DAILY"), routineSnapshotDao.requestedCadences)
     }
 
     @Test
     fun `given unsupported stored cadence when observing summaries then fails explicitly`() = runTest {
-        dailySnapshotDao.storeSnapshot(
+        routineSnapshotDao.storeSnapshot(
             snapshot = snapshotEntity(
                 id = 10L,
-                date = "2026-05-29",
+                periodStartDate = "2026-05-29",
                 cadence = "MONTHLY",
             ),
         )
@@ -102,10 +102,10 @@ class RoomRoutineHistoryRepositoryTest {
 
     @Test
     fun `given snapshot entries out of order when observing detail then maps them by position`() = runTest {
-        dailySnapshotDao.storeSnapshot(
+        routineSnapshotDao.storeSnapshot(
             snapshot = snapshotEntity(
                 id = 20L,
-                date = "2026-05-25",
+                periodStartDate = "2026-05-25",
                 cadence = "WEEKLY",
                 summaryNote = "Good week",
             ),
@@ -127,7 +127,7 @@ class RoomRoutineHistoryRepositoryTest {
         assertEquals(
             RoutineSnapshot(
                 snapshotId = 20L,
-                date = "2026-05-25",
+                periodStartDate = "2026-05-25",
                 finalizedAtMillis = FINALIZED_AT_MILLIS,
                 cadence = RoutineCadence.Weekly,
                 summaryNote = "Good week",
@@ -152,13 +152,13 @@ class RoomRoutineHistoryRepositoryTest {
             ),
             snapshot,
         )
-        assertEquals(listOf(20L), dailySnapshotDao.requestedSnapshotIds)
+        assertEquals(listOf(20L), routineSnapshotDao.requestedSnapshotIds)
     }
 
     @Test
     fun `given new snapshot when saving it then normalizes header and stores entries by position`() = runTest {
         val snapshotId = repository.saveSnapshot(
-            date = "2026-05-29",
+            periodStartDate = "2026-05-29",
             finalizedAtMillis = FINALIZED_AT_MILLIS,
             summaryNote = "  Good day  ",
             cadence = RoutineCadence.Daily,
@@ -177,20 +177,20 @@ class RoomRoutineHistoryRepositoryTest {
         )
 
         assertEquals(
-            DailySnapshotEntity(
+            RoutineSnapshotEntity(
                 id = snapshotId,
-                date = "2026-05-29",
+                periodStartDate = "2026-05-29",
                 finalizedAtMillis = FINALIZED_AT_MILLIS,
                 cadence = "DAILY",
                 summaryNote = "Good day",
             ),
-            dailySnapshotDao.snapshots.getValue(snapshotId),
+            routineSnapshotDao.snapshots.getValue(snapshotId),
         )
-        assertEquals(listOf(1L, 2L), dailySnapshotDao.entries.getValue(snapshotId).map { it.actionId })
-        assertEquals(3, dailySnapshotDao.entries.getValue(snapshotId).first().repeatTargetCountSnapshot)
-        assertEquals(2, dailySnapshotDao.entries.getValue(snapshotId).first().completedCount)
-        assertEquals(true, dailySnapshotDao.entries.getValue(snapshotId).first().isHidden)
-        assertEquals("Almost there", dailySnapshotDao.entries.getValue(snapshotId).first().note)
+        assertEquals(listOf(1L, 2L), routineSnapshotDao.entries.getValue(snapshotId).map { it.actionId })
+        assertEquals(3, routineSnapshotDao.entries.getValue(snapshotId).first().repeatTargetCountSnapshot)
+        assertEquals(2, routineSnapshotDao.entries.getValue(snapshotId).first().completedCount)
+        assertEquals(true, routineSnapshotDao.entries.getValue(snapshotId).first().isHidden)
+        assertEquals("Almost there", routineSnapshotDao.entries.getValue(snapshotId).first().note)
         assertEquals(1, database.transactionBegins)
         assertEquals(1, database.transactionSuccesses)
         assertEquals(1, database.transactionEnds)
@@ -198,10 +198,10 @@ class RoomRoutineHistoryRepositoryTest {
 
     @Test
     fun `given existing snapshot when saving same period then updates header and replaces entries`() = runTest {
-        dailySnapshotDao.storeSnapshot(
+        routineSnapshotDao.storeSnapshot(
             snapshot = snapshotEntity(
                 id = 10L,
-                date = "2026-05-29",
+                periodStartDate = "2026-05-29",
                 cadence = "DAILY",
                 summaryNote = "Old note",
             ),
@@ -209,7 +209,7 @@ class RoomRoutineHistoryRepositoryTest {
         )
 
         val snapshotId = repository.saveSnapshot(
-            date = "2026-05-29",
+            periodStartDate = "2026-05-29",
             finalizedAtMillis = FINALIZED_AT_MILLIS + 1,
             summaryNote = "   ",
             cadence = RoutineCadence.Daily,
@@ -217,37 +217,37 @@ class RoomRoutineHistoryRepositoryTest {
         )
 
         assertEquals(10L, snapshotId)
-        assertEquals(FINALIZED_AT_MILLIS + 1, dailySnapshotDao.snapshots.getValue(10L).finalizedAtMillis)
-        assertEquals(null, dailySnapshotDao.snapshots.getValue(10L).summaryNote)
-        assertEquals(listOf(10L), dailySnapshotDao.updatedSnapshotIds)
-        assertEquals(listOf(10L), dailySnapshotDao.deletedEntrySnapshotIds)
-        assertEquals(listOf(1L), dailySnapshotDao.entries.getValue(10L).map { it.actionId })
+        assertEquals(FINALIZED_AT_MILLIS + 1, routineSnapshotDao.snapshots.getValue(10L).finalizedAtMillis)
+        assertEquals(null, routineSnapshotDao.snapshots.getValue(10L).summaryNote)
+        assertEquals(listOf(10L), routineSnapshotDao.updatedSnapshotIds)
+        assertEquals(listOf(10L), routineSnapshotDao.deletedEntrySnapshotIds)
+        assertEquals(listOf(1L), routineSnapshotDao.entries.getValue(10L).map { it.actionId })
         assertEquals(1, database.transactionSuccesses)
     }
 
     @Test
     fun `given stored snapshot when deleting it then removes header and entries`() = runTest {
-        dailySnapshotDao.storeSnapshot(
-            snapshot = snapshotEntity(id = 10L, date = "2026-05-29", cadence = "DAILY"),
+        routineSnapshotDao.storeSnapshot(
+            snapshot = snapshotEntity(id = 10L, periodStartDate = "2026-05-29", cadence = "DAILY"),
             entries = listOf(entry(snapshotId = 10L, actionId = 1L, position = 0, isChecked = true)),
         )
 
         repository.deleteSnapshot(snapshotId = 10L)
 
-        assertEquals(emptyMap<Long, DailySnapshotEntity>(), dailySnapshotDao.snapshots)
-        assertEquals(emptyMap<Long, List<DailySnapshotEntryEntity>>(), dailySnapshotDao.entries)
-        assertEquals(listOf(10L), dailySnapshotDao.deletedSnapshotIds)
+        assertEquals(emptyMap<Long, RoutineSnapshotEntity>(), routineSnapshotDao.snapshots)
+        assertEquals(emptyMap<Long, List<RoutineSnapshotEntryEntity>>(), routineSnapshotDao.entries)
+        assertEquals(listOf(10L), routineSnapshotDao.deletedSnapshotIds)
     }
 
     private fun snapshotEntity(
         id: Long,
-        date: String,
+        periodStartDate: String,
         cadence: String,
         summaryNote: String? = null,
-    ): DailySnapshotEntity =
-        DailySnapshotEntity(
+    ): RoutineSnapshotEntity =
+        RoutineSnapshotEntity(
             id = id,
-            date = date,
+            periodStartDate = periodStartDate,
             finalizedAtMillis = FINALIZED_AT_MILLIS,
             cadence = cadence,
             summaryNote = summaryNote,
@@ -263,8 +263,8 @@ class RoomRoutineHistoryRepositoryTest {
         repeatTargetCount: Int? = null,
         completedCount: Int = 0,
         note: String? = null,
-    ): DailySnapshotEntryEntity =
-        DailySnapshotEntryEntity(
+    ): RoutineSnapshotEntryEntity =
+        RoutineSnapshotEntryEntity(
             snapshotId = snapshotId,
             actionId = actionId,
             titleSnapshot = "Action $actionId",
@@ -303,9 +303,9 @@ class RoomRoutineHistoryRepositoryTest {
     }
 }
 
-private class FakeDailySnapshotDao : DailySnapshotDao {
-    val snapshots = mutableMapOf<Long, DailySnapshotEntity>()
-    val entries = mutableMapOf<Long, List<DailySnapshotEntryEntity>>()
+private class FakeRoutineSnapshotDao : RoutineSnapshotDao {
+    val snapshots = mutableMapOf<Long, RoutineSnapshotEntity>()
+    val entries = mutableMapOf<Long, List<RoutineSnapshotEntryEntity>>()
     val requestedCadences = mutableListOf<String>()
     val requestedSnapshotIds = mutableListOf<Long>()
     val updatedSnapshotIds = mutableListOf<Long>()
@@ -313,36 +313,36 @@ private class FakeDailySnapshotDao : DailySnapshotDao {
     val deletedSnapshotIds = mutableListOf<Long>()
     private var nextSnapshotId = 1_000L
 
-    override fun snapshots(): Flow<List<DailySnapshotEntity>> =
-        flowOf(snapshots.values.sortedByDescending(DailySnapshotEntity::date))
+    override fun snapshots(): Flow<List<RoutineSnapshotEntity>> =
+        flowOf(snapshots.values.sortedByDescending(RoutineSnapshotEntity::periodStartDate))
 
-    override fun snapshots(cadence: String): Flow<List<DailySnapshotEntity>> =
-        flowOf(snapshots.values.filter { it.cadence == cadence }.sortedByDescending(DailySnapshotEntity::date))
+    override fun snapshots(cadence: String): Flow<List<RoutineSnapshotEntity>> =
+        flowOf(snapshots.values.filter { it.cadence == cadence }.sortedByDescending(RoutineSnapshotEntity::periodStartDate))
 
-    override fun snapshotsWithEntries(): Flow<List<DailySnapshotWithEntries>> =
-        flowOf(snapshots.values.sortedByDescending(DailySnapshotEntity::date).map(::withEntries))
+    override fun snapshotsWithEntries(): Flow<List<RoutineSnapshotWithEntries>> =
+        flowOf(snapshots.values.sortedByDescending(RoutineSnapshotEntity::periodStartDate).map(::withEntries))
 
-    override fun snapshotsWithEntries(cadence: String): Flow<List<DailySnapshotWithEntries>> {
+    override fun snapshotsWithEntries(cadence: String): Flow<List<RoutineSnapshotWithEntries>> {
         requestedCadences += cadence
         return flowOf(
             snapshots.values
                 .filter { snapshot -> snapshot.cadence == cadence }
-                .sortedByDescending(DailySnapshotEntity::date)
+                .sortedByDescending(RoutineSnapshotEntity::periodStartDate)
                 .map(::withEntries),
         )
     }
 
-    override fun snapshot(id: Long): Flow<DailySnapshotWithEntries?> {
+    override fun snapshot(id: Long): Flow<RoutineSnapshotWithEntries?> {
         requestedSnapshotIds += id
         return flowOf(snapshots[id]?.let(::withEntries))
     }
 
-    override suspend fun snapshotForDateOnce(
-        date: String,
+    override suspend fun snapshotForPeriodStartDateOnce(
+        periodStartDate: String,
         cadence: String,
-    ): DailySnapshotEntity? = findSnapshot(date, cadence)
+    ): RoutineSnapshotEntity? = findSnapshot(periodStartDate, cadence)
 
-    override suspend fun insertSnapshot(snapshot: DailySnapshotEntity): Long {
+    override suspend fun insertSnapshot(snapshot: RoutineSnapshotEntity): Long {
         val id = snapshot.id.takeIf { it != 0L } ?: nextSnapshotId++
         snapshots[id] = snapshot.copy(id = id)
         return id
@@ -360,8 +360,8 @@ private class FakeDailySnapshotDao : DailySnapshotDao {
         updatedSnapshotIds += id
     }
 
-    override suspend fun insertEntries(entries: List<DailySnapshotEntryEntity>) {
-        entries.groupBy(DailySnapshotEntryEntity::snapshotId).forEach { (snapshotId, newEntries) ->
+    override suspend fun insertEntries(entries: List<RoutineSnapshotEntryEntity>) {
+        entries.groupBy(RoutineSnapshotEntryEntity::snapshotId).forEach { (snapshotId, newEntries) ->
             this.entries[snapshotId] = this.entries[snapshotId].orEmpty() + newEntries
         }
     }
@@ -378,25 +378,25 @@ private class FakeDailySnapshotDao : DailySnapshotDao {
     }
 
     fun storeSnapshot(
-        snapshot: DailySnapshotEntity,
-        entries: List<DailySnapshotEntryEntity> = emptyList(),
+        snapshot: RoutineSnapshotEntity,
+        entries: List<RoutineSnapshotEntryEntity> = emptyList(),
     ) {
         snapshots[snapshot.id] = snapshot
         this.entries[snapshot.id] = entries
     }
 
-    private fun withEntries(snapshot: DailySnapshotEntity): DailySnapshotWithEntries =
-        DailySnapshotWithEntries(
+    private fun withEntries(snapshot: RoutineSnapshotEntity): RoutineSnapshotWithEntries =
+        RoutineSnapshotWithEntries(
             snapshot = snapshot,
             entries = entries[snapshot.id].orEmpty(),
         )
 
     private fun findSnapshot(
-        date: String,
+        periodStartDate: String,
         cadence: String,
-    ): DailySnapshotEntity? =
+    ): RoutineSnapshotEntity? =
         snapshots.values.firstOrNull { snapshot ->
-            snapshot.date == date && snapshot.cadence == cadence
+            snapshot.periodStartDate == periodStartDate && snapshot.cadence == cadence
         }
 }
 

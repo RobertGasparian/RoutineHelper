@@ -57,7 +57,7 @@ class FinalizeTodayUseCaseTest {
         assertEquals(emptyList<String>(), todayRepository.resetDates)
         assertEquals(
             SavedSnapshot(
-                date = "2026-05-29",
+                periodStartDate = "2026-05-29",
                 finalizedAtMillis = 123L,
                 summaryNote = "Low-energy day, but I kept the basics moving.",
                 items = listOf(
@@ -88,7 +88,7 @@ class FinalizeTodayUseCaseTest {
         historyRepository.setSnapshot(
             RoutineSnapshotSummary(
                 snapshotId = 77L,
-                date = "2026-05-29",
+                periodStartDate = "2026-05-29",
                 finalizedAtMillis = 100L,
             ),
         )
@@ -117,7 +117,7 @@ class FinalizeTodayUseCaseTest {
         assertEquals(emptyList<String>(), todayRepository.resetDates)
         assertEquals(
             SavedSnapshot(
-                date = "2026-05-29",
+                periodStartDate = "2026-05-29",
                 finalizedAtMillis = 200L,
                 items = listOf(
                     RoutineSnapshotItem(
@@ -154,11 +154,11 @@ class FinalizeTodayUseCaseTest {
 
         useCase(
             date = "2026-05-29",
-            snapshotDate = "2026-05-27",
+            snapshotPeriodStartDate = "2026-05-27",
             finalizedAtMillis = 123L,
         )
 
-        assertEquals("2026-05-27", historyRepository.savedSnapshots.single().date)
+        assertEquals("2026-05-27", historyRepository.savedSnapshots.single().periodStartDate)
         assertEquals(emptyList<String>(), todayRepository.resetDates)
     }
 
@@ -182,11 +182,11 @@ class FinalizeTodayUseCaseTest {
 
         useCase(
             date = "2026-05-29",
-            snapshotDate = "2026-05-28",
+            snapshotPeriodStartDate = "2026-05-28",
             finalizedAtMillis = 123L,
         )
 
-        assertEquals("2026-05-28", historyRepository.savedSnapshots.single().date)
+        assertEquals("2026-05-28", historyRepository.savedSnapshots.single().periodStartDate)
         assertEquals(
             "Kept for debug snapshot.",
             historyRepository.savedSnapshots.single().items.single().note,

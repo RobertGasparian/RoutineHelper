@@ -12,7 +12,7 @@ interface RoutineHistoryRepository {
     fun snapshot(snapshotId: Long): Flow<RoutineSnapshot?>
 
     suspend fun saveSnapshot(
-        date: String,
+        periodStartDate: String,
         finalizedAtMillis: Long,
         items: List<RoutineSnapshotItem>,
         summaryNote: String?,

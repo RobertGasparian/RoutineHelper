@@ -115,7 +115,7 @@ private fun RoutineSnapshot.toUiState(timeProvider: TimeProvider): HistoryDetail
     )
 
 private val RoutineSnapshot.displayDate: String
-    get() = if (cadence == RoutineCadence.Weekly) "Week of $date" else date
+    get() = if (cadence == RoutineCadence.Weekly) "Week of $periodStartDate" else periodStartDate
 
 private fun RoutineSnapshotItem.toUiState(): HistoryDetailItemUiState =
     HistoryDetailItemUiState(

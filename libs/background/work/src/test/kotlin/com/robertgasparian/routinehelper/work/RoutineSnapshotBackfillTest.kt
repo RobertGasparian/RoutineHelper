@@ -44,7 +44,7 @@ class RoutineSnapshotBackfillTest {
 
         assertEquals(
             listOf("2026-06-01" to RoutineCadence.Daily),
-            historyRepository.savedSnapshots.map { snapshot -> snapshot.date to snapshot.cadence },
+            historyRepository.savedSnapshots.map { snapshot -> snapshot.periodStartDate to snapshot.cadence },
         )
         assertEquals(listOf("2026-06-01"), todayRepository.resetDates)
         assertTrue(weeklyRepository.resetWeeks.isEmpty())
@@ -63,7 +63,7 @@ class RoutineSnapshotBackfillTest {
                 "2026-05-31" to RoutineCadence.Daily,
                 "2026-05-25" to RoutineCadence.Weekly,
             ),
-            historyRepository.savedSnapshots.map { snapshot -> snapshot.date to snapshot.cadence },
+            historyRepository.savedSnapshots.map { snapshot -> snapshot.periodStartDate to snapshot.cadence },
         )
         assertEquals(listOf("2026-05-31"), todayRepository.resetDates)
         assertEquals(listOf("2026-05-25"), weeklyRepository.resetWeeks)

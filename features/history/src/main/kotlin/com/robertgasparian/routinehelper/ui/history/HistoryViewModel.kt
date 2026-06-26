@@ -148,18 +148,18 @@ private enum class ShareMode {
 }
 
 private fun List<RoutineSnapshot>.toFileShareMessage(): String {
-    val dates = map { snapshot -> snapshot.date }.distinct().sorted()
-    return when (dates.size) {
+    val periodStartDates = map { snapshot -> snapshot.periodStartDate }.distinct().sorted()
+    return when (periodStartDates.size) {
         0 -> "Here are the routine snapshots."
-        1 -> "Here are the routine snapshots from ${dates.first()}."
-        else -> "Here are the routine snapshots from ${dates.first()} to ${dates.last()}."
+        1 -> "Here are the routine snapshots from ${periodStartDates.first()}."
+        else -> "Here are the routine snapshots from ${periodStartDates.first()} to ${periodStartDates.last()}."
     }
 }
 
 private fun RoutineSnapshotSummary.toUiState(isSelected: Boolean): HistorySnapshotUiState =
     HistorySnapshotUiState(
         snapshotId = snapshotId,
-        date = if (cadence == RoutineCadence.Weekly) "Week of $date" else date,
+        date = if (cadence == RoutineCadence.Weekly) "Week of $periodStartDate" else periodStartDate,
         cadence = cadence,
         completedCount = completedCount,
         totalCount = totalCount,

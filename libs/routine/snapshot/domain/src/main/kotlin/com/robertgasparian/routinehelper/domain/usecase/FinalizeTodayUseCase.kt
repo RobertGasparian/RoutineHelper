@@ -14,7 +14,7 @@ class FinalizeTodayUseCase @Inject constructor(
     suspend operator fun invoke(
         date: String,
         finalizedAtMillis: Long,
-        snapshotDate: String = date,
+        snapshotPeriodStartDate: String = date,
     ): Long? {
         val todayItems = todayRoutineRepository.todayItems(date).first()
         val snapshotItems = todayItems.map { item ->
@@ -35,7 +35,7 @@ class FinalizeTodayUseCase @Inject constructor(
         val summaryNote = todayRoutineRepository.summaryNote(date).first()
 
         val snapshotId = routineHistoryRepository.saveSnapshot(
-            date = snapshotDate,
+            periodStartDate = snapshotPeriodStartDate,
             finalizedAtMillis = finalizedAtMillis,
             items = snapshotItems,
             summaryNote = summaryNote,

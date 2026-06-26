@@ -14,7 +14,7 @@ class FinalizeWeeklyUseCase @Inject constructor(
     suspend operator fun invoke(
         weekStartDate: String,
         finalizedAtMillis: Long,
-        snapshotWeekStartDate: String = weekStartDate,
+        snapshotPeriodStartDate: String = weekStartDate,
     ): Long? {
         val weeklyItems = weeklyRoutineRepository.weeklyItems(weekStartDate).first()
         val snapshotItems = weeklyItems.map { item ->
@@ -35,7 +35,7 @@ class FinalizeWeeklyUseCase @Inject constructor(
         val summaryNote = weeklyRoutineRepository.summaryNote(weekStartDate).first()
 
         val snapshotId = routineHistoryRepository.saveSnapshot(
-            date = snapshotWeekStartDate,
+            periodStartDate = snapshotPeriodStartDate,
             finalizedAtMillis = finalizedAtMillis,
             items = snapshotItems,
             summaryNote = summaryNote,

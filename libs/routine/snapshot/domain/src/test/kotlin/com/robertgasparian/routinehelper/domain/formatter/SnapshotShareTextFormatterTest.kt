@@ -17,7 +17,7 @@ class SnapshotShareTextFormatterTest {
         val text = formatter(
             RoutineSnapshot(
                 snapshotId = 1L,
-                date = "2026-05-29",
+                periodStartDate = "2026-05-29",
                 finalizedAtMillis = FINALIZED_AT_MILLIS,
                 summaryNote = "Low-energy day, but I kept the basics moving.",
                 items = listOf(
@@ -61,7 +61,7 @@ class SnapshotShareTextFormatterTest {
         val text = formatter(
             RoutineSnapshot(
                 snapshotId = 1L,
-                date = "2026-05-29",
+                periodStartDate = "2026-05-29",
                 finalizedAtMillis = FINALIZED_AT_MILLIS,
                 cadence = RoutineCadence.Daily,
                 items = emptyList(),
@@ -77,7 +77,7 @@ class SnapshotShareTextFormatterTest {
         val text = formatter(
             RoutineSnapshot(
                 snapshotId = 1L,
-                date = "2026-05-25",
+                periodStartDate = "2026-05-25",
                 finalizedAtMillis = FINALIZED_AT_MILLIS,
                 cadence = RoutineCadence.Weekly,
                 items = emptyList(),
@@ -96,13 +96,13 @@ class SnapshotShareTextFormatterTest {
             listOf(
                 RoutineSnapshot(
                     snapshotId = 1L,
-                    date = "2026-05-28",
+                    periodStartDate = "2026-05-28",
                     finalizedAtMillis = FINALIZED_AT_MILLIS,
                     items = emptyList(),
                 ),
                 RoutineSnapshot(
                     snapshotId = 2L,
-                    date = "2026-05-29",
+                    periodStartDate = "2026-05-29",
                     finalizedAtMillis = FINALIZED_AT_MILLIS,
                     items = emptyList(),
                 ),

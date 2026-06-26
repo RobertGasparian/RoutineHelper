@@ -13,12 +13,12 @@ class DailySnapshotOrchestrator @Inject internal constructor(
     private val timeProvider: TimeProvider,
 ) {
     internal suspend fun finalizePreviousDay(now: ZonedDateTime = timeProvider.now()) {
-        val snapshotDate = SnapshotDates.dailySnapshotDate(now).toString()
+        val snapshotPeriodStartDate = SnapshotDates.dailySnapshotDate(now).toString()
         finalizeTodayUseCase(
-            date = snapshotDate,
-            snapshotDate = snapshotDate,
+            date = snapshotPeriodStartDate,
+            snapshotPeriodStartDate = snapshotPeriodStartDate,
             finalizedAtMillis = now.toInstant().toEpochMilli(),
         )
-        resetTodayUseCase(snapshotDate)
+        resetTodayUseCase(snapshotPeriodStartDate)
     }
 }

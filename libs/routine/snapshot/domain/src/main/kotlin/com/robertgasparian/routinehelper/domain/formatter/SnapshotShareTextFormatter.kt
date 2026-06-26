@@ -16,7 +16,7 @@ class SnapshotShareTextFormatter @Inject constructor(
         val timeFormatter = shareTimeFormatter.withZone(timeProvider.now().zone)
         return buildString {
             appendLine("${snapshot.cadence.label} routine snapshot")
-            appendLine("${snapshot.cadence.dateLabel}: ${snapshot.date}")
+            appendLine("${snapshot.cadence.dateLabel}: ${snapshot.periodStartDate}")
             appendLine("Finalized: ${timeFormatter.format(Instant.ofEpochMilli(snapshot.finalizedAtMillis))}")
             appendLine()
 
@@ -53,7 +53,7 @@ class SnapshotShareTextFormatter @Inject constructor(
 
     operator fun invoke(snapshots: List<RoutineSnapshot>): String =
         snapshots
-            .sortedWith(compareByDescending<RoutineSnapshot> { it.date }.thenByDescending { it.finalizedAtMillis })
+            .sortedWith(compareByDescending<RoutineSnapshot> { it.periodStartDate }.thenByDescending { it.finalizedAtMillis })
             .joinToString(separator = "\n\n---\n\n") { snapshot -> invoke(snapshot) }
 
     private val RoutineSnapshotItem.statusLabel: String

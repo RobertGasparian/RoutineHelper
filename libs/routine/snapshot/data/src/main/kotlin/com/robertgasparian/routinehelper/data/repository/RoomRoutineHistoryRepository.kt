@@ -2,10 +2,10 @@ package com.robertgasparian.routinehelper.data.repository
 
 import androidx.room.RoomDatabase
 import androidx.room.withTransaction
-import com.robertgasparian.routinehelper.data.local.dao.DailySnapshotDao
-import com.robertgasparian.routinehelper.data.local.entity.DailySnapshotEntity
-import com.robertgasparian.routinehelper.data.local.entity.DailySnapshotEntryEntity
-import com.robertgasparian.routinehelper.data.local.model.DailySnapshotWithEntries
+import com.robertgasparian.routinehelper.data.local.dao.RoutineSnapshotDao
+import com.robertgasparian.routinehelper.data.local.entity.RoutineSnapshotEntity
+import com.robertgasparian.routinehelper.data.local.entity.RoutineSnapshotEntryEntity
+import com.robertgasparian.routinehelper.data.local.model.RoutineSnapshotWithEntries
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
@@ -17,23 +17,23 @@ import javax.inject.Inject
 
 class RoomRoutineHistoryRepository @Inject constructor(
     private val database: RoomDatabase,
-    private val dailySnapshotDao: DailySnapshotDao,
+    private val routineSnapshotDao: RoutineSnapshotDao,
 ) : RoutineHistoryRepository {
     override fun snapshotSummaries(cadence: RoutineCadence?): Flow<List<RoutineSnapshotSummary>> =
-        (cadence?.let { dailySnapshotDao.snapshotsWithEntries(it.toStorageValue()) }
-            ?: dailySnapshotDao.snapshotsWithEntries()).map { snapshots ->
+        (cadence?.let { routineSnapshotDao.snapshotsWithEntries(it.toStorageValue()) }
+            ?: routineSnapshotDao.snapshotsWithEntries()).map { snapshots ->
             snapshots.map { snapshotWithEntries ->
                 snapshotWithEntries.toSummary()
             }
         }
 
     override fun snapshot(snapshotId: Long): Flow<RoutineSnapshot?> =
-        dailySnapshotDao.snapshot(snapshotId).map { snapshotWithEntries ->
+        routineSnapshotDao.snapshot(snapshotId).map { snapshotWithEntries ->
             snapshotWithEntries?.toDomain()
         }
 
     override suspend fun saveSnapshot(
-        date: String,
+        periodStartDate: String,
         finalizedAtMillis: Long,
         items: List<RoutineSnapshotItem>,
         summaryNote: String?,
@@ -41,26 +41,26 @@ class RoomRoutineHistoryRepository @Inject constructor(
     ): Long = database.withTransaction {
         val storageCadence = cadence.toStorageValue()
         val normalizedSummaryNote = summaryNote?.trim()?.takeIf(String::isNotEmpty)
-        val existingSnapshot = dailySnapshotDao.snapshotForDateOnce(date, storageCadence)
-        val snapshotId = existingSnapshot?.id ?: dailySnapshotDao.insertSnapshot(
-            DailySnapshotEntity(
-                date = date,
+        val existingSnapshot = routineSnapshotDao.snapshotForPeriodStartDateOnce(periodStartDate, storageCadence)
+        val snapshotId = existingSnapshot?.id ?: routineSnapshotDao.insertSnapshot(
+            RoutineSnapshotEntity(
+                periodStartDate = periodStartDate,
                 finalizedAtMillis = finalizedAtMillis,
                 cadence = storageCadence,
                 summaryNote = normalizedSummaryNote,
             ),
         )
         if (existingSnapshot != null) {
-            dailySnapshotDao.updateSnapshot(
+            routineSnapshotDao.updateSnapshot(
                 id = snapshotId,
                 finalizedAtMillis = finalizedAtMillis,
                 summaryNote = normalizedSummaryNote,
             )
-            dailySnapshotDao.deleteEntries(snapshotId)
+            routineSnapshotDao.deleteEntries(snapshotId)
         }
-        dailySnapshotDao.insertEntries(
+        routineSnapshotDao.insertEntries(
             items.sortedBy { it.position }.map { item ->
-                DailySnapshotEntryEntity(
+                RoutineSnapshotEntryEntity(
                     snapshotId = snapshotId,
                     actionId = item.actionId,
                     titleSnapshot = item.title,
@@ -78,34 +78,34 @@ class RoomRoutineHistoryRepository @Inject constructor(
     }
 
     override suspend fun deleteSnapshot(snapshotId: Long) {
-        dailySnapshotDao.deleteSnapshot(snapshotId)
+        routineSnapshotDao.deleteSnapshot(snapshotId)
     }
 }
 
 private fun RoutineCadence.toStorageValue(): String =
     when (this) {
-        RoutineCadence.Daily -> DailySnapshotEntity.DAILY_CADENCE_STORAGE_VALUE
-        RoutineCadence.Weekly -> DailySnapshotEntity.WEEKLY_CADENCE_STORAGE_VALUE
+        RoutineCadence.Daily -> RoutineSnapshotEntity.DAILY_CADENCE_STORAGE_VALUE
+        RoutineCadence.Weekly -> RoutineSnapshotEntity.WEEKLY_CADENCE_STORAGE_VALUE
     }
 
 private fun String.toRoutineCadence(): RoutineCadence =
     when (this) {
-        DailySnapshotEntity.DAILY_CADENCE_STORAGE_VALUE -> RoutineCadence.Daily
-        DailySnapshotEntity.WEEKLY_CADENCE_STORAGE_VALUE -> RoutineCadence.Weekly
+        RoutineSnapshotEntity.DAILY_CADENCE_STORAGE_VALUE -> RoutineCadence.Daily
+        RoutineSnapshotEntity.WEEKLY_CADENCE_STORAGE_VALUE -> RoutineCadence.Weekly
         else -> error("Unsupported routine cadence storage value: $this")
     }
 
-private fun DailySnapshotWithEntries.toDomain(): RoutineSnapshot =
+private fun RoutineSnapshotWithEntries.toDomain(): RoutineSnapshot =
     RoutineSnapshot(
         snapshotId = snapshot.id,
-        date = snapshot.date,
+        periodStartDate = snapshot.periodStartDate,
         finalizedAtMillis = snapshot.finalizedAtMillis,
         cadence = snapshot.cadence.toRoutineCadence(),
         summaryNote = snapshot.summaryNote,
         items = entries.toDomainItems(),
     )
 
-private fun List<DailySnapshotEntryEntity>.toDomainItems(): List<RoutineSnapshotItem> =
+private fun List<RoutineSnapshotEntryEntity>.toDomainItems(): List<RoutineSnapshotItem> =
     sortedBy { it.positionSnapshot }.map { entry ->
         RoutineSnapshotItem(
             actionId = entry.actionId,
@@ -120,11 +120,11 @@ private fun List<DailySnapshotEntryEntity>.toDomainItems(): List<RoutineSnapshot
         )
     }
 
-private fun DailySnapshotWithEntries.toSummary(): RoutineSnapshotSummary {
+private fun RoutineSnapshotWithEntries.toSummary(): RoutineSnapshotSummary {
     val countableEntries = entries.filterNot { entry -> entry.isHidden }
     return RoutineSnapshotSummary(
         snapshotId = snapshot.id,
-        date = snapshot.date,
+        periodStartDate = snapshot.periodStartDate,
         finalizedAtMillis = snapshot.finalizedAtMillis,
         cadence = snapshot.cadence.toRoutineCadence(),
         completedCount = countableEntries.count { entry ->

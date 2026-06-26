@@ -2,19 +2,19 @@ package com.robertgasparian.routinehelper.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.Index
-import androidx.room.PrimaryKey
 import androidx.room.ColumnInfo
+import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "daily_snapshots",
+    tableName = "routine_snapshots",
     indices = [
-        Index(value = ["date", "cadence"], unique = true),
+        Index(value = ["periodStartDate", "cadence"], unique = true),
     ],
 )
-data class DailySnapshotEntity(
+data class RoutineSnapshotEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val date: String,
+    val periodStartDate: String,
     val finalizedAtMillis: Long,
     @ColumnInfo(defaultValue = DAILY_CADENCE_STORAGE_VALUE)
     val cadence: String = DAILY_CADENCE_STORAGE_VALUE,

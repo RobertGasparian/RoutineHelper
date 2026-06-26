@@ -231,7 +231,7 @@ class WeeklyViewModel @Inject constructor(
         viewModelScope.launch {
             finalizeWeeklyUseCase(
                 weekStartDate = weekStartDate,
-                snapshotWeekStartDate = snapshotWeekStartDate,
+                snapshotPeriodStartDate = snapshotWeekStartDate,
                 finalizedAtMillis = timeProvider.currentTimeMillis(),
             )
         }

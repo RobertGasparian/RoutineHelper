@@ -35,7 +35,7 @@ class DailySnapshotOrchestratorTest {
         orchestrator.finalizePreviousDay(now)
 
         val snapshot = historyRepository.savedSnapshots.single()
-        assertEquals("2026-06-01", snapshot.date)
+        assertEquals("2026-06-01", snapshot.periodStartDate)
         assertEquals(RoutineCadence.Daily, snapshot.cadence)
         assertEquals(now.toInstant().toEpochMilli(), snapshot.finalizedAtMillis)
         assertEquals(listOf("2026-06-01"), todayRepository.resetDates)

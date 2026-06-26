@@ -35,7 +35,7 @@ class WeeklySnapshotOrchestratorTest {
         orchestrator.finalizePreviousWeek(now)
 
         val snapshot = historyRepository.savedSnapshots.single()
-        assertEquals("2026-05-25", snapshot.date)
+        assertEquals("2026-05-25", snapshot.periodStartDate)
         assertEquals(RoutineCadence.Weekly, snapshot.cadence)
         assertEquals(now.toInstant().toEpochMilli(), snapshot.finalizedAtMillis)
         assertEquals(listOf("2026-05-25"), weeklyRepository.resetWeeks)

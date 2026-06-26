@@ -58,7 +58,7 @@ class FinalizeWeeklyUseCaseTest {
         assertEquals(emptyList<String>(), weeklyRepository.resetWeeks)
         assertEquals(
             SavedSnapshot(
-                date = "2026-05-24",
+                periodStartDate = "2026-05-24",
                 finalizedAtMillis = 123L,
                 summaryNote = "Solid weekly reset.",
                 cadence = RoutineCadence.Weekly,
@@ -90,7 +90,7 @@ class FinalizeWeeklyUseCaseTest {
         historyRepository.setSnapshot(
             RoutineSnapshotSummary(
                 snapshotId = 77L,
-                date = "2026-05-24",
+                periodStartDate = "2026-05-24",
                 finalizedAtMillis = 100L,
                 cadence = RoutineCadence.Weekly,
             ),
@@ -120,7 +120,7 @@ class FinalizeWeeklyUseCaseTest {
         assertEquals(emptyList<String>(), weeklyRepository.resetWeeks)
         assertEquals(
             SavedSnapshot(
-                date = "2026-05-24",
+                periodStartDate = "2026-05-24",
                 finalizedAtMillis = 200L,
                 cadence = RoutineCadence.Weekly,
                 items = listOf(
@@ -158,11 +158,11 @@ class FinalizeWeeklyUseCaseTest {
 
         useCase(
             weekStartDate = "2026-05-24",
-            snapshotWeekStartDate = "2026-05-17",
+            snapshotPeriodStartDate = "2026-05-17",
             finalizedAtMillis = 123L,
         )
 
-        assertEquals("2026-05-17", historyRepository.savedSnapshots.single().date)
+        assertEquals("2026-05-17", historyRepository.savedSnapshots.single().periodStartDate)
         assertEquals(RoutineCadence.Weekly, historyRepository.savedSnapshots.single().cadence)
         assertEquals(emptyList<String>(), weeklyRepository.resetWeeks)
     }
@@ -189,11 +189,11 @@ class FinalizeWeeklyUseCaseTest {
 
         useCase(
             weekStartDate = "2026-05-24",
-            snapshotWeekStartDate = "2026-05-17",
+            snapshotPeriodStartDate = "2026-05-17",
             finalizedAtMillis = 123L,
         )
 
-        assertEquals("2026-05-17", historyRepository.savedSnapshots.single().date)
+        assertEquals("2026-05-17", historyRepository.savedSnapshots.single().periodStartDate)
         assertEquals(RoutineCadence.Weekly, historyRepository.savedSnapshots.single().cadence)
         assertEquals(9, historyRepository.savedSnapshots.single().items.single().completedCount)
         assertEquals(

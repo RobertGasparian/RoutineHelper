@@ -198,7 +198,7 @@ class HistoryViewModelTest {
         cadence: RoutineCadence = RoutineCadence.Daily,
     ): Long =
         repository.saveSnapshot(
-            date = date,
+            periodStartDate = date,
             finalizedAtMillis = 1_748_534_400_000L,
             items = listOf(snapshotItem()),
             summaryNote = "Summary",
@@ -215,7 +215,7 @@ class HistoryViewModelTest {
     ): RoutineSnapshotSummary =
         RoutineSnapshotSummary(
             snapshotId = snapshotId,
-            date = date,
+            periodStartDate = date,
             finalizedAtMillis = 1_748_534_400_000L,
             cadence = cadence,
             completedCount = completedCount,

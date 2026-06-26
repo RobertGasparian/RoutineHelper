@@ -6,10 +6,10 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "daily_snapshot_entries",
+    tableName = "routine_snapshot_entries",
     foreignKeys = [
         ForeignKey(
-            entity = DailySnapshotEntity::class,
+            entity = RoutineSnapshotEntity::class,
             parentColumns = ["id"],
             childColumns = ["snapshotId"],
             onDelete = ForeignKey.CASCADE,
@@ -21,7 +21,7 @@ import androidx.room.PrimaryKey
         Index(value = ["snapshotId", "positionSnapshot"]),
     ],
 )
-data class DailySnapshotEntryEntity(
+data class RoutineSnapshotEntryEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val snapshotId: Long,

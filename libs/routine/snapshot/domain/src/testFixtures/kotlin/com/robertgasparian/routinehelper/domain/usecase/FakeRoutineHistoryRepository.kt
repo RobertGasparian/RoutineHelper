@@ -20,7 +20,7 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
         snapshots.value = snapshots.value.replaceById(
             RoutineSnapshot(
                 snapshotId = summary.snapshotId,
-                date = summary.date,
+                periodStartDate = summary.periodStartDate,
                 finalizedAtMillis = summary.finalizedAtMillis,
                 cadence = summary.cadence,
                 items = emptyList(),
@@ -42,51 +42,51 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
         }
 
     override suspend fun saveSnapshot(
-        date: String,
+        periodStartDate: String,
         finalizedAtMillis: Long,
         items: List<RoutineSnapshotItem>,
         summaryNote: String?,
         cadence: RoutineCadence,
     ): Long {
         val existingSnapshot = snapshots.value.firstOrNull { snapshot ->
-            snapshot.date == date && snapshot.cadence == cadence
+            snapshot.periodStartDate == periodStartDate && snapshot.cadence == cadence
         }
         val snapshotId =
             existingSnapshot?.snapshotId ?: ((snapshots.value.maxOfOrNull { it.snapshotId }
                 ?: 0L) + 1L)
         val savedSnapshot = SavedSnapshot(
-            date = date,
+            periodStartDate = periodStartDate,
             finalizedAtMillis = finalizedAtMillis,
             items = items,
             summaryNote = summaryNote,
             cadence = cadence,
         )
-        savedSnapshots.removeAll { snapshot -> snapshot.date == date && snapshot.cadence == cadence }
+        savedSnapshots.removeAll { snapshot -> snapshot.periodStartDate == periodStartDate && snapshot.cadence == cadence }
         savedSnapshots += savedSnapshot
         val snapshot = RoutineSnapshot(
             snapshotId = snapshotId,
-            date = date,
+            periodStartDate = periodStartDate,
             finalizedAtMillis = finalizedAtMillis,
             cadence = cadence,
             summaryNote = summaryNote,
             items = items,
         )
         snapshots.value = snapshots.value.filterNot { snapshot ->
-            snapshot.date == date && snapshot.cadence == cadence
+            snapshot.periodStartDate == periodStartDate && snapshot.cadence == cadence
         } + snapshot
         summaries.value = summaries.value.filterNot { summary ->
-            summary.date == date && summary.cadence == cadence
+            summary.periodStartDate == periodStartDate && summary.cadence == cadence
         } + snapshot.toSummary()
         return snapshotId
     }
 
     suspend fun saveSnapshot(
-        date: String,
+        periodStartDate: String,
         finalizedAtMillis: Long,
         items: List<RoutineSnapshotItem>,
     ): Long =
         saveSnapshot(
-            date = date,
+            periodStartDate = periodStartDate,
             finalizedAtMillis = finalizedAtMillis,
             items = items,
             summaryNote = null,
@@ -110,7 +110,7 @@ private fun RoutineSnapshot.toSummary(): RoutineSnapshotSummary {
     val countableItems = items.filterNot(RoutineSnapshotItem::isHidden)
     return RoutineSnapshotSummary(
         snapshotId = snapshotId,
-        date = date,
+        periodStartDate = periodStartDate,
         finalizedAtMillis = finalizedAtMillis,
         cadence = cadence,
         completedCount = countableItems.count { item ->
@@ -124,7 +124,7 @@ private fun RoutineSnapshot.toSummary(): RoutineSnapshotSummary {
 }
 
 data class SavedSnapshot(
-    val date: String,
+    val periodStartDate: String,
     val finalizedAtMillis: Long,
     val items: List<RoutineSnapshotItem>,
     val summaryNote: String? = null,

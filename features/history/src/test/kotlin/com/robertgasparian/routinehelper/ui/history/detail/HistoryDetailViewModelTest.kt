@@ -140,7 +140,7 @@ class HistoryDetailViewModelTest {
 
     private suspend fun saveWeeklySnapshot(): Long =
         repository.saveSnapshot(
-            date = "2026-05-25",
+            periodStartDate = "2026-05-25",
             finalizedAtMillis = 1_748_534_400_000L,
             items = listOf(
                 RoutineSnapshotItem(

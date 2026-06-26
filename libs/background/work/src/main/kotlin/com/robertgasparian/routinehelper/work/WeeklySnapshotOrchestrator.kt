@@ -13,12 +13,12 @@ class WeeklySnapshotOrchestrator @Inject internal constructor(
     private val timeProvider: TimeProvider,
 ) {
     internal suspend fun finalizePreviousWeek(now: ZonedDateTime = timeProvider.now()) {
-        val snapshotWeekStartDate = SnapshotDates.previousCompletedCalendarWeekStartDate(now).toString()
+        val snapshotPeriodStartDate = SnapshotDates.previousCompletedCalendarWeekStartDate(now).toString()
         finalizeWeeklyUseCase(
-            weekStartDate = snapshotWeekStartDate,
-            snapshotWeekStartDate = snapshotWeekStartDate,
+            weekStartDate = snapshotPeriodStartDate,
+            snapshotPeriodStartDate = snapshotPeriodStartDate,
             finalizedAtMillis = now.toInstant().toEpochMilli(),
         )
-        resetWeeklyUseCase(snapshotWeekStartDate)
+        resetWeeklyUseCase(snapshotPeriodStartDate)
     }
 }

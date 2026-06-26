@@ -3,15 +3,15 @@ package com.robertgasparian.routinehelper.data.local
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.robertgasparian.routinehelper.data.local.dao.ActionDao
-import com.robertgasparian.routinehelper.data.local.dao.DailySnapshotDao
+import com.robertgasparian.routinehelper.data.local.dao.RoutineSnapshotDao
 import com.robertgasparian.routinehelper.data.local.dao.DailySummaryNoteDao
 import com.robertgasparian.routinehelper.data.local.dao.RoutineItemDao
 import com.robertgasparian.routinehelper.data.local.dao.TodayEntryDao
 import com.robertgasparian.routinehelper.data.local.dao.WeeklyEntryDao
 import com.robertgasparian.routinehelper.data.local.dao.WeeklySummaryNoteDao
 import com.robertgasparian.routinehelper.data.local.entity.ActionEntity
-import com.robertgasparian.routinehelper.data.local.entity.DailySnapshotEntity
-import com.robertgasparian.routinehelper.data.local.entity.DailySnapshotEntryEntity
+import com.robertgasparian.routinehelper.data.local.entity.RoutineSnapshotEntity
+import com.robertgasparian.routinehelper.data.local.entity.RoutineSnapshotEntryEntity
 import com.robertgasparian.routinehelper.data.local.entity.DailySummaryNoteEntity
 import com.robertgasparian.routinehelper.data.local.entity.RoutineItemEntity
 import com.robertgasparian.routinehelper.data.local.entity.TodayEntryEntity
@@ -23,8 +23,8 @@ import com.robertgasparian.routinehelper.data.local.entity.WeeklySummaryNoteEnti
         ActionEntity::class,
         RoutineItemEntity::class,
         TodayEntryEntity::class,
-        DailySnapshotEntity::class,
-        DailySnapshotEntryEntity::class,
+        RoutineSnapshotEntity::class,
+        RoutineSnapshotEntryEntity::class,
         WeeklyEntryEntity::class,
         DailySummaryNoteEntity::class,
         WeeklySummaryNoteEntity::class,
@@ -39,7 +39,7 @@ abstract class RoutineDatabase : RoomDatabase() {
 
     abstract fun todayEntryDao(): TodayEntryDao
 
-    abstract fun dailySnapshotDao(): DailySnapshotDao
+    abstract fun routineSnapshotDao(): RoutineSnapshotDao
 
     abstract fun weeklyEntryDao(): WeeklyEntryDao
 

@@ -227,7 +227,7 @@ class DailyViewModel @Inject constructor(
         viewModelScope.launch {
             finalizeTodayUseCase(
                 date = todayDate,
-                snapshotDate = snapshotDate,
+                snapshotPeriodStartDate = snapshotDate,
                 finalizedAtMillis = timeProvider.currentTimeMillis(),
             )
         }
