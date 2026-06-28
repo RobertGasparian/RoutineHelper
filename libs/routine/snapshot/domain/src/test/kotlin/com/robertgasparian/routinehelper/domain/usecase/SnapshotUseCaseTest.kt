@@ -1,5 +1,6 @@
 package com.robertgasparian.routinehelper.domain.usecase
 
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -15,6 +16,7 @@ class SnapshotUseCaseTest {
             periodStartDate = "2026-05-29",
             finalizedAtMillis = 123L,
             items = emptyList(),
+            cadence = RoutineCadence.Daily,
         )
 
         val summaries = SnapshotSummariesUseCase(repository)().first()
@@ -29,6 +31,7 @@ class SnapshotUseCaseTest {
         val snapshotId = repository.saveSnapshot(
             periodStartDate = "2026-05-29",
             finalizedAtMillis = 123L,
+            cadence = RoutineCadence.Daily,
             items = listOf(
                 RoutineSnapshotItem(
                     actionId = 100L,

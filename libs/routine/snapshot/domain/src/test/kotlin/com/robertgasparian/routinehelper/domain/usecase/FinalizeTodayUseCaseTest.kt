@@ -1,5 +1,6 @@
 package com.robertgasparian.routinehelper.domain.usecase
 
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotSummary
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
@@ -59,6 +60,7 @@ class FinalizeTodayUseCaseTest {
             SavedSnapshot(
                 periodStartDate = "2026-05-29",
                 finalizedAtMillis = 123L,
+                cadence = RoutineCadence.Daily,
                 summaryNote = "Low-energy day, but I kept the basics moving.",
                 items = listOf(
                     RoutineSnapshotItem(
@@ -90,6 +92,7 @@ class FinalizeTodayUseCaseTest {
                 snapshotId = 77L,
                 periodStartDate = "2026-05-29",
                 finalizedAtMillis = 100L,
+                cadence = RoutineCadence.Daily,
             ),
         )
         todayRepository.setItems(
@@ -119,6 +122,7 @@ class FinalizeTodayUseCaseTest {
             SavedSnapshot(
                 periodStartDate = "2026-05-29",
                 finalizedAtMillis = 200L,
+                cadence = RoutineCadence.Daily,
                 items = listOf(
                     RoutineSnapshotItem(
                         actionId = 100L,

@@ -19,6 +19,7 @@ class SnapshotShareTextFormatterTest {
                 snapshotId = 1L,
                 periodStartDate = "2026-05-29",
                 finalizedAtMillis = FINALIZED_AT_MILLIS,
+                cadence = RoutineCadence.Daily,
                 summaryNote = "Low-energy day, but I kept the basics moving.",
                 items = listOf(
                     RoutineSnapshotItem(
@@ -98,12 +99,14 @@ class SnapshotShareTextFormatterTest {
                     snapshotId = 1L,
                     periodStartDate = "2026-05-28",
                     finalizedAtMillis = FINALIZED_AT_MILLIS,
+                    cadence = RoutineCadence.Daily,
                     items = emptyList(),
                 ),
                 RoutineSnapshot(
                     snapshotId = 2L,
                     periodStartDate = "2026-05-29",
                     finalizedAtMillis = FINALIZED_AT_MILLIS,
+                    cadence = RoutineCadence.Daily,
                     items = emptyList(),
                 ),
             ),

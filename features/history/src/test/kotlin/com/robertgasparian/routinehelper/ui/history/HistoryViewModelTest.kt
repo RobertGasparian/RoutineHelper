@@ -97,7 +97,7 @@ class HistoryViewModelTest {
 
     @Test
     fun `given selected snapshot when share options are shown and cleared then dialog and selection reset`() = runTest {
-        repository.setSnapshot(summary(snapshotId = DAILY_SNAPSHOT_ID))
+        repository.setSnapshot(summary(snapshotId = DAILY_SNAPSHOT_ID, cadence = RoutineCadence.Daily))
         val viewModel = createViewModel()
         viewModel.uiState.first { it.snapshots.isNotEmpty() }
 
@@ -169,8 +169,8 @@ class HistoryViewModelTest {
 
     @Test
     fun `given selected snapshots when deleted then repository receives ids and selection clears`() = runTest {
-        val firstId = saveSnapshot(date = "2026-05-28")
-        val secondId = saveSnapshot(date = "2026-05-29")
+        val firstId = saveSnapshot(date = "2026-05-28", cadence = RoutineCadence.Daily)
+        val secondId = saveSnapshot(date = "2026-05-29", cadence = RoutineCadence.Daily)
         val viewModel = createViewModel()
         viewModel.uiState.first { it.snapshots.size == 2 }
         viewModel.toggleSelection(firstId)
@@ -195,7 +195,7 @@ class HistoryViewModelTest {
 
     private suspend fun saveSnapshot(
         date: String,
-        cadence: RoutineCadence = RoutineCadence.Daily,
+        cadence: RoutineCadence,
     ): Long =
         repository.saveSnapshot(
             periodStartDate = date,
@@ -208,7 +208,7 @@ class HistoryViewModelTest {
     private fun summary(
         snapshotId: Long,
         date: String = "2026-05-29",
-        cadence: RoutineCadence = RoutineCadence.Daily,
+        cadence: RoutineCadence,
         completedCount: Int = 0,
         totalCount: Int = 0,
         hasSummaryNote: Boolean = false,

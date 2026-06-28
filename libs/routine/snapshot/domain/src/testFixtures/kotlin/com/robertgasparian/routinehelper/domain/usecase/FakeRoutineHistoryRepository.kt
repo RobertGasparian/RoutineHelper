@@ -84,13 +84,14 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
         periodStartDate: String,
         finalizedAtMillis: Long,
         items: List<RoutineSnapshotItem>,
+        cadence: RoutineCadence,
     ): Long =
         saveSnapshot(
             periodStartDate = periodStartDate,
             finalizedAtMillis = finalizedAtMillis,
             items = items,
             summaryNote = null,
-            cadence = RoutineCadence.Daily,
+            cadence = cadence,
         )
 
     override suspend fun deleteSnapshot(snapshotId: Long) {
@@ -127,6 +128,6 @@ data class SavedSnapshot(
     val periodStartDate: String,
     val finalizedAtMillis: Long,
     val items: List<RoutineSnapshotItem>,
+    val cadence: RoutineCadence,
     val summaryNote: String? = null,
-    val cadence: RoutineCadence = RoutineCadence.Daily,
 )

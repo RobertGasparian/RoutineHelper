@@ -16,7 +16,7 @@ interface RoutineHistoryRepository {
         finalizedAtMillis: Long,
         items: List<RoutineSnapshotItem>,
         summaryNote: String?,
-        cadence: RoutineCadence = RoutineCadence.Daily,
+        cadence: RoutineCadence,
     ): Long
 
     suspend fun deleteSnapshot(snapshotId: Long)
