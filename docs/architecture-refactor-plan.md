@@ -77,7 +77,7 @@ Current and planned module families:
 - `:libs:routine:template:data`
   - Room-backed template entities, DAOs, relation models, and repository implementations.
 - `:libs:routine:tracking:domain`
-  - Platform-independent per-period models, period-date calculations, repository contracts, and use cases for today/weekly entries, checked state, hidden state, notes, completed count, and future check availability or lock state.
+  - Platform-independent per-period models, repository contracts, and use cases for today/weekly entries, checked state, hidden state, notes, completed count, and future check availability or lock state.
 - `:libs:routine:tracking:data`
   - Room-backed per-period entities, DAOs, and repository implementations.
   - It depends on template data for the routine definitions that tracked entries reference.
@@ -97,7 +97,8 @@ Current and planned module families:
   - WorkManager workers, scheduling, constraints, and app-start/background orchestration.
   - Workers should orchestrate use cases from other libs; workers should not own routine/reflection/reminder business rules.
 - `:core:time`
-  - Date, clock, and timezone abstractions, including the default application `TimeProvider` binding.
+  - Date, clock, timezone abstractions, reusable calendar calculations, and the default application `TimeProvider` binding.
+  - Generic calendar helpers such as calendar-week start belong here; capability modules own only business-specific period rules.
 - `:core:ui`
   - Theme, design-system components from `ui.dsm`, reusable UI helpers, and shared component test helpers where appropriate.
 - `:core:testing`
@@ -121,6 +122,7 @@ Cadence is a horizontal dimension inside routine libs. Daily, weekly, and future
 - Repository implementations depend on data sources and map to business models before crossing into public APIs.
 - Repository implementation bindings live with their owning capability data module. Shared Room and DAO bindings live in `:libs:routine:database`; `:app` does not construct capability repositories.
 - Cross-cutting implementation bindings live with their owning core module, while feature-specific presentation collaborator bindings live with their feature module.
+- Reusable date/time helpers live in `:core:time`; feature or lib modules should not own generic calendar extensions just because they are the first caller.
 - Shared code is extracted after the same pattern appears in at least two refactored flows, unless it is already clearly shared infrastructure.
 
 Allowed examples:

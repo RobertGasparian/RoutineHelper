@@ -1,4 +1,4 @@
-package com.robertgasparian.routinehelper.domain.time
+package com.robertgasparian.routinehelper.core.time
 
 import java.time.DayOfWeek
 import java.time.LocalDate

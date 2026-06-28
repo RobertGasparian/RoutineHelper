@@ -3,8 +3,8 @@ package com.robertgasparian.routinehelper.ui.weekly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robertgasparian.routinehelper.core.time.TimeProvider
+import com.robertgasparian.routinehelper.core.time.startOfCalendarWeek
 import com.robertgasparian.routinehelper.domain.time.SnapshotDates
-import com.robertgasparian.routinehelper.domain.time.startOfCalendarWeek
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeWeeklyUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ReorderWeeklyRoutineItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetWeeklyItemHiddenUseCase

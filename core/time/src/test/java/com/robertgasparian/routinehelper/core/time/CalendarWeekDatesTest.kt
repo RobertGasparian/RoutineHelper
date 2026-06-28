@@ -1,10 +1,10 @@
-package com.robertgasparian.routinehelper.domain.time
+package com.robertgasparian.routinehelper.core.time
 
 import java.time.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class RoutinePeriodDatesTest {
+class CalendarWeekDatesTest {
     @Test
     fun `given midweek date when finding calendar week start then previous Monday is returned`() {
         assertEquals(
