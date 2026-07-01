@@ -2,9 +2,7 @@ package com.robertgasparian.routinehelper.ui.history
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotSummary
-import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.formatter.SnapshotShareTextFormatter
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotSummariesUseCase
@@ -41,13 +39,13 @@ class HistoryViewModel @Inject constructor(
             shareDraft,
         ) { summaries, selectedFilter, selectedIds, isShareFormatDialogVisible, shareDraft ->
             val filteredSummaries = summaries.filter { summary ->
-                selectedFilter.cadence == null || summary.cadence == selectedFilter.cadence
+                selectedFilter.snapshotCadence == null || summary.cadence == selectedFilter.snapshotCadence
             }
             val existingIds = filteredSummaries.map(RoutineSnapshotSummary::snapshotId).toSet()
             val effectiveSelectedIds = selectedIds.intersect(existingIds)
             HistoryUiState(
                 snapshots = filteredSummaries.map { summary ->
-                    summary.toUiState(isSelected = summary.snapshotId in effectiveSelectedIds)
+                    summary.toHistorySnapshotUiState(isSelected = summary.snapshotId in effectiveSelectedIds)
                 },
                 selectedFilter = selectedFilter,
                 isSelectionMode = effectiveSelectedIds.isNotEmpty(),
@@ -107,7 +105,7 @@ class HistoryViewModel @Inject constructor(
                 shareDraft.value = when (mode) {
                     ShareMode.Text -> ShareDraft.text(exportText)
                     ShareMode.File -> ShareDraft.file(
-                        messageText = snapshots.toFileShareMessage(),
+                        messageText = snapshots.toHistoryFileShareMessage(),
                         fileText = exportText,
                         fileName = "routine-snapshots-export.txt",
                     )
@@ -146,33 +144,6 @@ private enum class ShareMode {
     Text,
     File,
 }
-
-private fun List<RoutineSnapshot>.toFileShareMessage(): String {
-    val periodStartDates = map { snapshot -> snapshot.periodStartDate }.distinct().sorted()
-    return when (periodStartDates.size) {
-        0 -> "Here are the routine snapshots."
-        1 -> "Here are the routine snapshots from ${periodStartDates.first()}."
-        else -> "Here are the routine snapshots from ${periodStartDates.first()} to ${periodStartDates.last()}."
-    }
-}
-
-private fun RoutineSnapshotSummary.toUiState(isSelected: Boolean): HistorySnapshotUiState =
-    HistorySnapshotUiState(
-        snapshotId = snapshotId,
-        date = if (cadence == RoutineCadence.Weekly) "Week of $periodStartDate" else periodStartDate,
-        cadence = cadence,
-        completedCount = completedCount,
-        totalCount = totalCount,
-        hasSummaryNote = hasSummaryNote,
-        isSelected = isSelected,
-    )
-
-private val HistoryFilter.cadence: RoutineCadence?
-    get() = when (this) {
-        HistoryFilter.All -> null
-        HistoryFilter.Daily -> RoutineCadence.Daily
-        HistoryFilter.Weekly -> RoutineCadence.Weekly
-    }
 
 private fun Set<Long>.toggle(snapshotId: Long): Set<Long> =
     if (snapshotId in this) {

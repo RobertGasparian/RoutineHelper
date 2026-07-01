@@ -4,8 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
-import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
-import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.formatter.SnapshotShareTextFormatter
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotUseCase
@@ -15,9 +13,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.time.Instant
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -44,7 +39,7 @@ class HistoryDetailViewModel @AssistedInject constructor(
             isShareFormatDialogVisible,
             shareDraft,
         ) { snapshot, isShareFormatDialogVisible, shareDraft ->
-            (snapshot?.toUiState(timeProvider) ?: HistoryDetailUiState.previewMissing()).copy(
+            (snapshot?.toHistoryDetailUiState(timeProvider) ?: HistoryDetailUiState.previewMissing()).copy(
                 isShareFormatDialogVisible = isShareFormatDialogVisible,
                 shareDraft = shareDraft,
             )
@@ -76,9 +71,9 @@ class HistoryDetailViewModel @AssistedInject constructor(
         val snapshot = currentSnapshot ?: return
         isShareFormatDialogVisible.value = false
         shareDraft.value = ShareDraft.file(
-            messageText = "Here is the ${snapshot.cadence.historyLabel.lowercase()} routine snapshot from ${snapshot.displayDate}.",
+            messageText = "Here is the ${snapshot.cadence.historyLabel.lowercase()} routine snapshot from ${snapshot.historyDisplayDate}.",
             fileText = snapshotShareTextFormatter(snapshot),
-            fileName = "routine-snapshot-${snapshot.displayDate}.txt",
+            fileName = "routine-snapshot-${snapshot.historyDisplayDate}.txt",
         )
     }
 
@@ -100,34 +95,3 @@ class HistoryDetailViewModel @AssistedInject constructor(
         fun create(snapshotId: Long): HistoryDetailViewModel
     }
 }
-
-private fun RoutineSnapshot.toUiState(timeProvider: TimeProvider): HistoryDetailUiState =
-    HistoryDetailUiState(
-        date = displayDate,
-        cadence = cadence,
-        finalizedLabel = "Finalized ${
-            timeFormatter
-                .withZone(timeProvider.now().zone)
-                .format(Instant.ofEpochMilli(finalizedAtMillis))
-        }",
-        summaryNote = summaryNote.orEmpty(),
-        items = items.map(RoutineSnapshotItem::toUiState),
-    )
-
-private val RoutineSnapshot.displayDate: String
-    get() = if (cadence == RoutineCadence.Weekly) "Week of $periodStartDate" else periodStartDate
-
-private fun RoutineSnapshotItem.toUiState(): HistoryDetailItemUiState =
-    HistoryDetailItemUiState(
-        actionId = actionId,
-        title = title,
-        description = description,
-        repeatTargetCount = repeatTargetCount,
-        completedCount = completedCount,
-        isChecked = isChecked,
-        isHidden = isHidden,
-        note = note,
-    )
-
-private val timeFormatter: DateTimeFormatter =
-    DateTimeFormatter.ofPattern("h:mm a", Locale.US)

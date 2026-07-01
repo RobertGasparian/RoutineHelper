@@ -144,7 +144,7 @@ class WeeklyViewModelTest {
         viewModel.onEvent(RoutineTrackingUiEvent.SnapshotDateSelected("2026-05-18"))
         advanceUntilIdle()
 
-        assertEquals("2026-05-18", historyRepository.savedSnapshots.single().date)
+        assertEquals("2026-05-18", historyRepository.savedSnapshots.single().periodStartDate)
         assertEquals(
             Instant.parse("2026-05-29T14:30:00Z").toEpochMilli(),
             historyRepository.savedSnapshots.single().finalizedAtMillis,

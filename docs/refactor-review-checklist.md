@@ -36,11 +36,12 @@ This checklist tracks the class-by-class standardization pass after modularizati
   - Preserve schema version 1 unless a separately approved behavior change requires a migration.
   - Standardized daily entry Room naming, removed implicit Daily cadence storage defaults, and deleted unused DAO methods.
 
-- [ ] **Providers, formatters, and pure mappers** - next
+- [x] **Providers, formatters, and pure mappers**
   - Review time/date providers, presentation providers, share formatting, and domain-to-UI mappers.
   - Keep platform and presentation concerns out of domain code and add focused mapper tests where useful.
+  - Extracted History mapper/formatting helpers from ViewModels, added focused mapper tests, and tightened snapshot share text formatter coverage.
 
-- [ ] **ViewModels**
+- [ ] **ViewModels** - next
   - Review Action Editor, Daily, Weekly, History, and History Detail ViewModels.
   - Standardize state construction, intent handling, coroutine/error behavior, dependency boundaries, and tests.
 

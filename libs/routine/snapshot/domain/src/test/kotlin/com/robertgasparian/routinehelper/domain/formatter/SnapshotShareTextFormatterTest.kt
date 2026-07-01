@@ -5,6 +5,7 @@ import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
 import com.robertgasparian.routinehelper.test.FixedTimeProvider
 import java.time.Instant
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -13,7 +14,7 @@ class SnapshotShareTextFormatterTest {
     private val formatter = SnapshotShareTextFormatter(FixedTimeProvider())
 
     @Test
-    fun `given populated snapshot when formatting share text then human readable text is returned`() {
+    fun `given populated snapshot when formatting share text then exact human readable text is returned`() {
         val text = formatter(
             RoutineSnapshot(
                 snapshotId = 1L,
@@ -44,17 +45,24 @@ class SnapshotShareTextFormatterTest {
             ),
         )
 
-        assertTrue(text.contains("Daily routine snapshot"))
-        assertTrue(text.contains("Date: 2026-05-29"))
-        assertTrue(text.contains("Finalized: 10:30 AM"))
-        assertTrue(text.contains("Summary note:"))
-        assertTrue(text.contains("Low-energy day, but I kept the basics moving."))
-        assertTrue(text.contains("1. [x] Drink water"))
-        assertTrue(text.contains("   Description: Drink 3L water"))
-        assertTrue(text.contains("   Note: One liter was diet soda."))
-        assertTrue(text.contains("2. [ ] Stretch"))
-        assertTrue(text.contains("   Count: 1/3"))
-        assertTrue(text.indexOf("Drink water") < text.indexOf("Stretch"))
+        assertEquals(
+            """
+            Daily routine snapshot
+            Date: 2026-05-29
+            Finalized: 10:30 AM
+
+            Summary note:
+            Low-energy day, but I kept the basics moving.
+
+            1. [x] Drink water
+               Description: Drink 3L water
+               Note: One liter was diet soda.
+
+            2. [ ] Stretch
+               Count: 1/3
+            """.trimIndent(),
+            text,
+        )
     }
 
     @Test
