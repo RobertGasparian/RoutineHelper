@@ -44,10 +44,10 @@ This checklist tracks the class-by-class standardization pass after modularizati
 - [x] **ViewModels**
   - Review Action Editor, Daily, Weekly, History, and History Detail ViewModels.
   - Standardize state construction, intent handling, coroutine/error behavior, dependency boundaries, and tests.
-  - Standardized route argument ownership, public `StateFlow` state exposure, and ViewModel-owned share/form state.
+  - Standardized route argument ownership, public `StateFlow` state exposure, `BaseViewModel` usage, and ViewModel-owned share/form state.
 
 - [ ] **UI state, events, and local state holders** - next
-  - Review UI-state models, `XxxUiEvent.Intent` contracts, share drafts, reorder state, and Compose-only state holders.
+  - Review UI-state models, `XxxIntent` contracts, ViewModel-emitted `XxxUiEvent` outputs, share drafts, reorder state, and Compose-only state holders.
   - Keep Compose-specific interaction details out of ViewModel state.
 
 - [ ] **Screens and components**
@@ -75,7 +75,7 @@ This checklist tracks the class-by-class standardization pass after modularizati
 - Never record or update Paparazzi baselines without explicit approval.
 - Use descriptive backtick test names in `given ... when ... then ...` form; `given` is optional.
 - Prefer Kotlin APIs and patterns unless a Java alternative is materially simpler or provides an essential missing capability.
-- Use `XxxUiEvent.Intent` for ViewModel-handled MVI events.
+- Use `XxxIntent` for outside-in user/screen actions. Reserve `XxxUiEvent` for one-off outputs emitted by the ViewModel for the screen or outside world to react to.
 - Keep multi-step flows in explicitly named orchestrators and focused business actions in use cases.
 - Apply an accepted pattern to genuinely similar Daily, Weekly, and other flows without hiding cadence-specific behavior.
 - After each batch, report whether it is relocation-only, structural, behavior-changing, test-only, or documentation-only.

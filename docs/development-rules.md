@@ -24,12 +24,13 @@
 - Add modules only when the boundary is useful and reviewable; do not create empty future-facing modules.
 - Use four top-level groups: `:app`, `:features:*`, `:libs:*`, and `:core:*`.
 - `:app` is the Android shell. It owns app entry points, root navigation, app startup, and dependency aggregation.
-- `:features:*` modules are presentation entry points. They own screens, components, ViewModels, UI state, UI events, previews, and Paparazzi tests.
+- `:features:*` modules are presentation entry points. They own screens, components, ViewModels, UI state, intents, UI events, previews, and Paparazzi tests.
 - `:libs:*` modules are business capability modules. They own app data, business rules, repositories, use cases, and implementation details for a specific capability.
 - When a capability earns separate submodules, use `:domain` for platform-independent models, repository contracts, and use cases, and `:data` for data sources and repository implementations.
 - A capability's `:data` submodule may depend on its `:domain` submodule; `:domain` must not depend on `:data`.
 - A capability's `:data` submodule owns the dependency-injection binding from its repository implementation to its domain repository contract.
 - `:core:*` modules are cross-cutting building blocks that are not specific to RoutineHelper business capabilities.
+- `:core:presentation` owns shared ViewModel infrastructure. Keep it generic: no feature, routine, Room, WorkManager, Compose, or business-language dependencies.
 - Do not create a broad `routine`, `domain`, or `data` module whose job is "shared app logic." Prefer capability boundaries such as template, tracking, snapshot, reminders, reflection, and background work.
 - `:features:*` may depend on `:libs:*` APIs and `:core:*`.
 - `:features:*` must not depend on Room DAOs, Room entities, Room database classes, WorkManager workers, or repository implementations.
@@ -61,7 +62,7 @@
 - Screen-level composables use two layers:
   - `XxxScreen`: stateful boundary. Owns the `ViewModel`, collects state, handles launched effects, and maps UI events to ViewModel calls.
   - `XxxComponent`: stateless renderer. Receives a `UiState`, renders it, and propagates events upward.
-- If a screen component (`XxxComponent`) or reusable composable needs more than three callbacks, replace the callback list with a corresponding `XxxUiEvent` sealed interface and a single `onEvent: (XxxUiEvent) -> Unit` callback. The `XxxScreen` handles those events by calling ViewModel functions, navigation callbacks, Android intents, or other side-effect boundaries.
+- If a screen component (`XxxComponent`) or reusable composable needs more than three callbacks, replace the callback list with a corresponding `XxxIntent` sealed interface and a single `onIntent: (XxxIntent) -> Unit` callback. The `XxxScreen` handles those intents by calling ViewModel functions, navigation callbacks, Android intents, or other side-effect boundaries.
 - Components must be covered with Paparazzi snapshot tests for relevant states.
 - Every `UiState` data class must include a `companion object` with at least `preview()`. Add state-specific helpers such as `previewEmpty()` or `previewError()` when applicable.
 - Each component should have:
@@ -75,11 +76,15 @@
 
 - ViewModels must depend on use cases or presentation-specific collaborators, not repositories or data sources.
 - Repositories stay behind use cases or lib APIs so presentation code does not know data-source or repository implementation boundaries.
-- ViewModels expose a single stable `val uiState: StateFlow<XxxUiState>` for screen state. Build it from private `MutableStateFlow`s and read-only use-case flows with `stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), initialState)`.
+- Feature ViewModels should extend `BaseViewModel<XxxUiState, XxxIntent, XxxUiEvent>` from `:core:presentation`; use `Nothing` for `XxxUiEvent` until the ViewModel emits one-off outputs.
+- ViewModels expose a single stable `override val uiState: StateFlow<XxxUiState>` for screen state. Build it from private `MutableStateFlow`s and read-only use-case flows with `stateInViewModel(initialState)`.
+- ViewModels handle outside-in actions by overriding `handleIntent(intent: XxxIntent)`. Screens call the inherited final `onIntent(...)`.
+- Use the inherited `launch { ... }` helper for ViewModel coroutines unless a call needs custom coroutine behavior.
 - Use Hilt assisted ViewModels for stable route/screen identity arguments such as IDs, cadence, or other navigation parameters. Once the ViewModel is created, public ViewModel methods should read those owned arguments instead of requiring the screen to pass them back on every call.
-- Keep mutable presentation state private inside the ViewModel. Screens collect `uiState` and call public methods or an `onEvent(...)` handler; they should not assemble ViewModel state flows themselves.
-- ViewModels should receive state-changing UI intents through a feature event handler when the feature has an MVI event contract.
-- When a feature has navigation events and ViewModel-handled events in the same UI event stream, model the ViewModel-handled subset as `XxxUiEvent.Intent`.
+- Keep mutable presentation state private inside the ViewModel. Screens collect `uiState` and send outside-in actions through `onIntent(...)`; they should not assemble ViewModel state flows themselves.
+- Name outside-in user or screen actions as `XxxIntent`, even when the screen handles some of them directly for navigation or platform side effects.
+- Name ViewModel-to-screen one-off outputs as `XxxUiEvent`. Use this only for effects initiated by the ViewModel after state changes or handled intents, such as navigation requests, share requests, or snackbars.
+- Do not pass screen callbacks such as `onSaved` or `onDeleted` into ViewModel operations. The screen should send an intent, the ViewModel should finish the operation, then emit a `XxxUiEvent` for navigation, share requests, snackbars, or other outside-world reactions.
 - UI state should be named for the feature or shared concept it represents. Avoid reusing a feature-specific name for another feature unless that is the intentional shared model.
 - Direct time reads should be isolated behind a small provider/collaborator when the code path is business logic, scheduling, snapshotting, or test-sensitive presentation state.
 

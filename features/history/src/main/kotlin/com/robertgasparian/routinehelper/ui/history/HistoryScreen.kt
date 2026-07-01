@@ -41,46 +41,46 @@ import com.robertgasparian.routinehelper.ui.share.shareText
 import com.robertgasparian.routinehelper.ui.share.shareTextFile
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 
-sealed interface HistoryUiEvent {
+sealed interface HistoryIntent {
     data class SnapshotClick(
         val snapshotId: Long,
-    ) : HistoryUiEvent
+    ) : HistoryIntent
 
-    data class SnapshotLongClick(
+    data class ToggleSnapshotSelection(
         val snapshotId: Long,
-    ) : HistoryUiEvent
+    ) : HistoryIntent
 
-    data object ClearSelectionClick : HistoryUiEvent
+    data object ClearSelectionClick : HistoryIntent
 
-    data object ShareSelectedClick : HistoryUiEvent
+    data object ShareSelectedClick : HistoryIntent
 
-    data object ShareAsTextClick : HistoryUiEvent
+    data object ShareAsTextClick : HistoryIntent
 
-    data object ShareAsFileClick : HistoryUiEvent
+    data object ShareAsFileClick : HistoryIntent
 
-    data object DeleteSelectedClick : HistoryUiEvent
+    data object DeleteSelectedClick : HistoryIntent
 
     data class FilterClick(
         val filter: HistoryFilter,
-    ) : HistoryUiEvent
+    ) : HistoryIntent
 
     data class ShareTextChange(
         val text: String,
-    ) : HistoryUiEvent
+    ) : HistoryIntent
 
     data class ShareFileNameChange(
         val fileName: String,
-    ) : HistoryUiEvent
+    ) : HistoryIntent
 
-    data object ShareDismiss : HistoryUiEvent
+    data object ShareDismiss : HistoryIntent
 
     data class ShareTextConfirm(
         val messageText: String,
-    ) : HistoryUiEvent
+    ) : HistoryIntent
 
     data class ShareFileConfirm(
         val draft: ShareDraft,
-    ) : HistoryUiEvent
+    ) : HistoryIntent
 }
 
 @Composable
@@ -97,45 +97,36 @@ fun HistoryScreen(
     LaunchedEffect(uiState.shareDraft) {
         val draft = uiState.shareDraft
         if (draft != null && !draft.isFileShare) {
-            viewModel.dismissSharePreview()
+            viewModel.onIntent(HistoryIntent.ShareDismiss)
             onShareTextPreviewClick(draft.messageText)
         }
     }
 
     HistoryComponent(
         uiState = uiState,
-        onEvent = { event ->
-            when (event) {
-                HistoryUiEvent.ClearSelectionClick -> viewModel.clearSelection()
-                HistoryUiEvent.DeleteSelectedClick -> viewModel.deleteSelectedSnapshots()
-                is HistoryUiEvent.FilterClick -> viewModel.selectFilter(event.filter)
-                HistoryUiEvent.ShareAsFileClick -> viewModel.showFileSharePreview()
-                HistoryUiEvent.ShareAsTextClick -> viewModel.showTextSharePreview()
-                HistoryUiEvent.ShareDismiss -> viewModel.dismissSharePreview()
-                is HistoryUiEvent.ShareFileConfirm -> {
+        onIntent = { intent ->
+            when (intent) {
+                is HistoryIntent.ShareFileConfirm -> {
                     context.shareTextFile(
-                        fileText = event.draft.fileText.orEmpty(),
-                        messageText = event.draft.messageText,
+                        fileText = intent.draft.fileText.orEmpty(),
+                        messageText = intent.draft.messageText,
                         title = "Share routine snapshots",
-                        fileName = event.draft.fileName.orEmpty(),
+                        fileName = intent.draft.fileName.orEmpty(),
                     )
-                    viewModel.dismissSharePreview()
+                    viewModel.onIntent(HistoryIntent.ShareDismiss)
                 }
-                is HistoryUiEvent.ShareFileNameChange -> viewModel.updateShareFileName(event.fileName)
-                HistoryUiEvent.ShareSelectedClick -> viewModel.showShareOptions()
-                is HistoryUiEvent.ShareTextChange -> viewModel.updateShareText(event.text)
-                is HistoryUiEvent.ShareTextConfirm -> {
-                    context.shareText(text = event.messageText, title = "Share routine snapshots")
-                    viewModel.dismissSharePreview()
+                is HistoryIntent.ShareTextConfirm -> {
+                    context.shareText(text = intent.messageText, title = "Share routine snapshots")
+                    viewModel.onIntent(HistoryIntent.ShareDismiss)
                 }
-                is HistoryUiEvent.SnapshotClick -> {
+                is HistoryIntent.SnapshotClick -> {
                     if (uiState.isSelectionMode) {
-                        viewModel.toggleSelection(event.snapshotId)
+                        viewModel.onIntent(HistoryIntent.ToggleSnapshotSelection(intent.snapshotId))
                     } else {
-                        onSnapshotClick(event.snapshotId)
+                        onSnapshotClick(intent.snapshotId)
                     }
                 }
-                is HistoryUiEvent.SnapshotLongClick -> viewModel.toggleSelection(event.snapshotId)
+                else -> viewModel.onIntent(intent)
             }
         },
         modifier = modifier,
@@ -147,7 +138,7 @@ fun HistoryScreen(
 @Composable
 fun HistoryComponent(
     uiState: HistoryUiState,
-    onEvent: (HistoryUiEvent) -> Unit,
+    onIntent: (HistoryIntent) -> Unit,
     modifier: Modifier = Modifier,
     onSettingsClick: () -> Unit = {},
 ) {
@@ -157,7 +148,7 @@ fun HistoryComponent(
             TopAppBar(
                 navigationIcon = {
                     if (uiState.isSelectionMode) {
-                        IconButton(onClick = { onEvent(HistoryUiEvent.ClearSelectionClick) }) {
+                        IconButton(onClick = { onIntent(HistoryIntent.ClearSelectionClick) }) {
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = "Clear selection",
@@ -178,7 +169,7 @@ fun HistoryComponent(
                     if (uiState.isSelectionMode) {
                         IconButton(
                             enabled = uiState.selectedCount > 0,
-                            onClick = { onEvent(HistoryUiEvent.ShareSelectedClick) },
+                            onClick = { onIntent(HistoryIntent.ShareSelectedClick) },
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Share,
@@ -187,7 +178,7 @@ fun HistoryComponent(
                         }
                         IconButton(
                             enabled = uiState.selectedCount > 0,
-                            onClick = { onEvent(HistoryUiEvent.DeleteSelectedClick) },
+                            onClick = { onIntent(HistoryIntent.DeleteSelectedClick) },
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
@@ -213,7 +204,7 @@ fun HistoryComponent(
         ) {
             HistoryFilterRow(
                 selectedFilter = uiState.selectedFilter,
-                onFilterClick = { filter -> onEvent(HistoryUiEvent.FilterClick(filter)) },
+                onFilterClick = { filter -> onIntent(HistoryIntent.FilterClick(filter)) },
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             )
             if (uiState.snapshots.isEmpty()) {
@@ -242,8 +233,8 @@ fun HistoryComponent(
                             hasSummaryNote = snapshot.hasSummaryNote,
                             isSelectionMode = uiState.isSelectionMode,
                             isSelected = snapshot.isSelected,
-                            onClick = { onEvent(HistoryUiEvent.SnapshotClick(snapshot.snapshotId)) },
-                            onLongClick = { onEvent(HistoryUiEvent.SnapshotLongClick(snapshot.snapshotId)) },
+                            onClick = { onIntent(HistoryIntent.SnapshotClick(snapshot.snapshotId)) },
+                            onLongClick = { onIntent(HistoryIntent.ToggleSnapshotSelection(snapshot.snapshotId)) },
                         )
                     }
                 }
@@ -253,19 +244,19 @@ fun HistoryComponent(
 
     if (uiState.isShareFormatDialogVisible) {
         ShareFormatDialog(
-            onDismiss = { onEvent(HistoryUiEvent.ShareDismiss) },
-            onTextClick = { onEvent(HistoryUiEvent.ShareAsTextClick) },
-            onFileClick = { onEvent(HistoryUiEvent.ShareAsFileClick) },
+            onDismiss = { onIntent(HistoryIntent.ShareDismiss) },
+            onTextClick = { onIntent(HistoryIntent.ShareAsTextClick) },
+            onFileClick = { onIntent(HistoryIntent.ShareAsFileClick) },
         )
     }
 
     uiState.shareDraft?.takeIf { draft -> draft.isFileShare }?.let { draft ->
         ShareFileDialog(
             draft = draft,
-            onFileNameChange = { fileName -> onEvent(HistoryUiEvent.ShareFileNameChange(fileName)) },
-            onTextChange = { text -> onEvent(HistoryUiEvent.ShareTextChange(text)) },
-            onDismiss = { onEvent(HistoryUiEvent.ShareDismiss) },
-            onShareClick = { onEvent(HistoryUiEvent.ShareFileConfirm(draft)) },
+            onFileNameChange = { fileName -> onIntent(HistoryIntent.ShareFileNameChange(fileName)) },
+            onTextChange = { text -> onIntent(HistoryIntent.ShareTextChange(text)) },
+            onDismiss = { onIntent(HistoryIntent.ShareDismiss) },
+            onShareClick = { onIntent(HistoryIntent.ShareFileConfirm(draft)) },
         )
     }
 }
@@ -349,7 +340,7 @@ private fun HistoryComponentPreview() {
     RoutineHelperTheme {
         HistoryComponent(
             uiState = HistoryUiState.preview(),
-            onEvent = {},
+            onIntent = {},
         )
     }
 }

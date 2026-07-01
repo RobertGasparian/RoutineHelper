@@ -51,7 +51,7 @@ import java.time.ZoneOffset
 @Composable
 fun RoutineTrackingComponent(
     uiState: RoutineTrackingUiState,
-    onEvent: (RoutineTrackingUiEvent) -> Unit,
+    onIntent: (RoutineTrackingIntent) -> Unit,
     modifier: Modifier = Modifier,
     title: String = "Daily",
     emptyTitle: String = "No routine items yet",
@@ -115,7 +115,7 @@ fun RoutineTrackingComponent(
                     .scale(fabScale),
                 onClick = {
                     if (fabVisible) {
-                        onEvent(RoutineTrackingUiEvent.CreateActionClick)
+                        onIntent(RoutineTrackingIntent.CreateActionClick)
                     }
                 },
             ) {
@@ -129,7 +129,7 @@ fun RoutineTrackingComponent(
     ) { innerPadding ->
         if (uiState.items.isEmpty()) {
             EmptyRoutineTrackingContent(
-                onAddClick = { onEvent(RoutineTrackingUiEvent.CreateActionClick) },
+                onAddClick = { onIntent(RoutineTrackingIntent.CreateActionClick) },
                 title = emptyTitle,
                 description = emptyDescription,
                 modifier = Modifier
@@ -148,7 +148,7 @@ fun RoutineTrackingComponent(
                     note = uiState.summaryNote,
                     label = if (title == "Weekly") "Week note" else "Day note",
                     onEditClick = {
-                        onEvent(RoutineTrackingUiEvent.EditSummaryNoteClick)
+                        onIntent(RoutineTrackingIntent.EditSummaryNoteClick)
                     },
                 )
             }
@@ -160,7 +160,7 @@ fun RoutineTrackingComponent(
                 ) -> Unit = { item, itemModifier, dragHandleModifier ->
                     RoutineTrackingItem(
                         item = item,
-                        onEvent = onEvent,
+                        onIntent = onIntent,
                         modifier = itemModifier,
                         dragHandleModifier = dragHandleModifier,
                     )
@@ -173,7 +173,7 @@ fun RoutineTrackingComponent(
                 coroutineScope = coroutineScope,
                 contentPadding = contentPadding,
                 summaryContent = summaryContent,
-                onDropOrder = { orderedIds -> onEvent(RoutineTrackingUiEvent.ReorderItems(orderedIds)) },
+                onDropOrder = { orderedIds -> onIntent(RoutineTrackingIntent.ReorderItems(orderedIds)) },
                 itemContent = itemContent,
                 modifier = Modifier
                     .fillMaxSize()
@@ -185,16 +185,16 @@ fun RoutineTrackingComponent(
     uiState.noteEditor?.let { editor ->
         RoutineNoteDialog(
             value = editor.value.toTextFieldValue(),
-            onValueChange = { value -> onEvent(RoutineTrackingUiEvent.NoteDraftChange(value.toNoteDraftUiState())) },
+            onValueChange = { value -> onIntent(RoutineTrackingIntent.NoteDraftChange(value.toNoteDraftUiState())) },
             title = editor.title,
             supportingText = editor.supportingText,
             label = editor.label,
-            onDismiss = { onEvent(RoutineTrackingUiEvent.NoteEditorDismiss) },
-            onSaveClick = { onEvent(RoutineTrackingUiEvent.NoteEditorSaveClick) },
-            onClearClick = { onEvent(RoutineTrackingUiEvent.NoteDraftClearClick) },
-            onDateClick = { onEvent(RoutineTrackingUiEvent.NoteDraftDateClick) },
-            onWeekdayClick = { onEvent(RoutineTrackingUiEvent.NoteDraftWeekdayClick) },
-            onTimeClick = { onEvent(RoutineTrackingUiEvent.NoteDraftTimeClick) },
+            onDismiss = { onIntent(RoutineTrackingIntent.NoteEditorDismiss) },
+            onSaveClick = { onIntent(RoutineTrackingIntent.NoteEditorSaveClick) },
+            onClearClick = { onIntent(RoutineTrackingIntent.NoteDraftClearClick) },
+            onDateClick = { onIntent(RoutineTrackingIntent.NoteDraftDateClick) },
+            onWeekdayClick = { onIntent(RoutineTrackingIntent.NoteDraftWeekdayClick) },
+            onTimeClick = { onIntent(RoutineTrackingIntent.NoteDraftTimeClick) },
         )
     }
 
@@ -203,7 +203,7 @@ fun RoutineTrackingComponent(
             onDismiss = { isSnapshotDatePickerVisible = false },
             onDateSelected = { date ->
                 isSnapshotDatePickerVisible = false
-                onEvent(RoutineTrackingUiEvent.SnapshotDateSelected(date))
+                onIntent(RoutineTrackingIntent.SnapshotDateSelected(date))
             },
         )
     }
@@ -262,7 +262,7 @@ private fun DebugSnapshotDatePickerDialog(
 @Composable
 private fun RoutineTrackingItem(
     item: RoutineTrackingItemUiState,
-    onEvent: (RoutineTrackingUiEvent) -> Unit,
+    onIntent: (RoutineTrackingIntent) -> Unit,
     modifier: Modifier = Modifier,
     dragHandleModifier: Modifier = Modifier,
 ) {
@@ -276,19 +276,19 @@ private fun RoutineTrackingItem(
         repeatTargetCount = item.repeatTargetCount,
         completedCount = item.completedCount,
         onCheckedChange = { isChecked ->
-            onEvent(RoutineTrackingUiEvent.CheckedChange(item.routineItemId, isChecked))
+            onIntent(RoutineTrackingIntent.CheckedChange(item.routineItemId, isChecked))
         },
         onCompletedCountChange = { completedCount ->
-            onEvent(RoutineTrackingUiEvent.CompletedCountChange(item.routineItemId, completedCount))
+            onIntent(RoutineTrackingIntent.CompletedCountChange(item.routineItemId, completedCount))
         },
         onEditActionClick = {
-            onEvent(RoutineTrackingUiEvent.EditActionClick(item.actionId))
+            onIntent(RoutineTrackingIntent.EditActionClick(item.actionId))
         },
         onEditNoteClick = {
-            onEvent(RoutineTrackingUiEvent.EditNoteClick(item))
+            onIntent(RoutineTrackingIntent.EditNoteClick(item))
         },
         onHiddenChange = { isHidden ->
-            onEvent(RoutineTrackingUiEvent.HiddenChange(item.routineItemId, isHidden))
+            onIntent(RoutineTrackingIntent.HiddenChange(item.routineItemId, isHidden))
         },
         dragHandleModifier = dragHandleModifier,
     )
@@ -339,7 +339,7 @@ private fun RoutineTrackingComponentPreview() {
     RoutineHelperTheme {
         RoutineTrackingComponent(
             uiState = RoutineTrackingUiState.preview(),
-            onEvent = {},
+            onIntent = {},
         )
     }
 }

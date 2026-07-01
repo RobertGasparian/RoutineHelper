@@ -18,7 +18,7 @@ private fun HistoryComponentPhonePreview() {
     RoutineHelperTheme {
         HistoryComponent(
             uiState = HistoryUiState.preview(),
-            onEvent = {},
+            onIntent = {},
         )
     }
 }
@@ -36,7 +36,7 @@ private fun HistoryComponentLandscapePreview() {
     RoutineHelperTheme {
         HistoryComponent(
             uiState = HistoryUiState.preview(),
-            onEvent = {},
+            onIntent = {},
         )
     }
 }
@@ -47,7 +47,7 @@ private fun HistoryComponentTabletPreview() {
     RoutineHelperTheme {
         HistoryComponent(
             uiState = HistoryUiState.preview(),
-            onEvent = {},
+            onIntent = {},
         )
     }
 }
@@ -58,7 +58,7 @@ private fun HistoryComponentFoldablePreview() {
     RoutineHelperTheme {
         HistoryComponent(
             uiState = HistoryUiState.preview(),
-            onEvent = {},
+            onIntent = {},
         )
     }
 }
@@ -69,7 +69,7 @@ private fun HistoryComponentEmptyPreview() {
     RoutineHelperTheme {
         HistoryComponent(
             uiState = HistoryUiState.previewEmpty(),
-            onEvent = {},
+            onIntent = {},
         )
     }
 }
@@ -80,7 +80,7 @@ private fun HistoryComponentSelectionPreview() {
     RoutineHelperTheme {
         HistoryComponent(
             uiState = HistoryUiState.previewSelection(),
-            onEvent = {},
+            onIntent = {},
         )
     }
 }
@@ -91,7 +91,7 @@ private fun HistoryComponentSharePreview() {
     RoutineHelperTheme {
         HistoryComponent(
             uiState = HistoryUiState.previewShare(),
-            onEvent = {},
+            onIntent = {},
         )
     }
 }
@@ -102,7 +102,7 @@ private fun HistoryComponentShareOptionsPreview() {
     RoutineHelperTheme {
         HistoryComponent(
             uiState = HistoryUiState.previewShareOptions(),
-            onEvent = {},
+            onIntent = {},
         )
     }
 }
@@ -113,7 +113,7 @@ private fun HistoryComponentFileSharePreview() {
     RoutineHelperTheme {
         HistoryComponent(
             uiState = HistoryUiState.previewFileShare(),
-            onEvent = {},
+            onIntent = {},
         )
     }
 }
@@ -124,7 +124,7 @@ private fun HistoryComponentLongSharePreview() {
     RoutineHelperTheme {
         HistoryComponent(
             uiState = HistoryUiState.previewLongShare(),
-            onEvent = {},
+            onIntent = {},
         )
     }
 }

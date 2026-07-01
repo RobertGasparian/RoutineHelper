@@ -12,10 +12,10 @@ import com.robertgasparian.routinehelper.domain.usecase.UpdatedTemplateItem
 import com.robertgasparian.routinehelper.test.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -64,10 +64,10 @@ class ActionEditorViewModelTest {
     fun `given draft changes when observing state then updated values are emitted`() = runTest {
         val viewModel = createViewModel(actionId = null)
 
-        viewModel.updateTitle("Read")
-        viewModel.updateDescription("One chapter")
-        viewModel.updateRepeatEnabled(true)
-        viewModel.updateRepeatTargetCount(1)
+        viewModel.onIntent(ActionEditorIntent.TitleChange("Read"))
+        viewModel.onIntent(ActionEditorIntent.DescriptionChange("One chapter"))
+        viewModel.onIntent(ActionEditorIntent.RepeatEnabledChange(true))
+        viewModel.onIntent(ActionEditorIntent.RepeatTargetCountChange(1))
 
         val state = viewModel.uiState.first { it.title == "Read" }
 
@@ -78,19 +78,22 @@ class ActionEditorViewModelTest {
     }
 
     @Test
-    fun `given new weekly draft when saving then item and callback are forwarded`() = runTest {
+    fun `given new weekly draft when save intent is handled then item is added and saved event is emitted`() = runTest {
         val viewModel = createViewModel(
             actionId = null,
             cadence = RoutineCadence.Weekly,
         )
 
-        viewModel.updateTitle("Review budget")
-        viewModel.updateDescription("Check every category")
-        viewModel.updateRepeatEnabled(true)
-        viewModel.updateRepeatTargetCount(4)
-        var wasSaved = false
+        viewModel.onIntent(ActionEditorIntent.TitleChange("Review budget"))
+        viewModel.onIntent(ActionEditorIntent.DescriptionChange("Check every category"))
+        viewModel.onIntent(ActionEditorIntent.RepeatEnabledChange(true))
+        viewModel.onIntent(ActionEditorIntent.RepeatTargetCountChange(4))
+        val events = mutableListOf<ActionEditorUiEvent>()
+        val collectEventsJob = launch {
+            viewModel.uiEvents.collect { event -> events += event }
+        }
 
-        viewModel.save(onSaved = { wasSaved = true })
+        viewModel.onIntent(ActionEditorIntent.SaveClick)
         advanceUntilIdle()
 
         assertEquals(
@@ -102,18 +105,22 @@ class ActionEditorViewModelTest {
             ),
             repository.addedItems.single(),
         )
-        assertTrue(wasSaved)
+        assertEquals(listOf(ActionEditorUiEvent.Saved), events)
+        collectEventsJob.cancel()
     }
 
     @Test
-    fun `given existing action when saving then update and callback are forwarded`() = runTest {
+    fun `given existing action when save intent is handled then item is updated and saved event is emitted`() = runTest {
         val viewModel = createViewModel(actionId = ACTION_ID)
 
-        viewModel.updateTitle("Updated title")
-        viewModel.updateDescription("Updated description")
-        var wasSaved = false
+        viewModel.onIntent(ActionEditorIntent.TitleChange("Updated title"))
+        viewModel.onIntent(ActionEditorIntent.DescriptionChange("Updated description"))
+        val events = mutableListOf<ActionEditorUiEvent>()
+        val collectEventsJob = launch {
+            viewModel.uiEvents.collect { event -> events += event }
+        }
 
-        viewModel.save(onSaved = { wasSaved = true })
+        viewModel.onIntent(ActionEditorIntent.SaveClick)
         advanceUntilIdle()
 
         assertEquals(
@@ -124,32 +131,41 @@ class ActionEditorViewModelTest {
             ),
             repository.updatedItems.single(),
         )
-        assertTrue(wasSaved)
+        assertEquals(listOf(ActionEditorUiEvent.Saved), events)
+        collectEventsJob.cancel()
     }
 
     @Test
-    fun `given existing action when deleting then item and callback are forwarded`() = runTest {
+    fun `given existing action when delete intent is handled then item is removed and deleted event is emitted`() = runTest {
         repository.setItems(listOf(templateItem()))
         val viewModel = createViewModel(actionId = ACTION_ID)
-        var wasDeleted = false
+        val events = mutableListOf<ActionEditorUiEvent>()
+        val collectEventsJob = launch {
+            viewModel.uiEvents.collect { event -> events += event }
+        }
 
-        viewModel.delete(onDeleted = { wasDeleted = true })
+        viewModel.onIntent(ActionEditorIntent.DeleteClick)
         advanceUntilIdle()
 
         assertEquals(listOf(ROUTINE_ITEM_ID), repository.removedTemplateItemIds)
-        assertTrue(wasDeleted)
+        assertEquals(listOf(ActionEditorUiEvent.Deleted), events)
+        collectEventsJob.cancel()
     }
 
     @Test
-    fun `given no action id when deleting then repository and callback are not invoked`() = runTest {
+    fun `given no action id when delete intent is handled then repository is not invoked and no event is emitted`() = runTest {
         val viewModel = createViewModel(actionId = null)
-        var wasDeleted = false
+        val events = mutableListOf<ActionEditorUiEvent>()
+        val collectEventsJob = launch {
+            viewModel.uiEvents.collect { event -> events += event }
+        }
 
-        viewModel.delete(onDeleted = { wasDeleted = true })
+        viewModel.onIntent(ActionEditorIntent.DeleteClick)
         advanceUntilIdle()
 
         assertTrue(repository.removedTemplateItemIds.isEmpty())
-        assertFalse(wasDeleted)
+        assertTrue(events.isEmpty())
+        collectEventsJob.cancel()
     }
 
     private fun templateItem(

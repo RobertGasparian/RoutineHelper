@@ -1,7 +1,6 @@
 package com.robertgasparian.routinehelper.ui.history.detail
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import com.robertgasparian.routinehelper.core.presentation.BaseViewModel
 import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
 import com.robertgasparian.routinehelper.domain.formatter.SnapshotShareTextFormatter
@@ -14,11 +13,8 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 @HiltViewModel(assistedFactory = HistoryDetailViewModel.Factory::class)
 class HistoryDetailViewModel @AssistedInject constructor(
@@ -27,18 +23,14 @@ class HistoryDetailViewModel @AssistedInject constructor(
     private val snapshotShareTextFormatter: SnapshotShareTextFormatter,
     snapshotUseCase: SnapshotUseCase,
     private val timeProvider: TimeProvider,
-) : ViewModel() {
+) : BaseViewModel<HistoryDetailUiState, HistoryDetailIntent, HistoryDetailUiEvent>() {
     private val isShareFormatDialogVisible = MutableStateFlow(false)
     private val shareDraft = MutableStateFlow<ShareDraft?>(null)
 
     private val snapshot: StateFlow<RoutineSnapshot?> =
-        snapshotUseCase(snapshotId).stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = null,
-        )
+        snapshotUseCase(snapshotId).stateInViewModel(initialValue = null)
 
-    val uiState: StateFlow<HistoryDetailUiState> =
+    override val uiState: StateFlow<HistoryDetailUiState> =
         combine(
             snapshot,
             isShareFormatDialogVisible,
@@ -49,35 +41,44 @@ class HistoryDetailViewModel @AssistedInject constructor(
                 shareDraft = shareDraft,
             )
         }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = HistoryDetailUiState.previewMissing(),
-            )
+            .stateInViewModel(initialValue = HistoryDetailUiState.previewMissing())
 
-    fun deleteSnapshot(
-        onDeleted: () -> Unit,
-    ) {
-        viewModelScope.launch {
-            // TODO Remove this test-only delete action when history management UX is finalized.
-            deleteSnapshotUseCase(snapshotId)
-            onDeleted()
+    override fun handleIntent(intent: HistoryDetailIntent) {
+        when (intent) {
+            HistoryDetailIntent.BackClick,
+            is HistoryDetailIntent.ShareFileConfirm,
+            is HistoryDetailIntent.ShareTextConfirm -> Unit
+            HistoryDetailIntent.DeleteClick -> deleteSnapshot()
+            HistoryDetailIntent.ShareAsFileClick -> showFileSharePreview()
+            HistoryDetailIntent.ShareAsTextClick -> showTextSharePreview()
+            HistoryDetailIntent.ShareClick -> showShareOptions()
+            HistoryDetailIntent.ShareDismiss -> dismissSharePreview()
+            is HistoryDetailIntent.ShareFileNameChange -> updateShareFileName(intent.fileName)
+            is HistoryDetailIntent.ShareTextChange -> updateShareText(intent.text)
         }
     }
 
-    fun showShareOptions() {
+    private fun deleteSnapshot() {
+        launch {
+            // TODO Remove this test-only delete action when history management UX is finalized.
+            deleteSnapshotUseCase(snapshotId)
+            emitUiEvent(HistoryDetailUiEvent.SnapshotDeleted)
+        }
+    }
+
+    private fun showShareOptions() {
         if (snapshot.value != null) {
             isShareFormatDialogVisible.value = true
         }
     }
 
-    fun showTextSharePreview() {
+    private fun showTextSharePreview() {
         val snapshot = snapshot.value ?: return
         isShareFormatDialogVisible.value = false
         shareDraft.value = ShareDraft.text(snapshotShareTextFormatter(snapshot))
     }
 
-    fun showFileSharePreview() {
+    private fun showFileSharePreview() {
         val snapshot = snapshot.value ?: return
         isShareFormatDialogVisible.value = false
         shareDraft.value = ShareDraft.file(
@@ -87,15 +88,15 @@ class HistoryDetailViewModel @AssistedInject constructor(
         )
     }
 
-    fun updateShareFileName(fileName: String) {
+    private fun updateShareFileName(fileName: String) {
         shareDraft.value = shareDraft.value?.copy(fileName = fileName)
     }
 
-    fun updateShareText(text: String) {
+    private fun updateShareText(text: String) {
         shareDraft.value = shareDraft.value?.copy(messageText = text)
     }
 
-    fun dismissSharePreview() {
+    private fun dismissSharePreview() {
         isShareFormatDialogVisible.value = false
         shareDraft.value = null
     }

@@ -18,7 +18,7 @@ class HistoryDetailComponentPaparazziTest {
             RoutineHelperTheme {
                 HistoryDetailComponent(
                     uiState = HistoryDetailUiState.preview(),
-                    onEvent = {},
+                    onIntent = {},
                 )
             }
         }
@@ -30,7 +30,7 @@ class HistoryDetailComponentPaparazziTest {
             RoutineHelperTheme {
                 HistoryDetailComponent(
                     uiState = HistoryDetailUiState.previewEmpty(),
-                    onEvent = {},
+                    onIntent = {},
                 )
             }
         }
@@ -42,7 +42,7 @@ class HistoryDetailComponentPaparazziTest {
             RoutineHelperTheme {
                 HistoryDetailComponent(
                     uiState = HistoryDetailUiState.previewShare(),
-                    onEvent = {},
+                    onIntent = {},
                 )
             }
         }
@@ -54,7 +54,7 @@ class HistoryDetailComponentPaparazziTest {
             RoutineHelperTheme {
                 HistoryDetailComponent(
                     uiState = HistoryDetailUiState.previewShareOptions(),
-                    onEvent = {},
+                    onIntent = {},
                 )
             }
         }
@@ -66,7 +66,7 @@ class HistoryDetailComponentPaparazziTest {
             RoutineHelperTheme {
                 HistoryDetailComponent(
                     uiState = HistoryDetailUiState.previewFileShare(),
-                    onEvent = {},
+                    onIntent = {},
                 )
             }
         }

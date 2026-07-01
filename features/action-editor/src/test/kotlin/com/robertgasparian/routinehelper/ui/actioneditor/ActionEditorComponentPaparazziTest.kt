@@ -18,7 +18,7 @@ class ActionEditorComponentPaparazziTest {
             RoutineHelperTheme {
                 ActionEditorComponent(
                     uiState = ActionEditorUiState.preview(),
-                    onEvent = {},
+                    onIntent = {},
                 )
             }
         }
@@ -30,7 +30,7 @@ class ActionEditorComponentPaparazziTest {
             RoutineHelperTheme {
                 ActionEditorComponent(
                     uiState = ActionEditorUiState.previewEmpty(),
-                    onEvent = {},
+                    onIntent = {},
                 )
             }
         }

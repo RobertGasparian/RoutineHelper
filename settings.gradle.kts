@@ -20,6 +20,7 @@ dependencyResolutionManagement {
 rootProject.name = "RoutineHelper"
 include(":app")
 include(":core:time")
+include(":core:presentation")
 include(":core:ui")
 include(":core:testing")
 include(":libs:routine:template:domain")

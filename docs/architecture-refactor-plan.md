@@ -6,14 +6,14 @@ The post-modularization class-by-class review is tracked in [`refactor-review-ch
 
 ## Current Shape
 
-- The project has 16 Gradle modules across `:app`, `:features:*`, `:libs:*`, and `:core:*`.
+- The project has 17 Gradle modules across `:app`, `:features:*`, `:libs:*`, and `:core:*`.
 - `:app` is a thin Android shell. It owns `MainActivity`, `RoutineHelperApplication`, root Navigation 3 composition, app startup, and dependency aggregation.
 - Daily and Weekly presentation live together in `:features:routine-tracking`, with cadence-specific ViewModels/mappers and neutral shared tracking state/components.
 - History/detail/sharing, Action Editor, and Settings live in their own feature modules.
 - Template, tracking, and snapshot capabilities each have separate `:domain` and `:data` modules.
 - `:libs:routine:database` owns only Room database/schema/DAO composition. Capability data modules own repository implementations and their Hilt bindings.
 - `:libs:background:work` owns WorkManager integration. Thin workers delegate structured flows to Daily and Weekly snapshot orchestrators, which compose focused use cases.
-- `:core:time`, `:core:ui`, and `:core:testing` own cross-cutting time, design-system, and shared test infrastructure.
+- `:core:time`, `:core:presentation`, `:core:ui`, and `:core:testing` own cross-cutting time, ViewModel infrastructure, design-system, and shared test infrastructure.
 - ViewModels depend on use cases or presentation collaborators rather than repositories. Feature modules do not import Room, repository implementations, or workers.
 - Repository, use-case, orchestrator, ViewModel, mapper, state-holder, and component snapshot coverage is distributed with the modules that own those behaviors.
 
@@ -22,7 +22,7 @@ The post-modularization class-by-class review is tracked in [`refactor-review-ch
 - Module boundaries now enforce the intended feature/lib/core dependency direction.
 - Repository and cross-cutting DI bindings live with their implementations; `:app` no longer constructs repositories or providers.
 - Time-sensitive business and presentation code uses `TimeProvider`; direct system-clock access is isolated to the provider or debug-only UI tooling.
-- Daily and Weekly follow the same MVI naming and screen/component/state/event structure while retaining cadence-specific names and behavior.
+- Daily and Weekly follow the same MVI naming and screen/component/state/intent structure while retaining cadence-specific names and behavior.
 - Snapshot finalization uses explicit Daily and Weekly orchestrators rather than one broad use case.
 - WorkManager code is outside `:app` and ready to coexist with future unrelated workers.
 - Existing Paparazzi baselines remain unchanged.
@@ -99,6 +99,8 @@ Current and planned module families:
 - `:core:time`
   - Date, clock, timezone abstractions, reusable calendar calculations, and the default application `TimeProvider` binding.
   - Generic calendar helpers such as calendar-week start belong here; capability modules own only business-specific period rules.
+- `:core:presentation`
+  - Shared ViewModel infrastructure such as `BaseViewModel`, outside-in intent handling, optional one-off UI event plumbing, and common `StateFlow`/coroutine helpers.
 - `:core:ui`
   - Theme, design-system components from `ui.dsm`, reusable UI helpers, and shared component test helpers where appropriate.
 - `:core:testing`

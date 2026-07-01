@@ -6,7 +6,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robertgasparian.routinehelper.features.routinetracking.BuildConfig
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingComponent
-import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingUiEvent
+import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingIntent
 
 @Composable
 fun DailyScreen(
@@ -19,11 +19,11 @@ fun DailyScreen(
 
     RoutineTrackingComponent(
         uiState = uiState,
-        onEvent = { event ->
-            when (event) {
-                RoutineTrackingUiEvent.CreateActionClick -> onCreateActionClick()
-                is RoutineTrackingUiEvent.EditActionClick -> onEditActionClick(event.actionId)
-                is RoutineTrackingUiEvent.Intent -> viewModel.onEvent(event)
+        onIntent = { intent ->
+            when (intent) {
+                RoutineTrackingIntent.CreateActionClick -> onCreateActionClick()
+                is RoutineTrackingIntent.EditActionClick -> onEditActionClick(intent.actionId)
+                else -> viewModel.onIntent(intent)
             }
         },
         showSnapshotAction = BuildConfig.DEBUG,

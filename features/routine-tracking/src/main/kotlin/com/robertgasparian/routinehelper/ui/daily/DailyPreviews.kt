@@ -92,6 +92,6 @@ private fun DailyComponentPreviewContent(
 ) {
     RoutineTrackingComponent(
         uiState = uiState,
-        onEvent = {},
+        onIntent = {},
     )
 }

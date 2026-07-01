@@ -54,34 +54,38 @@ import com.robertgasparian.routinehelper.ui.share.shareText
 import com.robertgasparian.routinehelper.ui.share.shareTextFile
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 
-sealed interface HistoryDetailUiEvent {
-    data object BackClick : HistoryDetailUiEvent
+sealed interface HistoryDetailIntent {
+    data object BackClick : HistoryDetailIntent
 
-    data object ShareClick : HistoryDetailUiEvent
+    data object ShareClick : HistoryDetailIntent
 
-    data object ShareAsTextClick : HistoryDetailUiEvent
+    data object ShareAsTextClick : HistoryDetailIntent
 
-    data object ShareAsFileClick : HistoryDetailUiEvent
+    data object ShareAsFileClick : HistoryDetailIntent
 
     data class ShareTextChange(
         val text: String,
-    ) : HistoryDetailUiEvent
+    ) : HistoryDetailIntent
 
     data class ShareFileNameChange(
         val fileName: String,
-    ) : HistoryDetailUiEvent
+    ) : HistoryDetailIntent
 
-    data object ShareDismiss : HistoryDetailUiEvent
+    data object ShareDismiss : HistoryDetailIntent
 
     data class ShareTextConfirm(
         val messageText: String,
-    ) : HistoryDetailUiEvent
+    ) : HistoryDetailIntent
 
     data class ShareFileConfirm(
         val draft: ShareDraft,
-    ) : HistoryDetailUiEvent
+    ) : HistoryDetailIntent
 
-    data object DeleteClick : HistoryDetailUiEvent
+    data object DeleteClick : HistoryDetailIntent
+}
+
+sealed interface HistoryDetailUiEvent {
+    data object SnapshotDeleted : HistoryDetailUiEvent
 }
 
 @Composable
@@ -97,39 +101,41 @@ fun HistoryDetailScreen(
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    LaunchedEffect(viewModel) {
+        viewModel.uiEvents.collect { event ->
+            when (event) {
+                HistoryDetailUiEvent.SnapshotDeleted -> onBackClick()
+            }
+        }
+    }
+
     LaunchedEffect(uiState.shareDraft) {
         val draft = uiState.shareDraft
         if (draft != null && !draft.isFileShare) {
-            viewModel.dismissSharePreview()
+            viewModel.onIntent(HistoryDetailIntent.ShareDismiss)
             onShareTextPreviewClick(draft.messageText)
         }
     }
 
     HistoryDetailComponent(
         uiState = uiState,
-        onEvent = { event ->
-            when (event) {
-                HistoryDetailUiEvent.BackClick -> onBackClick()
-                HistoryDetailUiEvent.DeleteClick -> viewModel.deleteSnapshot(onDeleted = onBackClick)
-                HistoryDetailUiEvent.ShareAsFileClick -> viewModel.showFileSharePreview()
-                HistoryDetailUiEvent.ShareAsTextClick -> viewModel.showTextSharePreview()
-                HistoryDetailUiEvent.ShareClick -> viewModel.showShareOptions()
-                HistoryDetailUiEvent.ShareDismiss -> viewModel.dismissSharePreview()
-                is HistoryDetailUiEvent.ShareFileConfirm -> {
+        onIntent = { intent ->
+            when (intent) {
+                HistoryDetailIntent.BackClick -> onBackClick()
+                is HistoryDetailIntent.ShareFileConfirm -> {
                     context.shareTextFile(
-                        fileText = event.draft.fileText.orEmpty(),
-                        messageText = event.draft.messageText,
+                        fileText = intent.draft.fileText.orEmpty(),
+                        messageText = intent.draft.messageText,
                         title = "Share routine snapshot",
-                        fileName = event.draft.fileName.orEmpty(),
+                        fileName = intent.draft.fileName.orEmpty(),
                     )
-                    viewModel.dismissSharePreview()
+                    viewModel.onIntent(HistoryDetailIntent.ShareDismiss)
                 }
-                is HistoryDetailUiEvent.ShareFileNameChange -> viewModel.updateShareFileName(event.fileName)
-                is HistoryDetailUiEvent.ShareTextChange -> viewModel.updateShareText(event.text)
-                is HistoryDetailUiEvent.ShareTextConfirm -> {
-                    context.shareText(text = event.messageText, title = "Share routine snapshot")
-                    viewModel.dismissSharePreview()
+                is HistoryDetailIntent.ShareTextConfirm -> {
+                    context.shareText(text = intent.messageText, title = "Share routine snapshot")
+                    viewModel.onIntent(HistoryDetailIntent.ShareDismiss)
                 }
+                else -> viewModel.onIntent(intent)
             }
         },
         modifier = modifier,
@@ -140,7 +146,7 @@ fun HistoryDetailScreen(
 @Composable
 fun HistoryDetailComponent(
     uiState: HistoryDetailUiState,
-    onEvent: (HistoryDetailUiEvent) -> Unit,
+    onIntent: (HistoryDetailIntent) -> Unit,
     modifier: Modifier = Modifier,
     showDeleteAction: Boolean = BuildConfig.DEBUG,
 ) {
@@ -152,7 +158,7 @@ fun HistoryDetailComponent(
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    IconButton(onClick = { onEvent(HistoryDetailUiEvent.BackClick) }) {
+                    IconButton(onClick = { onIntent(HistoryDetailIntent.BackClick) }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
@@ -165,7 +171,7 @@ fun HistoryDetailComponent(
                 actions = {
                     IconButton(
                         enabled = !uiState.isMissing && uiState.date.isNotBlank(),
-                        onClick = { onEvent(HistoryDetailUiEvent.ShareClick) },
+                        onClick = { onIntent(HistoryDetailIntent.ShareClick) },
                     ) {
                         Icon(
                             imageVector = Icons.Default.Share,
@@ -284,7 +290,7 @@ fun HistoryDetailComponent(
                     text = "Delete",
                     onClick = {
                         showDeleteConfirmation = false
-                        onEvent(HistoryDetailUiEvent.DeleteClick)
+                        onIntent(HistoryDetailIntent.DeleteClick)
                     },
                     isDestructive = true,
                 )
@@ -300,19 +306,19 @@ fun HistoryDetailComponent(
 
     if (uiState.isShareFormatDialogVisible) {
         ShareFormatDialog(
-            onDismiss = { onEvent(HistoryDetailUiEvent.ShareDismiss) },
-            onTextClick = { onEvent(HistoryDetailUiEvent.ShareAsTextClick) },
-            onFileClick = { onEvent(HistoryDetailUiEvent.ShareAsFileClick) },
+            onDismiss = { onIntent(HistoryDetailIntent.ShareDismiss) },
+            onTextClick = { onIntent(HistoryDetailIntent.ShareAsTextClick) },
+            onFileClick = { onIntent(HistoryDetailIntent.ShareAsFileClick) },
         )
     }
 
     uiState.shareDraft?.takeIf { draft -> draft.isFileShare }?.let { draft ->
         ShareSnapshotDialog(
             draft = draft,
-            onFileNameChange = { fileName -> onEvent(HistoryDetailUiEvent.ShareFileNameChange(fileName)) },
-            onTextChange = { text -> onEvent(HistoryDetailUiEvent.ShareTextChange(text)) },
-            onDismiss = { onEvent(HistoryDetailUiEvent.ShareDismiss) },
-            onShareClick = { onEvent(HistoryDetailUiEvent.ShareFileConfirm(draft)) },
+            onFileNameChange = { fileName -> onIntent(HistoryDetailIntent.ShareFileNameChange(fileName)) },
+            onTextChange = { text -> onIntent(HistoryDetailIntent.ShareTextChange(text)) },
+            onDismiss = { onIntent(HistoryDetailIntent.ShareDismiss) },
+            onShareClick = { onIntent(HistoryDetailIntent.ShareFileConfirm(draft)) },
         )
     }
 }
@@ -409,7 +415,7 @@ private fun HistoryDetailComponentPreview() {
     RoutineHelperTheme {
         HistoryDetailComponent(
             uiState = HistoryDetailUiState.preview(),
-            onEvent = {},
+            onIntent = {},
         )
     }
 }

@@ -30,6 +30,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:presentation"))
     implementation(project(":core:ui"))
     api(project(":libs:routine:template:domain"))
 

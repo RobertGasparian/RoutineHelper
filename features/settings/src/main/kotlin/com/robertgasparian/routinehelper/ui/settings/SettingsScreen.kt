@@ -37,16 +37,16 @@ data class SettingsUiState(
     val isWeeklySummaryNotificationEnabled: Boolean = false,
 )
 
-sealed interface SettingsUiEvent {
-    data object BackClick : SettingsUiEvent
+sealed interface SettingsIntent {
+    data object BackClick : SettingsIntent
 
     data class DailySummaryNotificationChange(
         val isEnabled: Boolean,
-    ) : SettingsUiEvent
+    ) : SettingsIntent
 
     data class WeeklySummaryNotificationChange(
         val isEnabled: Boolean,
-    ) : SettingsUiEvent
+    ) : SettingsIntent
 }
 
 @Composable
@@ -63,13 +63,13 @@ fun SettingsScreen(
 
     SettingsComponent(
         uiState = uiState,
-        onEvent = { event ->
+        onIntent = { event ->
             when (event) {
-                SettingsUiEvent.BackClick -> onBackClick()
-                is SettingsUiEvent.DailySummaryNotificationChange -> {
+                SettingsIntent.BackClick -> onBackClick()
+                is SettingsIntent.DailySummaryNotificationChange -> {
                     isDailySummaryNotificationEnabled = event.isEnabled
                 }
-                is SettingsUiEvent.WeeklySummaryNotificationChange -> {
+                is SettingsIntent.WeeklySummaryNotificationChange -> {
                     isWeeklySummaryNotificationEnabled = event.isEnabled
                 }
             }
@@ -82,7 +82,7 @@ fun SettingsScreen(
 @Composable
 fun SettingsComponent(
     uiState: SettingsUiState,
-    onEvent: (SettingsUiEvent) -> Unit,
+    onIntent: (SettingsIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -90,7 +90,7 @@ fun SettingsComponent(
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    IconButton(onClick = { onEvent(SettingsUiEvent.BackClick) }) {
+                    IconButton(onClick = { onIntent(SettingsIntent.BackClick) }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
@@ -117,7 +117,7 @@ fun SettingsComponent(
                     title = "Daily Actions Summary Notification",
                     isChecked = uiState.isDailySummaryNotificationEnabled,
                     onCheckedChange = { isEnabled ->
-                        onEvent(SettingsUiEvent.DailySummaryNotificationChange(isEnabled))
+                        onIntent(SettingsIntent.DailySummaryNotificationChange(isEnabled))
                     },
                 )
                 HorizontalDivider()
@@ -125,7 +125,7 @@ fun SettingsComponent(
                     title = "Weekly Actions Summary Notification",
                     isChecked = uiState.isWeeklySummaryNotificationEnabled,
                     onCheckedChange = { isEnabled ->
-                        onEvent(SettingsUiEvent.WeeklySummaryNotificationChange(isEnabled))
+                        onIntent(SettingsIntent.WeeklySummaryNotificationChange(isEnabled))
                     },
                 )
             }
@@ -194,7 +194,7 @@ private fun SettingsComponentPreview() {
     RoutineHelperTheme {
         SettingsComponent(
             uiState = SettingsUiState(),
-            onEvent = {},
+            onIntent = {},
         )
     }
 }
@@ -208,7 +208,7 @@ private fun SettingsComponentDarkPreview() {
                 isDailySummaryNotificationEnabled = true,
                 isWeeklySummaryNotificationEnabled = true,
             ),
-            onEvent = {},
+            onIntent = {},
         )
     }
 }

@@ -11,6 +11,7 @@ import com.robertgasparian.routinehelper.test.MainDispatcherRule
 import com.robertgasparian.routinehelper.ui.share.ShareMode
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -67,9 +68,9 @@ class HistoryDetailViewModelTest {
         val viewModel = createViewModel(snapshotId = 404L)
         val initialState = viewModel.uiState.first()
 
-        viewModel.showShareOptions()
-        viewModel.showTextSharePreview()
-        viewModel.showFileSharePreview()
+        viewModel.onIntent(HistoryDetailIntent.ShareClick)
+        viewModel.onIntent(HistoryDetailIntent.ShareAsTextClick)
+        viewModel.onIntent(HistoryDetailIntent.ShareAsFileClick)
 
         assertEquals(initialState, viewModel.uiState.first())
         assertTrue(initialState.isMissing)
@@ -81,15 +82,15 @@ class HistoryDetailViewModelTest {
         val viewModel = createViewModel(snapshotId)
         viewModel.uiState.first { !it.isMissing }
 
-        viewModel.showShareOptions()
+        viewModel.onIntent(HistoryDetailIntent.ShareClick)
         assertTrue(viewModel.uiState.first { it.isShareFormatDialogVisible }.isShareFormatDialogVisible)
 
-        viewModel.showTextSharePreview()
+        viewModel.onIntent(HistoryDetailIntent.ShareAsTextClick)
         val initialDraft = requireNotNull(viewModel.uiState.first { it.shareDraft != null }.shareDraft)
         assertEquals(ShareMode.Text, initialDraft.mode)
         assertTrue(initialDraft.messageText.contains("Weekly routine snapshot"))
 
-        viewModel.updateShareText("Updated message")
+        viewModel.onIntent(HistoryDetailIntent.ShareTextChange("Updated message"))
         assertEquals(
             "Updated message",
             viewModel.uiState.first { state -> state.shareDraft?.messageText == "Updated message" }
@@ -97,7 +98,7 @@ class HistoryDetailViewModelTest {
                 ?.messageText,
         )
 
-        viewModel.dismissSharePreview()
+        viewModel.onIntent(HistoryDetailIntent.ShareDismiss)
         val dismissedState = viewModel.uiState.first { state ->
             state.shareDraft == null && !state.isShareFormatDialogVisible
         }
@@ -111,7 +112,7 @@ class HistoryDetailViewModelTest {
         val viewModel = createViewModel(snapshotId)
         viewModel.uiState.first { !it.isMissing }
 
-        viewModel.showFileSharePreview()
+        viewModel.onIntent(HistoryDetailIntent.ShareAsFileClick)
         val draft = requireNotNull(viewModel.uiState.first { it.shareDraft != null }.shareDraft)
 
         assertEquals(ShareMode.File, draft.mode)
@@ -124,16 +125,20 @@ class HistoryDetailViewModelTest {
     }
 
     @Test
-    fun `given snapshot when deleted then repository receives id and callback runs`() = runTest {
+    fun `given snapshot when delete intent is handled then repository receives id and deleted event is emitted`() = runTest {
         val snapshotId = saveWeeklySnapshot()
         val viewModel = createViewModel(snapshotId)
-        var wasDeleted = false
+        val events = mutableListOf<HistoryDetailUiEvent>()
+        val collectEventsJob = launch {
+            viewModel.uiEvents.collect { event -> events += event }
+        }
 
-        viewModel.deleteSnapshot(onDeleted = { wasDeleted = true })
+        viewModel.onIntent(HistoryDetailIntent.DeleteClick)
         advanceUntilIdle()
 
         assertEquals(listOf(snapshotId), repository.deletedSnapshotIds)
-        assertTrue(wasDeleted)
+        assertEquals(listOf(HistoryDetailUiEvent.SnapshotDeleted), events)
+        collectEventsJob.cancel()
     }
 
     private fun createViewModel(snapshotId: Long): HistoryDetailViewModel =

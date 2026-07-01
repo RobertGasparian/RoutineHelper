@@ -18,7 +18,7 @@ class HistoryComponentPaparazziTest {
             RoutineHelperTheme {
                 HistoryComponent(
                     uiState = HistoryUiState.preview(),
-                    onEvent = {},
+                    onIntent = {},
                 )
             }
         }
@@ -30,7 +30,7 @@ class HistoryComponentPaparazziTest {
             RoutineHelperTheme {
                 HistoryComponent(
                     uiState = HistoryUiState.previewEmpty(),
-                    onEvent = {},
+                    onIntent = {},
                 )
             }
         }
@@ -42,7 +42,7 @@ class HistoryComponentPaparazziTest {
             RoutineHelperTheme {
                 HistoryComponent(
                     uiState = HistoryUiState.previewSelection(),
-                    onEvent = {},
+                    onIntent = {},
                 )
             }
         }
@@ -54,7 +54,7 @@ class HistoryComponentPaparazziTest {
             RoutineHelperTheme {
                 HistoryComponent(
                     uiState = HistoryUiState.previewShare(),
-                    onEvent = {},
+                    onIntent = {},
                 )
             }
         }
@@ -66,7 +66,7 @@ class HistoryComponentPaparazziTest {
             RoutineHelperTheme {
                 HistoryComponent(
                     uiState = HistoryUiState.previewShareOptions(),
-                    onEvent = {},
+                    onIntent = {},
                 )
             }
         }
@@ -78,7 +78,7 @@ class HistoryComponentPaparazziTest {
             RoutineHelperTheme {
                 HistoryComponent(
                     uiState = HistoryUiState.previewFileShare(),
-                    onEvent = {},
+                    onIntent = {},
                 )
             }
         }
@@ -90,7 +90,7 @@ class HistoryComponentPaparazziTest {
             RoutineHelperTheme {
                 HistoryComponent(
                     uiState = HistoryUiState.previewLongShare(),
-                    onEvent = {},
+                    onIntent = {},
                 )
             }
         }

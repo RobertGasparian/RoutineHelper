@@ -1,7 +1,6 @@
 package com.robertgasparian.routinehelper.ui.weekly
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import com.robertgasparian.routinehelper.core.presentation.BaseViewModel
 import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.core.time.startOfCalendarWeek
 import com.robertgasparian.routinehelper.domain.time.SnapshotDates
@@ -19,18 +18,15 @@ import com.robertgasparian.routinehelper.ui.tracking.NoteDraftUiState
 import com.robertgasparian.routinehelper.ui.tracking.NoteEditorTarget
 import com.robertgasparian.routinehelper.ui.tracking.NoteEditorUiState
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingItemUiState
-import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingUiEvent
+import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingIntent
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingUiState
 import com.robertgasparian.routinehelper.ui.tracking.insertAtCursor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 @HiltViewModel
 class WeeklyViewModel @Inject constructor(
@@ -45,11 +41,11 @@ class WeeklyViewModel @Inject constructor(
     private val updateWeeklySummaryNoteUseCase: UpdateWeeklySummaryNoteUseCase,
     private val noteDateTimeTextProvider: NoteDateTimeTextProvider,
     private val timeProvider: TimeProvider,
-) : ViewModel() {
+) : BaseViewModel<RoutineTrackingUiState, RoutineTrackingIntent, Nothing>() {
     private val weekStartDate = timeProvider.currentDate().startOfWeek().toString()
     private val noteEditor = MutableStateFlow<NoteEditorUiState?>(null)
 
-    val uiState: StateFlow<RoutineTrackingUiState> =
+    override val uiState: StateFlow<RoutineTrackingUiState> =
         combine(
             weeklyItemsUseCase(weekStartDate),
             weeklySummaryNoteUseCase(weekStartDate),
@@ -62,38 +58,36 @@ class WeeklyViewModel @Inject constructor(
                 noteEditor = noteEditor,
             )
         }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = RoutineTrackingUiState(date = "Week of $weekStartDate"),
-            )
+            .stateInViewModel(initialValue = RoutineTrackingUiState(date = "Week of $weekStartDate"))
 
-    fun onEvent(event: RoutineTrackingUiEvent.Intent) {
-        when (event) {
-            is RoutineTrackingUiEvent.CheckedChange -> setChecked(
-                routineItemId = event.routineItemId,
-                isChecked = event.isChecked,
+    override fun handleIntent(intent: RoutineTrackingIntent) {
+        when (intent) {
+            RoutineTrackingIntent.CreateActionClick,
+            is RoutineTrackingIntent.EditActionClick -> Unit
+            is RoutineTrackingIntent.CheckedChange -> setChecked(
+                routineItemId = intent.routineItemId,
+                isChecked = intent.isChecked,
             )
-            is RoutineTrackingUiEvent.CompletedCountChange -> updateCompletedCount(
-                routineItemId = event.routineItemId,
-                completedCount = event.completedCount,
+            is RoutineTrackingIntent.CompletedCountChange -> updateCompletedCount(
+                routineItemId = intent.routineItemId,
+                completedCount = intent.completedCount,
             )
-            is RoutineTrackingUiEvent.HiddenChange -> setHidden(
-                routineItemId = event.routineItemId,
-                isHidden = event.isHidden,
+            is RoutineTrackingIntent.HiddenChange -> setHidden(
+                routineItemId = intent.routineItemId,
+                isHidden = intent.isHidden,
             )
-            is RoutineTrackingUiEvent.ReorderItems -> reorderItems(event.routineItemIdsInOrder)
-            RoutineTrackingUiEvent.SnapshotClick -> snapshotWeek()
-            is RoutineTrackingUiEvent.SnapshotDateSelected -> snapshotWeek(snapshotWeekStartDate = event.date)
-            is RoutineTrackingUiEvent.EditNoteClick -> showItemNoteEditor(event.item)
-            RoutineTrackingUiEvent.EditSummaryNoteClick -> showSummaryNoteEditor(uiState.value.summaryNote)
-            is RoutineTrackingUiEvent.NoteDraftChange -> updateNoteDraft(event.value)
-            RoutineTrackingUiEvent.NoteDraftClearClick -> clearNoteDraft()
-            RoutineTrackingUiEvent.NoteDraftDateClick -> insertCurrentDateIntoNoteDraft()
-            RoutineTrackingUiEvent.NoteDraftWeekdayClick -> insertCurrentWeekdayIntoNoteDraft()
-            RoutineTrackingUiEvent.NoteDraftTimeClick -> insertCurrentTimeIntoNoteDraft()
-            RoutineTrackingUiEvent.NoteEditorDismiss -> dismissNoteEditor()
-            RoutineTrackingUiEvent.NoteEditorSaveClick -> saveNoteDraft()
+            is RoutineTrackingIntent.ReorderItems -> reorderItems(intent.routineItemIdsInOrder)
+            RoutineTrackingIntent.SnapshotClick -> snapshotWeek()
+            is RoutineTrackingIntent.SnapshotDateSelected -> snapshotWeek(snapshotWeekStartDate = intent.date)
+            is RoutineTrackingIntent.EditNoteClick -> showItemNoteEditor(intent.item)
+            RoutineTrackingIntent.EditSummaryNoteClick -> showSummaryNoteEditor(uiState.value.summaryNote)
+            is RoutineTrackingIntent.NoteDraftChange -> updateNoteDraft(intent.value)
+            RoutineTrackingIntent.NoteDraftClearClick -> clearNoteDraft()
+            RoutineTrackingIntent.NoteDraftDateClick -> insertCurrentDateIntoNoteDraft()
+            RoutineTrackingIntent.NoteDraftWeekdayClick -> insertCurrentWeekdayIntoNoteDraft()
+            RoutineTrackingIntent.NoteDraftTimeClick -> insertCurrentTimeIntoNoteDraft()
+            RoutineTrackingIntent.NoteEditorDismiss -> dismissNoteEditor()
+            RoutineTrackingIntent.NoteEditorSaveClick -> saveNoteDraft()
         }
     }
 
@@ -101,7 +95,7 @@ class WeeklyViewModel @Inject constructor(
         routineItemId: Long,
         isChecked: Boolean,
     ) {
-        viewModelScope.launch {
+        launch {
             setWeeklyItemCheckedUseCase(
                 weekStartDate = weekStartDate,
                 routineItemId = routineItemId,
@@ -114,7 +108,7 @@ class WeeklyViewModel @Inject constructor(
         routineItemId: Long,
         isHidden: Boolean,
     ) {
-        viewModelScope.launch {
+        launch {
             setWeeklyItemHiddenUseCase(
                 weekStartDate = weekStartDate,
                 routineItemId = routineItemId,
@@ -124,7 +118,7 @@ class WeeklyViewModel @Inject constructor(
     }
 
     private fun reorderItems(routineItemIdsInOrder: List<Long>) {
-        viewModelScope.launch {
+        launch {
             reorderWeeklyRoutineItemsUseCase(routineItemIdsInOrder)
         }
     }
@@ -133,7 +127,7 @@ class WeeklyViewModel @Inject constructor(
         routineItemId: Long,
         note: String,
     ) {
-        viewModelScope.launch {
+        launch {
             updateWeeklyItemNoteUseCase(
                 weekStartDate = weekStartDate,
                 routineItemId = routineItemId,
@@ -143,7 +137,7 @@ class WeeklyViewModel @Inject constructor(
     }
 
     private fun updateSummaryNote(note: String) {
-        viewModelScope.launch {
+        launch {
             updateWeeklySummaryNoteUseCase(
                 weekStartDate = weekStartDate,
                 note = note,
@@ -213,7 +207,7 @@ class WeeklyViewModel @Inject constructor(
         routineItemId: Long,
         completedCount: Int,
     ) {
-        viewModelScope.launch {
+        launch {
             updateWeeklyItemCompletedCountUseCase(
                 weekStartDate = weekStartDate,
                 routineItemId = routineItemId,
@@ -228,7 +222,7 @@ class WeeklyViewModel @Inject constructor(
             .previousCompletedCalendarWeekStartDate(timeProvider.now())
             .toString(),
     ) {
-        viewModelScope.launch {
+        launch {
             finalizeWeeklyUseCase(
                 weekStartDate = weekStartDate,
                 snapshotPeriodStartDate = snapshotWeekStartDate,

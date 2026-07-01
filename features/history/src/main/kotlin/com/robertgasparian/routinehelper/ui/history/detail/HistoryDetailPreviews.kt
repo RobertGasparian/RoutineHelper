@@ -18,7 +18,7 @@ private fun HistoryDetailComponentPhonePreview() {
     RoutineHelperTheme {
         HistoryDetailComponent(
             uiState = HistoryDetailUiState.preview(),
-            onEvent = {},
+            onIntent = {},
         )
     }
 }
@@ -36,7 +36,7 @@ private fun HistoryDetailComponentLandscapePreview() {
     RoutineHelperTheme {
         HistoryDetailComponent(
             uiState = HistoryDetailUiState.preview(),
-            onEvent = {},
+            onIntent = {},
         )
     }
 }
@@ -47,7 +47,7 @@ private fun HistoryDetailComponentTabletPreview() {
     RoutineHelperTheme {
         HistoryDetailComponent(
             uiState = HistoryDetailUiState.preview(),
-            onEvent = {},
+            onIntent = {},
         )
     }
 }
@@ -58,7 +58,7 @@ private fun HistoryDetailComponentFoldablePreview() {
     RoutineHelperTheme {
         HistoryDetailComponent(
             uiState = HistoryDetailUiState.preview(),
-            onEvent = {},
+            onIntent = {},
         )
     }
 }
@@ -69,7 +69,7 @@ private fun HistoryDetailComponentEmptyPreview() {
     RoutineHelperTheme {
         HistoryDetailComponent(
             uiState = HistoryDetailUiState.previewEmpty(),
-            onEvent = {},
+            onIntent = {},
         )
     }
 }
@@ -80,7 +80,7 @@ private fun HistoryDetailComponentSharePreview() {
     RoutineHelperTheme {
         HistoryDetailComponent(
             uiState = HistoryDetailUiState.previewShare(),
-            onEvent = {},
+            onIntent = {},
         )
     }
 }
@@ -91,7 +91,7 @@ private fun HistoryDetailComponentShareOptionsPreview() {
     RoutineHelperTheme {
         HistoryDetailComponent(
             uiState = HistoryDetailUiState.previewShareOptions(),
-            onEvent = {},
+            onIntent = {},
         )
     }
 }
@@ -102,7 +102,7 @@ private fun HistoryDetailComponentFileSharePreview() {
     RoutineHelperTheme {
         HistoryDetailComponent(
             uiState = HistoryDetailUiState.previewFileShare(),
-            onEvent = {},
+            onIntent = {},
         )
     }
 }

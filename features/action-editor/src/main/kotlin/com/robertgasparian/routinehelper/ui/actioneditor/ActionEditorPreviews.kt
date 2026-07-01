@@ -65,6 +65,6 @@ private fun ActionEditorPreviewContent(
 ) {
     ActionEditorComponent(
         uiState = uiState,
-        onEvent = {},
+        onIntent = {},
     )
 }

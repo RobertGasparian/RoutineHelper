@@ -37,16 +37,16 @@ import com.robertgasparian.routinehelper.ui.dsm.RoutineKeyboardAwareBottomAction
 import com.robertgasparian.routinehelper.ui.dsm.RoutineOutlinedTextField
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 
-sealed interface ShareTextPreviewUiEvent {
-    data object BackClick : ShareTextPreviewUiEvent
+sealed interface ShareTextPreviewIntent {
+    data object BackClick : ShareTextPreviewIntent
 
-    data object CancelClick : ShareTextPreviewUiEvent
+    data object CancelClick : ShareTextPreviewIntent
 
-    data object ShareClick : ShareTextPreviewUiEvent
+    data object ShareClick : ShareTextPreviewIntent
 
     data class TextChange(
         val text: String,
-    ) : ShareTextPreviewUiEvent
+    ) : ShareTextPreviewIntent
 }
 
 @Composable
@@ -60,13 +60,12 @@ fun ShareTextPreviewScreen(
 
     ShareTextPreviewComponent(
         text = text,
-        onEvent = { event ->
+        onIntent = { event ->
             when (event) {
-                ShareTextPreviewUiEvent.BackClick,
-                ShareTextPreviewUiEvent.CancelClick,
-                -> onBackClick()
-                ShareTextPreviewUiEvent.ShareClick -> onShareClick(text)
-                is ShareTextPreviewUiEvent.TextChange -> text = event.text
+                ShareTextPreviewIntent.BackClick,
+                ShareTextPreviewIntent.CancelClick -> onBackClick()
+                ShareTextPreviewIntent.ShareClick -> onShareClick(text)
+                is ShareTextPreviewIntent.TextChange -> text = event.text
             }
         },
         modifier = modifier,
@@ -77,7 +76,7 @@ fun ShareTextPreviewScreen(
 @Composable
 fun ShareTextPreviewComponent(
     text: String,
-    onEvent: (ShareTextPreviewUiEvent) -> Unit,
+    onIntent: (ShareTextPreviewIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val isOverSoftLimit = text.length > SHARE_TEXT_SOFT_LIMIT
@@ -87,7 +86,7 @@ fun ShareTextPreviewComponent(
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    IconButton(onClick = { onEvent(ShareTextPreviewUiEvent.BackClick) }) {
+                    IconButton(onClick = { onIntent(ShareTextPreviewIntent.BackClick) }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
@@ -100,8 +99,8 @@ fun ShareTextPreviewComponent(
         bottomBar = {
             ShareTextPreviewBottomActions(
                 canShare = text.isNotBlank(),
-                onCancelClick = { onEvent(ShareTextPreviewUiEvent.CancelClick) },
-                onShareClick = { onEvent(ShareTextPreviewUiEvent.ShareClick) },
+                onCancelClick = { onIntent(ShareTextPreviewIntent.CancelClick) },
+                onShareClick = { onIntent(ShareTextPreviewIntent.ShareClick) },
             )
         },
     ) { innerPadding ->
@@ -118,7 +117,7 @@ fun ShareTextPreviewComponent(
             }
             RoutineOutlinedTextField(
                 value = text,
-                onValueChange = { value -> onEvent(ShareTextPreviewUiEvent.TextChange(value)) },
+                onValueChange = { value -> onIntent(ShareTextPreviewIntent.TextChange(value)) },
                 label = "Message",
                 modifier = Modifier
                     .fillMaxWidth()
@@ -222,7 +221,7 @@ private fun ShareTextPreviewScreenPreview() {
     RoutineHelperTheme(dynamicColor = false) {
         ShareTextPreviewComponent(
             text = previewShareText,
-            onEvent = {},
+            onIntent = {},
         )
     }
 }
@@ -233,7 +232,7 @@ private fun ShareTextPreviewScreenDarkPreview() {
     RoutineHelperTheme(dynamicColor = false) {
         ShareTextPreviewComponent(
             text = previewShareText,
-            onEvent = {},
+            onIntent = {},
         )
     }
 }
@@ -244,7 +243,7 @@ private fun ShareTextPreviewLongWarningPreview() {
     RoutineHelperTheme(dynamicColor = false) {
         ShareTextPreviewComponent(
             text = previewShareText + "\n\n" + "A".repeat(SHARE_TEXT_SOFT_LIMIT),
-            onEvent = {},
+            onIntent = {},
         )
     }
 }

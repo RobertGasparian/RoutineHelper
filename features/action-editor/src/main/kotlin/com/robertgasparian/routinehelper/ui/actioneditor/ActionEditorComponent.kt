@@ -60,7 +60,7 @@ import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 @Composable
 fun ActionEditorComponent(
     uiState: ActionEditorUiState,
-    onEvent: (ActionEditorUiEvent) -> Unit,
+    onIntent: (ActionEditorIntent) -> Unit,
     modifier: Modifier = Modifier,
     cadence: RoutineCadence = RoutineCadence.Daily,
 ) {
@@ -71,7 +71,7 @@ fun ActionEditorComponent(
         topBar = {
             TopAppBar(
                 navigationIcon = {
-                    IconButton(onClick = { onEvent(ActionEditorUiEvent.BackClick) }) {
+                    IconButton(onClick = { onIntent(ActionEditorIntent.BackClick) }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
@@ -96,8 +96,8 @@ fun ActionEditorComponent(
         bottomBar = {
             ActionEditorBottomActions(
                 canSave = uiState.canSave,
-                onCancelClick = { onEvent(ActionEditorUiEvent.BackClick) },
-                onSaveClick = { onEvent(ActionEditorUiEvent.SaveClick) },
+                onCancelClick = { onIntent(ActionEditorIntent.BackClick) },
+                onSaveClick = { onIntent(ActionEditorIntent.SaveClick) },
             )
         },
     ) { innerPadding ->
@@ -110,7 +110,7 @@ fun ActionEditorComponent(
             content = {
                 ActionEditorFormCard(
                     uiState = uiState,
-                    onEvent = onEvent,
+                    onIntent = onIntent,
                     cadence = cadence,
                     modifier = Modifier.padding(horizontal = 16.dp),
                 )
@@ -124,7 +124,7 @@ fun ActionEditorComponent(
             onDismiss = { showDeleteConfirmation = false },
             onDeleteClick = {
                 showDeleteConfirmation = false
-                onEvent(ActionEditorUiEvent.DeleteClick)
+                onIntent(ActionEditorIntent.DeleteClick)
             },
         )
     }
@@ -133,7 +133,7 @@ fun ActionEditorComponent(
 @Composable
 private fun ActionEditorFormCard(
     uiState: ActionEditorUiState,
-    onEvent: (ActionEditorUiEvent) -> Unit,
+    onIntent: (ActionEditorIntent) -> Unit,
     cadence: RoutineCadence,
     modifier: Modifier = Modifier,
 ) {
@@ -155,7 +155,7 @@ private fun ActionEditorFormCard(
             ActionEditorCadenceRow(cadence = cadence)
             RoutineOutlinedTextField(
                 value = uiState.title,
-                onValueChange = { title -> onEvent(ActionEditorUiEvent.TitleChange(title)) },
+                onValueChange = { title -> onIntent(ActionEditorIntent.TitleChange(title)) },
                 label = "Title",
                 isRequired = true,
                 placeholder = "Drink water",
@@ -164,7 +164,7 @@ private fun ActionEditorFormCard(
             )
             RoutineOutlinedTextField(
                 value = uiState.description,
-                onValueChange = { description -> onEvent(ActionEditorUiEvent.DescriptionChange(description)) },
+                onValueChange = { description -> onIntent(ActionEditorIntent.DescriptionChange(description)) },
                 label = "Description",
                 placeholder = "Drink 3L water",
                 minLines = 4,
@@ -172,7 +172,7 @@ private fun ActionEditorFormCard(
             )
             RepeatTargetSection(
                 uiState = uiState,
-                onEvent = onEvent,
+                onIntent = onIntent,
             )
         }
     }
@@ -214,7 +214,7 @@ private fun ActionEditorCadenceRow(
 @Composable
 private fun RepeatTargetSection(
     uiState: ActionEditorUiState,
-    onEvent: (ActionEditorUiEvent) -> Unit,
+    onIntent: (ActionEditorIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -240,7 +240,7 @@ private fun RepeatTargetSection(
                 )
                 RepeatModeButtonGroup(
                     isRepeatEnabled = uiState.isRepeatEnabled,
-                    onRepeatEnabledChange = { enabled -> onEvent(ActionEditorUiEvent.RepeatEnabledChange(enabled)) },
+                    onRepeatEnabledChange = { enabled -> onIntent(ActionEditorIntent.RepeatEnabledChange(enabled)) },
                     modifier = Modifier.weight(1.6f),
                 )
             }
@@ -260,7 +260,7 @@ private fun RepeatTargetSection(
                     RepeatTargetStepper(
                         value = uiState.repeatTargetCount,
                         onValueChange = { targetCount ->
-                            onEvent(ActionEditorUiEvent.RepeatTargetCountChange(targetCount))
+                            onIntent(ActionEditorIntent.RepeatTargetCountChange(targetCount))
                         },
                     )
                 }
@@ -432,7 +432,7 @@ private fun ActionEditorAddEmptyPreview() {
     RoutineHelperTheme(dynamicColor = false) {
         ActionEditorComponent(
             uiState = ActionEditorUiState.previewEmpty(),
-            onEvent = {},
+            onIntent = {},
         )
     }
 }
@@ -444,7 +444,7 @@ private fun ActionEditorAddRepeatPreview() {
         ActionEditorComponent(
             uiState = ActionEditorUiState.preview().copy(isEditing = false),
             cadence = RoutineCadence.Daily,
-            onEvent = {},
+            onIntent = {},
         )
     }
 }
@@ -456,7 +456,7 @@ private fun ActionEditorEditWeeklyPreview() {
         ActionEditorComponent(
             uiState = ActionEditorUiState.preview().copy(isEditing = true),
             cadence = RoutineCadence.Weekly,
-            onEvent = {},
+            onIntent = {},
         )
     }
 }
@@ -468,7 +468,7 @@ private fun ActionEditorDarkPreview() {
         ActionEditorComponent(
             uiState = ActionEditorUiState.preview(),
             cadence = RoutineCadence.Weekly,
-            onEvent = {},
+            onIntent = {},
         )
     }
 }

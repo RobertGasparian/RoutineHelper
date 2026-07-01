@@ -84,10 +84,10 @@ class HistoryViewModelTest {
         val viewModel = createViewModel()
         viewModel.uiState.first { it.snapshots.size == 2 }
 
-        viewModel.toggleSelection(DAILY_SNAPSHOT_ID)
+        viewModel.onIntent(HistoryIntent.ToggleSnapshotSelection(DAILY_SNAPSHOT_ID))
         assertEquals(1, viewModel.uiState.first { it.selectedCount == 1 }.selectedCount)
 
-        viewModel.selectFilter(HistoryFilter.Weekly)
+        viewModel.onIntent(HistoryIntent.FilterClick(HistoryFilter.Weekly))
         val state = viewModel.uiState.first { it.selectedFilter == HistoryFilter.Weekly }
 
         assertEquals(listOf(WEEKLY_SNAPSHOT_ID), state.snapshots.map(HistorySnapshotUiState::snapshotId))
@@ -101,14 +101,14 @@ class HistoryViewModelTest {
         val viewModel = createViewModel()
         viewModel.uiState.first { it.snapshots.isNotEmpty() }
 
-        viewModel.showShareOptions()
+        viewModel.onIntent(HistoryIntent.ShareSelectedClick)
         assertFalse(viewModel.uiState.value.isShareFormatDialogVisible)
 
-        viewModel.toggleSelection(DAILY_SNAPSHOT_ID)
-        viewModel.showShareOptions()
+        viewModel.onIntent(HistoryIntent.ToggleSnapshotSelection(DAILY_SNAPSHOT_ID))
+        viewModel.onIntent(HistoryIntent.ShareSelectedClick)
         assertTrue(viewModel.uiState.first { it.isShareFormatDialogVisible }.isShareFormatDialogVisible)
 
-        viewModel.clearSelection()
+        viewModel.onIntent(HistoryIntent.ClearSelectionClick)
         val state = viewModel.uiState.first { !it.isShareFormatDialogVisible }
         assertFalse(state.isSelectionMode)
         assertEquals(0, state.selectedCount)
@@ -120,10 +120,10 @@ class HistoryViewModelTest {
         val weeklyId = saveSnapshot(date = "2026-05-25", cadence = RoutineCadence.Weekly)
         val viewModel = createViewModel()
         viewModel.uiState.first { it.snapshots.size == 2 }
-        viewModel.toggleSelection(dailyId)
-        viewModel.toggleSelection(weeklyId)
+        viewModel.onIntent(HistoryIntent.ToggleSnapshotSelection(dailyId))
+        viewModel.onIntent(HistoryIntent.ToggleSnapshotSelection(weeklyId))
 
-        viewModel.showTextSharePreview()
+        viewModel.onIntent(HistoryIntent.ShareAsTextClick)
         advanceUntilIdle()
         val draft = requireNotNull(viewModel.uiState.value.shareDraft)
 
@@ -138,10 +138,10 @@ class HistoryViewModelTest {
         val secondId = saveSnapshot(date = "2026-05-29", cadence = RoutineCadence.Daily)
         val viewModel = createViewModel()
         viewModel.uiState.first { it.snapshots.size == 2 }
-        viewModel.toggleSelection(firstId)
-        viewModel.toggleSelection(secondId)
+        viewModel.onIntent(HistoryIntent.ToggleSnapshotSelection(firstId))
+        viewModel.onIntent(HistoryIntent.ToggleSnapshotSelection(secondId))
 
-        viewModel.showFileSharePreview()
+        viewModel.onIntent(HistoryIntent.ShareAsFileClick)
         advanceUntilIdle()
         val initialDraft = requireNotNull(viewModel.uiState.value.shareDraft)
 
@@ -152,8 +152,8 @@ class HistoryViewModelTest {
         )
         assertEquals("routine-snapshots-export.txt", initialDraft.fileName)
 
-        viewModel.updateShareText("Updated message")
-        viewModel.updateShareFileName("updated.txt")
+        viewModel.onIntent(HistoryIntent.ShareTextChange("Updated message"))
+        viewModel.onIntent(HistoryIntent.ShareFileNameChange("updated.txt"))
         val updatedDraft = requireNotNull(
             viewModel.uiState.first { state ->
                 state.shareDraft?.messageText == "Updated message" &&
@@ -163,7 +163,7 @@ class HistoryViewModelTest {
         assertEquals("Updated message", updatedDraft.messageText)
         assertEquals("updated.txt", updatedDraft.fileName)
 
-        viewModel.dismissSharePreview()
+        viewModel.onIntent(HistoryIntent.ShareDismiss)
         assertEquals(null, viewModel.uiState.first { it.shareDraft == null }.shareDraft)
     }
 
@@ -173,10 +173,10 @@ class HistoryViewModelTest {
         val secondId = saveSnapshot(date = "2026-05-29", cadence = RoutineCadence.Daily)
         val viewModel = createViewModel()
         viewModel.uiState.first { it.snapshots.size == 2 }
-        viewModel.toggleSelection(firstId)
-        viewModel.toggleSelection(secondId)
+        viewModel.onIntent(HistoryIntent.ToggleSnapshotSelection(firstId))
+        viewModel.onIntent(HistoryIntent.ToggleSnapshotSelection(secondId))
 
-        viewModel.deleteSelectedSnapshots()
+        viewModel.onIntent(HistoryIntent.DeleteSelectedClick)
         advanceUntilIdle()
 
         assertEquals(listOf(firstId, secondId), repository.deletedSnapshotIds)

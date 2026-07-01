@@ -1,7 +1,6 @@
 package com.robertgasparian.routinehelper.ui.actioneditor
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import com.robertgasparian.routinehelper.core.presentation.BaseViewModel
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.RoutineTemplateItem
 import com.robertgasparian.routinehelper.domain.usecase.AddTemplateItemUseCase
@@ -14,15 +13,12 @@ import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 @HiltViewModel(assistedFactory = ActionEditorViewModel.Factory::class)
 class ActionEditorViewModel @AssistedInject constructor(
@@ -32,7 +28,7 @@ class ActionEditorViewModel @AssistedInject constructor(
     private val removeTemplateItemUseCase: RemoveTemplateItemUseCase,
     private val templateItemUseCase: TemplateItemUseCase,
     private val updateTemplateItemUseCase: UpdateTemplateItemUseCase,
-) : ViewModel() {
+) : BaseViewModel<ActionEditorUiState, ActionEditorIntent, ActionEditorUiEvent>() {
     private val draftTitle = MutableStateFlow("")
     private val draftDescription = MutableStateFlow("")
     private val isRepeatEnabled = MutableStateFlow(false)
@@ -51,7 +47,7 @@ class ActionEditorViewModel @AssistedInject constructor(
             }
         }
 
-    val uiState: StateFlow<ActionEditorUiState> =
+    override val uiState: StateFlow<ActionEditorUiState> =
         combine(
             templateItem,
             draftTitle,
@@ -68,32 +64,38 @@ class ActionEditorViewModel @AssistedInject constructor(
             )
         }
             .distinctUntilChanged()
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = ActionEditorUiState(isEditing = actionId != null),
-            )
+            .stateInViewModel(initialValue = ActionEditorUiState(isEditing = actionId != null))
 
-    fun updateTitle(title: String) {
+    override fun handleIntent(intent: ActionEditorIntent) {
+        when (intent) {
+            ActionEditorIntent.BackClick -> Unit
+            ActionEditorIntent.DeleteClick -> delete()
+            ActionEditorIntent.SaveClick -> save()
+            is ActionEditorIntent.DescriptionChange -> updateDescription(intent.description)
+            is ActionEditorIntent.RepeatEnabledChange -> updateRepeatEnabled(intent.enabled)
+            is ActionEditorIntent.RepeatTargetCountChange -> updateRepeatTargetCount(intent.targetCount)
+            is ActionEditorIntent.TitleChange -> updateTitle(intent.title)
+        }
+    }
+
+    private fun updateTitle(title: String) {
         draftTitle.value = title
     }
 
-    fun updateDescription(description: String) {
+    private fun updateDescription(description: String) {
         draftDescription.value = description
     }
 
-    fun updateRepeatEnabled(enabled: Boolean) {
+    private fun updateRepeatEnabled(enabled: Boolean) {
         isRepeatEnabled.value = enabled
     }
 
-    fun updateRepeatTargetCount(targetCount: Int) {
+    private fun updateRepeatTargetCount(targetCount: Int) {
         repeatTargetCount.value = targetCount.coerceAtLeast(2)
     }
 
-    fun save(
-        onSaved: () -> Unit,
-    ) {
-        viewModelScope.launch {
+    private fun save() {
+        launch {
             val targetCount = repeatTargetCount.value.takeIf { isRepeatEnabled.value }
             if (actionId == null) {
                 addTemplateItemUseCase(
@@ -110,19 +112,17 @@ class ActionEditorViewModel @AssistedInject constructor(
                     repeatTargetCount = targetCount,
                 )
             }
-            onSaved()
+            emitUiEvent(ActionEditorUiEvent.Saved)
         }
     }
 
-    fun delete(
-        onDeleted: () -> Unit,
-    ) {
+    private fun delete() {
         if (actionId == null) return
 
-        viewModelScope.launch {
+        launch {
             val item = templateItemUseCase(actionId).first() ?: return@launch
             removeTemplateItemUseCase(item.routineItemId)
-            onDeleted()
+            emitUiEvent(ActionEditorUiEvent.Deleted)
         }
     }
 

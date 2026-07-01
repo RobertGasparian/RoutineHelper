@@ -40,6 +40,6 @@ private fun DailyComponentPaparazziContent(
 ) {
     RoutineTrackingComponent(
         uiState = uiState,
-        onEvent = {},
+        onIntent = {},
     )
 }

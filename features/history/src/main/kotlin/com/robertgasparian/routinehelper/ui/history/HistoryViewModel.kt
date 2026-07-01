@@ -1,7 +1,6 @@
 package com.robertgasparian.routinehelper.ui.history
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import com.robertgasparian.routinehelper.core.presentation.BaseViewModel
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotSummary
 import com.robertgasparian.routinehelper.domain.formatter.SnapshotShareTextFormatter
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
@@ -11,12 +10,9 @@ import com.robertgasparian.routinehelper.ui.share.ShareDraft
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
@@ -24,13 +20,13 @@ class HistoryViewModel @Inject constructor(
     private val snapshotShareTextFormatter: SnapshotShareTextFormatter,
     snapshotSummariesUseCase: SnapshotSummariesUseCase,
     private val snapshotUseCase: SnapshotUseCase,
-) : ViewModel() {
+) : BaseViewModel<HistoryUiState, HistoryIntent, Nothing>() {
     private val selectedSnapshotIds = MutableStateFlow<Set<Long>>(emptySet())
     private val selectedFilter = MutableStateFlow(HistoryFilter.All)
     private val isShareFormatDialogVisible = MutableStateFlow(false)
     private val shareDraft = MutableStateFlow<ShareDraft?>(null)
 
-    val uiState: StateFlow<HistoryUiState> =
+    override val uiState: StateFlow<HistoryUiState> =
         combine(
             snapshotSummariesUseCase(),
             selectedFilter,
@@ -54,40 +50,54 @@ class HistoryViewModel @Inject constructor(
                 shareDraft = shareDraft,
             )
         }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = HistoryUiState(),
-            )
+            .stateInViewModel(initialValue = HistoryUiState())
 
-    fun toggleSelection(snapshotId: Long) {
+    override fun handleIntent(intent: HistoryIntent) {
+        when (intent) {
+            is HistoryIntent.ShareFileConfirm,
+            is HistoryIntent.ShareTextConfirm,
+            is HistoryIntent.SnapshotClick -> Unit
+            HistoryIntent.ClearSelectionClick -> clearSelection()
+            HistoryIntent.DeleteSelectedClick -> deleteSelectedSnapshots()
+            is HistoryIntent.FilterClick -> selectFilter(intent.filter)
+            HistoryIntent.ShareAsFileClick -> showFileSharePreview()
+            HistoryIntent.ShareAsTextClick -> showTextSharePreview()
+            HistoryIntent.ShareDismiss -> dismissSharePreview()
+            is HistoryIntent.ShareFileNameChange -> updateShareFileName(intent.fileName)
+            HistoryIntent.ShareSelectedClick -> showShareOptions()
+            is HistoryIntent.ShareTextChange -> updateShareText(intent.text)
+            is HistoryIntent.ToggleSnapshotSelection -> toggleSelection(intent.snapshotId)
+        }
+    }
+
+    private fun toggleSelection(snapshotId: Long) {
         selectedSnapshotIds.value = selectedSnapshotIds.value.toggle(snapshotId)
     }
 
-    fun clearSelection() {
+    private fun clearSelection() {
         selectedSnapshotIds.value = emptySet()
         isShareFormatDialogVisible.value = false
         shareDraft.value = null
     }
 
-    fun selectFilter(filter: HistoryFilter) {
+    private fun selectFilter(filter: HistoryFilter) {
         selectedFilter.value = filter
         selectedSnapshotIds.value = emptySet()
         isShareFormatDialogVisible.value = false
         shareDraft.value = null
     }
 
-    fun showShareOptions() {
+    private fun showShareOptions() {
         if (selectedSnapshotIds.value.isNotEmpty()) {
             isShareFormatDialogVisible.value = true
         }
     }
 
-    fun showTextSharePreview() {
+    private fun showTextSharePreview() {
         showSharePreview(mode = ShareMode.Text)
     }
 
-    fun showFileSharePreview() {
+    private fun showFileSharePreview() {
         showSharePreview(mode = ShareMode.File)
     }
 
@@ -96,7 +106,7 @@ class HistoryViewModel @Inject constructor(
         if (snapshotIds.isEmpty()) return
 
         isShareFormatDialogVisible.value = false
-        viewModelScope.launch {
+        launch {
             val snapshots = snapshotIds.mapNotNull { snapshotId ->
                 snapshotUseCase(snapshotId).first()
             }
@@ -114,24 +124,24 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
-    fun updateShareFileName(fileName: String) {
+    private fun updateShareFileName(fileName: String) {
         shareDraft.value = shareDraft.value?.copy(fileName = fileName)
     }
 
-    fun updateShareText(text: String) {
+    private fun updateShareText(text: String) {
         shareDraft.value = shareDraft.value?.copy(messageText = text)
     }
 
-    fun dismissSharePreview() {
+    private fun dismissSharePreview() {
         isShareFormatDialogVisible.value = false
         shareDraft.value = null
     }
 
-    fun deleteSelectedSnapshots() {
+    private fun deleteSelectedSnapshots() {
         val snapshotIds = selectedSnapshotIds.value.toList()
         if (snapshotIds.isEmpty()) return
 
-        viewModelScope.launch {
+        launch {
             snapshotIds.forEach { snapshotId ->
                 deleteSnapshotUseCase(snapshotId)
             }

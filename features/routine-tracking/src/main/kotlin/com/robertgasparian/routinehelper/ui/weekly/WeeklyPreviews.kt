@@ -56,7 +56,7 @@ private fun WeeklyPreviewContent(uiState: RoutineTrackingUiState) {
     RoutineHelperTheme {
         RoutineTrackingComponent(
             uiState = uiState,
-            onEvent = {},
+            onIntent = {},
             title = "Weekly",
             emptyTitle = "No weekly items yet",
             emptyDescription = "Add your first weekly action to start tracking this week.",
