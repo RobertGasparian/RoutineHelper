@@ -13,10 +13,11 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 @HiltViewModel(assistedFactory = HistoryDetailViewModel.Factory::class)
@@ -29,13 +30,17 @@ class HistoryDetailViewModel @AssistedInject constructor(
 ) : ViewModel() {
     private val isShareFormatDialogVisible = MutableStateFlow(false)
     private val shareDraft = MutableStateFlow<ShareDraft?>(null)
-    private var currentSnapshot: RoutineSnapshot? = null
 
-    val uiState: Flow<HistoryDetailUiState> =
+    private val snapshot: StateFlow<RoutineSnapshot?> =
+        snapshotUseCase(snapshotId).stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = null,
+        )
+
+    val uiState: StateFlow<HistoryDetailUiState> =
         combine(
-            snapshotUseCase(snapshotId).onEach { snapshot ->
-                currentSnapshot = snapshot
-            },
+            snapshot,
             isShareFormatDialogVisible,
             shareDraft,
         ) { snapshot, isShareFormatDialogVisible, shareDraft ->
@@ -44,6 +49,11 @@ class HistoryDetailViewModel @AssistedInject constructor(
                 shareDraft = shareDraft,
             )
         }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = HistoryDetailUiState.previewMissing(),
+            )
 
     fun deleteSnapshot(
         onDeleted: () -> Unit,
@@ -56,19 +66,19 @@ class HistoryDetailViewModel @AssistedInject constructor(
     }
 
     fun showShareOptions() {
-        if (currentSnapshot != null) {
+        if (snapshot.value != null) {
             isShareFormatDialogVisible.value = true
         }
     }
 
     fun showTextSharePreview() {
-        val snapshot = currentSnapshot ?: return
+        val snapshot = snapshot.value ?: return
         isShareFormatDialogVisible.value = false
         shareDraft.value = ShareDraft.text(snapshotShareTextFormatter(snapshot))
     }
 
     fun showFileSharePreview() {
-        val snapshot = currentSnapshot ?: return
+        val snapshot = snapshot.value ?: return
         isShareFormatDialogVisible.value = false
         shareDraft.value = ShareDraft.file(
             messageText = "Here is the ${snapshot.cadence.historyLabel.lowercase()} routine snapshot from ${snapshot.historyDisplayDate}.",

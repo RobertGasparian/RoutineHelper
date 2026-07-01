@@ -41,11 +41,12 @@ This checklist tracks the class-by-class standardization pass after modularizati
   - Keep platform and presentation concerns out of domain code and add focused mapper tests where useful.
   - Extracted History mapper/formatting helpers from ViewModels, added focused mapper tests, and tightened snapshot share text formatter coverage.
 
-- [ ] **ViewModels** - next
+- [x] **ViewModels**
   - Review Action Editor, Daily, Weekly, History, and History Detail ViewModels.
   - Standardize state construction, intent handling, coroutine/error behavior, dependency boundaries, and tests.
+  - Standardized route argument ownership, public `StateFlow` state exposure, and ViewModel-owned share/form state.
 
-- [ ] **UI state, events, and local state holders**
+- [ ] **UI state, events, and local state holders** - next
   - Review UI-state models, `XxxUiEvent.Intent` contracts, share drafts, reorder state, and Compose-only state holders.
   - Keep Compose-specific interaction details out of ViewModel state.
 

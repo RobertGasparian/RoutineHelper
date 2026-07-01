@@ -95,9 +95,7 @@ fun HistoryDetailScreen(
     ),
 ) {
     val context = LocalContext.current
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle(
-        initialValue = HistoryDetailUiState(),
-    )
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(uiState.shareDraft) {
         val draft = uiState.shareDraft

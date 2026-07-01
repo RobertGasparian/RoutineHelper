@@ -90,10 +90,17 @@ class HistoryDetailViewModelTest {
         assertTrue(initialDraft.messageText.contains("Weekly routine snapshot"))
 
         viewModel.updateShareText("Updated message")
-        assertEquals("Updated message", viewModel.uiState.first().shareDraft?.messageText)
+        assertEquals(
+            "Updated message",
+            viewModel.uiState.first { state -> state.shareDraft?.messageText == "Updated message" }
+                .shareDraft
+                ?.messageText,
+        )
 
         viewModel.dismissSharePreview()
-        val dismissedState = viewModel.uiState.first()
+        val dismissedState = viewModel.uiState.first { state ->
+            state.shareDraft == null && !state.isShareFormatDialogVisible
+        }
         assertEquals(null, dismissedState.shareDraft)
         assertFalse(dismissedState.isShareFormatDialogVisible)
     }

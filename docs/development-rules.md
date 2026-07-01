@@ -75,7 +75,10 @@
 
 - ViewModels must depend on use cases or presentation-specific collaborators, not repositories or data sources.
 - Repositories stay behind use cases or lib APIs so presentation code does not know data-source or repository implementation boundaries.
-- ViewModels should expose stable UI state and receive state-changing UI intents through a feature event handler.
+- ViewModels expose a single stable `val uiState: StateFlow<XxxUiState>` for screen state. Build it from private `MutableStateFlow`s and read-only use-case flows with `stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), initialState)`.
+- Use Hilt assisted ViewModels for stable route/screen identity arguments such as IDs, cadence, or other navigation parameters. Once the ViewModel is created, public ViewModel methods should read those owned arguments instead of requiring the screen to pass them back on every call.
+- Keep mutable presentation state private inside the ViewModel. Screens collect `uiState` and call public methods or an `onEvent(...)` handler; they should not assemble ViewModel state flows themselves.
+- ViewModels should receive state-changing UI intents through a feature event handler when the feature has an MVI event contract.
 - When a feature has navigation events and ViewModel-handled events in the same UI event stream, model the ViewModel-handled subset as `XxxUiEvent.Intent`.
 - UI state should be named for the feature or shared concept it represents. Avoid reusing a feature-specific name for another feature unless that is the intentional shared model.
 - Direct time reads should be isolated behind a small provider/collaborator when the code path is business logic, scheduling, snapshotting, or test-sensitive presentation state.

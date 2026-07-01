@@ -3,22 +3,31 @@ package com.robertgasparian.routinehelper.ui.actioneditor
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.domain.model.RoutineTemplateItem
 import com.robertgasparian.routinehelper.domain.usecase.AddTemplateItemUseCase
 import com.robertgasparian.routinehelper.domain.usecase.RemoveTemplateItemUseCase
 import com.robertgasparian.routinehelper.domain.usecase.TemplateItemUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTemplateItemUseCase
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-@HiltViewModel
-class ActionEditorViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = ActionEditorViewModel.Factory::class)
+class ActionEditorViewModel @AssistedInject constructor(
+    @Assisted private val actionId: Long?,
+    @Assisted private val cadence: RoutineCadence,
     private val addTemplateItemUseCase: AddTemplateItemUseCase,
     private val removeTemplateItemUseCase: RemoveTemplateItemUseCase,
     private val templateItemUseCase: TemplateItemUseCase,
@@ -28,24 +37,23 @@ class ActionEditorViewModel @Inject constructor(
     private val draftDescription = MutableStateFlow("")
     private val isRepeatEnabled = MutableStateFlow(false)
     private val repeatTargetCount = MutableStateFlow(2)
-    private val loadedActionIds = mutableSetOf<Long>()
+    private var isTemplateItemLoaded = false
 
-    fun uiState(actionId: Long?): Flow<ActionEditorUiState> {
-        val source = if (actionId == null) {
-            MutableStateFlow(null)
+    private val templateItem: Flow<RoutineTemplateItem?> =
+        if (actionId == null) {
+            flowOf(null)
         } else {
             templateItemUseCase(actionId).onEach { item ->
-                if (item != null && loadedActionIds.add(actionId)) {
-                    draftTitle.value = item.title
-                    draftDescription.value = item.description.orEmpty()
-                    isRepeatEnabled.value = item.repeatTargetCount != null
-                    repeatTargetCount.value = item.repeatTargetCount ?: 2
+                if (item != null && !isTemplateItemLoaded) {
+                    isTemplateItemLoaded = true
+                    loadDraft(item)
                 }
             }
         }
 
-        return combine(
-            source,
+    val uiState: StateFlow<ActionEditorUiState> =
+        combine(
+            templateItem,
             draftTitle,
             draftDescription,
             isRepeatEnabled,
@@ -58,8 +66,13 @@ class ActionEditorViewModel @Inject constructor(
                 repeatTargetCount = repeatTargetCount,
                 isEditing = actionId != null,
             )
-        }.distinctUntilChanged()
-    }
+        }
+            .distinctUntilChanged()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = ActionEditorUiState(isEditing = actionId != null),
+            )
 
     fun updateTitle(title: String) {
         draftTitle.value = title
@@ -78,8 +91,6 @@ class ActionEditorViewModel @Inject constructor(
     }
 
     fun save(
-        actionId: Long?,
-        cadence: RoutineCadence,
         onSaved: () -> Unit,
     ) {
         viewModelScope.launch {
@@ -104,7 +115,6 @@ class ActionEditorViewModel @Inject constructor(
     }
 
     fun delete(
-        actionId: Long?,
         onDeleted: () -> Unit,
     ) {
         if (actionId == null) return
@@ -114,5 +124,20 @@ class ActionEditorViewModel @Inject constructor(
             removeTemplateItemUseCase(item.routineItemId)
             onDeleted()
         }
+    }
+
+    private fun loadDraft(item: RoutineTemplateItem) {
+        draftTitle.value = item.title
+        draftDescription.value = item.description.orEmpty()
+        isRepeatEnabled.value = item.repeatTargetCount != null
+        repeatTargetCount.value = item.repeatTargetCount ?: 2
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            actionId: Long?,
+            cadence: RoutineCadence,
+        ): ActionEditorViewModel
     }
 }

@@ -37,11 +37,16 @@ fun ActionEditorScreen(
     cadence: RoutineCadence,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: ActionEditorViewModel = hiltViewModel(),
+    viewModel: ActionEditorViewModel = hiltViewModel<ActionEditorViewModel, ActionEditorViewModel.Factory>(
+        creationCallback = { factory ->
+            factory.create(
+                actionId = actionId,
+                cadence = cadence,
+            )
+        },
+    ),
 ) {
-    val uiState by viewModel.uiState(actionId).collectAsStateWithLifecycle(
-        initialValue = ActionEditorUiState(isEditing = actionId != null),
-    )
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     ActionEditorComponent(
         uiState = uiState,
@@ -51,15 +56,8 @@ fun ActionEditorScreen(
                 is ActionEditorUiEvent.DescriptionChange -> viewModel.updateDescription(event.description)
                 is ActionEditorUiEvent.RepeatEnabledChange -> viewModel.updateRepeatEnabled(event.enabled)
                 is ActionEditorUiEvent.RepeatTargetCountChange -> viewModel.updateRepeatTargetCount(event.targetCount)
-                ActionEditorUiEvent.SaveClick -> {
-                    viewModel.save(
-                        actionId = actionId,
-                        cadence = cadence,
-                        onSaved = onBackClick,
-                    )
-                }
+                ActionEditorUiEvent.SaveClick -> viewModel.save(onSaved = onBackClick)
                 ActionEditorUiEvent.DeleteClick -> viewModel.delete(
-                    actionId = actionId,
                     onDeleted = onBackClick,
                 )
                 is ActionEditorUiEvent.TitleChange -> viewModel.updateTitle(event.title)

@@ -26,16 +26,10 @@ class ActionEditorViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val repository = FakeRoutineTemplateRepository()
-    private val viewModel = ActionEditorViewModel(
-        addTemplateItemUseCase = AddTemplateItemUseCase(repository),
-        removeTemplateItemUseCase = RemoveTemplateItemUseCase(repository),
-        templateItemUseCase = TemplateItemUseCase(repository),
-        updateTemplateItemUseCase = UpdateTemplateItemUseCase(repository),
-    )
 
     @Test
     fun `given no action id when observing state then empty create state is emitted`() = runTest {
-        val state = viewModel.uiState(actionId = null).first()
+        val state = createViewModel(actionId = null).uiState.first()
 
         assertEquals(ActionEditorUiState.previewEmpty(), state)
     }
@@ -52,7 +46,7 @@ class ActionEditorViewModelTest {
             ),
         )
 
-        val state = viewModel.uiState(ACTION_ID).first { it.title == "Stretch" }
+        val state = createViewModel(actionId = ACTION_ID).uiState.first { it.title == "Stretch" }
 
         assertEquals(
             ActionEditorUiState(
@@ -68,12 +62,14 @@ class ActionEditorViewModelTest {
 
     @Test
     fun `given draft changes when observing state then updated values are emitted`() = runTest {
+        val viewModel = createViewModel(actionId = null)
+
         viewModel.updateTitle("Read")
         viewModel.updateDescription("One chapter")
         viewModel.updateRepeatEnabled(true)
         viewModel.updateRepeatTargetCount(1)
 
-        val state = viewModel.uiState(actionId = null).first()
+        val state = viewModel.uiState.first { it.title == "Read" }
 
         assertEquals("Read", state.title)
         assertEquals("One chapter", state.description)
@@ -83,17 +79,18 @@ class ActionEditorViewModelTest {
 
     @Test
     fun `given new weekly draft when saving then item and callback are forwarded`() = runTest {
+        val viewModel = createViewModel(
+            actionId = null,
+            cadence = RoutineCadence.Weekly,
+        )
+
         viewModel.updateTitle("Review budget")
         viewModel.updateDescription("Check every category")
         viewModel.updateRepeatEnabled(true)
         viewModel.updateRepeatTargetCount(4)
         var wasSaved = false
 
-        viewModel.save(
-            actionId = null,
-            cadence = RoutineCadence.Weekly,
-            onSaved = { wasSaved = true },
-        )
+        viewModel.save(onSaved = { wasSaved = true })
         advanceUntilIdle()
 
         assertEquals(
@@ -110,15 +107,13 @@ class ActionEditorViewModelTest {
 
     @Test
     fun `given existing action when saving then update and callback are forwarded`() = runTest {
+        val viewModel = createViewModel(actionId = ACTION_ID)
+
         viewModel.updateTitle("Updated title")
         viewModel.updateDescription("Updated description")
         var wasSaved = false
 
-        viewModel.save(
-            actionId = ACTION_ID,
-            cadence = RoutineCadence.Daily,
-            onSaved = { wasSaved = true },
-        )
+        viewModel.save(onSaved = { wasSaved = true })
         advanceUntilIdle()
 
         assertEquals(
@@ -135,12 +130,10 @@ class ActionEditorViewModelTest {
     @Test
     fun `given existing action when deleting then item and callback are forwarded`() = runTest {
         repository.setItems(listOf(templateItem()))
+        val viewModel = createViewModel(actionId = ACTION_ID)
         var wasDeleted = false
 
-        viewModel.delete(
-            actionId = ACTION_ID,
-            onDeleted = { wasDeleted = true },
-        )
+        viewModel.delete(onDeleted = { wasDeleted = true })
         advanceUntilIdle()
 
         assertEquals(listOf(ROUTINE_ITEM_ID), repository.removedTemplateItemIds)
@@ -149,12 +142,10 @@ class ActionEditorViewModelTest {
 
     @Test
     fun `given no action id when deleting then repository and callback are not invoked`() = runTest {
+        val viewModel = createViewModel(actionId = null)
         var wasDeleted = false
 
-        viewModel.delete(
-            actionId = null,
-            onDeleted = { wasDeleted = true },
-        )
+        viewModel.delete(onDeleted = { wasDeleted = true })
         advanceUntilIdle()
 
         assertTrue(repository.removedTemplateItemIds.isEmpty())
@@ -174,6 +165,19 @@ class ActionEditorViewModelTest {
             position = 0,
             cadence = RoutineCadence.Daily,
             repeatTargetCount = repeatTargetCount,
+        )
+
+    private fun createViewModel(
+        actionId: Long?,
+        cadence: RoutineCadence = RoutineCadence.Daily,
+    ): ActionEditorViewModel =
+        ActionEditorViewModel(
+            actionId = actionId,
+            cadence = cadence,
+            addTemplateItemUseCase = AddTemplateItemUseCase(repository),
+            removeTemplateItemUseCase = RemoveTemplateItemUseCase(repository),
+            templateItemUseCase = TemplateItemUseCase(repository),
+            updateTemplateItemUseCase = UpdateTemplateItemUseCase(repository),
         )
 
     private companion object {
