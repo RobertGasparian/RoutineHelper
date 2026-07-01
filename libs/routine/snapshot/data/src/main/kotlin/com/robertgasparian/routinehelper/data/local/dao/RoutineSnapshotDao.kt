@@ -12,12 +12,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface RoutineSnapshotDao {
-    @Query("SELECT * FROM routine_snapshots ORDER BY periodStartDate DESC")
-    fun snapshots(): Flow<List<RoutineSnapshotEntity>>
-
-    @Query("SELECT * FROM routine_snapshots WHERE cadence = :cadence ORDER BY periodStartDate DESC")
-    fun snapshots(cadence: String): Flow<List<RoutineSnapshotEntity>>
-
     @Transaction
     @Query("SELECT * FROM routine_snapshots ORDER BY periodStartDate DESC")
     fun snapshotsWithEntries(): Flow<List<RoutineSnapshotWithEntries>>

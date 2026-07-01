@@ -5,10 +5,10 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.robertgasparian.routinehelper.data.local.RoutineDatabase
 import com.robertgasparian.routinehelper.data.local.dao.ActionDao
-import com.robertgasparian.routinehelper.data.local.dao.RoutineSnapshotDao
+import com.robertgasparian.routinehelper.data.local.dao.DailyEntryDao
 import com.robertgasparian.routinehelper.data.local.dao.DailySummaryNoteDao
+import com.robertgasparian.routinehelper.data.local.dao.RoutineSnapshotDao
 import com.robertgasparian.routinehelper.data.local.dao.RoutineItemDao
-import com.robertgasparian.routinehelper.data.local.dao.TodayEntryDao
 import com.robertgasparian.routinehelper.data.local.dao.WeeklyEntryDao
 import com.robertgasparian.routinehelper.data.local.dao.WeeklySummaryNoteDao
 import dagger.Module
@@ -42,7 +42,7 @@ object DatabaseModule {
     fun provideRoutineItemDao(database: RoutineDatabase): RoutineItemDao = database.routineItemDao()
 
     @Provides
-    fun provideTodayEntryDao(database: RoutineDatabase): TodayEntryDao = database.todayEntryDao()
+    fun provideDailyEntryDao(database: RoutineDatabase): DailyEntryDao = database.dailyEntryDao()
 
     @Provides
     fun provideWeeklyEntryDao(database: RoutineDatabase): WeeklyEntryDao = database.weeklyEntryDao()

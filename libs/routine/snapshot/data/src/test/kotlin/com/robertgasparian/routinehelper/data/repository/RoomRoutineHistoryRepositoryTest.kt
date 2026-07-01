@@ -313,12 +313,6 @@ private class FakeRoutineSnapshotDao : RoutineSnapshotDao {
     val deletedSnapshotIds = mutableListOf<Long>()
     private var nextSnapshotId = 1_000L
 
-    override fun snapshots(): Flow<List<RoutineSnapshotEntity>> =
-        flowOf(snapshots.values.sortedByDescending(RoutineSnapshotEntity::periodStartDate))
-
-    override fun snapshots(cadence: String): Flow<List<RoutineSnapshotEntity>> =
-        flowOf(snapshots.values.filter { it.cadence == cadence }.sortedByDescending(RoutineSnapshotEntity::periodStartDate))
-
     override fun snapshotsWithEntries(): Flow<List<RoutineSnapshotWithEntries>> =
         flowOf(snapshots.values.sortedByDescending(RoutineSnapshotEntity::periodStartDate).map(::withEntries))
 

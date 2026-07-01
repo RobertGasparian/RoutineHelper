@@ -6,7 +6,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "today_entries",
+    tableName = "daily_entries",
     foreignKeys = [
         ForeignKey(
             entity = RoutineItemEntity::class,
@@ -20,7 +20,7 @@ import androidx.room.PrimaryKey
         Index(value = ["date", "routineItemId"], unique = true),
     ],
 )
-data class TodayEntryEntity(
+data class DailyEntryEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val routineItemId: Long,

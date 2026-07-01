@@ -15,23 +15,28 @@ This checklist tracks the class-by-class standardization pass after modularizati
   - Standardized atomic field updates, transactional aggregate reads and resets, cadence storage decoding, and cadence-specific contracts.
   - Removed unused or incomplete repository APIs.
 
-- [ ] **Use cases** - next
+- [x] **Use cases**
   - Review every use case for one focused business action, accurate naming, appropriate repository dependencies, duplicated rules, and test coverage.
   - Keep multi-step ordering, branching, and delivery decisions out of use cases.
+  - Standardized command/read naming, kept read-only Flow-backed use cases noun-style, and preserved focused command use cases.
 
-- [ ] **Orchestrators and workflow coordinators**
+- [x] **Orchestrators and workflow coordinators**
   - Review `DailySnapshotOrchestrator`, `WeeklySnapshotOrchestrator`, and `RoutineSnapshotBackfill`.
   - Keep orchestration explicit while delegating atomic business actions to use cases.
+  - Kept Daily and Weekly snapshot orchestration explicit, with atomic use cases handling individual business actions.
 
-- [ ] **Domain models and domain utilities**
+- [x] **Domain models and domain utilities**
   - Review routine, template, snapshot, cadence, date, and period models/helpers.
   - Check invariants, defaults, naming, cadence symmetry, and whether behavior belongs on a model or in a focused collaborator.
+  - Standardized cross-cadence snapshot naming, made snapshot period/cadence contracts explicit, and moved generic calendar helpers to `:core:time`.
+  - Deferred broader Daily/Weekly item abstraction until future cadence behavior proves the right shared model shape.
 
-- [ ] **Room primitives**
+- [x] **Room primitives**
   - Review entities, relation models, DAOs, queries, constraints, defaults, cascade behavior, and database composition.
   - Preserve schema version 1 unless a separately approved behavior change requires a migration.
+  - Standardized daily entry Room naming, removed implicit Daily cadence storage defaults, and deleted unused DAO methods.
 
-- [ ] **Providers, formatters, and pure mappers**
+- [ ] **Providers, formatters, and pure mappers** - next
   - Review time/date providers, presentation providers, share formatting, and domain-to-UI mappers.
   - Keep platform and presentation concerns out of domain code and add focused mapper tests where useful.
 

@@ -2,17 +2,17 @@ package com.robertgasparian.routinehelper.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import com.robertgasparian.routinehelper.data.local.entity.TodayEntryEntity
+import com.robertgasparian.routinehelper.data.local.entity.DailyEntryEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface TodayEntryDao {
-    @Query("SELECT * FROM today_entries WHERE date = :date")
-    fun entriesForDate(date: String): Flow<List<TodayEntryEntity>>
+interface DailyEntryDao {
+    @Query("SELECT * FROM daily_entries WHERE date = :date")
+    fun entriesForDate(date: String): Flow<List<DailyEntryEntity>>
 
     @Query(
         """
-        INSERT INTO today_entries (
+        INSERT INTO daily_entries (
             routineItemId,
             date,
             isChecked,
@@ -36,7 +36,7 @@ interface TodayEntryDao {
 
     @Query(
         """
-        INSERT INTO today_entries (
+        INSERT INTO daily_entries (
             routineItemId,
             date,
             isChecked,
@@ -60,7 +60,7 @@ interface TodayEntryDao {
 
     @Query(
         """
-        INSERT INTO today_entries (
+        INSERT INTO daily_entries (
             routineItemId,
             date,
             isChecked,
@@ -84,7 +84,7 @@ interface TodayEntryDao {
 
     @Query(
         """
-        INSERT INTO today_entries (
+        INSERT INTO daily_entries (
             routineItemId,
             date,
             isChecked,
@@ -106,9 +106,6 @@ interface TodayEntryDao {
         updatedAtMillis: Long,
     )
 
-    @Query("DELETE FROM today_entries WHERE date = :date")
+    @Query("DELETE FROM daily_entries WHERE date = :date")
     suspend fun deleteEntriesForDate(date: String)
-
-    @Query("DELETE FROM today_entries WHERE date < :date")
-    suspend fun deleteEntriesBefore(date: String)
 }

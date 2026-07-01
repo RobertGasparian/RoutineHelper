@@ -4,7 +4,6 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import androidx.room.ColumnInfo
 
 @Entity(
     tableName = "routine_items",
@@ -26,8 +25,7 @@ data class RoutineItemEntity(
     val id: Long = 0,
     val actionId: Long,
     val position: Int,
-    @ColumnInfo(defaultValue = DAILY_CADENCE_STORAGE_VALUE)
-    val cadence: String = DAILY_CADENCE_STORAGE_VALUE,
+    val cadence: String,
     val createdAtMillis: Long,
 ) {
     companion object {

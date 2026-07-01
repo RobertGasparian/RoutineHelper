@@ -291,10 +291,6 @@ private class FakeActionDao : ActionDao {
         items[action.id] = action
     }
 
-    override suspend fun delete(action: ActionEntity) {
-        items.remove(action.id)
-    }
-
     override suspend fun deleteById(id: Long) {
         items.remove(id)
     }

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "0abc33402c822e5967bf8d4a88d07b67",
+    "identityHash": "5d9d5b77713c9e0bab9aba1cb0b3a591",
     "entities": [
       {
         "tableName": "actions",
@@ -52,7 +52,7 @@
       },
       {
         "tableName": "routine_items",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `actionId` INTEGER NOT NULL, `position` INTEGER NOT NULL, `cadence` TEXT NOT NULL DEFAULT 'DAILY', `createdAtMillis` INTEGER NOT NULL, FOREIGN KEY(`actionId`) REFERENCES `actions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `actionId` INTEGER NOT NULL, `position` INTEGER NOT NULL, `cadence` TEXT NOT NULL, `createdAtMillis` INTEGER NOT NULL, FOREIGN KEY(`actionId`) REFERENCES `actions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -76,8 +76,7 @@
             "fieldPath": "cadence",
             "columnName": "cadence",
             "affinity": "TEXT",
-            "notNull": true,
-            "defaultValue": "'DAILY'"
+            "notNull": true
           },
           {
             "fieldPath": "createdAtMillis",
@@ -128,7 +127,7 @@
         ]
       },
       {
-        "tableName": "today_entries",
+        "tableName": "daily_entries",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `routineItemId` INTEGER NOT NULL, `date` TEXT NOT NULL, `isChecked` INTEGER NOT NULL, `completedCount` INTEGER NOT NULL, `isHidden` INTEGER NOT NULL, `note` TEXT, `updatedAtMillis` INTEGER NOT NULL, FOREIGN KEY(`routineItemId`) REFERENCES `routine_items`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
@@ -187,23 +186,23 @@
         },
         "indices": [
           {
-            "name": "index_today_entries_routineItemId",
+            "name": "index_daily_entries_routineItemId",
             "unique": false,
             "columnNames": [
               "routineItemId"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_today_entries_routineItemId` ON `${TABLE_NAME}` (`routineItemId`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_daily_entries_routineItemId` ON `${TABLE_NAME}` (`routineItemId`)"
           },
           {
-            "name": "index_today_entries_date_routineItemId",
+            "name": "index_daily_entries_date_routineItemId",
             "unique": true,
             "columnNames": [
               "date",
               "routineItemId"
             ],
             "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_today_entries_date_routineItemId` ON `${TABLE_NAME}` (`date`, `routineItemId`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_daily_entries_date_routineItemId` ON `${TABLE_NAME}` (`date`, `routineItemId`)"
           }
         ],
         "foreignKeys": [
@@ -222,7 +221,7 @@
       },
       {
         "tableName": "routine_snapshots",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `periodStartDate` TEXT NOT NULL, `finalizedAtMillis` INTEGER NOT NULL, `cadence` TEXT NOT NULL DEFAULT 'DAILY', `summaryNote` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `periodStartDate` TEXT NOT NULL, `finalizedAtMillis` INTEGER NOT NULL, `cadence` TEXT NOT NULL, `summaryNote` TEXT)",
         "fields": [
           {
             "fieldPath": "id",
@@ -246,8 +245,7 @@
             "fieldPath": "cadence",
             "columnName": "cadence",
             "affinity": "TEXT",
-            "notNull": true,
-            "defaultValue": "'DAILY'"
+            "notNull": true
           },
           {
             "fieldPath": "summaryNote",
@@ -548,7 +546,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0abc33402c822e5967bf8d4a88d07b67')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5d9d5b77713c9e0bab9aba1cb0b3a591')"
     ]
   }
 }

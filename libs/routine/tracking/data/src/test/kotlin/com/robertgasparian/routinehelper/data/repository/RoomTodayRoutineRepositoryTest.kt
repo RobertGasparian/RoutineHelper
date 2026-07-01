@@ -1,9 +1,9 @@
 package com.robertgasparian.routinehelper.data.repository
 
-import com.robertgasparian.routinehelper.data.local.dao.DailySummaryNoteDao
-import com.robertgasparian.routinehelper.data.local.dao.TodayEntryDao
+import com.robertgasparian.routinehelper.data.local.dao.DailyEntryDao
 import com.robertgasparian.routinehelper.data.local.entity.DailySummaryNoteEntity
-import com.robertgasparian.routinehelper.data.local.entity.TodayEntryEntity
+import com.robertgasparian.routinehelper.data.local.dao.DailySummaryNoteDao
+import com.robertgasparian.routinehelper.data.local.entity.DailyEntryEntity
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import com.robertgasparian.routinehelper.test.FixedTimeProvider
 import kotlinx.coroutines.flow.Flow
@@ -16,13 +16,13 @@ import org.junit.Test
 class RoomTodayRoutineRepositoryTest {
     private val database = TrackingTestRoomDatabase()
     private val routineItemDao = FakeRoutineItemDao()
-    private val todayEntryDao = FakeTodayEntryDao()
+    private val dailyEntryDao = FakeDailyEntryDao()
     private val dailySummaryNoteDao = FakeDailySummaryNoteDao()
     private val timeProvider = FixedTimeProvider()
     private val repository = RoomTodayRoutineRepository(
         database = database,
         routineItemDao = routineItemDao,
-        todayEntryDao = todayEntryDao,
+        dailyEntryDao = dailyEntryDao,
         dailySummaryNoteDao = dailySummaryNoteDao,
         timeProvider = timeProvider,
     )
@@ -50,13 +50,13 @@ class RoomTodayRoutineRepositoryTest {
                 position = 2,
             ),
         )
-        todayEntryDao.entries[DATE to 10L] = todayEntry(
+        dailyEntryDao.entries[DATE to 10L] = dailyEntry(
             routineItemId = 10L,
             completedCount = 5,
             isHidden = true,
             note = "Finished early",
         )
-        todayEntryDao.entries[DATE to 20L] = todayEntry(
+        dailyEntryDao.entries[DATE to 20L] = dailyEntry(
             routineItemId = 20L,
             isChecked = true,
             completedCount = 4,
@@ -114,18 +114,18 @@ class RoomTodayRoutineRepositoryTest {
         )
 
         assertEquals(
-            todayEntry(
+            dailyEntry(
                 routineItemId = 10L,
                 isChecked = true,
                 updatedAtMillis = timeProvider.currentTimeMillis(),
             ),
-            todayEntryDao.entries.getValue(DATE to 10L),
+            dailyEntryDao.entries.getValue(DATE to 10L),
         )
     }
 
     @Test
     fun `given an existing entry when updating its fields then normalizes values and preserves unrelated state`() = runTest {
-        todayEntryDao.entries[DATE to 10L] = todayEntry(
+        dailyEntryDao.entries[DATE to 10L] = dailyEntry(
             id = 7L,
             routineItemId = 10L,
             isChecked = true,
@@ -141,7 +141,7 @@ class RoomTodayRoutineRepositoryTest {
         repository.setHidden(DATE, 10L, false)
 
         assertEquals(
-            todayEntry(
+            dailyEntry(
                 id = 7L,
                 routineItemId = 10L,
                 isChecked = false,
@@ -150,7 +150,7 @@ class RoomTodayRoutineRepositoryTest {
                 note = "New note",
                 updatedAtMillis = timeProvider.currentTimeMillis(),
             ),
-            todayEntryDao.entries.getValue(DATE to 10L),
+            dailyEntryDao.entries.getValue(DATE to 10L),
         )
     }
 
@@ -186,7 +186,7 @@ class RoomTodayRoutineRepositoryTest {
 
     @Test
     fun `given stored daily state when resetting the date then deletes entries and summary note`() = runTest {
-        todayEntryDao.entries[DATE to 10L] = todayEntry(routineItemId = 10L)
+        dailyEntryDao.entries[DATE to 10L] = dailyEntry(routineItemId = 10L)
         dailySummaryNoteDao.notes[DATE] = DailySummaryNoteEntity(
             date = DATE,
             note = "Steady day",
@@ -195,8 +195,8 @@ class RoomTodayRoutineRepositoryTest {
 
         repository.resetDate(DATE)
 
-        assertEquals(emptyMap<Pair<String, Long>, TodayEntryEntity>(), todayEntryDao.entries)
-        assertEquals(listOf(DATE), todayEntryDao.deletedDates)
+        assertEquals(emptyMap<Pair<String, Long>, DailyEntryEntity>(), dailyEntryDao.entries)
+        assertEquals(listOf(DATE), dailyEntryDao.deletedDates)
         assertEquals(emptyMap<String, DailySummaryNoteEntity>(), dailySummaryNoteDao.notes)
         assertEquals(listOf(DATE), dailySummaryNoteDao.deletedDates)
         assertEquals(1, database.transactionBegins)
@@ -204,7 +204,7 @@ class RoomTodayRoutineRepositoryTest {
         assertEquals(1, database.transactionEnds)
     }
 
-    private fun todayEntry(
+    private fun dailyEntry(
         id: Long = 0L,
         routineItemId: Long,
         isChecked: Boolean = false,
@@ -212,8 +212,8 @@ class RoomTodayRoutineRepositoryTest {
         isHidden: Boolean = false,
         note: String? = null,
         updatedAtMillis: Long = 1L,
-    ): TodayEntryEntity =
-        TodayEntryEntity(
+    ): DailyEntryEntity =
+        DailyEntryEntity(
             id = id,
             routineItemId = routineItemId,
             date = DATE,
@@ -229,11 +229,11 @@ class RoomTodayRoutineRepositoryTest {
     }
 }
 
-private class FakeTodayEntryDao : TodayEntryDao {
-    val entries = mutableMapOf<Pair<String, Long>, TodayEntryEntity>()
+private class FakeDailyEntryDao : DailyEntryDao {
+    val entries = mutableMapOf<Pair<String, Long>, DailyEntryEntity>()
     val deletedDates = mutableListOf<String>()
 
-    override fun entriesForDate(date: String): Flow<List<TodayEntryEntity>> =
+    override fun entriesForDate(date: String): Flow<List<DailyEntryEntity>> =
         flowOf(entries.filterKeys { (entryDate, _) -> entryDate == date }.values.toList())
 
     override suspend fun upsertChecked(
@@ -285,18 +285,14 @@ private class FakeTodayEntryDao : TodayEntryDao {
         deletedDates += date
     }
 
-    override suspend fun deleteEntriesBefore(date: String) {
-        entries.keys.removeAll { (entryDate, _) -> entryDate < date }
-    }
-
     private fun updateEntry(
         date: String,
         routineItemId: Long,
         updatedAtMillis: Long,
-        update: (TodayEntryEntity) -> TodayEntryEntity,
+        update: (DailyEntryEntity) -> DailyEntryEntity,
     ) {
         val key = date to routineItemId
-        val existing = entries[key] ?: TodayEntryEntity(
+        val existing = entries[key] ?: DailyEntryEntity(
             routineItemId = routineItemId,
             date = date,
             updatedAtMillis = updatedAtMillis,

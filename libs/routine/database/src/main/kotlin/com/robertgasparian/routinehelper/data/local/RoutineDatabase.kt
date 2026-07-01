@@ -3,18 +3,18 @@ package com.robertgasparian.routinehelper.data.local
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.robertgasparian.routinehelper.data.local.dao.ActionDao
-import com.robertgasparian.routinehelper.data.local.dao.RoutineSnapshotDao
+import com.robertgasparian.routinehelper.data.local.dao.DailyEntryDao
 import com.robertgasparian.routinehelper.data.local.dao.DailySummaryNoteDao
+import com.robertgasparian.routinehelper.data.local.dao.RoutineSnapshotDao
 import com.robertgasparian.routinehelper.data.local.dao.RoutineItemDao
-import com.robertgasparian.routinehelper.data.local.dao.TodayEntryDao
 import com.robertgasparian.routinehelper.data.local.dao.WeeklyEntryDao
 import com.robertgasparian.routinehelper.data.local.dao.WeeklySummaryNoteDao
 import com.robertgasparian.routinehelper.data.local.entity.ActionEntity
+import com.robertgasparian.routinehelper.data.local.entity.DailyEntryEntity
+import com.robertgasparian.routinehelper.data.local.entity.DailySummaryNoteEntity
 import com.robertgasparian.routinehelper.data.local.entity.RoutineSnapshotEntity
 import com.robertgasparian.routinehelper.data.local.entity.RoutineSnapshotEntryEntity
-import com.robertgasparian.routinehelper.data.local.entity.DailySummaryNoteEntity
 import com.robertgasparian.routinehelper.data.local.entity.RoutineItemEntity
-import com.robertgasparian.routinehelper.data.local.entity.TodayEntryEntity
 import com.robertgasparian.routinehelper.data.local.entity.WeeklyEntryEntity
 import com.robertgasparian.routinehelper.data.local.entity.WeeklySummaryNoteEntity
 
@@ -22,7 +22,7 @@ import com.robertgasparian.routinehelper.data.local.entity.WeeklySummaryNoteEnti
     entities = [
         ActionEntity::class,
         RoutineItemEntity::class,
-        TodayEntryEntity::class,
+        DailyEntryEntity::class,
         RoutineSnapshotEntity::class,
         RoutineSnapshotEntryEntity::class,
         WeeklyEntryEntity::class,
@@ -37,7 +37,7 @@ abstract class RoutineDatabase : RoomDatabase() {
 
     abstract fun routineItemDao(): RoutineItemDao
 
-    abstract fun todayEntryDao(): TodayEntryDao
+    abstract fun dailyEntryDao(): DailyEntryDao
 
     abstract fun routineSnapshotDao(): RoutineSnapshotDao
 

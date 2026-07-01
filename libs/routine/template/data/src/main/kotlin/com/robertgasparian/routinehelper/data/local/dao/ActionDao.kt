@@ -1,7 +1,6 @@
 package com.robertgasparian.routinehelper.data.local.dao
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
@@ -21,9 +20,6 @@ interface ActionDao {
 
     @Update
     suspend fun update(action: ActionEntity)
-
-    @Delete
-    suspend fun delete(action: ActionEntity)
 
     @Query("DELETE FROM actions WHERE id = :id")
     suspend fun deleteById(id: Long)
