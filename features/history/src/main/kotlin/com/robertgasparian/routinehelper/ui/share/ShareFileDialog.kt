@@ -30,7 +30,7 @@ const val SHARE_TEXT_SOFT_LIMIT = 4_000
 
 @Composable
 fun ShareFileDialog(
-    draft: ShareDraft,
+    draft: ShareDraft.File,
     onFileNameChange: (String) -> Unit,
     onTextChange: (String) -> Unit,
     onDismiss: () -> Unit,
@@ -49,7 +49,7 @@ fun ShareFileDialog(
             ) {
                 ShareFileDescriptionBlock()
                 RoutineOutlinedTextField(
-                    value = draft.fileName.orEmpty(),
+                    value = draft.fileName,
                     onValueChange = onFileNameChange,
                     label = "File name",
                     isRequired = true,
@@ -75,7 +75,7 @@ fun ShareFileDialog(
             ) {
                 RoutineDialogFilledButton(
                     text = "Share .txt",
-                    enabled = draft.messageText.isNotBlank() && draft.fileName.orEmpty().isNotBlank(),
+                    enabled = draft.messageText.isNotBlank() && draft.fileName.isNotBlank(),
                     onClick = onShareClick,
                 )
             }
@@ -91,7 +91,7 @@ fun ShareFileDialog(
 
 @Composable
 private fun ShareFileDialogPreviewContent(
-    draft: ShareDraft,
+    draft: ShareDraft.File,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -112,7 +112,7 @@ private fun ShareFileDialogPreviewContent(
             )
             ShareFileDescriptionBlock()
             RoutineOutlinedTextField(
-                value = draft.fileName.orEmpty(),
+                value = draft.fileName,
                 onValueChange = {},
                 label = "File name",
                 isRequired = true,
@@ -140,7 +140,7 @@ private fun ShareFileDialogPreviewContent(
                 )
                 RoutineDialogFilledButton(
                     text = "Share .txt",
-                    enabled = draft.messageText.isNotBlank() && draft.fileName.orEmpty().isNotBlank(),
+                    enabled = draft.messageText.isNotBlank() && draft.fileName.isNotBlank(),
                     onClick = {},
                 )
             }

@@ -78,7 +78,7 @@ sealed interface HistoryDetailIntent {
     ) : HistoryDetailIntent
 
     data class ShareFileConfirm(
-        val draft: ShareDraft,
+        val draft: ShareDraft.File,
     ) : HistoryDetailIntent
 
     data object DeleteClick : HistoryDetailIntent
@@ -110,10 +110,13 @@ fun HistoryDetailScreen(
     }
 
     LaunchedEffect(uiState.shareDraft) {
-        val draft = uiState.shareDraft
-        if (draft != null && !draft.isFileShare) {
-            viewModel.onIntent(HistoryDetailIntent.ShareDismiss)
-            onShareTextPreviewClick(draft.messageText)
+        when (val draft = uiState.shareDraft) {
+            is ShareDraft.Text -> {
+                viewModel.onIntent(HistoryDetailIntent.ShareDismiss)
+                onShareTextPreviewClick(draft.messageText)
+            }
+            is ShareDraft.File,
+            null -> Unit
         }
     }
 
@@ -124,10 +127,10 @@ fun HistoryDetailScreen(
                 HistoryDetailIntent.BackClick -> onBackClick()
                 is HistoryDetailIntent.ShareFileConfirm -> {
                     context.shareTextFile(
-                        fileText = intent.draft.fileText.orEmpty(),
+                        fileText = intent.draft.fileText,
                         messageText = intent.draft.messageText,
                         title = "Share routine snapshot",
-                        fileName = intent.draft.fileName.orEmpty(),
+                        fileName = intent.draft.fileName,
                     )
                     viewModel.onIntent(HistoryDetailIntent.ShareDismiss)
                 }
@@ -312,7 +315,7 @@ fun HistoryDetailComponent(
         )
     }
 
-    uiState.shareDraft?.takeIf { draft -> draft.isFileShare }?.let { draft ->
+    (uiState.shareDraft as? ShareDraft.File)?.let { draft ->
         ShareSnapshotDialog(
             draft = draft,
             onFileNameChange = { fileName -> onIntent(HistoryDetailIntent.ShareFileNameChange(fileName)) },
@@ -362,7 +365,7 @@ private fun HiddenActionsHeader(
 
 @Composable
 private fun ShareSnapshotDialog(
-    draft: ShareDraft,
+    draft: ShareDraft.File,
     onFileNameChange: (String) -> Unit,
     onTextChange: (String) -> Unit,
     onDismiss: () -> Unit,

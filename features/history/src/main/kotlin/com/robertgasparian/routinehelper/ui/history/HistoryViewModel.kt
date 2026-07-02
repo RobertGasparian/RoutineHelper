@@ -125,11 +125,19 @@ class HistoryViewModel @Inject constructor(
     }
 
     private fun updateShareFileName(fileName: String) {
-        shareDraft.value = shareDraft.value?.copy(fileName = fileName)
+        shareDraft.value = when (val draft = shareDraft.value) {
+            is ShareDraft.File -> draft.copy(fileName = fileName)
+            is ShareDraft.Text,
+            null -> draft
+        }
     }
 
     private fun updateShareText(text: String) {
-        shareDraft.value = shareDraft.value?.copy(messageText = text)
+        shareDraft.value = when (val draft = shareDraft.value) {
+            is ShareDraft.File -> draft.copy(messageText = text)
+            is ShareDraft.Text -> draft.copy(messageText = text)
+            null -> null
+        }
     }
 
     private fun dismissSharePreview() {

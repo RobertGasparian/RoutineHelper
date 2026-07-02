@@ -8,7 +8,7 @@ import com.robertgasparian.routinehelper.domain.usecase.FakeRoutineHistoryReposi
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotUseCase
 import com.robertgasparian.routinehelper.test.FixedTimeProvider
 import com.robertgasparian.routinehelper.test.MainDispatcherRule
-import com.robertgasparian.routinehelper.ui.share.ShareMode
+import com.robertgasparian.routinehelper.ui.share.ShareDraft
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -87,7 +87,7 @@ class HistoryDetailViewModelTest {
 
         viewModel.onIntent(HistoryDetailIntent.ShareAsTextClick)
         val initialDraft = requireNotNull(viewModel.uiState.first { it.shareDraft != null }.shareDraft)
-        assertEquals(ShareMode.Text, initialDraft.mode)
+        assertTrue(initialDraft is ShareDraft.Text)
         assertTrue(initialDraft.messageText.contains("Weekly routine snapshot"))
 
         viewModel.onIntent(HistoryDetailIntent.ShareTextChange("Updated message"))
@@ -113,15 +113,14 @@ class HistoryDetailViewModelTest {
         viewModel.uiState.first { !it.isMissing }
 
         viewModel.onIntent(HistoryDetailIntent.ShareAsFileClick)
-        val draft = requireNotNull(viewModel.uiState.first { it.shareDraft != null }.shareDraft)
+        val draft = requireNotNull(viewModel.uiState.first { it.shareDraft != null }.shareDraft) as ShareDraft.File
 
-        assertEquals(ShareMode.File, draft.mode)
         assertEquals(
             "Here is the weekly routine snapshot from Week of 2026-05-25.",
             draft.messageText,
         )
         assertEquals("routine-snapshot-Week of 2026-05-25.txt", draft.fileName)
-        assertTrue(draft.fileText.orEmpty().contains("Weekly routine snapshot"))
+        assertTrue(draft.fileText.contains("Weekly routine snapshot"))
     }
 
     @Test

@@ -79,7 +79,7 @@ sealed interface HistoryIntent {
     ) : HistoryIntent
 
     data class ShareFileConfirm(
-        val draft: ShareDraft,
+        val draft: ShareDraft.File,
     ) : HistoryIntent
 }
 
@@ -95,10 +95,13 @@ fun HistoryScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(uiState.shareDraft) {
-        val draft = uiState.shareDraft
-        if (draft != null && !draft.isFileShare) {
-            viewModel.onIntent(HistoryIntent.ShareDismiss)
-            onShareTextPreviewClick(draft.messageText)
+        when (val draft = uiState.shareDraft) {
+            is ShareDraft.Text -> {
+                viewModel.onIntent(HistoryIntent.ShareDismiss)
+                onShareTextPreviewClick(draft.messageText)
+            }
+            is ShareDraft.File,
+            null -> Unit
         }
     }
 
@@ -108,10 +111,10 @@ fun HistoryScreen(
             when (intent) {
                 is HistoryIntent.ShareFileConfirm -> {
                     context.shareTextFile(
-                        fileText = intent.draft.fileText.orEmpty(),
+                        fileText = intent.draft.fileText,
                         messageText = intent.draft.messageText,
                         title = "Share routine snapshots",
-                        fileName = intent.draft.fileName.orEmpty(),
+                        fileName = intent.draft.fileName,
                     )
                     viewModel.onIntent(HistoryIntent.ShareDismiss)
                 }
@@ -250,7 +253,7 @@ fun HistoryComponent(
         )
     }
 
-    uiState.shareDraft?.takeIf { draft -> draft.isFileShare }?.let { draft ->
+    (uiState.shareDraft as? ShareDraft.File)?.let { draft ->
         ShareFileDialog(
             draft = draft,
             onFileNameChange = { fileName -> onIntent(HistoryIntent.ShareFileNameChange(fileName)) },

@@ -10,7 +10,7 @@ import com.robertgasparian.routinehelper.domain.usecase.SnapshotSummariesUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotUseCase
 import com.robertgasparian.routinehelper.test.FixedTimeProvider
 import com.robertgasparian.routinehelper.test.MainDispatcherRule
-import com.robertgasparian.routinehelper.ui.share.ShareMode
+import com.robertgasparian.routinehelper.ui.share.ShareDraft
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -127,7 +127,7 @@ class HistoryViewModelTest {
         advanceUntilIdle()
         val draft = requireNotNull(viewModel.uiState.value.shareDraft)
 
-        assertEquals(ShareMode.Text, draft.mode)
+        assertTrue(draft is ShareDraft.Text)
         assertTrue(draft.messageText.contains("Daily routine snapshot"))
         assertTrue(draft.messageText.contains("Weekly routine snapshot"))
     }
@@ -143,9 +143,8 @@ class HistoryViewModelTest {
 
         viewModel.onIntent(HistoryIntent.ShareAsFileClick)
         advanceUntilIdle()
-        val initialDraft = requireNotNull(viewModel.uiState.value.shareDraft)
+        val initialDraft = requireNotNull(viewModel.uiState.value.shareDraft) as ShareDraft.File
 
-        assertEquals(ShareMode.File, initialDraft.mode)
         assertEquals(
             "Here are the routine snapshots from 2026-05-25 to 2026-05-29.",
             initialDraft.messageText,
@@ -156,10 +155,11 @@ class HistoryViewModelTest {
         viewModel.onIntent(HistoryIntent.ShareFileNameChange("updated.txt"))
         val updatedDraft = requireNotNull(
             viewModel.uiState.first { state ->
-                state.shareDraft?.messageText == "Updated message" &&
-                    state.shareDraft.fileName == "updated.txt"
+                (state.shareDraft as? ShareDraft.File)?.let { draft ->
+                    draft.messageText == "Updated message" && draft.fileName == "updated.txt"
+                } == true
             }.shareDraft,
-        )
+        ) as ShareDraft.File
         assertEquals("Updated message", updatedDraft.messageText)
         assertEquals("updated.txt", updatedDraft.fileName)
 
