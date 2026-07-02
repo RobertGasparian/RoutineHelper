@@ -3,6 +3,7 @@ package com.robertgasparian.routinehelper.ui.weekly
 import com.robertgasparian.routinehelper.core.presentation.BaseViewModel
 import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.core.time.startOfCalendarWeek
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.time.SnapshotDates
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeWeeklyUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ReorderWeeklyRoutineItemsUseCase
@@ -156,7 +157,7 @@ class WeeklyViewModel @Inject constructor(
         noteEditor.value = NoteEditorUiState.item(
             routineItemId = routineItemId,
             note = note,
-            isWeekly = true,
+            cadence = RoutineCadence.Weekly,
             itemTitle = itemTitle,
         )
     }
@@ -164,7 +165,7 @@ class WeeklyViewModel @Inject constructor(
     private fun showSummaryNoteEditor(summaryNote: String) {
         noteEditor.value = NoteEditorUiState.summary(
             note = summaryNote,
-            isWeekly = true,
+            cadence = RoutineCadence.Weekly,
         )
     }
 

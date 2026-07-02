@@ -1,5 +1,7 @@
 package com.robertgasparian.routinehelper.ui.tracking
 
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+
 data class RoutineTrackingUiState(
     val date: String,
     val summaryNote: String = "",
@@ -74,10 +76,10 @@ data class NoteEditorUiState(
         fun item(
             routineItemId: Long,
             note: String,
-            isWeekly: Boolean,
+            cadence: RoutineCadence,
             itemTitle: String,
         ): NoteEditorUiState {
-            val label = if (isWeekly) "Weekly note" else "Daily note"
+            val label = cadence.itemNoteLabel
             return NoteEditorUiState(
                 target = NoteEditorTarget.Item(routineItemId),
                 title = if (note.isBlank()) "Add note" else "Edit note",
@@ -89,17 +91,13 @@ data class NoteEditorUiState(
 
         fun summary(
             note: String,
-            isWeekly: Boolean,
+            cadence: RoutineCadence,
         ): NoteEditorUiState {
-            val label = if (isWeekly) "Week note" else "Day note"
+            val label = cadence.summaryNoteLabel
             return NoteEditorUiState(
                 target = NoteEditorTarget.Summary,
                 title = label,
-                supportingText = if (isWeekly) {
-                    "This note is saved for the current week."
-                } else {
-                    "This note is saved for this day only."
-                },
+                supportingText = cadence.summaryNoteSupportingText,
                 label = label,
                 value = NoteDraftUiState.fromText(note),
             )
@@ -155,3 +153,21 @@ data class RoutineTrackingItemUiState(
 ) {
     val isRepeatAction: Boolean = repeatTargetCount != null
 }
+
+private val RoutineCadence.itemNoteLabel: String
+    get() = when (this) {
+        RoutineCadence.Daily -> "Daily note"
+        RoutineCadence.Weekly -> "Weekly note"
+    }
+
+private val RoutineCadence.summaryNoteLabel: String
+    get() = when (this) {
+        RoutineCadence.Daily -> "Day note"
+        RoutineCadence.Weekly -> "Week note"
+    }
+
+private val RoutineCadence.summaryNoteSupportingText: String
+    get() = when (this) {
+        RoutineCadence.Daily -> "This note is saved for this day only."
+        RoutineCadence.Weekly -> "This note is saved for the current week."
+    }

@@ -2,6 +2,7 @@ package com.robertgasparian.routinehelper.ui.daily
 
 import com.robertgasparian.routinehelper.core.presentation.BaseViewModel
 import com.robertgasparian.routinehelper.core.time.TimeProvider
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.time.SnapshotDates
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ReorderDailyRoutineItemsUseCase
@@ -154,7 +155,7 @@ class DailyViewModel @Inject constructor(
         noteEditor.value = NoteEditorUiState.item(
             routineItemId = routineItemId,
             note = note,
-            isWeekly = false,
+            cadence = RoutineCadence.Daily,
             itemTitle = itemTitle,
         )
     }
@@ -162,7 +163,7 @@ class DailyViewModel @Inject constructor(
     private fun showSummaryNoteEditor(summaryNote: String) {
         noteEditor.value = NoteEditorUiState.summary(
             note = summaryNote,
-            isWeekly = false,
+            cadence = RoutineCadence.Daily,
         )
     }
 
