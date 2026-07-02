@@ -32,11 +32,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 
-data class SettingsUiState(
-    val isDailySummaryNotificationEnabled: Boolean = false,
-    val isWeeklySummaryNotificationEnabled: Boolean = false,
-)
-
 sealed interface SettingsIntent {
     data object BackClick : SettingsIntent
 
@@ -193,7 +188,7 @@ private fun SettingsSwitchRow(
 private fun SettingsComponentPreview() {
     RoutineHelperTheme {
         SettingsComponent(
-            uiState = SettingsUiState(),
+            uiState = SettingsUiState.preview(),
             onIntent = {},
         )
     }
@@ -204,10 +199,7 @@ private fun SettingsComponentPreview() {
 private fun SettingsComponentDarkPreview() {
     RoutineHelperTheme {
         SettingsComponent(
-            uiState = SettingsUiState(
-                isDailySummaryNotificationEnabled = true,
-                isWeeklySummaryNotificationEnabled = true,
-            ),
+            uiState = SettingsUiState.previewNotificationsEnabled(),
             onIntent = {},
         )
     }
