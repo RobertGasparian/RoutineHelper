@@ -54,40 +54,6 @@ import com.robertgasparian.routinehelper.ui.share.shareText
 import com.robertgasparian.routinehelper.ui.share.shareTextFile
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 
-sealed interface HistoryDetailIntent {
-    data object BackClick : HistoryDetailIntent
-
-    data object ShareClick : HistoryDetailIntent
-
-    data object ShareAsTextClick : HistoryDetailIntent
-
-    data object ShareAsFileClick : HistoryDetailIntent
-
-    data class ShareTextChange(
-        val text: String,
-    ) : HistoryDetailIntent
-
-    data class ShareFileNameChange(
-        val fileName: String,
-    ) : HistoryDetailIntent
-
-    data object ShareDismiss : HistoryDetailIntent
-
-    data class ShareTextConfirm(
-        val messageText: String,
-    ) : HistoryDetailIntent
-
-    data class ShareFileConfirm(
-        val draft: ShareDraft.File,
-    ) : HistoryDetailIntent
-
-    data object DeleteClick : HistoryDetailIntent
-}
-
-sealed interface HistoryDetailUiEvent {
-    data object SnapshotDeleted : HistoryDetailUiEvent
-}
-
 @Composable
 fun HistoryDetailScreen(
     snapshotId: Long,

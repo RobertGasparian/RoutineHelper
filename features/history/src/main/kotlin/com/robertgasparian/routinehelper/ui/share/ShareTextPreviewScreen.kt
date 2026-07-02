@@ -37,18 +37,6 @@ import com.robertgasparian.routinehelper.ui.dsm.RoutineKeyboardAwareBottomAction
 import com.robertgasparian.routinehelper.ui.dsm.RoutineOutlinedTextField
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 
-sealed interface ShareTextPreviewIntent {
-    data object BackClick : ShareTextPreviewIntent
-
-    data object CancelClick : ShareTextPreviewIntent
-
-    data object ShareClick : ShareTextPreviewIntent
-
-    data class TextChange(
-        val text: String,
-    ) : ShareTextPreviewIntent
-}
-
 @Composable
 fun ShareTextPreviewScreen(
     initialText: String,

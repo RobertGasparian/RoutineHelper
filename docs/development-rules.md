@@ -85,6 +85,7 @@
 - Name outside-in user or screen actions as `XxxIntent`, even when the screen handles some of them directly for navigation or platform side effects.
 - Keep `XxxIntent` payloads minimal and action-specific. Pass stable ids, primitive values, or focused value objects; do not pass an entire `UiState`/item state when the handler only needs a few fields. Full `UiState` objects are appropriate as renderer inputs, not as upward event or ViewModel action payloads.
 - Name ViewModel-to-screen one-off outputs as `XxxUiEvent`. Use this only for effects initiated by the ViewModel after state changes or handled intents, such as navigation requests, share requests, or snackbars.
+- Keep public feature presentation contracts such as `XxxUiState`, `XxxIntent`, and `XxxUiEvent` in dedicated files once they are used by both a screen/component and a ViewModel, test, or preview.
 - Do not pass screen callbacks such as `onSaved` or `onDeleted` into ViewModel operations. The screen should send an intent, the ViewModel should finish the operation, then emit a `XxxUiEvent` for navigation, share requests, snackbars, or other outside-world reactions.
 - UI state should be named for the feature or shared concept it represents. Avoid reusing a feature-specific name for another feature unless that is the intentional shared model.
 - Direct time reads should be isolated behind a small provider/collaborator when the code path is business logic, scheduling, snapshotting, or test-sensitive presentation state.

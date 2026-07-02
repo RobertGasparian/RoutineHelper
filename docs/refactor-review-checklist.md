@@ -77,6 +77,7 @@ This checklist tracks the class-by-class standardization pass after modularizati
 - Prefer Kotlin APIs and patterns unless a Java alternative is materially simpler or provides an essential missing capability.
 - Use `XxxIntent` for outside-in user/screen actions. Reserve `XxxUiEvent` for one-off outputs emitted by the ViewModel for the screen or outside world to react to.
 - Keep upward `XxxIntent` and event payloads narrow: pass only the ids and values the handler consumes instead of full `UiState`/item-state models.
+- Keep reusable feature presentation contracts in dedicated files instead of burying them inside `Screen.kt`.
 - Keep multi-step flows in explicitly named orchestrators and focused business actions in use cases.
 - Apply an accepted pattern to genuinely similar Daily, Weekly, and other flows without hiding cadence-specific behavior.
 - After each batch, report whether it is relocation-only, structural, behavior-changing, test-only, or documentation-only.

@@ -32,18 +32,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 
-sealed interface SettingsIntent {
-    data object BackClick : SettingsIntent
-
-    data class DailySummaryNotificationChange(
-        val isEnabled: Boolean,
-    ) : SettingsIntent
-
-    data class WeeklySummaryNotificationChange(
-        val isEnabled: Boolean,
-    ) : SettingsIntent
-}
-
 @Composable
 fun SettingsScreen(
     onBackClick: () -> Unit,
