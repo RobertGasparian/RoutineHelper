@@ -30,19 +30,19 @@ class NoteDraftComposeMappersTest {
     }
 
     @Test
-    fun `given text field value when mapped to note draft then text and selection are preserved`() {
-        val noteDraft = TextFieldValue(
+    fun `given text field value when mapped to note draft change then text and selection are preserved`() {
+        val intent = TextFieldValue(
             text = "Steady progress",
             selection = TextRange(3, 9),
-        ).toNoteDraftUiState()
+        ).toNoteDraftChange()
 
         assertEquals(
-            NoteDraftUiState(
+            RoutineTrackingIntent.NoteDraftChange(
                 text = "Steady progress",
                 selectionStart = 3,
                 selectionEnd = 9,
             ),
-            noteDraft,
+            intent,
         )
     }
 }

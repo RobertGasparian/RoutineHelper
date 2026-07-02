@@ -185,7 +185,7 @@ fun RoutineTrackingComponent(
     uiState.noteEditor?.let { editor ->
         RoutineNoteDialog(
             value = editor.value.toTextFieldValue(),
-            onValueChange = { value -> onIntent(RoutineTrackingIntent.NoteDraftChange(value.toNoteDraftUiState())) },
+            onValueChange = { value -> onIntent(value.toNoteDraftChange()) },
             title = editor.title,
             supportingText = editor.supportingText,
             label = editor.label,
@@ -285,7 +285,13 @@ private fun RoutineTrackingItem(
             onIntent(RoutineTrackingIntent.EditActionClick(item.actionId))
         },
         onEditNoteClick = {
-            onIntent(RoutineTrackingIntent.EditNoteClick(item))
+            onIntent(
+                RoutineTrackingIntent.EditNoteClick(
+                    routineItemId = item.routineItemId,
+                    itemTitle = item.title,
+                    note = item.note,
+                ),
+            )
         },
         onHiddenChange = { isHidden ->
             onIntent(RoutineTrackingIntent.HiddenChange(item.routineItemId, isHidden))

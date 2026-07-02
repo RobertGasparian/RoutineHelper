@@ -16,7 +16,6 @@ import com.robertgasparian.routinehelper.ui.tracking.NoteDateTimeTextProvider
 import com.robertgasparian.routinehelper.ui.tracking.NoteDraftUiState
 import com.robertgasparian.routinehelper.ui.tracking.NoteEditorTarget
 import com.robertgasparian.routinehelper.ui.tracking.NoteEditorUiState
-import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingItemUiState
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingIntent
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingUiState
 import com.robertgasparian.routinehelper.ui.tracking.insertAtCursor
@@ -77,9 +76,13 @@ class DailyViewModel @Inject constructor(
             is RoutineTrackingIntent.ReorderItems -> reorderItems(intent.routineItemIdsInOrder)
             RoutineTrackingIntent.SnapshotClick -> snapshotDaily()
             is RoutineTrackingIntent.SnapshotDateSelected -> snapshotDaily(snapshotDate = intent.date)
-            is RoutineTrackingIntent.EditNoteClick -> showItemNoteEditor(intent.item)
+            is RoutineTrackingIntent.EditNoteClick -> showItemNoteEditor(
+                routineItemId = intent.routineItemId,
+                note = intent.note,
+                itemTitle = intent.itemTitle,
+            )
             RoutineTrackingIntent.EditSummaryNoteClick -> showSummaryNoteEditor(uiState.value.summaryNote)
-            is RoutineTrackingIntent.NoteDraftChange -> updateNoteDraft(intent.value)
+            is RoutineTrackingIntent.NoteDraftChange -> updateNoteDraft(intent)
             RoutineTrackingIntent.NoteDraftClearClick -> clearNoteDraft()
             RoutineTrackingIntent.NoteDraftDateClick -> insertCurrentDateIntoNoteDraft()
             RoutineTrackingIntent.NoteDraftWeekdayClick -> insertCurrentWeekdayIntoNoteDraft()
@@ -143,12 +146,16 @@ class DailyViewModel @Inject constructor(
         }
     }
 
-    private fun showItemNoteEditor(item: RoutineTrackingItemUiState) {
+    private fun showItemNoteEditor(
+        routineItemId: Long,
+        note: String,
+        itemTitle: String,
+    ) {
         noteEditor.value = NoteEditorUiState.item(
-            routineItemId = item.routineItemId,
-            note = item.note,
+            routineItemId = routineItemId,
+            note = note,
             isWeekly = false,
-            itemTitle = item.title,
+            itemTitle = itemTitle,
         )
     }
 
@@ -159,8 +166,14 @@ class DailyViewModel @Inject constructor(
         )
     }
 
-    private fun updateNoteDraft(value: NoteDraftUiState) {
-        noteEditor.value = noteEditor.value?.copy(value = value)
+    private fun updateNoteDraft(intent: RoutineTrackingIntent.NoteDraftChange) {
+        noteEditor.value = noteEditor.value?.copy(
+            value = NoteDraftUiState(
+                text = intent.text,
+                selectionStart = intent.selectionStart,
+                selectionEnd = intent.selectionEnd,
+            ),
+        )
     }
 
     private fun insertCurrentDateIntoNoteDraft() {

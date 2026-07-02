@@ -21,8 +21,6 @@ import com.robertgasparian.routinehelper.domain.usecase.UpdateTodaySummaryNoteUs
 import com.robertgasparian.routinehelper.test.FakeNoteDateTimeTextProvider
 import com.robertgasparian.routinehelper.test.FixedTimeProvider
 import com.robertgasparian.routinehelper.test.MainDispatcherRule
-import com.robertgasparian.routinehelper.ui.tracking.NoteDraftUiState
-import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingItemUiState
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingIntent
 import java.time.Instant
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -90,8 +88,8 @@ class DailyViewModelTest {
     fun `given item note editor is open when save is clicked then updates item note`() = runTest {
         val viewModel = createViewModel()
 
-        viewModel.onIntent(RoutineTrackingIntent.EditNoteClick(itemUiState(note = "old note")))
-        viewModel.onIntent(RoutineTrackingIntent.NoteDraftChange(NoteDraftUiState.fromText("updated note")))
+        viewModel.onIntent(editNoteClick(note = "old note"))
+        viewModel.onIntent(noteDraftChange("updated note"))
         viewModel.onIntent(RoutineTrackingIntent.NoteEditorSaveClick)
         advanceUntilIdle()
 
@@ -112,7 +110,7 @@ class DailyViewModelTest {
         noteDateTimeTextProvider.dateText = "May 29"
         val viewModel = createViewModel()
 
-        viewModel.onIntent(RoutineTrackingIntent.EditNoteClick(itemUiState(note = "Completed on ")))
+        viewModel.onIntent(editNoteClick(note = "Completed on "))
         viewModel.onIntent(RoutineTrackingIntent.NoteDraftDateClick)
         viewModel.onIntent(RoutineTrackingIntent.NoteEditorSaveClick)
         advanceUntilIdle()
@@ -170,16 +168,18 @@ class DailyViewModelTest {
             timeProvider = timeProvider,
         )
 
-    private fun itemUiState(note: String): RoutineTrackingItemUiState =
-        RoutineTrackingItemUiState(
+    private fun editNoteClick(note: String): RoutineTrackingIntent.EditNoteClick =
+        RoutineTrackingIntent.EditNoteClick(
             routineItemId = 10L,
-            actionId = 100L,
-            title = "Drink water",
-            description = null,
-            repeatTargetCount = null,
-            completedCount = 0,
-            isChecked = false,
+            itemTitle = "Drink water",
             note = note,
+        )
+
+    private fun noteDraftChange(text: String): RoutineTrackingIntent.NoteDraftChange =
+        RoutineTrackingIntent.NoteDraftChange(
+            text = text,
+            selectionStart = text.length,
+            selectionEnd = text.length,
         )
 
     private companion object {

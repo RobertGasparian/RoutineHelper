@@ -33,13 +33,17 @@ sealed interface RoutineTrackingIntent {
     ) : RoutineTrackingIntent
 
     data class EditNoteClick(
-        val item: RoutineTrackingItemUiState,
+        val routineItemId: Long,
+        val itemTitle: String,
+        val note: String,
     ) : RoutineTrackingIntent
 
     data object EditSummaryNoteClick : RoutineTrackingIntent
 
     data class NoteDraftChange(
-        val value: NoteDraftUiState,
+        val text: String,
+        val selectionStart: Int,
+        val selectionEnd: Int = selectionStart,
     ) : RoutineTrackingIntent
 
     data object NoteDraftClearClick : RoutineTrackingIntent

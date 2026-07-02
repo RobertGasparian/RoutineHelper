@@ -12,8 +12,8 @@ fun NoteDraftUiState.toTextFieldValue(): TextFieldValue =
         ),
     )
 
-fun TextFieldValue.toNoteDraftUiState(): NoteDraftUiState =
-    NoteDraftUiState(
+fun TextFieldValue.toNoteDraftChange(): RoutineTrackingIntent.NoteDraftChange =
+    RoutineTrackingIntent.NoteDraftChange(
         text = text,
         selectionStart = selection.start.coerceIn(0, text.length),
         selectionEnd = selection.end.coerceIn(0, text.length),
