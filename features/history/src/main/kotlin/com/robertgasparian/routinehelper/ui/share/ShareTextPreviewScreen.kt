@@ -57,14 +57,15 @@ fun ShareTextPreviewScreen(
     modifier: Modifier = Modifier,
 ) {
     var text by rememberSaveable(initialText) { mutableStateOf(initialText) }
+    val uiState = ShareTextPreviewUiState(text = text)
 
     ShareTextPreviewComponent(
-        text = text,
+        uiState = uiState,
         onIntent = { event ->
             when (event) {
                 ShareTextPreviewIntent.BackClick,
                 ShareTextPreviewIntent.CancelClick -> onBackClick()
-                ShareTextPreviewIntent.ShareClick -> onShareClick(text)
+                ShareTextPreviewIntent.ShareClick -> onShareClick(uiState.text)
                 is ShareTextPreviewIntent.TextChange -> text = event.text
             }
         },
@@ -75,12 +76,10 @@ fun ShareTextPreviewScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShareTextPreviewComponent(
-    text: String,
+    uiState: ShareTextPreviewUiState,
     onIntent: (ShareTextPreviewIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val isOverSoftLimit = text.length > SHARE_TEXT_SOFT_LIMIT
-
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -98,7 +97,7 @@ fun ShareTextPreviewComponent(
         },
         bottomBar = {
             ShareTextPreviewBottomActions(
-                canShare = text.isNotBlank(),
+                canShare = uiState.canShare,
                 onCancelClick = { onIntent(ShareTextPreviewIntent.CancelClick) },
                 onShareClick = { onIntent(ShareTextPreviewIntent.ShareClick) },
             )
@@ -112,11 +111,11 @@ fun ShareTextPreviewComponent(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             ShareTextPreviewHeader()
-            if (isOverSoftLimit) {
+            if (uiState.isOverSoftLimit) {
                 ShareTextLimitNote()
             }
             RoutineOutlinedTextField(
-                value = text,
+                value = uiState.text,
                 onValueChange = { value -> onIntent(ShareTextPreviewIntent.TextChange(value)) },
                 label = "Message",
                 modifier = Modifier
@@ -124,7 +123,7 @@ fun ShareTextPreviewComponent(
                     .weight(1f),
                 minLines = 12,
                 supportingText = {
-                    Text(text = "${text.length} characters")
+                    Text(text = uiState.characterCountLabel)
                 },
             )
         }
@@ -220,7 +219,7 @@ private fun ShareTextPreviewBottomActions(
 private fun ShareTextPreviewScreenPreview() {
     RoutineHelperTheme(dynamicColor = false) {
         ShareTextPreviewComponent(
-            text = previewShareText,
+            uiState = ShareTextPreviewUiState.preview(),
             onIntent = {},
         )
     }
@@ -231,7 +230,7 @@ private fun ShareTextPreviewScreenPreview() {
 private fun ShareTextPreviewScreenDarkPreview() {
     RoutineHelperTheme(dynamicColor = false) {
         ShareTextPreviewComponent(
-            text = previewShareText,
+            uiState = ShareTextPreviewUiState.preview(),
             onIntent = {},
         )
     }
@@ -242,18 +241,8 @@ private fun ShareTextPreviewScreenDarkPreview() {
 private fun ShareTextPreviewLongWarningPreview() {
     RoutineHelperTheme(dynamicColor = false) {
         ShareTextPreviewComponent(
-            text = previewShareText + "\n\n" + "A".repeat(SHARE_TEXT_SOFT_LIMIT),
+            uiState = ShareTextPreviewUiState.previewLongWarning(),
             onIntent = {},
         )
     }
 }
-
-private val previewShareText = """
-    Daily routine snapshot - 2026-05-29
-
-    Completed 3 of 4 actions.
-
-    - Stretching: done
-    - Read Book: not done
-      Note: Chapter 4 was very interesting.
-""".trimIndent()

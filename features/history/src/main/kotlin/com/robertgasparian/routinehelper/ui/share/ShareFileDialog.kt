@@ -26,8 +26,6 @@ import com.robertgasparian.routinehelper.ui.dsm.RoutineOutlinedTextField
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 import java.io.File
 
-const val SHARE_TEXT_SOFT_LIMIT = 4_000
-
 @Composable
 fun ShareFileDialog(
     draft: ShareDraft.File,
