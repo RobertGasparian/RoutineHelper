@@ -16,7 +16,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -34,9 +33,11 @@ class RoutineReorderState {
         private set
     var draggedItemOffset by mutableFloatStateOf(0f)
         private set
+    private var sourceItems: List<RoutineTrackingItemUiState> = emptyList()
     private var phase by mutableStateOf<RoutineReorderPhase>(RoutineReorderPhase.Idle)
 
     fun syncFromSource(items: List<RoutineTrackingItemUiState>) {
+        sourceItems = items
         phase = when (val currentPhase = phase) {
             RoutineReorderPhase.Idle -> {
                 displayedItems = items
@@ -73,14 +74,14 @@ class RoutineReorderState {
         draggedItemOffset += offsetAdjustment
     }
 
-    fun onDragCancel(sourceItems: List<RoutineTrackingItemUiState>) {
+    fun onDragCancel() {
         draggedItemId = null
         draggedItemOffset = 0f
         displayedItems = sourceItems
         phase = RoutineReorderPhase.Idle
     }
 
-    fun onDragEnd(sourceItems: List<RoutineTrackingItemUiState>): List<Long>? {
+    fun onDragEnd(): List<Long>? {
         val orderedIds = displayedItems.map(RoutineTrackingItemUiState::routineItemId)
         val sourceIds = sourceItems.map(RoutineTrackingItemUiState::routineItemId)
         draggedItemId = null
@@ -115,8 +116,6 @@ fun RoutineReorderList(
     ) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val currentSourceItems by rememberUpdatedState(sourceItems)
-
     LaunchedEffect(sourceItems) {
         reorderState.syncFromSource(sourceItems)
     }
@@ -149,10 +148,10 @@ fun RoutineReorderList(
                             reorderState.onDragStart(item.routineItemId)
                         },
                         onDragCancel = {
-                            reorderState.onDragCancel(currentSourceItems)
+                            reorderState.onDragCancel()
                         },
                         onDragEnd = {
-                            val orderedIds = reorderState.onDragEnd(currentSourceItems)
+                            val orderedIds = reorderState.onDragEnd()
                             if (orderedIds != null) {
                                 onDropOrder(orderedIds)
                             }
