@@ -33,7 +33,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
 import com.robertgasparian.routinehelper.ui.share.ShareFileDialog
 import com.robertgasparian.routinehelper.ui.share.ShareFormatDialog
@@ -237,7 +236,7 @@ private fun HistoryFilterRow(
                 selected = selectedFilter == filter,
                 onClick = { onFilterClick(filter) },
                 label = { Text(text = filter.label) },
-                leadingIcon = filter.cadence?.let { cadence ->
+                leadingIcon = filter.snapshotCadence?.let { cadence ->
                     {
                         Icon(
                             imageVector = cadence.historyIcon,
@@ -275,16 +274,6 @@ private fun EmptyHistoryContent(
         )
     }
 }
-
-private val HistoryFilter.label: String
-    get() = cadence?.historyLabel ?: "All"
-
-private val HistoryFilter.cadence: RoutineCadence?
-    get() = when (this) {
-        HistoryFilter.All -> null
-        HistoryFilter.Daily -> RoutineCadence.Daily
-        HistoryFilter.Weekly -> RoutineCadence.Weekly
-    }
 
 private val HistorySnapshotUiState.completionLabel: String
     get() = if (totalCount == 0) {

@@ -23,10 +23,3 @@ internal fun List<RoutineSnapshot>.toHistoryFileShareMessage(): String {
         else -> "Here are the routine snapshots from ${periodStartDates.first()} to ${periodStartDates.last()}."
     }
 }
-
-internal val HistoryFilter.snapshotCadence: RoutineCadence?
-    get() = when (this) {
-        HistoryFilter.All -> null
-        HistoryFilter.Daily -> RoutineCadence.Daily
-        HistoryFilter.Weekly -> RoutineCadence.Weekly
-    }

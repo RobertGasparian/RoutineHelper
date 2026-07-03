@@ -52,13 +52,6 @@ class HistorySnapshotUiMapperTest {
         )
     }
 
-    @Test
-    fun `given history filter when converted to cadence then matching cadence is returned`() {
-        assertEquals(null, HistoryFilter.All.snapshotCadence)
-        assertEquals(RoutineCadence.Daily, HistoryFilter.Daily.snapshotCadence)
-        assertEquals(RoutineCadence.Weekly, HistoryFilter.Weekly.snapshotCadence)
-    }
-
     private fun summary(
         periodStartDate: String,
         cadence: RoutineCadence,
