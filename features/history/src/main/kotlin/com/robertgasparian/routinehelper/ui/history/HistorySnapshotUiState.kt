@@ -10,4 +10,14 @@ data class HistorySnapshotUiState(
     val totalCount: Int = 0,
     val hasSummaryNote: Boolean = false,
     val isSelected: Boolean = false,
-)
+) {
+    val isComplete: Boolean = totalCount > 0 && completedCount == totalCount
+
+    val completionLabel: String = if (totalCount == 0) {
+        "No actions saved"
+    } else if (isComplete) {
+        "All completed!"
+    } else {
+        "$completedCount/$totalCount completed"
+    }
+}

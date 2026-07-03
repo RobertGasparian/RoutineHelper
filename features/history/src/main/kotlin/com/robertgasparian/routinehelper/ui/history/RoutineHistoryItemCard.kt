@@ -41,6 +41,7 @@ fun RoutineHistoryItemCard(
     cadence: RoutineCadence,
     title: String,
     completionLabel: String,
+    isComplete: Boolean,
     hasSummaryNote: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
@@ -123,12 +124,12 @@ fun RoutineHistoryItemCard(
                 Text(
                     text = completionLabel,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = if (completionLabel == AllCompletedLabel) {
+                    color = if (isComplete) {
                         RoutineHistoryCompleteColor()
                     } else {
                         RoutineHistorySecondaryText(isSelected)
                     },
-                    fontWeight = if (completionLabel == AllCompletedLabel) {
+                    fontWeight = if (isComplete) {
                         FontWeight.Bold
                     } else {
                         FontWeight.Normal
@@ -211,8 +212,6 @@ private fun RoutineHistoryCompleteColor(): Color =
         Color(0xFF1E7D35)
     }
 
-private const val AllCompletedLabel = "All completed!"
-
 @Preview(showBackground = true, widthDp = 390, heightDp = 800)
 @Composable
 private fun RoutineHistoryItemCardAllStatesPreview() {
@@ -242,6 +241,7 @@ private fun RoutineHistoryItemCardPreviewContent() {
             cadence = RoutineCadence.Daily,
             title = "May 29, 2026",
             completionLabel = "3/5 completed",
+            isComplete = false,
             hasSummaryNote = false,
             onClick = {},
             onLongClick = {},
@@ -249,7 +249,8 @@ private fun RoutineHistoryItemCardPreviewContent() {
         RoutineHistoryItemCard(
             cadence = RoutineCadence.Daily,
             title = "May 30, 2026",
-            completionLabel = AllCompletedLabel,
+            completionLabel = "All completed!",
+            isComplete = true,
             hasSummaryNote = true,
             onClick = {},
             onLongClick = {},
@@ -258,6 +259,7 @@ private fun RoutineHistoryItemCardPreviewContent() {
             cadence = RoutineCadence.Weekly,
             title = "Week of May 25, 2026",
             completionLabel = "8/12 completed",
+            isComplete = false,
             hasSummaryNote = false,
             onClick = {},
             onLongClick = {},
@@ -265,7 +267,8 @@ private fun RoutineHistoryItemCardPreviewContent() {
         RoutineHistoryItemCard(
             cadence = RoutineCadence.Weekly,
             title = "Week of June 1, 2026",
-            completionLabel = AllCompletedLabel,
+            completionLabel = "All completed!",
+            isComplete = true,
             hasSummaryNote = true,
             onClick = {},
             onLongClick = {},
@@ -274,6 +277,7 @@ private fun RoutineHistoryItemCardPreviewContent() {
             cadence = RoutineCadence.Daily,
             title = "May 31, 2026",
             completionLabel = "2/4 completed",
+            isComplete = false,
             hasSummaryNote = true,
             isSelectionMode = true,
             isSelected = false,
@@ -284,6 +288,7 @@ private fun RoutineHistoryItemCardPreviewContent() {
             cadence = RoutineCadence.Weekly,
             title = "Week of May 18, 2026",
             completionLabel = "6/10 completed",
+            isComplete = false,
             hasSummaryNote = true,
             isSelectionMode = true,
             isSelected = true,

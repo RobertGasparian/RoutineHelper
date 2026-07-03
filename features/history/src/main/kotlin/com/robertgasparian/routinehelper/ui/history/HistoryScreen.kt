@@ -190,6 +190,7 @@ fun HistoryComponent(
                             cadence = snapshot.cadence,
                             title = snapshot.date,
                             completionLabel = snapshot.completionLabel,
+                            isComplete = snapshot.isComplete,
                             hasSummaryNote = snapshot.hasSummaryNote,
                             isSelectionMode = uiState.isSelectionMode,
                             isSelected = snapshot.isSelected,
@@ -274,15 +275,6 @@ private fun EmptyHistoryContent(
         )
     }
 }
-
-private val HistorySnapshotUiState.completionLabel: String
-    get() = if (totalCount == 0) {
-        "No actions saved"
-    } else if (completedCount == totalCount) {
-        "All completed!"
-    } else {
-        "$completedCount/$totalCount completed"
-    }
 
 @Preview(showBackground = true)
 @Composable

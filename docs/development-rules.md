@@ -88,6 +88,7 @@
 - Keep public feature presentation contracts such as `XxxUiState`, `XxxIntent`, and `XxxUiEvent` in dedicated files once they are used by both a screen/component and a ViewModel, test, or preview.
 - Keep small contract-owned mapping helpers next to the contract when multiple call sites need them; use a dedicated feature-owned presentation mapper when the mapping grows beyond that contract.
 - Keep derived presentation properties on the UI-state model when multiple components need the same derived value, instead of repeating private extension properties in each component.
+- Do not drive UI styling by comparing display strings. Expose explicit presentation state, such as a boolean or sealed summary, and keep labels as labels.
 - Keep UI-state files focused. Split item-state models, local state holders, and UI-state models with behavior into dedicated files when one `XxxUiState.kt` file starts to own multiple independent concepts.
 - Avoid boolean flags for cadence or variant selection in UI-state factories and presentation helpers. Pass an explicit enum/sealed type such as `RoutineCadence`, or split into cadence-specific functions when that reads better.
 - Do not pass screen callbacks such as `onSaved` or `onDeleted` into ViewModel operations. The screen should send an intent, the ViewModel should finish the operation, then emit a `XxxUiEvent` for navigation, share requests, snackbars, or other outside-world reactions.
