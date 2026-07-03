@@ -36,6 +36,7 @@
 - `:features:*` must not depend on Room DAOs, Room entities, Room database classes, WorkManager workers, or repository implementations.
 - `:features:*` must not depend on `:app`.
 - Avoid feature-to-feature implementation dependencies. Route cross-feature navigation through `:app` or a small feature API/navigation contract only when needed.
+- Root navigation should use typed destination contracts instead of `Any` route values. Keep top-level destinations as a narrower subtype when top-level navigation needs special behavior.
 - Cadence variants that share one presentation workflow may live as packages inside one cohesive feature module; cadence packages must share neutral presentation contracts rather than depend on one another.
 - `:libs:*` may depend on `:core:*` and other `:libs:*` APIs when there is a clear one-way capability relationship.
 - `:libs:*` should avoid depending on other `:libs:*` implementations unless the module is explicit infrastructure wiring.

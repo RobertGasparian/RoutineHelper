@@ -55,7 +55,7 @@ import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun RoutineHelperScreen() {
-    val topLevelBackStack = remember { TopLevelBackStack<Any>(DailyDestination) }
+    val topLevelBackStack = remember { TopLevelBackStack<RoutineDestination>(DailyDestination) }
 
     RoutineHelperComponent(
         topLevelBackStack = topLevelBackStack,
@@ -65,7 +65,7 @@ fun RoutineHelperScreen() {
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun RoutineHelperComponent(
-    topLevelBackStack: TopLevelBackStack<Any>,
+    topLevelBackStack: TopLevelBackStack<RoutineDestination>,
     modifier: Modifier = Modifier,
 ) {
     val currentDestination = topLevelBackStack.backStack.lastOrNull()
@@ -86,7 +86,7 @@ fun RoutineHelperComponent(
         topLevelBackStack.addTopLevel(destination)
     }
 
-    fun navigateToDetail(destination: Any) {
+    fun navigateToDetail(destination: RoutineDestination) {
         navigationTransitionDirection = HorizontalDirection.Right
         topLevelBackStack.add(destination)
     }
@@ -235,7 +235,7 @@ private fun horizontalSlideContentTransform(
         slideOutHorizontally { width -> -sign * width }
 }
 
-private val Any?.topLevelTabIndex: Int?
+private val RoutineDestination?.topLevelTabIndex: Int?
     get() = TopLevelNavigationItems.indexOfFirst { item -> item.destination == this }
         .takeIf { index -> index >= 0 }
 
@@ -246,7 +246,7 @@ private enum class HorizontalDirection {
 
 @Composable
 private fun FloatingBottomNavigationBar(
-    selectedDestination: Any,
+    selectedDestination: RoutineDestination,
     onDestinationSelected: (TopLevelDestination) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -313,7 +313,7 @@ private val TopLevelNavigationItems = listOf(
 private fun RoutineHelperComponentPreview() {
     RoutineHelperTheme {
         RoutineHelperComponent(
-            topLevelBackStack = TopLevelBackStack<Any>(DailyDestination),
+            topLevelBackStack = TopLevelBackStack<RoutineDestination>(DailyDestination),
         )
     }
 }
