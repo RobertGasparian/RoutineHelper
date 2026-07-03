@@ -106,19 +106,3 @@ data class HistoryUiState(
         fun previewEmpty(): HistoryUiState = HistoryUiState()
     }
 }
-
-data class HistorySnapshotUiState(
-    val snapshotId: Long,
-    val date: String,
-    val cadence: RoutineCadence,
-    val completedCount: Int = 0,
-    val totalCount: Int = 0,
-    val hasSummaryNote: Boolean = false,
-    val isSelected: Boolean = false,
-)
-
-enum class HistoryFilter {
-    All,
-    Daily,
-    Weekly,
-}
