@@ -64,9 +64,10 @@ This checklist tracks the class-by-class standardization pass after modularizati
   - Review Hilt bindings and providers for ownership, scope, visibility, and unnecessary app-level wiring.
   - Standardized injectable implementation bindings, scoped app-lifetime presentation collaborators, and confirmed repository/database bindings stay with their owning modules.
 
-- [ ] **Navigation and app shell**
+- [x] **Navigation and app shell**
   - Review destinations, top-level back stack, root composition, startup, and feature navigation boundaries.
   - Keep `:app` limited to composition and Android application entry points.
+  - Standardized typed app destinations, added explicit saveable root back-stack persistence, and split app-shell graph/bottom-navigation helpers into focused files.
 
 - [ ] **Test infrastructure and final enforcement**
   - Review fakes, fixtures, dispatcher rules, test naming, supported verification commands, dependency visibility, and remaining documentation.
