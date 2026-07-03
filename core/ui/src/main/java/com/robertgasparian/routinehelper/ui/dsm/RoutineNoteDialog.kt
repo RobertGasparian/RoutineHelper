@@ -47,13 +47,7 @@ import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 @Composable
 fun RoutineNoteDialog(
     value: TextFieldValue,
-    onValueChange: (TextFieldValue) -> Unit,
-    onDismiss: () -> Unit,
-    onSaveClick: () -> Unit,
-    onClearClick: () -> Unit,
-    onDateClick: () -> Unit,
-    onWeekdayClick: () -> Unit,
-    onTimeClick: () -> Unit,
+    onIntent: (RoutineNoteDialogIntent) -> Unit,
     modifier: Modifier = Modifier,
     title: String = if (value.text.isBlank()) "Add note" else "Edit note",
     supportingText: String = "This note is saved for this day only.",
@@ -61,18 +55,12 @@ fun RoutineNoteDialog(
     autoFocus: Boolean = true,
 ) {
     Dialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { onIntent(RoutineNoteDialogIntent.Dismiss) },
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         RoutineNoteDialogContent(
             value = value,
-            onValueChange = onValueChange,
-            onDismiss = onDismiss,
-            onSaveClick = onSaveClick,
-            onClearClick = onClearClick,
-            onDateClick = onDateClick,
-            onWeekdayClick = onWeekdayClick,
-            onTimeClick = onTimeClick,
+            onIntent = onIntent,
             title = title,
             supportingText = supportingText,
             label = label,
@@ -85,13 +73,7 @@ fun RoutineNoteDialog(
 @Composable
 fun RoutineNoteDialogContent(
     value: TextFieldValue,
-    onValueChange: (TextFieldValue) -> Unit,
-    onDismiss: () -> Unit,
-    onSaveClick: () -> Unit,
-    onClearClick: () -> Unit,
-    onDateClick: () -> Unit,
-    onWeekdayClick: () -> Unit,
-    onTimeClick: () -> Unit,
+    onIntent: (RoutineNoteDialogIntent) -> Unit,
     modifier: Modifier = Modifier,
     title: String = if (value.text.isBlank()) "Add note" else "Edit note",
     supportingText: String = "This note is saved for this day only.",
@@ -148,7 +130,7 @@ fun RoutineNoteDialogContent(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 IconButton(
-                    onClick = onWeekdayClick,
+                    onClick = { onIntent(RoutineNoteDialogIntent.WeekdayClick) },
                 ) {
                     Icon(
                         imageVector = Icons.Default.Event,
@@ -157,7 +139,7 @@ fun RoutineNoteDialogContent(
                     )
                 }
                 IconButton(
-                    onClick = onDateClick,
+                    onClick = { onIntent(RoutineNoteDialogIntent.DateClick) },
                 ) {
                     Icon(
                         imageVector = Icons.Default.DateRange,
@@ -166,7 +148,7 @@ fun RoutineNoteDialogContent(
                     )
                 }
                 IconButton(
-                    onClick = onTimeClick,
+                    onClick = { onIntent(RoutineNoteDialogIntent.TimeClick) },
                 ) {
                     Icon(
                         imageVector = Icons.Default.Schedule,
@@ -178,7 +160,9 @@ fun RoutineNoteDialogContent(
 
             RoutineNoteField(
                 value = value,
-                onValueChange = onValueChange,
+                onValueChange = { updatedValue ->
+                    onIntent(RoutineNoteDialogIntent.ValueChange(updatedValue))
+                },
                 label = label,
                 focusRequester = focusRequester,
             )
@@ -190,16 +174,16 @@ fun RoutineNoteDialogContent(
                 if (value.text.isNotBlank()) {
                     RoutineDialogTextButton(
                         text = "Clear",
-                        onClick = onClearClick,
+                        onClick = { onIntent(RoutineNoteDialogIntent.ClearClick) },
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 RoutineDialogTextButton(
                     text = "Cancel",
-                    onClick = onDismiss,
+                    onClick = { onIntent(RoutineNoteDialogIntent.Dismiss) },
                 )
                 Button(
-                    onClick = onSaveClick,
+                    onClick = { onIntent(RoutineNoteDialogIntent.SaveClick) },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -245,13 +229,10 @@ private fun RoutineNoteDialogAddPreview() {
             }
             RoutineNoteDialogContent(
                 value = note,
-                onValueChange = { note = it },
-                onDismiss = {},
-                onSaveClick = {},
-                onClearClick = { note = TextFieldValue("") },
-                onDateClick = { note = note.insertAtCursor("June 8") },
-                onWeekdayClick = { note = note.insertAtCursor("Monday") },
-                onTimeClick = { note = note.insertAtCursor("8:30 AM") },
+                onIntent = routineNotePreviewIntentHandler(
+                    note = note,
+                    onNoteChange = { note = it },
+                ),
                 autoFocus = false,
             )
         }
@@ -268,13 +249,10 @@ private fun RoutineNoteDialogEditPreview() {
             }
             RoutineNoteDialogContent(
                 value = note,
-                onValueChange = { note = it },
-                onDismiss = {},
-                onSaveClick = {},
-                onClearClick = { note = TextFieldValue("") },
-                onDateClick = { note = note.insertAtCursor("June 8") },
-                onWeekdayClick = { note = note.insertAtCursor("Monday") },
-                onTimeClick = { note = note.insertAtCursor("8:30 AM") },
+                onIntent = routineNotePreviewIntentHandler(
+                    note = note,
+                    onNoteChange = { note = it },
+                ),
                 autoFocus = false,
             )
         }
@@ -291,13 +269,10 @@ private fun RoutineNoteDialogDarkPreview() {
             }
             RoutineNoteDialogContent(
                 value = note,
-                onValueChange = { note = it },
-                onDismiss = {},
-                onSaveClick = {},
-                onClearClick = { note = TextFieldValue("") },
-                onDateClick = { note = note.insertAtCursor("June 8") },
-                onWeekdayClick = { note = note.insertAtCursor("Monday") },
-                onTimeClick = { note = note.insertAtCursor("8:30 AM") },
+                onIntent = routineNotePreviewIntentHandler(
+                    note = note,
+                    onNoteChange = { note = it },
+                ),
                 autoFocus = false,
             )
         }
@@ -315,6 +290,21 @@ private fun RoutineNoteDialogPreviewContainer(
         contentAlignment = Alignment.Center,
     ) {
         content()
+    }
+}
+
+private fun routineNotePreviewIntentHandler(
+    note: TextFieldValue,
+    onNoteChange: (TextFieldValue) -> Unit,
+): (RoutineNoteDialogIntent) -> Unit = { intent ->
+    when (intent) {
+        is RoutineNoteDialogIntent.ValueChange -> onNoteChange(intent.value)
+        RoutineNoteDialogIntent.ClearClick -> onNoteChange(TextFieldValue(""))
+        RoutineNoteDialogIntent.DateClick -> onNoteChange(note.insertAtCursor("June 8"))
+        RoutineNoteDialogIntent.WeekdayClick -> onNoteChange(note.insertAtCursor("Monday"))
+        RoutineNoteDialogIntent.TimeClick -> onNoteChange(note.insertAtCursor("8:30 AM"))
+        RoutineNoteDialogIntent.Dismiss,
+        RoutineNoteDialogIntent.SaveClick -> Unit
     }
 }
 

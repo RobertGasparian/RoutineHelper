@@ -41,6 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.robertgasparian.routinehelper.ui.dsm.RoutineActionItemCard
 import com.robertgasparian.routinehelper.ui.dsm.RoutineNoteDialog
+import com.robertgasparian.routinehelper.ui.dsm.RoutineNoteDialogIntent
 import com.robertgasparian.routinehelper.ui.dsm.SummaryNoteCard
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 import java.time.Instant
@@ -184,16 +185,22 @@ fun RoutineTrackingComponent(
     uiState.noteEditor?.let { editor ->
         RoutineNoteDialog(
             value = editor.value.toTextFieldValue(),
-            onValueChange = { value -> onIntent(value.toNoteDraftChange()) },
+            onIntent = { dialogIntent ->
+                when (dialogIntent) {
+                    is RoutineNoteDialogIntent.ValueChange -> {
+                        onIntent(dialogIntent.value.toNoteDraftChange())
+                    }
+                    RoutineNoteDialogIntent.Dismiss -> onIntent(RoutineTrackingIntent.NoteEditorDismiss)
+                    RoutineNoteDialogIntent.SaveClick -> onIntent(RoutineTrackingIntent.NoteEditorSaveClick)
+                    RoutineNoteDialogIntent.ClearClick -> onIntent(RoutineTrackingIntent.NoteDraftClearClick)
+                    RoutineNoteDialogIntent.DateClick -> onIntent(RoutineTrackingIntent.NoteDraftDateClick)
+                    RoutineNoteDialogIntent.WeekdayClick -> onIntent(RoutineTrackingIntent.NoteDraftWeekdayClick)
+                    RoutineNoteDialogIntent.TimeClick -> onIntent(RoutineTrackingIntent.NoteDraftTimeClick)
+                }
+            },
             title = editor.title,
             supportingText = editor.supportingText,
             label = editor.label,
-            onDismiss = { onIntent(RoutineTrackingIntent.NoteEditorDismiss) },
-            onSaveClick = { onIntent(RoutineTrackingIntent.NoteEditorSaveClick) },
-            onClearClick = { onIntent(RoutineTrackingIntent.NoteDraftClearClick) },
-            onDateClick = { onIntent(RoutineTrackingIntent.NoteDraftDateClick) },
-            onWeekdayClick = { onIntent(RoutineTrackingIntent.NoteDraftWeekdayClick) },
-            onTimeClick = { onIntent(RoutineTrackingIntent.NoteDraftTimeClick) },
         )
     }
 

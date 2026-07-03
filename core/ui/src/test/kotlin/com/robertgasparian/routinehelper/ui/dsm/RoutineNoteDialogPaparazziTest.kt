@@ -19,13 +19,7 @@ class RoutineNoteDialogPaparazziTest {
             RoutineHelperTheme {
                 RoutineNoteDialogContent(
                     value = TextFieldValue("08:30 Walked before breakfast."),
-                    onValueChange = {},
-                    onDismiss = {},
-                    onSaveClick = {},
-                    onClearClick = {},
-                    onDateClick = {},
-                    onWeekdayClick = {},
-                    onTimeClick = {},
+                    onIntent = {},
                     title = "Edit note",
                     supportingText = "Daily note for Walk",
                     label = "Daily note",
@@ -41,13 +35,7 @@ class RoutineNoteDialogPaparazziTest {
             RoutineHelperTheme {
                 RoutineNoteDialogContent(
                     value = TextFieldValue(""),
-                    onValueChange = {},
-                    onDismiss = {},
-                    onSaveClick = {},
-                    onClearClick = {},
-                    onDateClick = {},
-                    onWeekdayClick = {},
-                    onTimeClick = {},
+                    onIntent = {},
                     title = "Add note",
                     supportingText = "This note is saved for this day only.",
                     label = "Day note",
