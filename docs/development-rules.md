@@ -43,6 +43,8 @@
 - `:app` aggregates the data and database modules but must not construct capability repository implementations itself.
 - Default cross-cutting bindings live with their `:core:*` implementation, and feature-specific presentation collaborator bindings live with their feature; `:app` aggregates these modules instead of constructing their implementations.
 - Modules declare direct dependencies for APIs their source imports. Dependencies used only to aggregate DI/runtime implementations are allowed in `:app`, but should be identifiable as composition dependencies rather than accidental transitive access.
+- Prefer Hilt `@Binds` for interface-to-implementation bindings when the implementation has an injectable constructor. Use `@Provides` for framework factories, builder APIs, external objects, and values that require custom construction.
+- Scope bindings installed in `SingletonComponent` with `@Singleton` when the implementation is stateless or intended to share app lifetime. Leave bindings unscoped only when each injection should create fresh state.
 - `:libs:*` must not depend on `:features:*`.
 - `:core:*` must not depend on features or business libs.
 - The module graph must stay acyclic. If two libs need each other both ways, split out a smaller shared API/model or merge them into one cohesive capability.

@@ -1,16 +1,17 @@
 package com.robertgasparian.routinehelper.core.time
 
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object TimeProviderModule {
-    @Provides
+abstract class TimeProviderModule {
+    @Binds
     @Singleton
-    fun provideTimeProvider(): TimeProvider =
-        SystemTimeProvider()
+    abstract fun bindTimeProvider(
+        provider: SystemTimeProvider,
+    ): TimeProvider
 }

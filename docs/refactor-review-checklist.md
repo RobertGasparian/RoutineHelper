@@ -60,8 +60,9 @@ This checklist tracks the class-by-class standardization pass after modularizati
   - Workers stay thin and delegate structured flows to orchestrators.
   - Extracted and tested shared worker result policy, split recurring snapshot schedule specs from WorkManager enqueueing, and documented the current one-boundary app-start backfill limitation.
 
-- [ ] **Dependency-injection modules**
+- [x] **Dependency-injection modules**
   - Review Hilt bindings and providers for ownership, scope, visibility, and unnecessary app-level wiring.
+  - Standardized injectable implementation bindings, scoped app-lifetime presentation collaborators, and confirmed repository/database bindings stay with their owning modules.
 
 - [ ] **Navigation and app shell**
   - Review destinations, top-level back stack, root composition, startup, and feature navigation boundaries.
