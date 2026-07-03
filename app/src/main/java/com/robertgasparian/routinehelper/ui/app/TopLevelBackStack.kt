@@ -31,4 +31,14 @@ class TopLevelBackStack<T : Any>(
 
         return false
     }
+
+    companion object {
+        fun <T : Any> fromRestored(entries: List<T>): TopLevelBackStack<T> {
+            require(entries.isNotEmpty()) { "Restored back stack must not be empty." }
+            return TopLevelBackStack(entries.first()).apply {
+                backStack.clear()
+                backStack.addAll(entries)
+            }
+        }
+    }
 }
