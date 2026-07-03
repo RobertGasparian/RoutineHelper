@@ -3,6 +3,8 @@ package com.robertgasparian.routinehelper.ui.tracking
 sealed interface RoutineTrackingIntent {
     data object CreateActionClick : RoutineTrackingIntent
 
+    data object SettingsClick : RoutineTrackingIntent
+
     data class EditActionClick(
         val actionId: Long,
     ) : RoutineTrackingIntent

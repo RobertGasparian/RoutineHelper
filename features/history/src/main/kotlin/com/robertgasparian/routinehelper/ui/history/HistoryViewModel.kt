@@ -56,6 +56,7 @@ class HistoryViewModel @Inject constructor(
         when (intent) {
             is HistoryIntent.ShareFileConfirm,
             is HistoryIntent.ShareTextConfirm,
+            HistoryIntent.SettingsClick,
             is HistoryIntent.SnapshotClick -> Unit
             HistoryIntent.ClearSelectionClick -> clearSelection()
             HistoryIntent.DeleteSelectedClick -> deleteSelectedSnapshots()

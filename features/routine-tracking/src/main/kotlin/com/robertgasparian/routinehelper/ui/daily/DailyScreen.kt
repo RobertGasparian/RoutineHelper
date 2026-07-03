@@ -22,11 +22,11 @@ fun DailyScreen(
         onIntent = { intent ->
             when (intent) {
                 RoutineTrackingIntent.CreateActionClick -> onCreateActionClick()
+                RoutineTrackingIntent.SettingsClick -> onSettingsClick()
                 is RoutineTrackingIntent.EditActionClick -> onEditActionClick(intent.actionId)
                 else -> viewModel.onIntent(intent)
             }
         },
         showSnapshotAction = BuildConfig.DEBUG,
-        onSettingsClick = onSettingsClick,
     )
 }

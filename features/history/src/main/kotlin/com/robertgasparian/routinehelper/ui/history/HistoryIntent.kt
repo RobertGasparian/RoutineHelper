@@ -3,6 +3,8 @@ package com.robertgasparian.routinehelper.ui.history
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
 
 sealed interface HistoryIntent {
+    data object SettingsClick : HistoryIntent
+
     data class SnapshotClick(
         val snapshotId: Long,
     ) : HistoryIntent

@@ -22,6 +22,7 @@ fun WeeklyScreen(
         onIntent = { intent ->
             when (intent) {
                 RoutineTrackingIntent.CreateActionClick -> onCreateActionClick()
+                RoutineTrackingIntent.SettingsClick -> onSettingsClick()
                 is RoutineTrackingIntent.EditActionClick -> onEditActionClick(intent.actionId)
                 else -> viewModel.onIntent(intent)
             }
@@ -30,6 +31,5 @@ fun WeeklyScreen(
         emptyTitle = "No weekly items yet",
         emptyDescription = "Add your first weekly action to start tracking this week.",
         showSnapshotAction = BuildConfig.DEBUG,
-        onSettingsClick = onSettingsClick,
     )
 }

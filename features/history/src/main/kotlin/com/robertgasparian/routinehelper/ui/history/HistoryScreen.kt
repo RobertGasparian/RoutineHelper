@@ -66,6 +66,7 @@ fun HistoryScreen(
         uiState = uiState,
         onIntent = { intent ->
             when (intent) {
+                HistoryIntent.SettingsClick -> onSettingsClick()
                 is HistoryIntent.ShareFileConfirm -> {
                     context.shareTextFile(
                         fileText = intent.draft.fileText,
@@ -90,7 +91,6 @@ fun HistoryScreen(
             }
         },
         modifier = modifier,
-        onSettingsClick = onSettingsClick,
     )
 }
 
@@ -100,7 +100,6 @@ fun HistoryComponent(
     uiState: HistoryUiState,
     onIntent: (HistoryIntent) -> Unit,
     modifier: Modifier = Modifier,
-    onSettingsClick: () -> Unit = {},
 ) {
     Scaffold(
         modifier = modifier,
@@ -146,7 +145,7 @@ fun HistoryComponent(
                             )
                         }
                     } else {
-                        IconButton(onClick = onSettingsClick) {
+                        IconButton(onClick = { onIntent(HistoryIntent.SettingsClick) }) {
                             Icon(
                                 imageVector = Icons.Default.Settings,
                                 contentDescription = "Open settings",

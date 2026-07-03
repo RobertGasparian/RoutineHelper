@@ -61,6 +61,7 @@ class DailyViewModel @Inject constructor(
     override fun handleIntent(intent: RoutineTrackingIntent) {
         when (intent) {
             RoutineTrackingIntent.CreateActionClick,
+            RoutineTrackingIntent.SettingsClick,
             is RoutineTrackingIntent.EditActionClick -> Unit
             is RoutineTrackingIntent.CheckedChange -> setChecked(
                 routineItemId = intent.routineItemId,

@@ -57,7 +57,6 @@ fun RoutineTrackingComponent(
     emptyTitle: String = "No routine items yet",
     emptyDescription: String = "Add your first daily action to start tracking.",
     showSnapshotAction: Boolean = true,
-    onSettingsClick: () -> Unit = {},
 ) {
     // TODO Remove this debug/test-only date picker before the first public release.
     var isSnapshotDatePickerVisible by rememberSaveable { mutableStateOf(false) }
@@ -99,7 +98,7 @@ fun RoutineTrackingComponent(
                             Text(text = "Snapshot")
                         }
                     }
-                    IconButton(onClick = onSettingsClick) {
+                    IconButton(onClick = { onIntent(RoutineTrackingIntent.SettingsClick) }) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Open settings",

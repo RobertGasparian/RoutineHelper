@@ -91,6 +91,7 @@
 - Use Hilt assisted ViewModels for stable route/screen identity arguments such as IDs, cadence, or other navigation parameters. Once the ViewModel is created, public ViewModel methods should read those owned arguments instead of requiring the screen to pass them back on every call.
 - Keep mutable presentation state private inside the ViewModel. Screens collect `uiState` and send outside-in actions through `onIntent(...)`; they should not assemble ViewModel state flows themselves.
 - Name outside-in user or screen actions as `XxxIntent`, even when the screen handles some of them directly for navigation or platform side effects.
+- Keep navigation and platform callbacks at the stateful `XxxScreen` boundary; stateless components should report those user actions through `XxxIntent` instead of receiving separate navigation callbacks.
 - Keep `XxxIntent` payloads minimal and action-specific. Pass stable ids, primitive values, or focused value objects; do not pass an entire `UiState`/item state when the handler only needs a few fields. Full `UiState` objects are appropriate as renderer inputs, not as upward event or ViewModel action payloads.
 - Name ViewModel-to-screen one-off outputs as `XxxUiEvent`. Use this only for effects initiated by the ViewModel after state changes or handled intents, such as navigation requests, share requests, or snackbars.
 - Keep public feature presentation contracts such as `XxxUiState`, `XxxIntent`, and `XxxUiEvent` in dedicated files once they are used by both a screen/component and a ViewModel, test, or preview.
