@@ -6,22 +6,16 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.CancellationException
 
 @HiltWorker
 class WeeklySnapshotWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted workerParameters: WorkerParameters,
     private val snapshotOrchestrator: WeeklySnapshotOrchestrator,
+    private val workerResultRunner: WorkerResultRunner,
 ) : CoroutineWorker(appContext, workerParameters) {
-    override suspend fun doWork(): Result {
-        return try {
+    override suspend fun doWork(): Result =
+        workerResultRunner.run {
             snapshotOrchestrator.finalizePreviousWeek()
-            Result.success()
-        } catch (cancellationException: CancellationException) {
-            throw cancellationException
-        } catch (_: Exception) {
-            Result.retry()
         }
-    }
 }

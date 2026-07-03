@@ -55,9 +55,10 @@ This checklist tracks the class-by-class standardization pass after modularizati
   - Review stateful screen boundaries, stateless components, callback/event surfaces, previews, and shared design-system usage.
   - Limit work to architectural cleanup; defer visual redesign and preserve Paparazzi baselines.
 
-- [ ] **Workers and scheduling adapters**
+- [x] **Workers and scheduling adapters**
   - Review workers, scheduler setup, work-date calculation, WorkManager input/output, retries, and cancellation handling.
   - Workers stay thin and delegate structured flows to orchestrators.
+  - Extracted and tested shared worker result policy, split recurring snapshot schedule specs from WorkManager enqueueing, and documented the current one-boundary app-start backfill limitation.
 
 - [ ] **Dependency-injection modules**
   - Review Hilt bindings and providers for ownership, scope, visibility, and unnecessary app-level wiring.

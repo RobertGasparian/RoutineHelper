@@ -1,8 +1,8 @@
 package com.robertgasparian.routinehelper.work
 
 import android.content.Context
-import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import com.robertgasparian.routinehelper.core.time.TimeProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -16,32 +16,15 @@ class RoutineSnapshotWorkScheduler @Inject constructor(
     private val timeProvider: TimeProvider,
 ) {
     fun scheduleRecurringSnapshots() {
-        val now = timeProvider.now()
         val workManager = WorkManager.getInstance(context)
 
-        workManager.enqueueUniquePeriodicWork(
-            DAILY_SNAPSHOT_WORK_NAME,
-            ExistingPeriodicWorkPolicy.UPDATE,
-            PeriodicWorkRequestBuilder<DailySnapshotWorker>(1, TimeUnit.DAYS)
-                .setInitialDelay(
-                    SnapshotWorkDates.delayUntilNextDailyFinalize(now).toMillis(),
-                    TimeUnit.MILLISECONDS,
-                )
-                .addTag(SNAPSHOT_WORK_TAG)
-                .build(),
-        )
-
-        workManager.enqueueUniquePeriodicWork(
-            WEEKLY_SNAPSHOT_WORK_NAME,
-            ExistingPeriodicWorkPolicy.UPDATE,
-            PeriodicWorkRequestBuilder<WeeklySnapshotWorker>(7, TimeUnit.DAYS)
-                .setInitialDelay(
-                    SnapshotWorkDates.delayUntilNextWeeklyFinalize(now).toMillis(),
-                    TimeUnit.MILLISECONDS,
-                )
-                .addTag(SNAPSHOT_WORK_TAG)
-                .build(),
-        )
+        RoutineSnapshotWorkSchedules.recurringSnapshots(timeProvider.now()).forEach { schedule ->
+            workManager.enqueueUniquePeriodicWork(
+                schedule.uniqueWorkName,
+                schedule.existingWorkPolicy,
+                schedule.toWorkRequest(),
+            )
+        }
     }
 
     companion object {
@@ -49,4 +32,22 @@ class RoutineSnapshotWorkScheduler @Inject constructor(
         const val WEEKLY_SNAPSHOT_WORK_NAME = "weekly-routine-snapshot"
         const val SNAPSHOT_WORK_TAG = "routine-snapshot"
     }
+}
+
+private fun RoutineSnapshotWorkSchedule.toWorkRequest(): PeriodicWorkRequest {
+    val builder = when (workerKind) {
+        SnapshotWorkerKind.Daily -> PeriodicWorkRequestBuilder<DailySnapshotWorker>(
+            repeatInterval = repeatInterval,
+            repeatIntervalTimeUnit = repeatIntervalUnit,
+        )
+        SnapshotWorkerKind.Weekly -> PeriodicWorkRequestBuilder<WeeklySnapshotWorker>(
+            repeatInterval = repeatInterval,
+            repeatIntervalTimeUnit = repeatIntervalUnit,
+        )
+    }
+
+    return builder
+        .setInitialDelay(initialDelay.toMillis(), TimeUnit.MILLISECONDS)
+        .addTag(tag)
+        .build()
 }

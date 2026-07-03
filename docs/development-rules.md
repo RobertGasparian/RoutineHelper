@@ -51,6 +51,9 @@
 - Keep shared Compose components, theme, and design-system primitives in a shared UI boundary once modules are introduced.
 - Move WorkManager code out of `:app` before adding new unrelated background jobs.
 - Keep `CoroutineWorker` subclasses thin: delegate multi-step operations to injectable, unit-tested orchestrators while the worker retains WorkManager result, retry, and cancellation handling.
+- Keep repeated WorkManager result policy behind a small tested collaborator so workers only name the background action they run.
+- Keep recurring WorkManager schedule specs testable without requiring Android WorkManager runtime setup; isolate pure schedule policy such as unique names, tags, intervals, policies, and initial delays from enqueueing.
+- Current app-start snapshot backfill is best-effort for the latest missed daily and weekly boundary only. Do not claim multi-period recovery until the app stores enough per-period state to recover multiple missed days or weeks.
 - Use cases model one focused business action. Multi-step flows, ordering, branching, and delivery-specific decisions belong to explicitly named orchestrators that compose those use cases.
 - Prefer focused add/update/delete use cases over a broad `Save...UseCase` when create and update paths call different repository operations or require different context.
 - Read-only use cases that expose ongoing repository `Flow` data may use noun-style names; reserve verb-style names for commands and state-changing operations.

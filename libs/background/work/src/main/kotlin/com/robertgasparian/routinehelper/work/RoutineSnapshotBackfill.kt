@@ -13,6 +13,7 @@ class RoutineSnapshotBackfill @Inject constructor(
     private val timeProvider: TimeProvider,
 ) {
     suspend fun backfillMissedSnapshots(now: ZonedDateTime = timeProvider.now()) {
+        // Current tracking state only preserves the active period, so app-start backfill attempts the latest boundary.
         if (SnapshotWorkDates.shouldBackfillDailyOnAppStart(now)) {
             attemptBackfill {
                 dailySnapshotOrchestrator.finalizePreviousDay(now)

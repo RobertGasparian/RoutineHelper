@@ -96,6 +96,7 @@ Current and planned module families:
 - `:libs:background:work`
   - WorkManager workers, scheduling, constraints, and app-start/background orchestration.
   - Workers should orchestrate use cases from other libs; workers should not own routine/reflection/reminder business rules.
+  - App-start snapshot backfill is currently best-effort for the latest missed daily and weekly boundary only; multi-period recovery needs a future persisted per-period state model.
 - `:core:time`
   - Date, clock, timezone abstractions, reusable calendar calculations, and the default application `TimeProvider` binding.
   - Generic calendar helpers such as calendar-week start belong here; capability modules own only business-specific period rules.
