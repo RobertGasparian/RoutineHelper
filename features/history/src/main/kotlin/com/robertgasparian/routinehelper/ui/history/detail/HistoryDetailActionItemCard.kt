@@ -249,13 +249,6 @@ private fun SnapshotActionNote(
     )
 }
 
-private val HistoryDetailItemUiState.isComplete: Boolean
-    get() = !isHidden && if (isRepeatAction) {
-        completedCount >= repeatTargetCount.orZero()
-    } else {
-        isChecked
-    }
-
 private fun Int?.orZero(): Int = this ?: 0
 
 @Preview(showBackground = true, widthDp = 390, heightDp = 800)

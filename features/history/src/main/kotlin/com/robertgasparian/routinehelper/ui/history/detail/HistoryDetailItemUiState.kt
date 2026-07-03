@@ -11,4 +11,12 @@ data class HistoryDetailItemUiState(
     val note: String?,
 ) {
     val isRepeatAction: Boolean = repeatTargetCount != null
+
+    val isComplete: Boolean = !isHidden && if (isRepeatAction) {
+        completedCount >= repeatTargetCount.orZero()
+    } else {
+        isChecked
+    }
 }
+
+private fun Int?.orZero(): Int = this ?: 0

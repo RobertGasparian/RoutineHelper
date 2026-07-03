@@ -135,9 +135,6 @@ private val HistoryDetailUiState.completionSummary: CompletionSummary
         }
     }
 
-private val HistoryDetailItemUiState.isComplete: Boolean
-    get() = repeatTargetCount?.let { target -> completedCount >= target } ?: isChecked
-
 private sealed interface CompletionSummary {
     val label: String
 
