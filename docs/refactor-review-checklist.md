@@ -46,11 +46,12 @@ This checklist tracks the class-by-class standardization pass after modularizati
   - Standardize state construction, intent handling, coroutine/error behavior, dependency boundaries, and tests.
   - Standardized route argument ownership, public `StateFlow` state exposure, `BaseViewModel` usage, and ViewModel-owned share/form state.
 
-- [ ] **UI state, events, and local state holders** - next
+- [x] **UI state, events, and local state holders**
   - Review UI-state models, `XxxIntent` contracts, ViewModel-emitted `XxxUiEvent` outputs, share drafts, reorder state, and Compose-only state holders.
   - Keep Compose-specific interaction details out of ViewModel state.
+  - Standardized intent/event naming, narrowed intent payloads, split focused UI-state models, centralized reusable derived presentation state, and added tests for mapper/local-state/derived-state behavior.
 
-- [ ] **Screens and components**
+- [ ] **Screens and components** - next
   - Review stateful screen boundaries, stateless components, callback/event surfaces, previews, and shared design-system usage.
   - Limit work to architectural cleanup; defer visual redesign and preserve Paparazzi baselines.
 

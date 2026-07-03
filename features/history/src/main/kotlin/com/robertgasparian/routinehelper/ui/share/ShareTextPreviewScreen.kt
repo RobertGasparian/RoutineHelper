@@ -49,12 +49,12 @@ fun ShareTextPreviewScreen(
 
     ShareTextPreviewComponent(
         uiState = uiState,
-        onIntent = { event ->
-            when (event) {
+        onIntent = { intent ->
+            when (intent) {
                 ShareTextPreviewIntent.BackClick,
                 ShareTextPreviewIntent.CancelClick -> onBackClick()
                 ShareTextPreviewIntent.ShareClick -> onShareClick(uiState.text)
-                is ShareTextPreviewIntent.TextChange -> text = event.text
+                is ShareTextPreviewIntent.TextChange -> text = intent.text
             }
         },
         modifier = modifier,

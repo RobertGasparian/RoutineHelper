@@ -81,20 +81,18 @@ fun HistoryDetailHeaderCard(
 
 @Composable
 private fun CompletionSummaryChip(
-    summary: CompletionSummary,
+    summary: HistoryDetailCompletionSummary,
     modifier: Modifier = Modifier,
 ) {
-    val isAllComplete = summary is CompletionSummary.AllComplete
-
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(999.dp),
-        color = if (isAllComplete) {
+        color = if (summary.isComplete) {
             routineCompletedContainerColor()
         } else {
             MaterialTheme.colorScheme.surfaceContainerHigh
         },
-        contentColor = if (isAllComplete) {
+        contentColor = if (summary.isComplete) {
             routineOnCompletedContainerColor()
         } else {
             MaterialTheme.colorScheme.onSurfaceVariant
@@ -105,7 +103,7 @@ private fun CompletionSummaryChip(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            if (isAllComplete) {
+            if (summary.isComplete) {
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = null,
@@ -118,39 +116,6 @@ private fun CompletionSummaryChip(
                 fontWeight = FontWeight.SemiBold,
             )
         }
-    }
-}
-
-private val HistoryDetailUiState.completionSummary: CompletionSummary
-    get() {
-        val countableItems = items.filterNot { item -> item.isHidden }
-        val totalCount = countableItems.size
-        if (totalCount == 0) return CompletionSummary.Empty
-
-        val completedCount = countableItems.count(HistoryDetailItemUiState::isComplete)
-        return if (completedCount == totalCount) {
-            CompletionSummary.AllComplete
-        } else {
-            CompletionSummary.Partial(completedCount = completedCount, totalCount = totalCount)
-        }
-    }
-
-private sealed interface CompletionSummary {
-    val label: String
-
-    data object Empty : CompletionSummary {
-        override val label: String = "No actions saved"
-    }
-
-    data object AllComplete : CompletionSummary {
-        override val label: String = "All completed!"
-    }
-
-    data class Partial(
-        val completedCount: Int,
-        val totalCount: Int,
-    ) : CompletionSummary {
-        override val label: String = "$completedCount of $totalCount completed"
     }
 }
 

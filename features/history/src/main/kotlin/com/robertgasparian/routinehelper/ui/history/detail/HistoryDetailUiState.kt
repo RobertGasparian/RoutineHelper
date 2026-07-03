@@ -15,6 +15,18 @@ data class HistoryDetailUiState(
 ) {
     val visibleItems: List<HistoryDetailItemUiState> = items.filterNot { item -> item.isHidden }
     val hiddenItems: List<HistoryDetailItemUiState> = items.filter { item -> item.isHidden }
+    val completionSummary: HistoryDetailCompletionSummary
+        get() {
+            val totalCount = visibleItems.size
+            if (totalCount == 0) return HistoryDetailCompletionSummary.Empty
+
+            val completedCount = visibleItems.count(HistoryDetailItemUiState::isComplete)
+            return if (completedCount == totalCount) {
+                HistoryDetailCompletionSummary.AllComplete
+            } else {
+                HistoryDetailCompletionSummary.Partial(completedCount = completedCount, totalCount = totalCount)
+            }
+        }
 
     companion object {
         fun preview(): HistoryDetailUiState =

@@ -46,14 +46,14 @@ fun SettingsScreen(
 
     SettingsComponent(
         uiState = uiState,
-        onIntent = { event ->
-            when (event) {
+        onIntent = { intent ->
+            when (intent) {
                 SettingsIntent.BackClick -> onBackClick()
                 is SettingsIntent.DailySummaryNotificationChange -> {
-                    isDailySummaryNotificationEnabled = event.isEnabled
+                    isDailySummaryNotificationEnabled = intent.isEnabled
                 }
                 is SettingsIntent.WeeklySummaryNotificationChange -> {
-                    isWeeklySummaryNotificationEnabled = event.isEnabled
+                    isWeeklySummaryNotificationEnabled = intent.isEnabled
                 }
             }
         },
