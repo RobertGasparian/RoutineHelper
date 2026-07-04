@@ -344,6 +344,7 @@ private class FakeRoutineItemDao(
     }
 }
 
+@Suppress("OVERRIDE_DEPRECATION")
 private class TestRoomDatabase : RoomDatabase() {
     var transactionBegins = 0
         private set

@@ -394,6 +394,7 @@ private class FakeRoutineSnapshotDao : RoutineSnapshotDao {
         }
 }
 
+@Suppress("OVERRIDE_DEPRECATION")
 private class TestRoomDatabase : RoomDatabase() {
     var transactionBegins = 0
         private set
