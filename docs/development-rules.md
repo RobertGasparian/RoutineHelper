@@ -126,6 +126,7 @@
 - Prefer Paparazzi for component rendering states and regular unit tests for logic/state transformations.
 - Shared test doubles that are reused across modules should live in the owning module's `testFixtures` source set. Keep one-off DAO or repository fakes local to the test file when only one test class needs them.
 - Shared cross-module test utilities from `:core:testing` should use the `com.robertgasparian.routinehelper.core.testing` package.
+- Keep framework-specific test fakes with the owning framework/data tests unless a dedicated testing module exists for that framework. Do not pull Room-specific fakes into `:core:testing`.
 - ViewModel tests and other tests that depend on `Dispatchers.Main` should use `MainDispatcherRule` from `:core:testing` instead of setting or resetting the main dispatcher inline.
 - Do not force unit tests around thin DI modules, generated framework glue, simple data classes with no behavior, or code that is better covered by a UI/snapshot/integration test.
 - Test function names should be descriptive Kotlin backtick names using `given ... when ... then ...`; omit `given ...` when there is no meaningful setup condition.

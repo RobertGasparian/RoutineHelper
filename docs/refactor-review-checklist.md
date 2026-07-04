@@ -70,9 +70,11 @@ This checklist tracks the class-by-class standardization pass after modularizati
   - Keep `:app` limited to composition and Android application entry points.
   - Standardized typed app destinations, added explicit saveable root back-stack persistence, and split app-shell graph/bottom-navigation helpers into focused files.
 
-- [ ] **Test infrastructure and final enforcement** - next
+- [x] **Test infrastructure and final enforcement**
   - Review fakes, fixtures, dispatcher rules, test naming, supported verification commands, dependency visibility, and remaining documentation.
   - Add static enforcement only for patterns that have settled during this pass.
+  - Standardized shared test utility package ownership, confirmed ViewModel tests use `MainDispatcherRule`, confirmed non-Paparazzi tests follow descriptive backtick names, and documented why Room-specific fakes stay with data tests.
+  - No new static enforcement was added; the settled rules are documented and the default verification command remains the enforcement baseline for now.
 
 ## Guardrails For Every Category
 

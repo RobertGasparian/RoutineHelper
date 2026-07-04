@@ -105,7 +105,7 @@ Current and planned module families:
 - `:core:ui`
   - Theme, design-system components from `ui.dsm`, reusable UI helpers, and shared component test helpers where appropriate.
 - `:core:testing`
-  - Shared coroutine test setup and test helpers used across feature modules; capability-specific fakes remain with their owning domain test fixtures.
+  - Shared coroutine test setup and framework-neutral test helpers used across feature modules; capability-specific fakes remain with their owning domain test fixtures, and framework-specific fakes such as Room database fakes stay with the owning data tests unless a dedicated testing module is introduced.
 
 Cadence is a horizontal dimension inside routine libs. Daily, weekly, and future monthly support should start as packages/classes inside capability module families such as `:libs:routine:template:*`, `:libs:routine:tracking:*`, and `:libs:routine:snapshot:*`, not as separate modules by default. Promote cadence to module level only if it earns an independent boundary through separate dependencies, complexity, ownership, or review lifecycle.
 
