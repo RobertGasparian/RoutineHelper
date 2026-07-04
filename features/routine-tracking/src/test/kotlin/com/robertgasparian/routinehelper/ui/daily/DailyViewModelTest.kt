@@ -19,8 +19,8 @@ import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayItemCompleted
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayItemNoteUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTodaySummaryNoteUseCase
 import com.robertgasparian.routinehelper.test.FakeNoteDateTimeTextProvider
-import com.robertgasparian.routinehelper.test.FixedTimeProvider
-import com.robertgasparian.routinehelper.test.MainDispatcherRule
+import com.robertgasparian.routinehelper.core.testing.FixedTimeProvider
+import com.robertgasparian.routinehelper.core.testing.MainDispatcherRule
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingIntent
 import java.time.Instant
 import kotlinx.coroutines.ExperimentalCoroutinesApi

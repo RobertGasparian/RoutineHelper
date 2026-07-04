@@ -6,7 +6,7 @@ import com.robertgasparian.routinehelper.domain.repository.FakeRoutineHistoryRep
 import com.robertgasparian.routinehelper.domain.repository.FakeTodayRoutineRepository
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ResetTodayUseCase
-import com.robertgasparian.routinehelper.test.FixedTimeProvider
+import com.robertgasparian.routinehelper.core.testing.FixedTimeProvider
 import java.time.ZonedDateTime
 import java.time.ZoneId
 import kotlinx.coroutines.test.runTest

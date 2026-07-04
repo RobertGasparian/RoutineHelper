@@ -18,8 +18,8 @@ import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklySummaryNoteU
 import com.robertgasparian.routinehelper.domain.usecase.WeeklyItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.WeeklySummaryNoteUseCase
 import com.robertgasparian.routinehelper.test.FakeNoteDateTimeTextProvider
-import com.robertgasparian.routinehelper.test.FixedTimeProvider
-import com.robertgasparian.routinehelper.test.MainDispatcherRule
+import com.robertgasparian.routinehelper.core.testing.FixedTimeProvider
+import com.robertgasparian.routinehelper.core.testing.MainDispatcherRule
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingIntent
 import java.time.Instant
 import kotlinx.coroutines.ExperimentalCoroutinesApi

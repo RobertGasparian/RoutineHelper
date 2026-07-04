@@ -5,7 +5,7 @@ import com.robertgasparian.routinehelper.data.local.entity.DailySummaryNoteEntit
 import com.robertgasparian.routinehelper.data.local.dao.DailySummaryNoteDao
 import com.robertgasparian.routinehelper.data.local.entity.DailyEntryEntity
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
-import com.robertgasparian.routinehelper.test.FixedTimeProvider
+import com.robertgasparian.routinehelper.core.testing.FixedTimeProvider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf

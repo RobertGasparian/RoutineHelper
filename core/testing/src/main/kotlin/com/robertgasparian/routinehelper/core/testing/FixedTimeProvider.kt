@@ -1,4 +1,4 @@
-package com.robertgasparian.routinehelper.test
+package com.robertgasparian.routinehelper.core.testing
 
 import com.robertgasparian.routinehelper.core.time.TimeProvider
 import java.time.Instant

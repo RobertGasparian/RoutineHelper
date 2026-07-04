@@ -3,7 +3,7 @@ package com.robertgasparian.routinehelper.domain.formatter
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
-import com.robertgasparian.routinehelper.test.FixedTimeProvider
+import com.robertgasparian.routinehelper.core.testing.FixedTimeProvider
 import java.time.Instant
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

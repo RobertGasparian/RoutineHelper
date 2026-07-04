@@ -9,7 +9,7 @@ import com.robertgasparian.routinehelper.domain.usecase.AddTemplateItemUseCase
 import com.robertgasparian.routinehelper.domain.usecase.RemoveTemplateItemUseCase
 import com.robertgasparian.routinehelper.domain.usecase.TemplateItemUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTemplateItemUseCase
-import com.robertgasparian.routinehelper.test.MainDispatcherRule
+import com.robertgasparian.routinehelper.core.testing.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch

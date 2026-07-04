@@ -9,7 +9,7 @@ import com.robertgasparian.routinehelper.data.local.entity.RoutineItemEntity
 import com.robertgasparian.routinehelper.data.local.model.RoutineItemWithAction
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.RoutineTemplateItem
-import com.robertgasparian.routinehelper.test.FixedTimeProvider
+import com.robertgasparian.routinehelper.core.testing.FixedTimeProvider
 import java.util.concurrent.Executor
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first

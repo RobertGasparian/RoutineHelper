@@ -1,4 +1,4 @@
-package com.robertgasparian.routinehelper.test
+package com.robertgasparian.routinehelper.core.testing
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

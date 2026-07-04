@@ -5,7 +5,7 @@ import com.robertgasparian.routinehelper.data.local.dao.WeeklySummaryNoteDao
 import com.robertgasparian.routinehelper.data.local.entity.WeeklyEntryEntity
 import com.robertgasparian.routinehelper.data.local.entity.WeeklySummaryNoteEntity
 import com.robertgasparian.routinehelper.domain.model.WeeklyRoutineItem
-import com.robertgasparian.routinehelper.test.FixedTimeProvider
+import com.robertgasparian.routinehelper.core.testing.FixedTimeProvider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
