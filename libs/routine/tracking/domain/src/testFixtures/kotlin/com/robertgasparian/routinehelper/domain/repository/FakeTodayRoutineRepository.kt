@@ -1,7 +1,6 @@
-package com.robertgasparian.routinehelper.domain.usecase
+package com.robertgasparian.routinehelper.domain.repository
 
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
-import com.robertgasparian.routinehelper.domain.repository.TodayRoutineRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map

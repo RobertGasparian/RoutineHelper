@@ -1,6 +1,8 @@
 package com.robertgasparian.routinehelper.domain.usecase
 
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.domain.repository.AddedTemplateItem
+import com.robertgasparian.routinehelper.domain.repository.FakeRoutineTemplateRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

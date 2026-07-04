@@ -2,13 +2,13 @@ package com.robertgasparian.routinehelper.work
 
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
-import com.robertgasparian.routinehelper.domain.usecase.FakeRoutineHistoryRepository
-import com.robertgasparian.routinehelper.domain.usecase.FakeTodayRoutineRepository
+import com.robertgasparian.routinehelper.domain.repository.FakeRoutineHistoryRepository
+import com.robertgasparian.routinehelper.domain.repository.FakeTodayRoutineRepository
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ResetTodayUseCase
 import com.robertgasparian.routinehelper.test.FixedTimeProvider
-import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.ZoneId
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

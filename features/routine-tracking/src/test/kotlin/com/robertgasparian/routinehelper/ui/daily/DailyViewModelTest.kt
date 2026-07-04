@@ -2,14 +2,14 @@ package com.robertgasparian.routinehelper.ui.daily
 
 import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
-import com.robertgasparian.routinehelper.domain.usecase.CheckedChange
-import com.robertgasparian.routinehelper.domain.usecase.CountChange
-import com.robertgasparian.routinehelper.domain.usecase.FakeRoutineHistoryRepository
-import com.robertgasparian.routinehelper.domain.usecase.FakeRoutineTemplateRepository
-import com.robertgasparian.routinehelper.domain.usecase.FakeTodayRoutineRepository
+import com.robertgasparian.routinehelper.domain.repository.CheckedChange
+import com.robertgasparian.routinehelper.domain.repository.CountChange
+import com.robertgasparian.routinehelper.domain.repository.FakeRoutineHistoryRepository
+import com.robertgasparian.routinehelper.domain.repository.FakeRoutineTemplateRepository
+import com.robertgasparian.routinehelper.domain.repository.FakeTodayRoutineRepository
+import com.robertgasparian.routinehelper.domain.repository.HiddenChange
+import com.robertgasparian.routinehelper.domain.repository.NoteChange
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
-import com.robertgasparian.routinehelper.domain.usecase.HiddenChange
-import com.robertgasparian.routinehelper.domain.usecase.NoteChange
 import com.robertgasparian.routinehelper.domain.usecase.ReorderDailyRoutineItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetTodayItemCheckedUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetTodayItemHiddenUseCase

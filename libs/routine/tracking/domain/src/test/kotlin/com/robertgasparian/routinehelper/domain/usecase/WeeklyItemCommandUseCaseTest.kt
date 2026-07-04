@@ -1,5 +1,11 @@
 package com.robertgasparian.routinehelper.domain.usecase
 
+import com.robertgasparian.routinehelper.domain.repository.FakeWeeklyRoutineRepository
+import com.robertgasparian.routinehelper.domain.repository.WeeklyCheckedChange
+import com.robertgasparian.routinehelper.domain.repository.WeeklyCountChange
+import com.robertgasparian.routinehelper.domain.repository.WeeklyHiddenChange
+import com.robertgasparian.routinehelper.domain.repository.WeeklyNoteChange
+import com.robertgasparian.routinehelper.domain.repository.WeeklySummaryNoteChange
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test

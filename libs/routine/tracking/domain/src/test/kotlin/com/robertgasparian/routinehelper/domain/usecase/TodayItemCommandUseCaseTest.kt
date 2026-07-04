@@ -1,5 +1,11 @@
 package com.robertgasparian.routinehelper.domain.usecase
 
+import com.robertgasparian.routinehelper.domain.repository.CheckedChange
+import com.robertgasparian.routinehelper.domain.repository.CountChange
+import com.robertgasparian.routinehelper.domain.repository.FakeTodayRoutineRepository
+import com.robertgasparian.routinehelper.domain.repository.HiddenChange
+import com.robertgasparian.routinehelper.domain.repository.NoteChange
+import com.robertgasparian.routinehelper.domain.repository.SummaryNoteChange
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test

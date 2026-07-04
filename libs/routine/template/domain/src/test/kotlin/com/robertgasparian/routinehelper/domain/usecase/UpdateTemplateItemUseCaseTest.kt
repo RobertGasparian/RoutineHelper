@@ -1,5 +1,7 @@
 package com.robertgasparian.routinehelper.domain.usecase
 
+import com.robertgasparian.routinehelper.domain.repository.FakeRoutineTemplateRepository
+import com.robertgasparian.routinehelper.domain.repository.UpdatedTemplateItem
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

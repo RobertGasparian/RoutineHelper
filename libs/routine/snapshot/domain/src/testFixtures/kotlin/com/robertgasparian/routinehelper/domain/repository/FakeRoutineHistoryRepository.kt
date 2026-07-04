@@ -1,10 +1,9 @@
-package com.robertgasparian.routinehelper.domain.usecase
+package com.robertgasparian.routinehelper.domain.repository
 
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotSummary
-import com.robertgasparian.routinehelper.domain.repository.RoutineHistoryRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map

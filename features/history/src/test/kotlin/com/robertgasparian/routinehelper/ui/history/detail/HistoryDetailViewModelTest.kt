@@ -1,10 +1,10 @@
 package com.robertgasparian.routinehelper.ui.history.detail
 
+import com.robertgasparian.routinehelper.domain.formatter.SnapshotShareTextFormatter
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
-import com.robertgasparian.routinehelper.domain.formatter.SnapshotShareTextFormatter
+import com.robertgasparian.routinehelper.domain.repository.FakeRoutineHistoryRepository
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
-import com.robertgasparian.routinehelper.domain.usecase.FakeRoutineHistoryRepository
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotUseCase
 import com.robertgasparian.routinehelper.test.FixedTimeProvider
 import com.robertgasparian.routinehelper.test.MainDispatcherRule

@@ -1,9 +1,13 @@
 package com.robertgasparian.routinehelper.ui.weekly
 
 import com.robertgasparian.routinehelper.domain.model.WeeklyRoutineItem
-import com.robertgasparian.routinehelper.domain.usecase.FakeRoutineHistoryRepository
-import com.robertgasparian.routinehelper.domain.usecase.FakeRoutineTemplateRepository
-import com.robertgasparian.routinehelper.domain.usecase.FakeWeeklyRoutineRepository
+import com.robertgasparian.routinehelper.domain.repository.FakeRoutineHistoryRepository
+import com.robertgasparian.routinehelper.domain.repository.FakeRoutineTemplateRepository
+import com.robertgasparian.routinehelper.domain.repository.FakeWeeklyRoutineRepository
+import com.robertgasparian.routinehelper.domain.repository.WeeklyCheckedChange
+import com.robertgasparian.routinehelper.domain.repository.WeeklyCountChange
+import com.robertgasparian.routinehelper.domain.repository.WeeklyHiddenChange
+import com.robertgasparian.routinehelper.domain.repository.WeeklyNoteChange
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeWeeklyUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ReorderWeeklyRoutineItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetWeeklyItemCheckedUseCase
@@ -11,11 +15,7 @@ import com.robertgasparian.routinehelper.domain.usecase.SetWeeklyItemHiddenUseCa
 import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyItemCompletedCountUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyItemNoteUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklySummaryNoteUseCase
-import com.robertgasparian.routinehelper.domain.usecase.WeeklyCheckedChange
-import com.robertgasparian.routinehelper.domain.usecase.WeeklyCountChange
-import com.robertgasparian.routinehelper.domain.usecase.WeeklyHiddenChange
 import com.robertgasparian.routinehelper.domain.usecase.WeeklyItemsUseCase
-import com.robertgasparian.routinehelper.domain.usecase.WeeklyNoteChange
 import com.robertgasparian.routinehelper.domain.usecase.WeeklySummaryNoteUseCase
 import com.robertgasparian.routinehelper.test.FakeNoteDateTimeTextProvider
 import com.robertgasparian.routinehelper.test.FixedTimeProvider
