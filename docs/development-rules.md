@@ -124,6 +124,8 @@
 - New code should include unit tests when the behavior is feasible to test without excessive framework setup.
 - Feasible unit-test targets include domain use cases, pure Kotlin models/mappers/formatters, repository logic that can run against fakes or in-memory stores, and ViewModel state/event behavior with fake use cases.
 - Prefer Paparazzi for component rendering states and regular unit tests for logic/state transformations.
+- Shared test doubles that are reused across modules should live in the owning module's `testFixtures` source set. Keep one-off DAO or repository fakes local to the test file when only one test class needs them.
+- ViewModel tests and other tests that depend on `Dispatchers.Main` should use `MainDispatcherRule` from `:core:testing` instead of setting or resetting the main dispatcher inline.
 - Do not force unit tests around thin DI modules, generated framework glue, simple data classes with no behavior, or code that is better covered by a UI/snapshot/integration test.
 - Test function names should be descriptive Kotlin backtick names using `given ... when ... then ...`; omit `given ...` when there is no meaningful setup condition.
 - Existing Paparazzi test method names are part of their baseline image identity. Do not rename them solely for style compliance without explicit approval to update the corresponding baselines; new Paparazzi tests should follow the descriptive naming rule from the start.
@@ -131,3 +133,5 @@
 - Do not run Paparazzi record/update tasks unless explicitly approved.
 - Do not update existing snapshot images unless explicitly approved.
 - If UI-rendered code changes, run Paparazzi verification when practical and report any visual diffs without recording new baselines.
+- Default refactor verification is `.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug --no-daemon`, plus focused module tests for any changed module whose tests are not covered by the app task.
+- Run `git diff --check` before handoff. Line-ending warnings are acceptable when no whitespace errors are reported.

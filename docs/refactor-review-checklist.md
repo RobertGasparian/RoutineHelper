@@ -51,9 +51,10 @@ This checklist tracks the class-by-class standardization pass after modularizati
   - Keep Compose-specific interaction details out of ViewModel state.
   - Standardized intent/event naming, narrowed intent payloads, split focused UI-state models, centralized reusable derived presentation state, and added tests for mapper/local-state/derived-state behavior.
 
-- [ ] **Screens and components** - next
+- [x] **Screens and components**
   - Review stateful screen boundaries, stateless components, callback/event surfaces, previews, and shared design-system usage.
   - Limit work to architectural cleanup; defer visual redesign and preserve Paparazzi baselines.
+  - Standardized component navigation actions through `XxxIntent` and converted `RoutineNoteDialog` to a single intent-based callback API.
 
 - [x] **Workers and scheduling adapters**
   - Review workers, scheduler setup, work-date calculation, WorkManager input/output, retries, and cancellation handling.
@@ -69,7 +70,7 @@ This checklist tracks the class-by-class standardization pass after modularizati
   - Keep `:app` limited to composition and Android application entry points.
   - Standardized typed app destinations, added explicit saveable root back-stack persistence, and split app-shell graph/bottom-navigation helpers into focused files.
 
-- [ ] **Test infrastructure and final enforcement**
+- [ ] **Test infrastructure and final enforcement** - next
   - Review fakes, fixtures, dispatcher rules, test naming, supported verification commands, dependency visibility, and remaining documentation.
   - Add static enforcement only for patterns that have settled during this pass.
 
