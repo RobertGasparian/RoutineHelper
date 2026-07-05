@@ -158,7 +158,7 @@ private fun ActionEditorFormCard(
                 onValueChange = { title -> onIntent(ActionEditorIntent.TitleChange(title)) },
                 label = "Title",
                 isRequired = true,
-                placeholder = "Drink water",
+                placeholder = "Name this action",
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -166,7 +166,7 @@ private fun ActionEditorFormCard(
                 value = uiState.description,
                 onValueChange = { description -> onIntent(ActionEditorIntent.DescriptionChange(description)) },
                 label = "Description",
-                placeholder = "Drink 3L water",
+                placeholder = "Add optional details",
                 minLines = 4,
                 modifier = Modifier.fillMaxWidth(),
             )
