@@ -6,16 +6,17 @@ The post-modularization class-by-class review is tracked in [`refactor-review-ch
 
 ## Current Shape
 
-- The project has 17 Gradle modules across `:app`, `:features:*`, `:libs:*`, and `:core:*`.
+- The project has 20 Gradle modules across `:app`, `:features:*`, `:libs:*`, and `:core:*`.
 - `:app` is a thin Android shell. It owns `MainActivity`, `RoutineHelperApplication`, root Navigation 3 composition, app startup, and dependency aggregation.
 - Daily and Weekly presentation live together in `:features:routine-tracking`, with cadence-specific ViewModels/mappers and neutral shared tracking state/components.
-- History/detail/sharing, Action Editor, and Settings live in their own feature modules.
-- Template, tracking, and snapshot capabilities each have separate `:domain` and `:data` modules.
+- History/detail/sharing, Current List, Action Editor, and Settings live in their own feature modules.
+- Template, current-list, tracking, and snapshot capabilities each have separate `:domain` and `:data` modules.
 - `:libs:routine:database` owns only Room database/schema/DAO composition. Capability data modules own repository implementations and their Hilt bindings.
 - `:libs:background:work` owns WorkManager integration. Thin workers delegate structured flows to Daily and Weekly snapshot orchestrators, which compose focused use cases.
 - `:core:time`, `:core:presentation`, `:core:ui`, and `:core:testing` own cross-cutting time, ViewModel infrastructure, design-system, and shared test infrastructure.
 - ViewModels depend on use cases or presentation collaborators rather than repositories. Feature modules do not import Room, repository implementations, or workers.
 - Repository, use-case, orchestrator, ViewModel, mapper, state-holder, and component snapshot coverage is distributed with the modules that own those behaviors.
+- Current List undo is a feature-owned app-lifetime workflow: Room persists pending-removal state, a singleton coordinator serializes undo/finalization, a root-scoped feature ViewModel exposes feedback state, and `:app` owns only startup invocation and renderer placement.
 
 ## Completed Outcomes
 
@@ -31,6 +32,7 @@ The post-modularization class-by-class review is tracked in [`refactor-review-ch
 
 - Finish final dependency-visibility and build/test-command audits, then document the supported verification commands.
 - Add Room migration tests when the schema first moves beyond version 1; there is no migration path to test yet.
+- Record the approved initial Current List Paparazzi goldens after the new component visuals have been reviewed.
 - Keep existing debug-only snapshot/delete affordances gated and remove them when their replacement tooling or UX is ready.
 - Defer visual cleanup and component redesign to the separately planned UI/UX overhaul.
 - Create reflection, reminder, deadline, or monthly modules only when those capabilities are implemented and their boundaries are concrete.
@@ -65,6 +67,9 @@ Current and planned module families:
   - Daily and Weekly remain packages inside one feature because they are cadence variants of the same presentation workflow and share substantial UI behavior.
 - `:features:history`
   - Snapshot history list, snapshot detail, and the snapshot-sharing presentation flow they own today.
+- `:features:current-list`
+  - Current List screen, reorder interaction state, activity-scoped undo presentation, and the app-level undo renderer.
+  - Its app-lifetime coordinator remains feature-owned even though `:app` invokes startup cleanup and places its renderer.
 - `:features:action-editor`
   - Create/edit action UI flow.
 - A separate share feature is not introduced while sharing is only part of History. If another feature later needs the same complete presentation flow, reevaluate the boundary without adding a feature-to-feature dependency.
@@ -81,6 +86,10 @@ Current and planned module families:
 - `:libs:routine:tracking:data`
   - Room-backed per-period entities, DAOs, and repository implementations.
   - It depends on template data for the routine definitions that tracked entries reference.
+- `:libs:routine:current-list:domain`
+  - Current List models, repository behavior contracts, input normalization, formatting, and focused item/list commands.
+- `:libs:routine:current-list:data`
+  - Room-backed Current List entity, DAO, repository implementation, pending-removal persistence, and repository binding.
 - `:libs:routine:snapshot:domain`
   - Platform-independent snapshot models, snapshot-period calculations, history repository contracts, finalization, queries, deletion, and share-text use cases.
 - `:libs:routine:snapshot:data`

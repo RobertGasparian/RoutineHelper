@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.ViewWeek
@@ -73,6 +74,11 @@ private data class TopLevelNavigationItem(
 )
 
 private val TopLevelNavigationItems = listOf(
+    TopLevelNavigationItem(
+        destination = CurrentListDestination,
+        label = "List",
+        icon = Icons.Default.Checklist,
+    ),
     TopLevelNavigationItem(
         destination = DailyDestination,
         label = "Daily",

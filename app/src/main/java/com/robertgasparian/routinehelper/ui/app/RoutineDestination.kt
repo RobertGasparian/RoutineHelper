@@ -10,6 +10,8 @@ data object DailyDestination : TopLevelDestination
 
 data object WeeklyDestination : TopLevelDestination
 
+data object CurrentListDestination : TopLevelDestination
+
 data object HistoryDestination : TopLevelDestination
 
 data object SettingsDestination : RoutineDestination

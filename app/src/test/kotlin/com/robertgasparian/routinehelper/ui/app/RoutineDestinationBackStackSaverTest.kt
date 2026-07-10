@@ -44,6 +44,18 @@ class RoutineDestinationBackStackSaverTest {
     }
 
     @Test
+    fun `given current list top level destination when saving and restoring then it is preserved`() {
+        val backStack = TopLevelBackStack<RoutineDestination>(CurrentListDestination)
+
+        val restored = restoreRoutineDestinationBackStack(
+            saveRoutineDestinationBackStack(backStack),
+        )
+
+        assertEquals(CurrentListDestination, restored.topLevelKey)
+        assertEquals(listOf(CurrentListDestination), restored.backStack.toList())
+    }
+
+    @Test
     fun `given malformed saved stack when restoring then daily root is returned`() {
         val restored = restoreRoutineDestinationBackStack(
             listOf(listOf("unknown")),

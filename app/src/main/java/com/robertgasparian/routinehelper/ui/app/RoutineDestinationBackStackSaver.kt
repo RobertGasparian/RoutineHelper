@@ -39,6 +39,7 @@ private fun RoutineDestination.toSaveableRoute(): List<Any?> =
     when (this) {
         DailyDestination -> listOf(RouteDaily)
         WeeklyDestination -> listOf(RouteWeekly)
+        CurrentListDestination -> listOf(RouteCurrentList)
         HistoryDestination -> listOf(RouteHistory)
         SettingsDestination -> listOf(RouteSettings)
         is HistoryDetailDestination -> listOf(RouteHistoryDetail, snapshotId)
@@ -50,6 +51,7 @@ private fun List<*>.toRoutineDestinationOrNull(): RoutineDestination? =
     when (firstOrNull()) {
         RouteDaily -> DailyDestination
         RouteWeekly -> WeeklyDestination
+        RouteCurrentList -> CurrentListDestination
         RouteHistory -> HistoryDestination
         RouteSettings -> SettingsDestination
         RouteHistoryDetail -> HistoryDetailDestination(
@@ -88,6 +90,7 @@ private fun Any?.asLongOrNull(): Long? =
 
 private const val RouteDaily = "daily"
 private const val RouteWeekly = "weekly"
+private const val RouteCurrentList = "current_list"
 private const val RouteHistory = "history"
 private const val RouteSettings = "settings"
 private const val RouteHistoryDetail = "history_detail"

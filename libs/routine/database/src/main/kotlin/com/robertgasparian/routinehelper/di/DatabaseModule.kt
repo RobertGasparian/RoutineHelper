@@ -5,6 +5,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.robertgasparian.routinehelper.data.local.RoutineDatabase
 import com.robertgasparian.routinehelper.data.local.dao.ActionDao
+import com.robertgasparian.routinehelper.data.local.dao.CurrentListItemDao
 import com.robertgasparian.routinehelper.data.local.dao.DailyEntryDao
 import com.robertgasparian.routinehelper.data.local.dao.DailySummaryNoteDao
 import com.robertgasparian.routinehelper.data.local.dao.RoutineSnapshotDao
@@ -55,4 +56,7 @@ object DatabaseModule {
 
     @Provides
     fun provideRoutineSnapshotDao(database: RoutineDatabase): RoutineSnapshotDao = database.routineSnapshotDao()
+
+    @Provides
+    fun provideCurrentListItemDao(database: RoutineDatabase): CurrentListItemDao = database.currentListItemDao()
 }

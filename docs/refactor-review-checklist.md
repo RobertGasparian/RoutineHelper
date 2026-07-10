@@ -76,6 +76,12 @@ This checklist tracks the class-by-class standardization pass after modularizati
   - Standardized shared test utility package ownership, confirmed ViewModel tests use `MainDispatcherRule`, confirmed non-Paparazzi tests follow descriptive backtick names, and documented why Room-specific fakes stay with data tests.
   - No new static enforcement was added; the settled rules are documented and the default verification command remains the enforcement baseline for now.
 
+- [x] **Post-refactor Current List addition**
+  - Audited the new feature against the completed modularization and class-level standards.
+  - Kept the activity-scoped undo ViewModel, coordinator, intents, state, and renderer feature-owned while `:app` retains startup and root-placement responsibilities.
+  - Serialized durable undo transitions, removed the unused immediate-delete API, made reorder writes field-specific, gated test tooling to debug builds, and added preview/Paparazzi definitions.
+  - Documented the app-lifetime feature workflow pattern so future cross-destination feedback does not move presentation ownership into `:app` or introduce direct ViewModel communication.
+
 ## Guardrails For Every Category
 
 - Preserve business behavior and visual output unless a specific behavior change is approved and documented.

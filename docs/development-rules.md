@@ -45,7 +45,9 @@
 - `:libs:routine:database` is infrastructure wiring only: it may aggregate capability-owned Room entities and DAOs and provide the shared database/DAO bindings, but must not contain repositories or business rules.
 - `:app` aggregates the data and database modules but must not construct capability repository implementations itself.
 - Default cross-cutting bindings live with their `:core:*` implementation, and feature-specific presentation collaborator bindings live with their feature; `:app` aggregates these modules instead of constructing their implementations.
+- A feature-owned UI workflow may outlive one navigation destination when its feedback must remain visible across destination changes. Keep its stateful coordinator, root/activity-scoped ViewModel, UI state, intents, and renderer in the owning `:features:*` module; `:app` may obtain that ViewModel at the root, place the renderer in the app shell, and invoke an explicit startup cleanup hook.
 - Modules declare direct dependencies for APIs their source imports. Dependencies used only to aggregate DI/runtime implementations are allowed in `:app`, but should be identifiable as composition dependencies rather than accidental transitive access.
+- Use Gradle `api` when a module's public contract exposes a dependency type that consumers must resolve. For example, a feature-owned root ViewModel consumed by `:app` requires the feature to expose `:core:presentation` because `BaseViewModel` is part of that public type hierarchy; keep ordinary internal dependencies as `implementation`.
 - Prefer Hilt `@Binds` for interface-to-implementation bindings when the implementation has an injectable constructor. Use `@Provides` for framework factories, builder APIs, external objects, and values that require custom construction.
 - Scope bindings installed in `SingletonComponent` with `@Singleton` when the implementation is stateless or intended to share app lifetime. Leave bindings unscoped only when each injection should create fresh state.
 - `:libs:*` must not depend on `:features:*`.
@@ -88,6 +90,7 @@
 - ViewModels expose a single stable `override val uiState: StateFlow<XxxUiState>` for screen state. Build it from private `MutableStateFlow`s and read-only use-case flows with `stateInViewModel(initialState)`.
 - ViewModels handle outside-in actions by overriding `handleIntent(intent: XxxIntent)`. Screens call the inherited final `onIntent(...)`.
 - Use the inherited `launch { ... }` helper for ViewModel coroutines unless a call needs custom coroutine behavior.
+- ViewModels must not call one another. When multiple ViewModels or app-shell entry points participate in one long-lived feature workflow, inject a feature-owned coordinator into each participant and keep workflow ordering in that coordinator.
 - Use Hilt assisted ViewModels for stable route/screen identity arguments such as IDs, cadence, or other navigation parameters. Once the ViewModel is created, public ViewModel methods should read those owned arguments instead of requiring the screen to pass them back on every call.
 - Keep mutable presentation state private inside the ViewModel. Screens collect `uiState` and send outside-in actions through `onIntent(...)`; they should not assemble ViewModel state flows themselves.
 - Name outside-in user or screen actions as `XxxIntent`, even when the screen handles some of them directly for navigation or platform side effects.
@@ -103,6 +106,7 @@
 - Do not pass screen callbacks such as `onSaved` or `onDeleted` into ViewModel operations. The screen should send an intent, the ViewModel should finish the operation, then emit a `XxxUiEvent` for navigation, share requests, snackbars, or other outside-world reactions.
 - UI state should be named for the feature or shared concept it represents. Avoid reusing a feature-specific name for another feature unless that is the intentional shared model.
 - Direct time reads should be isolated behind a small provider/collaborator when the code path is business logic, scheduling, snapshotting, or test-sensitive presentation state.
+- Standard Material snackbars have one action. When a transient app-level feature workflow genuinely needs multiple simultaneous actions, use a feature-owned custom host with explicit UI state and intents; keep only its placement and activity-scoped ViewModel lookup in `:app`.
 
 ## Data And Domain
 
@@ -115,9 +119,11 @@
 - Define persisted enum strings as named constants owned by their data schema. Decode every supported value explicitly and fail on unknown values; never silently reinterpret malformed or newer data as an existing domain value.
 - Cadence-specific operations must carry cadence through repository/data boundaries when raw IDs alone cannot prove the cadence, and implementations must not update records from a mismatched cadence.
 - Normalize user-entered text at the boundary that persists it, and keep that rule consistent across similar flows.
+- Durable ordering rules that depend on persisted state, such as hidden pending-removal rows reserving list slots, belong in domain planners/use cases with pure unit tests. Repository implementations should load the required stored state and persist the resulting updates in a transaction, not own the ordering decision itself.
 - Prefer field-specific, single-statement DAO updates/upserts when independent fields of one row can change concurrently; avoid read-copy-replace writes that can overwrite unrelated state.
 - Wrap repository operations that mutate multiple rows or DAOs as one logical action in a Room transaction.
 - Read a Room-backed domain aggregate through one transactional relation query; do not combine independently observed parent and child queries in a repository.
+- Durable undo must keep pending rows in the source of truth instead of deleting and reinserting them. Serialize mark-pending, restore, timeout finalization, and clear operations in one coordinator so timeout and user actions cannot race; app startup must explicitly finalize dangling pending rows left by process death.
 
 ## Testing
 
@@ -135,5 +141,6 @@
 - Do not run Paparazzi record/update tasks unless explicitly approved.
 - Do not update existing snapshot images unless explicitly approved.
 - If UI-rendered code changes, run Paparazzi verification when practical and report any visual diffs without recording new baselines.
+- New components require Paparazzi test definitions and approved initial golden images. Adding a new component does not waive the rule against recording snapshots without explicit approval.
 - Default refactor verification is `.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug --no-daemon`, plus focused module tests for any changed module whose tests are not covered by the app task.
 - Run `git diff --check` before handoff. Line-ending warnings are acceptable when no whitespace errors are reported.

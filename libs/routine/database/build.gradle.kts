@@ -29,6 +29,7 @@ room {
 }
 
 dependencies {
+    api(project(":libs:routine:current-list:data"))
     api(project(":libs:routine:template:data"))
     api(project(":libs:routine:tracking:data"))
     api(project(":libs:routine:snapshot:data"))

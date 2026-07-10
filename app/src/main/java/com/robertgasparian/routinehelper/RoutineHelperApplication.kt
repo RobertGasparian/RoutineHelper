@@ -3,6 +3,7 @@ package com.robertgasparian.routinehelper
 import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
+import com.robertgasparian.routinehelper.ui.currentlist.undo.CurrentListUndoCoordinator
 import com.robertgasparian.routinehelper.work.RoutineSnapshotBackfill
 import com.robertgasparian.routinehelper.work.RoutineSnapshotWorkScheduler
 import dagger.hilt.android.HiltAndroidApp
@@ -25,6 +26,9 @@ class RoutineHelperApplication : Application(), Configuration.Provider {
     @Inject
     lateinit var routineSnapshotBackfill: RoutineSnapshotBackfill
 
+    @Inject
+    lateinit var currentListUndoCoordinator: CurrentListUndoCoordinator
+
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)
@@ -34,6 +38,9 @@ class RoutineHelperApplication : Application(), Configuration.Provider {
         super.onCreate()
         applicationScope.launch {
             routineSnapshotBackfill.backfillMissedSnapshots()
+        }
+        applicationScope.launch {
+            currentListUndoCoordinator.finalizeDanglingPendingRemovalsOnLaunch()
         }
         routineSnapshotWorkScheduler.scheduleRecurringSnapshots()
     }

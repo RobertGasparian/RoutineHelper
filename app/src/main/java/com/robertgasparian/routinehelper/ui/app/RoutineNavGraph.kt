@@ -9,6 +9,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.ui.actioneditor.ActionEditorScreen
+import com.robertgasparian.routinehelper.ui.currentlist.CurrentListScreen
 import com.robertgasparian.routinehelper.ui.daily.DailyScreen
 import com.robertgasparian.routinehelper.ui.history.HistoryScreen
 import com.robertgasparian.routinehelper.ui.history.detail.HistoryDetailScreen
@@ -66,6 +67,22 @@ internal fun RoutineNavGraph(
                             ActionEditorDestination(
                                 actionId = actionId,
                                 cadence = RoutineCadence.Weekly,
+                            ),
+                        )
+                    },
+                    onSettingsClick = {
+                        onNavigateToDetail(SettingsDestination)
+                    },
+                )
+            }
+
+            entry<CurrentListDestination> {
+                CurrentListScreen(
+                    onShareTextPreviewClick = { text ->
+                        onNavigateToDetail(
+                            ShareTextPreviewDestination(
+                                initialText = text,
+                                shareTitle = "Share current list",
                             ),
                         )
                     },
