@@ -69,6 +69,10 @@
 
 ## UI
 
+- Before changing shared drag/reorder behavior or overhauling its item UI, read the
+  [`RoutineReorderableLazyColumn` maintenance guide](reorderable-lazy-column.md). Preserve its
+  pointer-ownership, overlay, measured-drop-target, and source-reconciliation invariants unless the
+  change explicitly redesigns and retests them.
 - Screen-level composables use two layers:
   - `XxxScreen`: stateful boundary. Owns the `ViewModel`, collects state, handles launched effects, and maps UI events to ViewModel calls.
   - `XxxComponent`: stateless renderer. Receives a `UiState`, renders it, and propagates events upward.

@@ -31,7 +31,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -42,6 +41,8 @@ import androidx.compose.ui.unit.dp
 import com.robertgasparian.routinehelper.ui.dsm.RoutineActionItemCard
 import com.robertgasparian.routinehelper.ui.dsm.RoutineNoteDialog
 import com.robertgasparian.routinehelper.ui.dsm.RoutineNoteDialogIntent
+import com.robertgasparian.routinehelper.ui.dsm.RoutineReorderableLazyColumn
+import com.robertgasparian.routinehelper.ui.dsm.RoutineReorderDragStartMode
 import com.robertgasparian.routinehelper.ui.dsm.SummaryNoteCard
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 import java.time.Instant
@@ -62,8 +63,6 @@ fun RoutineTrackingComponent(
     // TODO Remove this debug/test-only date picker before the first public release.
     var isSnapshotDatePickerVisible by rememberSaveable { mutableStateOf(false) }
     val listState = rememberLazyListState()
-    val coroutineScope = rememberCoroutineScope()
-    val reorderState = rememberRoutineReorderState()
     val fabVisible by remember {
         derivedStateOf {
             !listState.isScrollInProgress
@@ -152,33 +151,25 @@ fun RoutineTrackingComponent(
                     },
                 )
             }
-            val itemContent:
-                @Composable (
-                    RoutineTrackingItemUiState,
-                    Modifier,
-                    Modifier,
-                ) -> Unit = { item, itemModifier, dragHandleModifier ->
-                    RoutineTrackingItem(
-                        item = item,
-                        onIntent = onIntent,
-                        modifier = itemModifier,
-                        dragHandleModifier = dragHandleModifier,
-                    )
-                }
-
-            RoutineReorderList(
-                sourceItems = uiState.items,
-                reorderState = reorderState,
-                listState = listState,
-                coroutineScope = coroutineScope,
+            RoutineReorderableLazyColumn(
+                items = uiState.items,
+                itemId = RoutineTrackingItemUiState::routineItemId,
+                state = listState,
                 contentPadding = contentPadding,
-                summaryContent = summaryContent,
-                onDropOrder = { orderedIds -> onIntent(RoutineTrackingIntent.ReorderItems(orderedIds)) },
-                itemContent = itemContent,
+                itemSpacing = 12.dp,
+                dragStartMode = RoutineReorderDragStartMode.LongPress,
+                header = summaryContent,
+                onOrderChange = { orderedIds -> onIntent(RoutineTrackingIntent.ReorderItems(orderedIds)) },
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
-            )
+            ) { item ->
+                RoutineTrackingItem(
+                    item = item,
+                    onIntent = onIntent,
+                    dragHandleModifier = dragHandleModifier,
+                )
+            }
         }
     }
 

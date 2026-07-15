@@ -70,6 +70,7 @@ import com.robertgasparian.routinehelper.features.currentlist.BuildConfig
 import com.robertgasparian.routinehelper.ui.dsm.RoutineDialogFilledButton
 import com.robertgasparian.routinehelper.ui.dsm.RoutineDialogTextButton
 import com.robertgasparian.routinehelper.ui.dsm.RoutineOutlinedTextField
+import com.robertgasparian.routinehelper.ui.dsm.RoutineReorderableLazyColumn
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 import kotlinx.coroutines.launch
 
@@ -112,8 +113,6 @@ fun CurrentListComponent(
     var isOverflowMenuVisible by rememberSaveable { mutableStateOf(false) }
     var isClearConfirmationVisible by rememberSaveable { mutableStateOf(false) }
     val listState = rememberLazyListState()
-    val coroutineScope = rememberCoroutineScope()
-    val reorderState = rememberCurrentListReorderState(uiState.items)
 
     Scaffold(
         modifier = modifier,
@@ -185,19 +184,19 @@ fun CurrentListComponent(
                     .padding(innerPadding),
             )
         } else {
-            CurrentListReorderList(
-                sourceItems = uiState.items,
-                reorderState = reorderState,
-                listState = listState,
-                coroutineScope = coroutineScope,
+            RoutineReorderableLazyColumn(
+                items = uiState.items,
+                itemId = CurrentListItemUiState::id,
+                state = listState,
                 contentPadding = PaddingValues(
                     start = 16.dp,
                     top = 16.dp,
                     end = 16.dp,
                     bottom = CurrentListBottomSafeSpace,
                 ),
-                onDropOrder = { orderedIds -> onIntent(CurrentListIntent.ReorderItems(orderedIds)) },
-                stickyHeaderContent = if (uiState.canShowBulkActions) {
+                itemSpacing = 12.dp,
+                onOrderChange = { orderedIds -> onIntent(CurrentListIntent.ReorderItems(orderedIds)) },
+                header = if (uiState.canShowBulkActions) {
                     {
                         CurrentListBulkActionsHeader(
                             canCheckAll = uiState.canCheckAll,
@@ -209,32 +208,30 @@ fun CurrentListComponent(
                 } else {
                     null
                 },
-                itemContent = { item, itemModifier, dragHandleModifier ->
-                    SwipeToRemoveCurrentListItem(
-                        item = item,
-                        onRemove = { onIntent(CurrentListIntent.RemoveItem(item.id)) },
-                        modifier = itemModifier,
-                    ) {
-                        CurrentListItemCard(
-                            item = item,
-                            isDragHandleActive = reorderState.pressedHandleItemId == item.id ||
-                                reorderState.draggedItemId == item.id,
-                            onCheckedChange = { isChecked ->
-                                onIntent(
-                                    CurrentListIntent.CheckedChange(
-                                        itemId = item.id,
-                                        isChecked = isChecked,
-                                    ),
-                                )
-                            },
-                            dragHandleModifier = dragHandleModifier,
-                        )
-                    }
-                },
+                stickyHeader = true,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
-            )
+            ) { item ->
+                SwipeToRemoveCurrentListItem(
+                    item = item,
+                    onRemove = { onIntent(CurrentListIntent.RemoveItem(item.id)) },
+                ) {
+                    CurrentListItemCard(
+                        item = item,
+                        isDragHandleActive = isDragHandleActive,
+                        onCheckedChange = { isChecked ->
+                            onIntent(
+                                CurrentListIntent.CheckedChange(
+                                    itemId = item.id,
+                                    isChecked = isChecked,
+                                ),
+                            )
+                        },
+                        dragHandleModifier = dragHandleModifier,
+                    )
+                }
+            }
         }
     }
 
