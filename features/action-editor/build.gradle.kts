@@ -9,10 +9,7 @@ plugins {
 android {
     namespace = "com.robertgasparian.routinehelper.features.actioneditor"
     compileSdk {
-        version =
-            release(36) {
-                minorApiLevel = 1
-            }
+        version = release(37)
     }
 
     defaultConfig {

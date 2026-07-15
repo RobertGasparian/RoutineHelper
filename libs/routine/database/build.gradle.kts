@@ -8,10 +8,7 @@ plugins {
 android {
     namespace = "com.robertgasparian.routinehelper.libs.routine.database"
     compileSdk {
-        version =
-            release(36) {
-                minorApiLevel = 1
-            }
+        version = release(37)
     }
 
     defaultConfig {

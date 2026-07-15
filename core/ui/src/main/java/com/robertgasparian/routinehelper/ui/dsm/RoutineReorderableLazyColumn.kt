@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
@@ -77,7 +78,7 @@ fun <Item> RoutineReorderableLazyColumn(
     val autoScroller = rememberRoutineReorderAutoScroller(listState = state)
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
-    val reorderCoordinates = remember { RoutineReorderCoordinates() }
+    val reorderCoordinates = remember { RoutineReorderLayoutCoordinates() }
     val currentItemId = rememberUpdatedState(itemId)
     val currentOnOrderChange = rememberUpdatedState(onOrderChange)
     val idOf: (Item) -> Long = remember {
@@ -117,6 +118,7 @@ fun <Item> RoutineReorderableLazyColumn(
                     reorderState = reorderState,
                     listState = state,
                     autoScroller = autoScroller,
+                    layoutCoordinates = reorderCoordinates,
                     idOf = idOf,
                 ),
             contentPadding = contentPadding,
@@ -156,6 +158,11 @@ fun <Item> RoutineReorderableLazyColumn(
                     isDragHandleActive = reorderState.pressedHandleItemId == id || isDragging,
                     isDragging = isDragging,
                 )
+                DisposableEffect(id) {
+                    onDispose {
+                        reorderCoordinates.onItemDisposed(itemId = id)
+                    }
+                }
 
                 val placementModifier = if (isDragging) {
                     Modifier.animateItem(
@@ -169,18 +176,18 @@ fun <Item> RoutineReorderableLazyColumn(
                 Box(
                     modifier = placementModifier
                         .fillMaxWidth()
-                        .then(
+                        .onGloballyPositioned { coordinates ->
+                            val itemBounds = reorderCoordinates.onItemPlaced(
+                                itemId = id,
+                                itemTopInRoot = coordinates.positionInRoot().y,
+                                itemSize = coordinates.size.height,
+                            )
                             if (isDragging) {
-                                Modifier.onGloballyPositioned { coordinates ->
-                                    reorderState.onDraggedItemSlotPlaced(
-                                        itemTop = coordinates.positionInRoot().y -
-                                            reorderCoordinates.containerTopInRoot,
-                                    )
-                                }
-                            } else {
-                                Modifier
-                            },
-                        ),
+                                reorderState.onDraggedItemSlotPlaced(
+                                    itemTop = itemBounds.top,
+                                )
+                            }
+                        },
                 ) {
                     if (isDragging && isOverlayVisible) {
                         Box(
@@ -241,8 +248,32 @@ private data class RoutineReorderableItemScopeImpl(
     override val isDragging: Boolean,
 ) : RoutineReorderableItemScope
 
-private class RoutineReorderCoordinates {
+internal data class RoutineReorderItemBounds(
+    val top: Float,
+    val size: Int,
+)
+
+internal class RoutineReorderLayoutCoordinates {
     var containerTopInRoot: Float = 0f
+
+    private val itemBoundsById = mutableMapOf<Long, RoutineReorderItemBounds>()
+
+    fun onItemPlaced(
+        itemId: Long,
+        itemTopInRoot: Float,
+        itemSize: Int,
+    ): RoutineReorderItemBounds = RoutineReorderItemBounds(
+        top = itemTopInRoot - containerTopInRoot,
+        size = itemSize,
+    ).also { itemBounds ->
+        itemBoundsById[itemId] = itemBounds
+    }
+
+    fun itemBounds(itemId: Long): RoutineReorderItemBounds? = itemBoundsById[itemId]
+
+    fun onItemDisposed(itemId: Long) {
+        itemBoundsById.remove(itemId)
+    }
 }
 
 private const val ReorderHeaderKey = "routine-reorder-header"

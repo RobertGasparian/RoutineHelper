@@ -8,7 +8,7 @@ The component lives in `:core:ui` because it is shared UI infrastructure with no
 Daily, or Weekly business knowledge. Its current consumers are:
 
 - [Current List](../features/current-list/src/main/kotlin/com/robertgasparian/routinehelper/ui/currentlist/CurrentListScreen.kt),
-  using immediate drag recognition and a sticky bulk-actions header.
+  using whole-card long-press recognition and a sticky bulk-actions header.
 - [Daily and Weekly tracking](../features/routine-tracking/src/main/kotlin/com/robertgasparian/routinehelper/ui/tracking/RoutineTrackingComponent.kt),
   using long-press drag recognition and a summary-note header.
 
@@ -21,15 +21,15 @@ The most important invariant is:
 
 | File | Responsibility |
 | --- | --- |
-| [`RoutineReorderableLazyColumn.kt`](../core/ui/src/main/java/com/robertgasparian/routinehelper/ui/dsm/RoutineReorderableLazyColumn.kt) | Public API, LazyColumn content, dragged overlay, blank slot, and slot measurement. |
+| [`RoutineReorderableLazyColumn.kt`](../core/ui/src/main/java/com/robertgasparian/routinehelper/ui/dsm/RoutineReorderableLazyColumn.kt) | Public API, LazyColumn content, dragged overlay, blank slot, and rendered item/slot measurement. |
 | [`RoutineReorderGesture.kt`](../core/ui/src/main/java/com/robertgasparian/routinehelper/ui/dsm/RoutineReorderGesture.kt) | Handle recognition and stable container-level pointer ownership. |
 | [`RoutineReorderState.kt`](../core/ui/src/main/java/com/robertgasparian/routinehelper/ui/dsm/RoutineReorderState.kt) | Optimistic order, drag coordinates, lifecycle, and source reconciliation. |
 | [`RoutineReorderGeometry.kt`](../core/ui/src/main/java/com/robertgasparian/routinehelper/ui/dsm/RoutineReorderGeometry.kt) | Directional adjacent-item threshold calculation. |
 | [`RoutineReorderAutoScroller.kt`](../core/ui/src/main/java/com/robertgasparian/routinehelper/ui/dsm/RoutineReorderAutoScroller.kt) | Continuous edge auto-scroll owned by the drag. |
 | [`RoutineReorderDropAnimation.kt`](../core/ui/src/main/java/com/robertgasparian/routinehelper/ui/dsm/RoutineReorderDropAnimation.kt) | Constant-speed travel from the finger position to the measured slot. |
 
-Pure state, geometry, auto-scroll, and duration behavior is covered by the corresponding
-`RoutineReorder*Test.kt` files under `core/ui/src/test`.
+Pure state, geometry, auto-scroll, duration, and coordinate-conversion behavior is covered by the
+corresponding `RoutineReorder*Test.kt` files under `core/ui/src/test`.
 
 ## Public API contract
 
@@ -58,7 +58,8 @@ The caller must honor these rules:
 - `itemId` must return a unique, stable `Long`. Identity must not depend on the current index,
   visible content, or mutable presentation state.
 - Apply `dragHandleModifier` to the exact UI region that should start a reorder gesture. Do not put
-  a second reorder detector on the card or row.
+  a second reorder detector on the card or row. Current List applies it to the full card; tracking
+  applies it to its existing drag interaction region.
 - `itemContent` must tolerate being moved from the LazyColumn item into the overlay composition
   during a drag. Important interaction state should be hoisted; do not rely on local composable
   state surviving that transition.
@@ -87,7 +88,7 @@ anchor stable when `displayedItems` changes order.
 
 ```mermaid
 flowchart LR
-    A["Handle recognizes drag"] --> B["Stable list container owns pointer"]
+    A["Handle recognizes drag"] --> B["Stable container snapshots rendered bounds and owns pointer"]
     B --> C["Overlay follows pointer delta"]
     C --> D{"Overlay center crossed adjacent item center?"}
     D -->|No| C
@@ -103,6 +104,14 @@ flowchart LR
 The overlay currently has no elevation animation or graphics layer. It is on top because it is the
 last child of the component's root `Box`. Elevation is a visual option, not a positioning tool, and
 must not be used to repair a bad handoff.
+
+Current List provides drag activation feedback without changing geometry. Its card animates from
+`surfaceContainerLow` to `surfaceContainerHigh` while its border animates from `outlineVariant` to
+`primary`. Both colors are driven by one progress animation, so they remain synchronized. This
+follows Material's distinction between effects motion, such as color, and spatial motion that
+changes shape or bounds. The project uses Material 3's standard `MotionScheme` because reordering is
+a recurring utility interaction, and the activation transition uses the theme's `fastEffectsSpec`.
+Keep the timing theme-driven instead of adding a local duration or easing curve.
 
 While the overlay exists—including during drop travel—its item scope reports
 `isDragHandleActive = true` and `isDragging = true`. Its `dragHandleModifier` is empty, so the
@@ -160,7 +169,8 @@ drag start.
 
 - Observes the original pointer at `PointerEventPass.Initial` with `requireUnconsumed = false`.
 - Locks the gesture to the pointer ID and dragged item that started it.
-- Captures the item's initial top and size from `LazyListState.layoutInfo`.
+- Verifies the item is visible through `LazyListState.layoutInfo`, then captures its actual rendered
+  top and size from the component's continuously measured item bounds.
 - Applies all later pointer deltas exactly once.
 - Evaluates reorder thresholds after finger motion and after auto-scroll motion.
 - Starts and stops the one auto-scroll job for the gesture.
@@ -184,7 +194,8 @@ Most subtle reorder bugs have been coordinate bugs. The current coordinate contr
 | --- | --- | --- |
 | `draggedItemTop` | Pixels relative to the component root/LazyColumn vertical origin | Overlay position, thresholds, and auto-scroll. |
 | `draggedItemSize` | Pixels | Placeholder height, overlay center, and bottom edge. |
-| `LazyListItemInfo.offset` | Logical pixels relative to the LazyColumn viewport | Initial drag position and neighboring-item geometry only. |
+| Measured item bounds | Actual placed pixels relative to the component root | Initial overlay top and captured item size. |
+| `LazyListItemInfo.offset` | Logical pixels relative to the LazyColumn viewport | Neighboring-item geometry only. |
 | `draggedItemSlotTop` | Actual placed pixels relative to the component root | Final drop target only. |
 | Auto-scroll thresholds and steps | Configured in dp, converted to pixels | Density-correct edge behavior. |
 
@@ -192,13 +203,29 @@ The LazyColumn fills the component root, and the overlay uses the same vertical 
 copies only the left and right content padding. Top content padding is already represented by the
 measured/laid-out Y position and must not be added again.
 
-The actual slot top is measured as:
+Each visible reorderable item's outer box is continuously measured. Both its initial top and the
+active slot top use the same conversion:
 
 ```text
 dragged item positionInRoot().y - component positionInRoot().y
 ```
 
-This makes it directly comparable to `draggedItemTop`, which drives the overlay's local Y offset.
+`RoutineReorderLayoutCoordinates` keeps the latest bounds keyed by stable item ID. Every placement
+refreshes the entry, and `DisposableEffect` removes it when that Lazy item leaves composition. Keep
+both halves of this lifecycle: retaining disposed entries can make a later drag start from stale
+coordinates, while measuring only the active item is too late to initialize the overlay without a
+representation jump.
+
+At drag recognition, the container snapshots the selected card's measured top and size before the
+card is replaced by its placeholder. This prevents the activation jump that occurs when a logical
+`LazyListItemInfo.offset` differs from the card's actual rendered position due to placement
+animation or another layout effect. `visibleItemsInfo` still verifies that the selected item is
+currently visible, but it is not the source of the starting coordinate. If either visibility or
+measured bounds is unexpectedly unavailable, cancel the drag; do not fall back to a logical offset
+and reintroduce the jump.
+
+The shared conversion makes the measured positions directly comparable to `draggedItemTop`, which
+drives the overlay's local Y offset.
 If a UI overhaul moves the overlay into a popup, another window, or a parent with a different
 transform, this coordinate conversion must be redesigned and retested.
 
@@ -500,6 +527,11 @@ the single scroll session, overlay-bound calculation, and reorder callback after
 Render them on the overlay. Keep the overlay as the last root child and do not make visual state
 control when the overlay is removed. Verify at slow animator scales.
 
+For feature-owned card feedback, prefer effects that do not alter measured geometry. Current List
+uses synchronized container and border color animation from `isDragging`. Avoid padding and size
+changes because item size is captured once at drag start; avoid scale unless its center-origin edge
+movement is an intentional part of the motion design.
+
 ### Add horizontal or grid reordering
 
 The current implementation is intentionally vertical and LazyColumn-specific. Orientation,
@@ -519,8 +551,8 @@ generalized geometry/gesture design rather than adding scattered orientation fla
   reconciliation removes it, but there is no dedicated user-facing cancellation behavior.
 - Very tall items that overlap both auto-scroll edge zones use top-edge priority.
 - Auto-scroll maximum speed is per frame rather than elapsed-time based.
-- The dragged card size and final drop target are snapshots; dynamic height or inset changes during
-  one active drag/drop are not followed continuously.
+- The initial rendered bounds and final drop target are snapshots; dynamic height or inset changes
+  during one active drag/drop are not followed continuously.
 
 Treat these as explicit future work, not reasons to weaken the invariants that already work.
 
@@ -535,14 +567,19 @@ Before changing the component:
 - Keep `draggedItemTop` independent from logical order changes and list scroll.
 - Keep the dragged Lazy item's outer node stable.
 - Keep dragged-slot placement snapped while neighbors animate.
-- Keep the drop target measured in the same coordinate space as the overlay.
+- Initialize the overlay from the card's measured rendered bounds, never a logical LazyList offset.
+- Keep the final drop target measured in the same coordinate space as the overlay.
 - Keep the one-frame wait before sampling the final slot.
 - Decide explicitly whether persistence still happens after the visual drop or at pointer-up.
 - Define a real rejection contract before adding rollback.
 
 Manual regression matrix:
 
-- Current List immediate drag and Daily/Weekly long-press drag.
+- Current List whole-card long-press drag and Daily/Weekly long-press drag.
+- Current List horizontal swipe-to-remove before the long-press timeout, including starting the
+  swipe from the card body.
+- Long-press a card immediately after list placement motion and verify activation has no vertical
+  jump relative to the finger.
 - Drag upward through the app-bar boundary and hold there.
 - Drag downward into the bottom edge/navigation area and hold there.
 - Move the same item down, back up, and down again during one gesture.
@@ -569,6 +606,6 @@ Do not update Paparazzi baselines unless the UI overhaul intentionally changes a
 3. Only the adjacent item in the current direction can be crossed.
 4. Auto-scroll is one continuous, exclusive, frame-driven session.
 5. Neighbors animate; the dragged blank slot snaps.
-6. The drop target is the actual measured slot, never a logical LazyList offset.
+6. Both drag start and drop handoff use actual measured positions, never logical LazyList offsets.
 7. Drop duration is distance-derived, and handoff happens once at the exact final coordinate.
 8. The optimistic order remains until the source confirms it; rejection requires an explicit design.

@@ -3,6 +3,7 @@ package com.robertgasparian.routinehelper.ui.theme
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
@@ -59,6 +60,8 @@ private val DarkColorScheme = darkColorScheme(
     outlineVariant = Color(0xFF43474D),
 )
 
+private val RoutineMotionScheme = MotionScheme.standard()
+
 @Composable
 fun RoutineHelperTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -77,6 +80,7 @@ fun RoutineHelperTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
+        motionScheme = RoutineMotionScheme,
         typography = Typography,
         content = content,
     )

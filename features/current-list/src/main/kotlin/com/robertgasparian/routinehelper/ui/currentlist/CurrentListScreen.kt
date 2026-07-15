@@ -6,6 +6,7 @@ import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +26,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.DoneAll
-import androidx.compose.material.icons.filled.DragIndicator
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.RemoveDone
 import androidx.compose.material.icons.filled.Settings
@@ -59,6 +59,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -70,6 +71,7 @@ import com.robertgasparian.routinehelper.features.currentlist.BuildConfig
 import com.robertgasparian.routinehelper.ui.dsm.RoutineDialogFilledButton
 import com.robertgasparian.routinehelper.ui.dsm.RoutineDialogTextButton
 import com.robertgasparian.routinehelper.ui.dsm.RoutineOutlinedTextField
+import com.robertgasparian.routinehelper.ui.dsm.RoutineReorderDragStartMode
 import com.robertgasparian.routinehelper.ui.dsm.RoutineReorderableLazyColumn
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 import kotlinx.coroutines.launch
@@ -195,6 +197,7 @@ fun CurrentListComponent(
                     bottom = CurrentListBottomSafeSpace,
                 ),
                 itemSpacing = 12.dp,
+                dragStartMode = RoutineReorderDragStartMode.LongPress,
                 onOrderChange = { orderedIds -> onIntent(CurrentListIntent.ReorderItems(orderedIds)) },
                 header = if (uiState.canShowBulkActions) {
                     {
@@ -219,7 +222,7 @@ fun CurrentListComponent(
                 ) {
                     CurrentListItemCard(
                         item = item,
-                        isDragHandleActive = isDragHandleActive,
+                        isDragging = isDragging,
                         onCheckedChange = { isChecked ->
                             onIntent(
                                 CurrentListIntent.CheckedChange(
@@ -228,7 +231,7 @@ fun CurrentListComponent(
                                 ),
                             )
                         },
-                        dragHandleModifier = dragHandleModifier,
+                        modifier = dragHandleModifier,
                     )
                 }
             }
@@ -463,19 +466,34 @@ private const val SwipeDismissThresholdFraction = 0.5f
 @Composable
 private fun CurrentListItemCard(
     item: CurrentListItemUiState,
-    isDragHandleActive: Boolean,
+    isDragging: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    dragHandleModifier: Modifier,
     modifier: Modifier = Modifier,
 ) {
+    val dragActivationProgress by animateFloatAsState(
+        targetValue = if (isDragging) 1f else 0f,
+        animationSpec = MaterialTheme.motionScheme.fastEffectsSpec(),
+        label = "Current list item drag activation",
+    )
+    val containerColor = lerp(
+        start = MaterialTheme.colorScheme.surfaceContainerLow,
+        stop = MaterialTheme.colorScheme.surfaceContainerHigh,
+        fraction = dragActivationProgress,
+    )
+    val borderColor = lerp(
+        start = MaterialTheme.colorScheme.outlineVariant,
+        stop = MaterialTheme.colorScheme.primary,
+        fraction = dragActivationProgress,
+    )
+
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         border = CardDefaults.outlinedCardBorder().copy(
-            brush = SolidColor(MaterialTheme.colorScheme.outlineVariant),
+            brush = SolidColor(borderColor),
         ),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            containerColor = containerColor,
             contentColor = MaterialTheme.colorScheme.onSurface,
         ),
     ) {
@@ -512,29 +530,6 @@ private fun CurrentListItemCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-            }
-            Box(
-                modifier = dragHandleModifier
-                    .size(36.dp)
-                    .background(
-                        color = if (isDragHandleActive) {
-                            MaterialTheme.colorScheme.secondaryContainer
-                        } else {
-                            MaterialTheme.colorScheme.surfaceContainerLow
-                        },
-                        shape = RoundedCornerShape(8.dp),
-                    ),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    imageVector = Icons.Default.DragIndicator,
-                    contentDescription = "Reorder item",
-                    tint = if (isDragHandleActive) {
-                        MaterialTheme.colorScheme.onSecondaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-                )
             }
         }
     }

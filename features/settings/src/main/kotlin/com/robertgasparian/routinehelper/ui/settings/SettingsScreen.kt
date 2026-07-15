@@ -154,9 +154,6 @@ private fun SettingsSwitchRow(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         },
-        headlineContent = {
-            Text(text = title)
-        },
         trailingContent = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -168,7 +165,9 @@ private fun SettingsSwitchRow(
                 )
             }
         },
-    )
+    ) {
+        Text(text = title)
+    }
 }
 
 @Preview(showBackground = true)

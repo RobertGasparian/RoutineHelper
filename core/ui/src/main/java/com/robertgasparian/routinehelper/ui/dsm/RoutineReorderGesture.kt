@@ -64,9 +64,10 @@ internal fun <Item> Modifier.reorderDragContainer(
     reorderState: RoutineReorderState<Item>,
     listState: LazyListState,
     autoScroller: RoutineReorderAutoScroller,
+    layoutCoordinates: RoutineReorderLayoutCoordinates,
     idOf: (Item) -> Long,
 ): Modifier =
-    pointerInput(reorderState, listState, autoScroller) {
+    pointerInput(reorderState, listState, autoScroller, layoutCoordinates) {
         fun applyReorderMove(
             draggedItemId: Long,
             direction: ReorderDirection,
@@ -106,14 +107,15 @@ internal fun <Item> Modifier.reorderDragContainer(
                         if (activeDraggedItemId == null) {
                             val draggedInfo = listState.layoutInfo.visibleItemsInfo
                                 .firstOrNull { itemInfo -> itemInfo.key == draggedItemId }
-                            if (draggedInfo == null) {
+                            val renderedItemBounds = layoutCoordinates.itemBounds(draggedItemId)
+                            if (draggedInfo == null || renderedItemBounds == null) {
                                 reorderState.onDragCancel()
                                 break
                             }
                             activeDraggedItemId = draggedItemId
                             reorderState.onContainerDragStart(
-                                itemTop = draggedInfo.offset.toFloat(),
-                                itemSize = draggedInfo.size,
+                                itemTop = renderedItemBounds.top,
+                                itemSize = renderedItemBounds.size,
                             )
                             autoScroller.start(
                                 draggedItemTop = { reorderState.draggedItemTop },
