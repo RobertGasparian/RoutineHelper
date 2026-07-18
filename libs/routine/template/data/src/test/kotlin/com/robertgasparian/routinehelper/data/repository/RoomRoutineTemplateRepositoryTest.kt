@@ -97,13 +97,28 @@ class RoomRoutineTemplateRepositoryTest {
     }
 
     @Test
-    fun `given new template values when adding item then normalizes and appends within cadence`() = runTest {
+    fun `given existing and pending items when adding template item then normalizes and prepends within cadence`() = runTest {
         storeTemplateItem(
             routineItemId = 10L,
             actionId = 100L,
             title = "Existing",
-            position = 2,
+            position = 0,
             cadence = "DAILY",
+        )
+        storeTemplateItem(
+            routineItemId = 20L,
+            actionId = 200L,
+            title = "Pending",
+            position = 1,
+            cadence = "DAILY",
+            pendingRemovalAtMillis = 100L,
+        )
+        storeTemplateItem(
+            routineItemId = 30L,
+            actionId = 300L,
+            title = "Weekly",
+            position = 0,
+            cadence = "WEEKLY",
         )
 
         val routineItemId = repository.addTemplateItem(
@@ -120,9 +135,12 @@ class RoomRoutineTemplateRepositoryTest {
         assertEquals(3, action.repeatTargetCount)
         assertEquals(timeProvider.currentTimeMillis(), action.createdAtMillis)
         assertEquals(timeProvider.currentTimeMillis(), action.updatedAtMillis)
-        assertEquals(3, routineItem.position)
+        assertEquals(0, routineItem.position)
         assertEquals("DAILY", routineItem.cadence)
         assertEquals(timeProvider.currentTimeMillis(), routineItem.createdAtMillis)
+        assertEquals(1, routineItemDao.items.getValue(10L).position)
+        assertEquals(2, routineItemDao.items.getValue(20L).position)
+        assertEquals(0, routineItemDao.items.getValue(30L).position)
         assertEquals(1, database.transactionBegins)
         assertEquals(1, database.transactionSuccesses)
         assertEquals(1, database.transactionEnds)
@@ -424,12 +442,15 @@ private class FakeRoutineItemDao(
             .filter { item -> item.cadence == cadence }
             .sortedWith(compareBy(RoutineItemEntity::position, RoutineItemEntity::id))
 
-    override fun maxPosition(cadence: String): Flow<Int> =
-        flowOf(
-            items.values
-                .filter { item -> item.cadence == cadence }
-                .maxOfOrNull(RoutineItemEntity::position) ?: -1,
-        )
+    override suspend fun shiftPositionsForPrepend(cadence: String) {
+        items.values
+            .filter { item -> item.cadence == cadence }
+            .map(RoutineItemEntity::id)
+            .forEach { id ->
+                val item = items.getValue(id)
+                items[id] = item.copy(position = item.position + 1)
+            }
+    }
 
     override fun routineItem(id: Long): Flow<RoutineItemEntity?> = flowOf(items[id])
 

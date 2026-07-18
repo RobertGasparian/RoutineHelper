@@ -21,7 +21,7 @@ internal class FakeRoutineItemDao : RoutineItemDao {
 
     override suspend fun allRoutineItemsSnapshot(cadence: String): List<RoutineItemEntity> = emptyList()
 
-    override fun maxPosition(cadence: String): Flow<Int> = flowOf(-1)
+    override suspend fun shiftPositionsForPrepend(cadence: String) = Unit
 
     override fun routineItem(id: Long): Flow<RoutineItemEntity?> = flowOf(null)
 

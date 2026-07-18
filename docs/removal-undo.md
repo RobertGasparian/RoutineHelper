@@ -89,8 +89,10 @@ Without this planner, reordering visible rows to consecutive positions would col
 the hidden row, and undo would restore it into an unexpected location. Keep this rule in pure domain
 planners with tests; do not rebuild it ad hoc in a repository loop or UI state.
 
-`maxPosition` intentionally includes pending rows, so a newly added item still appends after the
-complete durable list.
+Prepending shifts every stored row in that source or cadence, including pending rows, one position
+before inserting the new item at position zero. This keeps the new item first without compacting or
+moving a pending row relative to the items around it; undo restores the hidden item after the new
+item in the expected durable order.
 
 ## Serialization and timer rules
 

@@ -59,26 +59,39 @@ class RoomCurrentListRepositoryTest {
     }
 
     @Test
-    fun `given existing items when adding item then appends normalized unchecked item`() = runTest {
-        currentListItemDao.items += currentListItemEntity(id = 10L, position = 2)
+    fun `given existing and pending items when adding item then prepends normalized unchecked item`() = runTest {
+        currentListItemDao.items += currentListItemEntity(id = 10L, position = 0)
+        currentListItemDao.items += currentListItemEntity(
+            id = 11L,
+            position = 1,
+            pendingRemovalAtMillis = 100L,
+        )
 
         val itemId = repository.addItem(
             title = "  Order filters  ",
             description = "  HVAC  ",
         )
 
-        assertEquals(11L, itemId)
+        assertEquals(12L, itemId)
         assertEquals(
             currentListItemEntity(
-                id = 11L,
+                id = 12L,
                 title = "Order filters",
                 description = "HVAC",
-                position = 3,
+                position = 0,
                 isChecked = false,
                 createdAtMillis = timeProvider.currentTimeMillis(),
                 updatedAtMillis = timeProvider.currentTimeMillis(),
             ),
             currentListItemDao.items.last(),
+        )
+        assertEquals(
+            mapOf(
+                10L to 1,
+                11L to 2,
+                12L to 0,
+            ),
+            currentListItemDao.items.associate { item -> item.id to item.position },
         )
         assertEquals(1, database.transactionSuccesses)
     }
@@ -283,7 +296,14 @@ private class FakeCurrentListItemDao : CurrentListItemDao {
     override suspend fun allCurrentListItemsSnapshot(): List<CurrentListItemEntity> =
         items.sortedWith(compareBy(CurrentListItemEntity::position, CurrentListItemEntity::id))
 
-    override suspend fun maxPosition(): Int = items.maxOfOrNull(CurrentListItemEntity::position) ?: -1
+    override suspend fun shiftPositionsForPrepend(updatedAtMillis: Long) {
+        items.indices.forEach { index ->
+            items[index] = items[index].copy(
+                position = items[index].position + 1,
+                updatedAtMillis = updatedAtMillis,
+            )
+        }
+    }
 
     override suspend fun insert(item: CurrentListItemEntity): Long {
         val nextId = items.maxOfOrNull(CurrentListItemEntity::id)?.plus(1L) ?: 1L

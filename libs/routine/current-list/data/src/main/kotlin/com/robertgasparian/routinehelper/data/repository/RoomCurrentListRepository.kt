@@ -29,11 +29,12 @@ class RoomCurrentListRepository @Inject constructor(
         description: String?,
     ): Long = database.withTransaction {
         val now = timeProvider.currentTimeMillis()
+        currentListItemDao.shiftPositionsForPrepend(updatedAtMillis = now)
         currentListItemDao.insert(
             CurrentListItemEntity(
                 title = title.trim(),
                 description = description?.trim()?.takeIf(String::isNotEmpty),
-                position = currentListItemDao.maxPosition() + 1,
+                position = 0,
                 isChecked = false,
                 createdAtMillis = now,
                 updatedAtMillis = now,

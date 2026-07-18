@@ -46,6 +46,7 @@ class RoomRoutineTemplateRepository @Inject constructor(
         cadence: RoutineCadence,
     ): Long = database.withTransaction {
         val now = timeProvider.currentTimeMillis()
+        val storageCadence = cadence.toStorageValue()
         val actionId = actionDao.insert(
             ActionEntity(
                 title = title.trim(),
@@ -55,11 +56,12 @@ class RoomRoutineTemplateRepository @Inject constructor(
                 updatedAtMillis = now,
             ),
         )
+        routineItemDao.shiftPositionsForPrepend(cadence = storageCadence)
         routineItemDao.insert(
             RoutineItemEntity(
                 actionId = actionId,
-                position = routineItemDao.maxPosition(cadence.toStorageValue()).first() + 1,
-                cadence = cadence.toStorageValue(),
+                position = 0,
+                cadence = storageCadence,
                 createdAtMillis = now,
             ),
         )

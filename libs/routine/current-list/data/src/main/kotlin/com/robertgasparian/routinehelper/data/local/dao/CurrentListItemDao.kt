@@ -14,8 +14,8 @@ interface CurrentListItemDao {
     @Query("SELECT * FROM current_list_items ORDER BY position, id")
     suspend fun allCurrentListItemsSnapshot(): List<CurrentListItemEntity>
 
-    @Query("SELECT COALESCE(MAX(position), -1) FROM current_list_items")
-    suspend fun maxPosition(): Int
+    @Query("UPDATE current_list_items SET position = position + 1, updatedAtMillis = :updatedAtMillis")
+    suspend fun shiftPositionsForPrepend(updatedAtMillis: Long)
 
     @Insert
     suspend fun insert(item: CurrentListItemEntity): Long

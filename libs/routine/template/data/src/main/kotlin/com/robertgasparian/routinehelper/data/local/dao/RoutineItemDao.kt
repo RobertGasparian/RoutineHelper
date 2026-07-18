@@ -22,8 +22,8 @@ interface RoutineItemDao {
     @Query("SELECT * FROM routine_items WHERE cadence = :cadence ORDER BY position, id")
     suspend fun allRoutineItemsSnapshot(cadence: String): List<RoutineItemEntity>
 
-    @Query("SELECT COALESCE(MAX(position), -1) FROM routine_items WHERE cadence = :cadence")
-    fun maxPosition(cadence: String): Flow<Int>
+    @Query("UPDATE routine_items SET position = position + 1 WHERE cadence = :cadence")
+    suspend fun shiftPositionsForPrepend(cadence: String)
 
     @Query("SELECT * FROM routine_items WHERE id = :id")
     fun routineItem(id: Long): Flow<RoutineItemEntity?>
