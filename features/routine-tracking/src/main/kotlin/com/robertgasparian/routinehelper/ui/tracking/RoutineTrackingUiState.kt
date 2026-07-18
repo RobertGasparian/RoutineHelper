@@ -5,6 +5,7 @@ data class RoutineTrackingUiState(
     val summaryNote: String = "",
     val items: List<RoutineTrackingItemUiState> = emptyList(),
     val noteEditor: NoteEditorUiState? = null,
+    val canRemoveItems: Boolean = true,
 ) {
     companion object {
         fun preview(): RoutineTrackingUiState =

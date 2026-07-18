@@ -18,26 +18,26 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.robertgasparian.routinehelper.ui.currentlist.undo.CurrentListUndoIntent
-import com.robertgasparian.routinehelper.ui.currentlist.undo.CurrentListUndoSnackbarHost
-import com.robertgasparian.routinehelper.ui.currentlist.undo.CurrentListUndoUiState
-import com.robertgasparian.routinehelper.ui.currentlist.undo.CurrentListUndoViewModel
+import com.robertgasparian.routinehelper.ui.removalundo.RoutineRemovalUndoIntent
+import com.robertgasparian.routinehelper.ui.removalundo.RoutineRemovalUndoSnackbarHost
+import com.robertgasparian.routinehelper.ui.removalundo.RoutineRemovalUndoUiState
+import com.robertgasparian.routinehelper.ui.removalundo.RoutineRemovalUndoViewModel
 import com.robertgasparian.routinehelper.ui.share.shareText
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 
 @Composable
 fun RoutineHelperScreen(
-    currentListUndoViewModel: CurrentListUndoViewModel = hiltViewModel<CurrentListUndoViewModel>(),
+    routineRemovalUndoViewModel: RoutineRemovalUndoViewModel = hiltViewModel<RoutineRemovalUndoViewModel>(),
 ) {
     val topLevelBackStack = rememberSaveable(saver = RoutineDestinationBackStackSaver) {
         TopLevelBackStack<RoutineDestination>(DailyDestination)
     }
-    val currentListUndoUiState by currentListUndoViewModel.uiState.collectAsStateWithLifecycle()
+    val routineRemovalUndoUiState by routineRemovalUndoViewModel.uiState.collectAsStateWithLifecycle()
 
     RoutineHelperComponent(
         topLevelBackStack = topLevelBackStack,
-        currentListUndoUiState = currentListUndoUiState,
-        onCurrentListUndoIntent = currentListUndoViewModel::onIntent,
+        routineRemovalUndoUiState = routineRemovalUndoUiState,
+        onRoutineRemovalUndoIntent = routineRemovalUndoViewModel::onIntent,
     )
 }
 
@@ -46,8 +46,8 @@ fun RoutineHelperScreen(
 fun RoutineHelperComponent(
     topLevelBackStack: TopLevelBackStack<RoutineDestination>,
     modifier: Modifier = Modifier,
-    currentListUndoUiState: CurrentListUndoUiState = CurrentListUndoUiState(),
-    onCurrentListUndoIntent: (CurrentListUndoIntent) -> Unit = {},
+    routineRemovalUndoUiState: RoutineRemovalUndoUiState = RoutineRemovalUndoUiState(),
+    onRoutineRemovalUndoIntent: (RoutineRemovalUndoIntent) -> Unit = {},
 ) {
     val currentDestination = topLevelBackStack.backStack.lastOrNull()
     val context = LocalContext.current
@@ -80,9 +80,9 @@ fun RoutineHelperComponent(
     Scaffold(
         modifier = modifier,
         snackbarHost = {
-            CurrentListUndoSnackbarHost(
-                uiState = currentListUndoUiState,
-                onIntent = onCurrentListUndoIntent,
+            RoutineRemovalUndoSnackbarHost(
+                uiState = routineRemovalUndoUiState,
+                onIntent = onRoutineRemovalUndoIntent,
             )
         },
         bottomBar = {

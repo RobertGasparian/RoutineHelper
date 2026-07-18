@@ -11,6 +11,12 @@ interface CurrentListRepository {
         description: String?,
     ): Long
 
+    suspend fun updateItem(
+        itemId: Long,
+        title: String,
+        description: String?,
+    )
+
     suspend fun setChecked(
         itemId: Long,
         isChecked: Boolean,

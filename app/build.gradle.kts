@@ -44,11 +44,13 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":features:routine-tracking"))
     implementation(project(":features:current-list"))
+    implementation(project(":features:removal-undo"))
     implementation(project(":features:action-editor"))
     implementation(project(":features:history"))
     implementation(project(":features:settings"))
     implementation(project(":libs:background:work"))
     implementation(project(":libs:routine:template:domain"))
+    implementation(project(":libs:routine:removal:domain"))
     implementation(project(":libs:routine:database"))
 
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)

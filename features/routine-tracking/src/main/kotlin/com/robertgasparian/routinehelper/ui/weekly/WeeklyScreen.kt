@@ -31,5 +31,6 @@ fun WeeklyScreen(
         emptyTitle = "No weekly items yet",
         emptyDescription = "Add your first weekly action to start tracking this week.",
         showSnapshotAction = BuildConfig.DEBUG,
+        showAddTestItems = BuildConfig.DEBUG,
     )
 }

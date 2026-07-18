@@ -3,6 +3,7 @@ package com.robertgasparian.routinehelper.ui.currentlist
 data class CurrentListUiState(
     val items: List<CurrentListItemUiState> = emptyList(),
     val shareText: String = "",
+    val canRemoveItems: Boolean = true,
 ) {
     val hasItems: Boolean = items.isNotEmpty()
     val canShare: Boolean = shareText.isNotBlank() && hasItems

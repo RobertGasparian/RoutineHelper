@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class FakeCurrentListRepository : CurrentListRepository {
     private val items = MutableStateFlow<List<CurrentListItem>>(emptyList())
     val addedItems = mutableListOf<AddedCurrentListItem>()
+    val updatedItems = mutableListOf<UpdatedCurrentListItem>()
     val checkedChanges = mutableListOf<CurrentListCheckedChange>()
     val allCheckedChanges = mutableListOf<Boolean>()
     val pendingRemovalItemIds = mutableListOf<Long>()
@@ -32,6 +33,18 @@ class FakeCurrentListRepository : CurrentListRepository {
             description = description,
         )
         return addedItems.size.toLong()
+    }
+
+    override suspend fun updateItem(
+        itemId: Long,
+        title: String,
+        description: String?,
+    ) {
+        updatedItems += UpdatedCurrentListItem(
+            itemId = itemId,
+            title = title,
+            description = description,
+        )
     }
 
     override suspend fun setChecked(
@@ -78,6 +91,12 @@ class FakeCurrentListRepository : CurrentListRepository {
 }
 
 data class AddedCurrentListItem(
+    val title: String,
+    val description: String?,
+)
+
+data class UpdatedCurrentListItem(
+    val itemId: Long,
     val title: String,
     val description: String?,
 )

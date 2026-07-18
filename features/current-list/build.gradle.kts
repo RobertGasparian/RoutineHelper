@@ -31,6 +31,7 @@ dependencies {
     api(project(":core:presentation"))
     implementation(project(":core:ui"))
     implementation(project(":libs:routine:current-list:domain"))
+    implementation(project(":libs:routine:removal:domain"))
 
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
@@ -54,4 +55,5 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(project(":core:testing"))
     testImplementation(testFixtures(project(":libs:routine:current-list:domain")))
+    testImplementation(testFixtures(project(":libs:routine:removal:domain")))
 }

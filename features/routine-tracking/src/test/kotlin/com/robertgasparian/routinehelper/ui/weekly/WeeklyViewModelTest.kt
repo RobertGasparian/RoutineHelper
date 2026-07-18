@@ -1,6 +1,13 @@
 package com.robertgasparian.routinehelper.ui.weekly
 
+import com.robertgasparian.routinehelper.core.testing.FixedTimeProvider
+import com.robertgasparian.routinehelper.core.testing.MainDispatcherRule
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.WeeklyRoutineItem
+import com.robertgasparian.routinehelper.domain.removal.FakeRoutineRemovalUndoCoordinator
+import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalRequest
+import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalSource
+import com.robertgasparian.routinehelper.domain.repository.AddedTemplateItem
 import com.robertgasparian.routinehelper.domain.repository.FakeRoutineHistoryRepository
 import com.robertgasparian.routinehelper.domain.repository.FakeRoutineTemplateRepository
 import com.robertgasparian.routinehelper.domain.repository.FakeWeeklyRoutineRepository
@@ -8,6 +15,7 @@ import com.robertgasparian.routinehelper.domain.repository.WeeklyCheckedChange
 import com.robertgasparian.routinehelper.domain.repository.WeeklyCountChange
 import com.robertgasparian.routinehelper.domain.repository.WeeklyHiddenChange
 import com.robertgasparian.routinehelper.domain.repository.WeeklyNoteChange
+import com.robertgasparian.routinehelper.domain.usecase.AddTemplateItemUseCase
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeWeeklyUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ReorderWeeklyRoutineItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetWeeklyItemCheckedUseCase
@@ -18,11 +26,11 @@ import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklySummaryNoteU
 import com.robertgasparian.routinehelper.domain.usecase.WeeklyItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.WeeklySummaryNoteUseCase
 import com.robertgasparian.routinehelper.test.FakeNoteDateTimeTextProvider
-import com.robertgasparian.routinehelper.core.testing.FixedTimeProvider
-import com.robertgasparian.routinehelper.core.testing.MainDispatcherRule
+import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingDebugItemsPopulator
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingIntent
 import java.time.Instant
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -39,6 +47,7 @@ class WeeklyViewModelTest {
     private val historyRepository = FakeRoutineHistoryRepository()
     private val noteDateTimeTextProvider = FakeNoteDateTimeTextProvider()
     private val timeProvider = FixedTimeProvider()
+    private val removalUndoCoordinator = FakeRoutineRemovalUndoCoordinator()
 
     @Test
     fun `when item events are received then forwards them to weekly use cases`() = runTest {
@@ -47,6 +56,7 @@ class WeeklyViewModelTest {
         viewModel.onIntent(RoutineTrackingIntent.CheckedChange(routineItemId = 10L, isChecked = true))
         viewModel.onIntent(RoutineTrackingIntent.CompletedCountChange(routineItemId = 10L, completedCount = 3))
         viewModel.onIntent(RoutineTrackingIntent.HiddenChange(routineItemId = 10L, isHidden = true))
+        viewModel.onIntent(RoutineTrackingIntent.RemoveItem(routineItemId = 10L))
         viewModel.onIntent(RoutineTrackingIntent.ReorderItems(listOf(10L, 11L)))
         advanceUntilIdle()
 
@@ -79,6 +89,10 @@ class WeeklyViewModelTest {
                 ),
             ),
             weeklyRepository.hiddenChanges,
+        )
+        assertEquals(
+            listOf(RoutineRemovalRequest(RoutineRemovalSource.Weekly, itemId = 10L)),
+            removalUndoCoordinator.removalRequests,
         )
         assertEquals(listOf(listOf(10L, 11L)), templateRepository.reorderedTemplateItemIds)
     }
@@ -121,6 +135,48 @@ class WeeklyViewModelTest {
     }
 
     @Test
+    fun `given weekly list has an item when test items are added then appends twenty weekly actions`() = runTest {
+        weeklyRepository.setItems(
+            weekStartDate = WeekStartDate,
+            items = listOf(
+                WeeklyRoutineItem(
+                    routineItemId = 1L,
+                    actionId = 1L,
+                    title = "Existing weekly action",
+                    description = null,
+                    position = 0,
+                    weekStartDate = WeekStartDate,
+                    isChecked = false,
+                    note = null,
+                ),
+            ),
+        )
+        val viewModel = createViewModel()
+        viewModel.uiState.first { state -> state.items.size == 1 }
+
+        viewModel.onIntent(RoutineTrackingIntent.AddTestItemsClick)
+        advanceUntilIdle()
+
+        assertEquals(20, templateRepository.addedItems.size)
+        assertEquals(
+            AddedTemplateItem(
+                title = "weekly action 2",
+                description = "description for weekly action 2",
+                cadence = RoutineCadence.Weekly,
+            ),
+            templateRepository.addedItems.first(),
+        )
+        assertEquals(
+            AddedTemplateItem(
+                title = "weekly action 21",
+                description = null,
+                cadence = RoutineCadence.Weekly,
+            ),
+            templateRepository.addedItems.last(),
+        )
+    }
+
+    @Test
     fun `given current week has items when snapshot week is selected then finalizes current week under selected week`() = runTest {
         weeklyRepository.setItems(
             weekStartDate = WeekStartDate,
@@ -153,10 +209,14 @@ class WeeklyViewModelTest {
         WeeklyViewModel(
             weeklyItemsUseCase = WeeklyItemsUseCase(weeklyRepository),
             weeklySummaryNoteUseCase = WeeklySummaryNoteUseCase(weeklyRepository),
+            debugItemsPopulator = RoutineTrackingDebugItemsPopulator(
+                addTemplateItemUseCase = AddTemplateItemUseCase(templateRepository),
+            ),
             finalizeWeeklyUseCase = FinalizeWeeklyUseCase(
                 weeklyRoutineRepository = weeklyRepository,
                 routineHistoryRepository = historyRepository,
             ),
+            routineRemovalUndoCoordinator = removalUndoCoordinator,
             reorderWeeklyRoutineItemsUseCase = ReorderWeeklyRoutineItemsUseCase(templateRepository),
             setWeeklyItemCheckedUseCase = SetWeeklyItemCheckedUseCase(weeklyRepository),
             setWeeklyItemHiddenUseCase = SetWeeklyItemHiddenUseCase(weeklyRepository),

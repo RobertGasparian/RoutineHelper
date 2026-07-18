@@ -3,11 +3,13 @@ package com.robertgasparian.routinehelper.ui.daily
 import com.robertgasparian.routinehelper.core.presentation.BaseViewModel
 import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalSource
+import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalUndoCoordinator
 import com.robertgasparian.routinehelper.domain.time.SnapshotDates
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ReorderDailyRoutineItemsUseCase
-import com.robertgasparian.routinehelper.domain.usecase.SetTodayItemHiddenUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetTodayItemCheckedUseCase
+import com.robertgasparian.routinehelper.domain.usecase.SetTodayItemHiddenUseCase
 import com.robertgasparian.routinehelper.domain.usecase.TodayItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.TodaySummaryNoteUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayItemCompletedCountUseCase
@@ -17,6 +19,7 @@ import com.robertgasparian.routinehelper.ui.tracking.NoteDateTimeTextProvider
 import com.robertgasparian.routinehelper.ui.tracking.NoteDraftUiState
 import com.robertgasparian.routinehelper.ui.tracking.NoteEditorTarget
 import com.robertgasparian.routinehelper.ui.tracking.NoteEditorUiState
+import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingDebugItemsPopulator
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingIntent
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingUiState
 import com.robertgasparian.routinehelper.ui.tracking.insertAtCursor
@@ -30,7 +33,9 @@ import kotlinx.coroutines.flow.combine
 class DailyViewModel @Inject constructor(
     todayItemsUseCase: TodayItemsUseCase,
     todaySummaryNoteUseCase: TodaySummaryNoteUseCase,
+    private val debugItemsPopulator: RoutineTrackingDebugItemsPopulator,
     private val finalizeTodayUseCase: FinalizeTodayUseCase,
+    private val routineRemovalUndoCoordinator: RoutineRemovalUndoCoordinator,
     private val reorderDailyRoutineItemsUseCase: ReorderDailyRoutineItemsUseCase,
     private val setTodayItemCheckedUseCase: SetTodayItemCheckedUseCase,
     private val setTodayItemHiddenUseCase: SetTodayItemHiddenUseCase,
@@ -48,12 +53,14 @@ class DailyViewModel @Inject constructor(
             todayItemsUseCase(todayDate),
             todaySummaryNoteUseCase(todayDate),
             noteEditor,
-        ) { items, summaryNote, noteEditor ->
+            routineRemovalUndoCoordinator.state,
+        ) { items, summaryNote, noteEditor, removalState ->
             RoutineTrackingUiState(
                 date = todayDate,
                 summaryNote = summaryNote.orEmpty(),
                 items = items.map { item -> item.toRoutineTrackingItemUiState() },
                 noteEditor = noteEditor,
+                canRemoveItems = removalState.allowsRemovalFrom(RoutineRemovalSource.Daily),
             )
         }
             .stateInViewModel(initialValue = RoutineTrackingUiState(date = todayDate))
@@ -63,6 +70,7 @@ class DailyViewModel @Inject constructor(
             RoutineTrackingIntent.CreateActionClick,
             RoutineTrackingIntent.SettingsClick,
             is RoutineTrackingIntent.EditActionClick -> Unit
+            RoutineTrackingIntent.AddTestItemsClick -> addTestItems()
             is RoutineTrackingIntent.CheckedChange -> setChecked(
                 routineItemId = intent.routineItemId,
                 isChecked = intent.isChecked,
@@ -75,6 +83,7 @@ class DailyViewModel @Inject constructor(
                 routineItemId = intent.routineItemId,
                 isHidden = intent.isHidden,
             )
+            is RoutineTrackingIntent.RemoveItem -> removeItem(intent.routineItemId)
             is RoutineTrackingIntent.ReorderItems -> reorderItems(intent.routineItemIdsInOrder)
             RoutineTrackingIntent.SnapshotClick -> snapshotDaily()
             is RoutineTrackingIntent.SnapshotDateSelected -> snapshotDaily(snapshotDate = intent.date)
@@ -123,6 +132,25 @@ class DailyViewModel @Inject constructor(
     private fun reorderItems(routineItemIdsInOrder: List<Long>) {
         launch {
             reorderDailyRoutineItemsUseCase(routineItemIdsInOrder)
+        }
+    }
+
+    private fun addTestItems() {
+        val existingItemCount = uiState.value.items.size
+        launch {
+            debugItemsPopulator(
+                cadence = RoutineCadence.Daily,
+                existingItemCount = existingItemCount,
+            )
+        }
+    }
+
+    private fun removeItem(routineItemId: Long) {
+        launch {
+            routineRemovalUndoCoordinator.requestRemoval(
+                source = RoutineRemovalSource.Daily,
+                itemId = routineItemId,
+            )
         }
     }
 

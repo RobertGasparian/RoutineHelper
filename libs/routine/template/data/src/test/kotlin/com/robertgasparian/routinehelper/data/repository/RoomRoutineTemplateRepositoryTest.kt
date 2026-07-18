@@ -9,6 +9,7 @@ import com.robertgasparian.routinehelper.data.local.entity.RoutineItemEntity
 import com.robertgasparian.routinehelper.data.local.model.RoutineItemWithAction
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.RoutineTemplateItem
+import com.robertgasparian.routinehelper.domain.order.RoutineTemplateOrderPlanner
 import com.robertgasparian.routinehelper.core.testing.FixedTimeProvider
 import java.util.concurrent.Executor
 import kotlinx.coroutines.flow.Flow
@@ -27,6 +28,7 @@ class RoomRoutineTemplateRepositoryTest {
         database = database,
         actionDao = actionDao,
         routineItemDao = routineItemDao,
+        routineTemplateOrderPlanner = RoutineTemplateOrderPlanner(),
         timeProvider = timeProvider,
     )
 
@@ -175,6 +177,102 @@ class RoomRoutineTemplateRepositoryTest {
     }
 
     @Test
+    fun `given daily item when marked pending then hides it without deleting action`() = runTest {
+        storeTemplateItem(
+            routineItemId = 10L,
+            actionId = 100L,
+            title = "Drink water",
+            position = 0,
+            cadence = RoutineItemEntity.DAILY_CADENCE_STORAGE_VALUE,
+        )
+
+        repository.markPendingRemoval(
+            cadence = RoutineCadence.Daily,
+            routineItemId = 10L,
+        )
+
+        assertEquals(timeProvider.currentTimeMillis(), routineItemDao.items.getValue(10L).pendingRemovalAtMillis)
+        assertEquals(emptyList<RoutineTemplateItem>(), repository.templateItems(RoutineCadence.Daily).first())
+        assertEquals("Drink water", actionDao.items.getValue(100L).title)
+    }
+
+    @Test
+    fun `given pending daily item when restored then makes original item visible again`() = runTest {
+        storeTemplateItem(
+            routineItemId = 10L,
+            actionId = 100L,
+            title = "Drink water",
+            position = 0,
+            cadence = RoutineItemEntity.DAILY_CADENCE_STORAGE_VALUE,
+            pendingRemovalAtMillis = 100L,
+        )
+
+        repository.restorePendingRemoval(
+            cadence = RoutineCadence.Daily,
+            routineItemId = 10L,
+        )
+
+        assertEquals(null, routineItemDao.items.getValue(10L).pendingRemovalAtMillis)
+        assertEquals(listOf(10L), repository.templateItems(RoutineCadence.Daily).first().map { it.routineItemId })
+    }
+
+    @Test
+    fun `given pending weekly item when timeout deletion runs then deletes item and its action`() = runTest {
+        storeTemplateItem(
+            routineItemId = 20L,
+            actionId = 200L,
+            title = "Plan meals",
+            position = 0,
+            cadence = RoutineItemEntity.WEEKLY_CADENCE_STORAGE_VALUE,
+            pendingRemovalAtMillis = 100L,
+        )
+
+        repository.deletePendingRemovals(
+            cadence = RoutineCadence.Weekly,
+            routineItemIds = listOf(20L),
+        )
+
+        assertEquals(emptyMap<Long, RoutineItemEntity>(), routineItemDao.items)
+        assertEquals(emptyMap<Long, ActionEntity>(), actionDao.items)
+        assertEquals(1, database.transactionSuccesses)
+    }
+
+    @Test
+    fun `given pending item when reordering visible items then preserves its hidden position`() = runTest {
+        storeTemplateItem(
+            routineItemId = 10L,
+            actionId = 100L,
+            title = "First",
+            position = 0,
+            cadence = RoutineItemEntity.DAILY_CADENCE_STORAGE_VALUE,
+        )
+        storeTemplateItem(
+            routineItemId = 20L,
+            actionId = 200L,
+            title = "Pending",
+            position = 1,
+            cadence = RoutineItemEntity.DAILY_CADENCE_STORAGE_VALUE,
+            pendingRemovalAtMillis = 100L,
+        )
+        storeTemplateItem(
+            routineItemId = 30L,
+            actionId = 300L,
+            title = "Third",
+            position = 2,
+            cadence = RoutineItemEntity.DAILY_CADENCE_STORAGE_VALUE,
+        )
+
+        repository.reorderTemplateItems(
+            cadence = RoutineCadence.Daily,
+            routineItemIdsInOrder = listOf(30L, 10L),
+        )
+
+        assertEquals(0, routineItemDao.items.getValue(30L).position)
+        assertEquals(1, routineItemDao.items.getValue(20L).position)
+        assertEquals(2, routineItemDao.items.getValue(10L).position)
+    }
+
+    @Test
     fun `given template order when reordering then updates positions and ignores unknown ids`() = runTest {
         storeTemplateItem(
             routineItemId = 10L,
@@ -254,6 +352,7 @@ class RoomRoutineTemplateRepositoryTest {
         cadence: String,
         description: String? = null,
         repeatTargetCount: Int? = null,
+        pendingRemovalAtMillis: Long? = null,
     ) {
         actionDao.items[actionId] = ActionEntity(
             id = actionId,
@@ -269,6 +368,7 @@ class RoomRoutineTemplateRepositoryTest {
             position = position,
             cadence = cadence,
             createdAtMillis = 1L,
+            pendingRemovalAtMillis = pendingRemovalAtMillis,
         )
     }
 }
@@ -308,7 +408,7 @@ private class FakeRoutineItemDao(
         requestedCadences += cadence
         return flowOf(
             items.values
-                .filter { item -> item.cadence == cadence }
+                .filter { item -> item.cadence == cadence && item.pendingRemovalAtMillis == null }
                 .sortedBy(RoutineItemEntity::position)
                 .map { item ->
                     RoutineItemWithAction(
@@ -318,6 +418,11 @@ private class FakeRoutineItemDao(
                 },
         )
     }
+
+    override suspend fun allRoutineItemsSnapshot(cadence: String): List<RoutineItemEntity> =
+        items.values
+            .filter { item -> item.cadence == cadence }
+            .sortedWith(compareBy(RoutineItemEntity::position, RoutineItemEntity::id))
 
     override fun maxPosition(cadence: String): Flow<Int> =
         flowOf(
@@ -337,6 +442,72 @@ private class FakeRoutineItemDao(
     override suspend fun update(routineItem: RoutineItemEntity) {
         items[routineItem.id] = routineItem
         updatedIds += routineItem.id
+    }
+
+    override suspend fun markPendingRemoval(
+        cadence: String,
+        routineItemId: Long,
+        pendingRemovalAtMillis: Long,
+    ) {
+        val item = items[routineItemId] ?: return
+        if (item.cadence == cadence) {
+            items[routineItemId] = item.copy(pendingRemovalAtMillis = pendingRemovalAtMillis)
+        }
+    }
+
+    override suspend fun restorePendingRemoval(
+        cadence: String,
+        routineItemId: Long,
+    ) {
+        val item = items[routineItemId] ?: return
+        if (item.cadence == cadence) {
+            items[routineItemId] = item.copy(pendingRemovalAtMillis = null)
+        }
+    }
+
+    override suspend fun restorePendingRemovals(
+        cadence: String,
+        routineItemIds: List<Long>,
+    ) {
+        routineItemIds.forEach { routineItemId ->
+            restorePendingRemoval(cadence, routineItemId)
+        }
+    }
+
+    override suspend fun pendingRemovalsSnapshot(
+        cadence: String,
+        routineItemIds: List<Long>,
+    ): List<RoutineItemEntity> =
+        routineItemIds.mapNotNull(items::get).filter { item ->
+            item.cadence == cadence && item.pendingRemovalAtMillis != null
+        }
+
+    override suspend fun allPendingRemovalsSnapshot(): List<RoutineItemEntity> =
+        items.values.filter { item -> item.pendingRemovalAtMillis != null }
+
+    override suspend fun deletePendingRemovals(
+        cadence: String,
+        routineItemIds: List<Long>,
+    ) {
+        pendingRemovalsSnapshot(cadence, routineItemIds).forEach { item ->
+            items.remove(item.id)
+        }
+    }
+
+    override suspend fun deleteAllPendingRemovals() {
+        allPendingRemovalsSnapshot().forEach { item -> items.remove(item.id) }
+    }
+
+    override suspend fun updatePosition(
+        cadence: String,
+        routineItemId: Long,
+        position: Int,
+    ) {
+        val item = items[routineItemId] ?: return
+        if (item.cadence == cadence) {
+            items[routineItemId] = item.copy(position = position)
+            updatedIds += routineItemId
+        }
     }
 
     override suspend fun deleteById(id: Long) {

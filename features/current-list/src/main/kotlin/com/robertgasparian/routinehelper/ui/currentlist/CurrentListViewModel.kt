@@ -3,35 +3,41 @@ package com.robertgasparian.routinehelper.ui.currentlist
 import com.robertgasparian.routinehelper.core.presentation.BaseViewModel
 import com.robertgasparian.routinehelper.domain.formatter.CurrentListShareTextFormatter
 import com.robertgasparian.routinehelper.domain.model.CurrentListItem
+import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalSource
+import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalUndoCoordinator
 import com.robertgasparian.routinehelper.domain.usecase.AddCurrentListItemUseCase
 import com.robertgasparian.routinehelper.domain.usecase.CurrentListItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ReorderCurrentListItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetAllCurrentListItemsCheckedUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetCurrentListItemCheckedUseCase
-import com.robertgasparian.routinehelper.ui.currentlist.undo.CurrentListUndoCoordinator
+import com.robertgasparian.routinehelper.domain.usecase.UpdateCurrentListItemUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 
 @HiltViewModel
 class CurrentListViewModel @Inject constructor(
     currentListItemsUseCase: CurrentListItemsUseCase,
     private val addCurrentListItemUseCase: AddCurrentListItemUseCase,
+    private val updateCurrentListItemUseCase: UpdateCurrentListItemUseCase,
     private val reorderCurrentListItemsUseCase: ReorderCurrentListItemsUseCase,
     private val setAllCurrentListItemsCheckedUseCase: SetAllCurrentListItemsCheckedUseCase,
     private val setCurrentListItemCheckedUseCase: SetCurrentListItemCheckedUseCase,
     private val currentListShareTextFormatter: CurrentListShareTextFormatter,
-    private val currentListUndoCoordinator: CurrentListUndoCoordinator,
+    private val routineRemovalUndoCoordinator: RoutineRemovalUndoCoordinator,
 ) : BaseViewModel<CurrentListUiState, CurrentListIntent, Nothing>() {
     override val uiState: StateFlow<CurrentListUiState> =
-        currentListItemsUseCase()
-            .map { items ->
-                CurrentListUiState(
-                    items = items.map(CurrentListItem::toUiState),
-                    shareText = currentListShareTextFormatter(items),
-                )
-            }
+        combine(
+            currentListItemsUseCase(),
+            routineRemovalUndoCoordinator.state,
+        ) { items, removalState ->
+            CurrentListUiState(
+                items = items.map(CurrentListItem::toUiState),
+                shareText = currentListShareTextFormatter(items),
+                canRemoveItems = removalState.allowsRemovalFrom(RoutineRemovalSource.CurrentList),
+            )
+        }
             .stateInViewModel(initialValue = CurrentListUiState())
 
     override fun handleIntent(intent: CurrentListIntent) {
@@ -39,6 +45,11 @@ class CurrentListViewModel @Inject constructor(
             CurrentListIntent.SettingsClick,
             CurrentListIntent.ShareClick -> Unit
             is CurrentListIntent.AddItem -> addItem(
+                title = intent.title,
+                description = intent.description,
+            )
+            is CurrentListIntent.UpdateItem -> updateItem(
+                itemId = intent.itemId,
                 title = intent.title,
                 description = intent.description,
             )
@@ -55,14 +66,14 @@ class CurrentListViewModel @Inject constructor(
     }
 
     private fun addTestItems() {
-        if (uiState.value.items.isNotEmpty()) return
+        val firstItemNumber = uiState.value.items.size + 1
         launch {
-            repeat(TestItemCount) { index ->
-                val displayIndex = index + 1
+            repeat(DebugItemBatchSize) { offset ->
+                val itemNumber = firstItemNumber + offset
                 addCurrentListItemUseCase(
-                    title = "list item $displayIndex",
-                    description = if (displayIndex % 2 == 0) {
-                        "description for list item $displayIndex"
+                    title = "list item $itemNumber",
+                    description = if (itemNumber % 2 == 0) {
+                        "description for list item $itemNumber"
                     } else {
                         null
                     },
@@ -95,6 +106,20 @@ class CurrentListViewModel @Inject constructor(
         }
     }
 
+    private fun updateItem(
+        itemId: Long,
+        title: String,
+        description: String?,
+    ) {
+        launch {
+            updateCurrentListItemUseCase(
+                itemId = itemId,
+                title = title,
+                description = description,
+            )
+        }
+    }
+
     private fun setAllChecked(isChecked: Boolean) {
         launch {
             setAllCurrentListItemsCheckedUseCase(isChecked)
@@ -103,7 +128,10 @@ class CurrentListViewModel @Inject constructor(
 
     private fun removeItem(itemId: Long) {
         launch {
-            currentListUndoCoordinator.requestRemoval(itemId)
+            routineRemovalUndoCoordinator.requestRemoval(
+                source = RoutineRemovalSource.CurrentList,
+                itemId = itemId,
+            )
         }
     }
 
@@ -115,7 +143,7 @@ class CurrentListViewModel @Inject constructor(
 
     private fun clearList() {
         launch {
-            currentListUndoCoordinator.clearList()
+            routineRemovalUndoCoordinator.clearCurrentList()
         }
     }
 }
@@ -128,4 +156,4 @@ private fun CurrentListItem.toUiState(): CurrentListItemUiState =
         isChecked = isChecked,
     )
 
-private const val TestItemCount = 20
+private const val DebugItemBatchSize = 20

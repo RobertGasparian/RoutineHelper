@@ -8,9 +8,10 @@ The component lives in `:core:ui` because it is shared UI infrastructure with no
 Daily, or Weekly business knowledge. Its current consumers are:
 
 - [Current List](../features/current-list/src/main/kotlin/com/robertgasparian/routinehelper/ui/currentlist/CurrentListScreen.kt),
-  using whole-card long-press recognition and a sticky bulk-actions header.
+  using whole-card long-press recognition, a trailing item overflow action, and a sticky bulk-actions
+  header.
 - [Daily and Weekly tracking](../features/routine-tracking/src/main/kotlin/com/robertgasparian/routinehelper/ui/tracking/RoutineTrackingComponent.kt),
-  using long-press drag recognition and a summary-note header.
+  using long-press drag recognition, reveal-and-tap deletion, and a summary-note header.
 
 The most important invariant is:
 
@@ -27,9 +28,13 @@ The most important invariant is:
 | [`RoutineReorderGeometry.kt`](../core/ui/src/main/java/com/robertgasparian/routinehelper/ui/dsm/RoutineReorderGeometry.kt) | Directional adjacent-item threshold calculation. |
 | [`RoutineReorderAutoScroller.kt`](../core/ui/src/main/java/com/robertgasparian/routinehelper/ui/dsm/RoutineReorderAutoScroller.kt) | Continuous edge auto-scroll owned by the drag. |
 | [`RoutineReorderDropAnimation.kt`](../core/ui/src/main/java/com/robertgasparian/routinehelper/ui/dsm/RoutineReorderDropAnimation.kt) | Constant-speed travel from the finger position to the measured slot. |
+| [`RoutineSwipeToReveal.kt`](../core/ui/src/main/java/com/robertgasparian/routinehelper/ui/dsm/RoutineSwipeToReveal.kt) | Reusable horizontal covered/revealed interaction composed around Current List and tracking cards; it does not participate in vertical reorder state. |
+| [`RoutineSwipeToDismiss.kt`](../core/ui/src/main/java/com/robertgasparian/routinehelper/ui/dsm/RoutineSwipeToDismiss.kt) | Preserved full end-to-start Material swipe-dismiss alternative; it is not used by the active lists. |
 
 Pure state, geometry, auto-scroll, duration, and coordinate-conversion behavior is covered by the
-corresponding `RoutineReorder*Test.kt` files under `core/ui/src/test`.
+corresponding `RoutineReorder*Test.kt` files under `core/ui/src/test`. Swipe direction and exit
+geometry have focused `RoutineSwipeToRevealTest` coverage, while covered and revealed layouts have
+Paparazzi test definitions in the same module.
 
 ## Public API contract
 
@@ -113,10 +118,83 @@ changes shape or bounds. The project uses Material 3's standard `MotionScheme` b
 a recurring utility interaction, and the activation transition uses the theme's `fastEffectsSpec`.
 Keep the timing theme-driven instead of adding a local duration or easing curve.
 
+The trailing overflow icon replaces the former dedicated drag icon. A tap opens item actions, while
+the card's shared modifier recognizes a long press for reordering. The expanded item-menu ID is
+hoisted in `CurrentListComponent`; do not make menu ownership depend on card-local composition
+because `itemContent` moves between the Lazy item and overlay during a drag.
+
+## Reorderable-list horizontal swipe-to-reveal
+
+Current List, Daily, and Weekly compose each card inside `RoutineSwipeToReveal`. This is a separate
+horizontal interaction built with Foundation `AnchoredDraggableState`; it deliberately does not add
+horizontal logic to `RoutineReorderableLazyColumn`.
+
+The component has exactly two user-reachable anchors:
+
+- `Covered` at zero.
+- `Revealed` at `80.dp` toward the logical start edge, exposing one trailing action.
+
+There is no dismissed anchor, so a swipe or a high-velocity fling can reveal the delete action but
+can never delete an item. Deletion requires a click on the exposed Material error-container action.
+After that click, the component immediately dispatches the caller's removal intent. It does not
+animate the foreground off screen. The containing Lazy item's `animateItem()` disappearance and
+neighbor movement are the single delete animation, avoiding consecutive or competing visual
+phases. Anchored settling still uses the theme's fast spatial motion spec. RTL layouts reverse the
+reveal offset while preserving the same end-to-start interaction.
+
+The API is controlled: `CurrentListComponent` and the shared `RoutineTrackingComponent` each own
+one `revealedItemId`, pass `isRevealed`, and update that ID through `onRevealedChange`. This keeps at
+most one row open per list. Starting vertical list scroll clears the ID, opening a Current List
+row's overflow menu closes its swipe action, and starting reorder disables/closes the horizontal
+interaction. The long-press modifier remains attached while a row is revealed. Pointer-down sets
+`isDragHandleActive`, which begins covering the row during the long-press timeout; once recognition
+completes, reorder starts from the covered representation.
+
+The error-container underlay fills the complete item bounds and uses the same rounded shape as the
+card. Only the trailing `80.dp` action region is clickable. Keeping the visual underlay independent
+of the action width prevents the card's rounded trailing corners from exposing list background at
+the reveal seam, and it stays correct if the reveal width changes later. The whole underlay layer is
+drawn only while the foreground offset is away from the covered anchor; this prevents red
+anti-aliasing from bleeding through the card's outer rounded corners while idle.
+
+The hidden action has its semantics cleared while covered. Keep this behavior if the action UI is
+changed; a visually covered delete button must not remain focusable to accessibility services.
+The exposed bin remains a semantic button but intentionally uses no click indication, so tapping it
+does not draw a ripple over the error-container action.
+
+`onAction` is invoked immediately after the action is accepted and guarded against a second click.
+It is expected to remove the containing item. If deletion later gains a recoverable failure path,
+extend this contract with an explicit outcome and reset behavior. Do not add a timer that restores
+the revealed row while persistence may still be in flight.
+
+Do not replace the anchored horizontal gesture with raw pointer interception. Foundation's
+orientation-aware drag arbitration is what lets ordinary vertical list scroll win before the
+long-press reorder timeout while preserving horizontal reveal.
+
 While the overlay exists—including during drop travel—its item scope reports
 `isDragHandleActive = true` and `isDragging = true`. Its `dragHandleModifier` is empty, so the
 overlay cannot start a second detector. Treat these booleans as visual interaction state, not as a
 signal to run business logic.
+
+Every Current List, Daily, and Weekly row uses this reveal-and-tap interaction. All three route the
+action into the global durable removal workflow described in
+[`removal-undo.md`](removal-undo.md). Only one source can own the undo window at a time; same-source
+removals batch and reset the timer, while other-source reveal gestures are disabled. Daily and
+Weekly keep the routine item, owning action, tracking entries, and persisted list slot until the
+user undoes the removal or the timeout performs the final delete. History remains a separate
+selection-based deletion workflow.
+
+### Preserved full-swipe alternative
+
+`RoutineSwipeToDismiss` keeps the former Material 3 `SwipeToDismissBox` behavior available as a
+reusable DSM alternative. It supports only end-to-start dismissal, resets its visual state, and
+then asks the caller to remove the item. It is intentionally not used by an active list.
+
+Material dismissal considers both position and fling velocity. A short, fast horizontal movement
+can therefore dismiss even when it did not travel far, which is the failure mode that motivated
+the active reveal-and-tap design. Use the full-dismiss alternative only when swipe itself is an
+acceptable confirmation, and keep `RoutineSwipeToReveal` for destructive actions that require an
+explicit action-button tap.
 
 ## Effective lifecycle
 
@@ -488,6 +566,17 @@ real list item settled separately. It did not solve the incorrect target.
 **Do not reintroduce:** delayed overlay removal, delayed `animateItem`, or a second settle state. One
 travel should end at the actual slot, followed by immediate representation handoff.
 
+### Running an off-screen swipe after requesting removal
+
+An action-owned `Animatable` briefly moved the foreground while removal simultaneously removed the
+keyed Lazy item. The item composition was then disposed and its `rememberCoroutineScope` cancelled.
+`animateItem()` retained only the last rendered graphics layer for disappearance, not the live
+swipe composition, so the horizontal motion froze after a small step while the list kept closing.
+
+**Do not reintroduce:** an item-owned exit coroutine that must outlive removal. Either let the Lazy
+item own the complete delete animation, as the current design does, or build a separately owned
+list-level overlay if a future design truly requires motion after source removal.
+
 ### Treating elevation as the cause or cure
 
 Lowering and then removing elevation made the extra phase easier to diagnose but did not remove the
@@ -560,7 +649,7 @@ Treat these as explicit future work, not reasons to weaken the invariants that a
 
 Before changing the component:
 
-- Read this guide and the six production files in the file map.
+- Read this guide and the eight production files in the file map.
 - Keep stable, unique item IDs.
 - Keep the overlay/blank-slot split.
 - Keep pointer lifetime ownership on the stable container.
@@ -575,9 +664,25 @@ Before changing the component:
 
 Manual regression matrix:
 
+- In a debug build, use **Add test items** from the overflow menu on Current List, Daily, and
+  Weekly. Verify every selection appends another 20 items even when the list is already populated,
+  and that the generated numbering continues from the current visible item count.
 - Current List whole-card long-press drag and Daily/Weekly long-press drag.
-- Current List horizontal swipe-to-remove before the long-press timeout, including starting the
-  swipe from the card body.
+- Tap the Current List checkbox and trailing overflow icon without starting a drag; verify Edit opens
+  the shared item dialog with the current title and description prefilled.
+- Current List horizontal swipe-to-reveal before the long-press timeout, including starting the
+  swipe from the card body. Verify it stops at the action and never deletes by swipe alone.
+- Reveal one Current List action, reveal another, and verify only the second stays open.
+- Reveal an action, vertically scroll the list, and verify the row closes without deleting.
+- Reveal an action, tap its bin, and verify there is no second off-screen swipe: the Lazy item closes
+  its gap smoothly while the existing remove/undo flow begins.
+- Reveal an action, long-press the card, and verify it covers during the timeout before reorder
+  starts without a horizontal jump.
+- Repeat reveal, single-open-row, vertical-scroll close, bin-tap exit, and reorder-handoff checks on
+  both Daily and Weekly. Verify the correct source-aware undo snackbar appears and temporary hide
+  remains a separate item action.
+- With one source's undo snackbar visible, switch tabs and verify other-source delete gestures are
+  disabled while same-source removals still join the active batch.
 - Long-press a card immediately after list placement motion and verify activation has no vertical
   jump relative to the finger.
 - Drag upward through the app-bar boundary and hold there.

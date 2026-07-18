@@ -27,6 +27,7 @@ data class RoutineItemEntity(
     val position: Int,
     val cadence: String,
     val createdAtMillis: Long,
+    val pendingRemovalAtMillis: Long? = null,
 ) {
     companion object {
         const val DAILY_CADENCE_STORAGE_VALUE = "DAILY"

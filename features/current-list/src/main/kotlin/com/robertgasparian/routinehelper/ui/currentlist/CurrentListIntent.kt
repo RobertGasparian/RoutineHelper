@@ -10,6 +10,12 @@ sealed interface CurrentListIntent {
         val description: String?,
     ) : CurrentListIntent
 
+    data class UpdateItem(
+        val itemId: Long,
+        val title: String,
+        val description: String?,
+    ) : CurrentListIntent
+
     data object AddTestItemsClick : CurrentListIntent
 
     data class CheckedChange(

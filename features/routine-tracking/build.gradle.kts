@@ -32,6 +32,7 @@ dependencies {
     implementation(project(":core:time"))
     implementation(project(":core:ui"))
     implementation(project(":libs:routine:snapshot:domain"))
+    implementation(project(":libs:routine:removal:domain"))
     implementation(project(":libs:routine:template:domain"))
     implementation(project(":libs:routine:tracking:domain"))
 
@@ -56,6 +57,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(project(":core:testing"))
     testImplementation(testFixtures(project(":libs:routine:snapshot:domain")))
+    testImplementation(testFixtures(project(":libs:routine:removal:domain")))
     testImplementation(testFixtures(project(":libs:routine:template:domain")))
     testImplementation(testFixtures(project(":libs:routine:tracking:domain")))
 }

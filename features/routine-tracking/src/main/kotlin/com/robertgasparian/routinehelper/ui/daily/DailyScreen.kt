@@ -28,5 +28,6 @@ fun DailyScreen(
             }
         },
         showSnapshotAction = BuildConfig.DEBUG,
+        showAddTestItems = BuildConfig.DEBUG,
     )
 }

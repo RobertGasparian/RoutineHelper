@@ -3,6 +3,7 @@ package com.robertgasparian.routinehelper.di
 import android.content.Context
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.robertgasparian.routinehelper.data.local.Migration1To2
 import com.robertgasparian.routinehelper.data.local.RoutineDatabase
 import com.robertgasparian.routinehelper.data.local.dao.ActionDao
 import com.robertgasparian.routinehelper.data.local.dao.CurrentListItemDao
@@ -31,7 +32,9 @@ object DatabaseModule {
             context,
             RoutineDatabase::class.java,
             "routine-helper.db",
-        ).build()
+        )
+            .addMigrations(Migration1To2)
+            .build()
 
     @Provides
     fun provideRoomDatabase(database: RoutineDatabase): RoomDatabase = database

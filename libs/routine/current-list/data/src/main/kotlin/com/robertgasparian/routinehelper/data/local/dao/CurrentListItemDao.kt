@@ -20,6 +20,14 @@ interface CurrentListItemDao {
     @Insert
     suspend fun insert(item: CurrentListItemEntity): Long
 
+    @Query("UPDATE current_list_items SET title = :title, description = :description, updatedAtMillis = :updatedAtMillis WHERE id = :itemId")
+    suspend fun updateContent(
+        itemId: Long,
+        title: String,
+        description: String?,
+        updatedAtMillis: Long,
+    )
+
     @Query("UPDATE current_list_items SET isChecked = :isChecked, updatedAtMillis = :updatedAtMillis WHERE id = :itemId")
     suspend fun updateChecked(
         itemId: Long,

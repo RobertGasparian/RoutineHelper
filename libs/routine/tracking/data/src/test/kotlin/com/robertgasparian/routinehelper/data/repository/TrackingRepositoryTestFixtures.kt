@@ -19,6 +19,8 @@ internal class FakeRoutineItemDao : RoutineItemDao {
         return flowOf(items)
     }
 
+    override suspend fun allRoutineItemsSnapshot(cadence: String): List<RoutineItemEntity> = emptyList()
+
     override fun maxPosition(cadence: String): Flow<Int> = flowOf(-1)
 
     override fun routineItem(id: Long): Flow<RoutineItemEntity?> = flowOf(null)
@@ -26,6 +28,42 @@ internal class FakeRoutineItemDao : RoutineItemDao {
     override suspend fun insert(routineItem: RoutineItemEntity): Long = routineItem.id
 
     override suspend fun update(routineItem: RoutineItemEntity) = Unit
+
+    override suspend fun markPendingRemoval(
+        cadence: String,
+        routineItemId: Long,
+        pendingRemovalAtMillis: Long,
+    ) = Unit
+
+    override suspend fun restorePendingRemoval(
+        cadence: String,
+        routineItemId: Long,
+    ) = Unit
+
+    override suspend fun restorePendingRemovals(
+        cadence: String,
+        routineItemIds: List<Long>,
+    ) = Unit
+
+    override suspend fun pendingRemovalsSnapshot(
+        cadence: String,
+        routineItemIds: List<Long>,
+    ): List<RoutineItemEntity> = emptyList()
+
+    override suspend fun allPendingRemovalsSnapshot(): List<RoutineItemEntity> = emptyList()
+
+    override suspend fun deletePendingRemovals(
+        cadence: String,
+        routineItemIds: List<Long>,
+    ) = Unit
+
+    override suspend fun deleteAllPendingRemovals() = Unit
+
+    override suspend fun updatePosition(
+        cadence: String,
+        routineItemId: Long,
+        position: Int,
+    ) = Unit
 
     override suspend fun deleteById(id: Long) = Unit
 }

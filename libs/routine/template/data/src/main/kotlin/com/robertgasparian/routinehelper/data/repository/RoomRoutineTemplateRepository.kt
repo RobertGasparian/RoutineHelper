@@ -10,6 +10,8 @@ import com.robertgasparian.routinehelper.data.local.entity.RoutineItemEntity
 import com.robertgasparian.routinehelper.data.local.model.RoutineItemWithAction
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.RoutineTemplateItem
+import com.robertgasparian.routinehelper.domain.order.RoutineTemplateOrderItem
+import com.robertgasparian.routinehelper.domain.order.RoutineTemplateOrderPlanner
 import com.robertgasparian.routinehelper.domain.repository.RoutineTemplateRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -21,6 +23,7 @@ class RoomRoutineTemplateRepository @Inject constructor(
     private val database: RoomDatabase,
     private val actionDao: ActionDao,
     private val routineItemDao: RoutineItemDao,
+    private val routineTemplateOrderPlanner: RoutineTemplateOrderPlanner,
     private val timeProvider: TimeProvider,
 ) : RoutineTemplateRepository {
     override fun templateItems(cadence: RoutineCadence): Flow<List<RoutineTemplateItem>> =
@@ -87,21 +90,82 @@ class RoomRoutineTemplateRepository @Inject constructor(
         }
     }
 
+    override suspend fun markPendingRemoval(
+        cadence: RoutineCadence,
+        routineItemId: Long,
+    ) {
+        routineItemDao.markPendingRemoval(
+            cadence = cadence.toStorageValue(),
+            routineItemId = routineItemId,
+            pendingRemovalAtMillis = timeProvider.currentTimeMillis(),
+        )
+    }
+
+    override suspend fun restorePendingRemoval(
+        cadence: RoutineCadence,
+        routineItemId: Long,
+    ) {
+        routineItemDao.restorePendingRemoval(
+            cadence = cadence.toStorageValue(),
+            routineItemId = routineItemId,
+        )
+    }
+
+    override suspend fun restorePendingRemovals(
+        cadence: RoutineCadence,
+        routineItemIds: List<Long>,
+    ) {
+        if (routineItemIds.isEmpty()) return
+        routineItemDao.restorePendingRemovals(
+            cadence = cadence.toStorageValue(),
+            routineItemIds = routineItemIds,
+        )
+    }
+
+    override suspend fun deletePendingRemovals(
+        cadence: RoutineCadence,
+        routineItemIds: List<Long>,
+    ) {
+        if (routineItemIds.isEmpty()) return
+        val storageCadence = cadence.toStorageValue()
+        database.withTransaction {
+            val pendingItems = routineItemDao.pendingRemovalsSnapshot(
+                cadence = storageCadence,
+                routineItemIds = routineItemIds,
+            )
+            routineItemDao.deletePendingRemovals(
+                cadence = storageCadence,
+                routineItemIds = routineItemIds,
+            )
+            pendingItems.forEach { item -> actionDao.deleteById(item.actionId) }
+        }
+    }
+
+    override suspend fun deleteAllPendingRemovals() {
+        database.withTransaction {
+            val pendingItems = routineItemDao.allPendingRemovalsSnapshot()
+            routineItemDao.deleteAllPendingRemovals()
+            pendingItems.forEach { item -> actionDao.deleteById(item.actionId) }
+        }
+    }
+
     override suspend fun reorderTemplateItems(
         cadence: RoutineCadence,
         routineItemIdsInOrder: List<Long>,
     ) {
         val storageCadence = cadence.toStorageValue()
         database.withTransaction {
-            var nextPosition = 0
-            routineItemIdsInOrder.forEach { routineItemId ->
-                val routineItem = routineItemDao.routineItem(routineItemId).first()
-                if (routineItem?.cadence == storageCadence) {
-                    if (routineItem.position != nextPosition) {
-                        routineItemDao.update(routineItem.copy(position = nextPosition))
-                    }
-                    nextPosition += 1
-                }
+            val allItems = routineItemDao.allRoutineItemsSnapshot(storageCadence)
+            val positionUpdates = routineTemplateOrderPlanner.planReorder(
+                allItems = allItems.map(RoutineItemEntity::toOrderItem),
+                visibleItemIdsInOrder = routineItemIdsInOrder,
+            )
+            positionUpdates.forEach { update ->
+                routineItemDao.updatePosition(
+                    cadence = storageCadence,
+                    routineItemId = update.itemId,
+                    position = update.position,
+                )
             }
         }
     }
@@ -129,4 +193,11 @@ private fun RoutineItemWithAction.toDomain(): RoutineTemplateItem =
         repeatTargetCount = action.repeatTargetCount,
         position = routineItem.position,
         cadence = routineItem.cadence.toRoutineCadence(),
+    )
+
+private fun RoutineItemEntity.toOrderItem(): RoutineTemplateOrderItem =
+    RoutineTemplateOrderItem(
+        id = id,
+        position = position,
+        isPendingRemoval = pendingRemovalAtMillis != null,
     )

@@ -25,6 +25,28 @@ interface RoutineTemplateRepository {
 
     suspend fun removeTemplateItem(routineItemId: Long)
 
+    suspend fun markPendingRemoval(
+        cadence: RoutineCadence,
+        routineItemId: Long,
+    )
+
+    suspend fun restorePendingRemoval(
+        cadence: RoutineCadence,
+        routineItemId: Long,
+    )
+
+    suspend fun restorePendingRemovals(
+        cadence: RoutineCadence,
+        routineItemIds: List<Long>,
+    )
+
+    suspend fun deletePendingRemovals(
+        cadence: RoutineCadence,
+        routineItemIds: List<Long>,
+    )
+
+    suspend fun deleteAllPendingRemovals()
+
     suspend fun reorderTemplateItems(
         cadence: RoutineCadence,
         routineItemIdsInOrder: List<Long>,

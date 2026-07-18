@@ -41,5 +41,6 @@ private fun DailyComponentPaparazziContent(
     RoutineTrackingComponent(
         uiState = uiState,
         onIntent = {},
+        showSnapshotAction = true,
     )
 }

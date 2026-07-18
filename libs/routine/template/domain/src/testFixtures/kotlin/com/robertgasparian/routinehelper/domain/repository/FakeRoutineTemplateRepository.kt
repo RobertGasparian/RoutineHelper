@@ -10,9 +10,14 @@ class FakeRoutineTemplateRepository : RoutineTemplateRepository {
     private val items = MutableStateFlow<List<RoutineTemplateItem>>(emptyList())
     val addedItems = mutableListOf<AddedTemplateItem>()
     val removedTemplateItemIds = mutableListOf<Long>()
+    val pendingRemovalItems = mutableListOf<TemplateItemRemoval>()
+    val restoredPendingRemovalItems = mutableListOf<TemplateItemRemoval>()
+    val restoredPendingRemovalItemGroups = mutableListOf<TemplateItemRemovalGroup>()
+    val deletedPendingRemovalItemGroups = mutableListOf<TemplateItemRemovalGroup>()
     val reorderedTemplateItemCadences = mutableListOf<RoutineCadence>()
     val reorderedTemplateItemIds = mutableListOf<List<Long>>()
     val updatedItems = mutableListOf<UpdatedTemplateItem>()
+    var deleteAllPendingRemovalsCount = 0
 
     fun setItems(items: List<RoutineTemplateItem>) {
         this.items.value = items
@@ -59,6 +64,38 @@ class FakeRoutineTemplateRepository : RoutineTemplateRepository {
         removedTemplateItemIds += routineItemId
     }
 
+    override suspend fun markPendingRemoval(
+        cadence: RoutineCadence,
+        routineItemId: Long,
+    ) {
+        pendingRemovalItems += TemplateItemRemoval(cadence, routineItemId)
+    }
+
+    override suspend fun restorePendingRemoval(
+        cadence: RoutineCadence,
+        routineItemId: Long,
+    ) {
+        restoredPendingRemovalItems += TemplateItemRemoval(cadence, routineItemId)
+    }
+
+    override suspend fun restorePendingRemovals(
+        cadence: RoutineCadence,
+        routineItemIds: List<Long>,
+    ) {
+        restoredPendingRemovalItemGroups += TemplateItemRemovalGroup(cadence, routineItemIds)
+    }
+
+    override suspend fun deletePendingRemovals(
+        cadence: RoutineCadence,
+        routineItemIds: List<Long>,
+    ) {
+        deletedPendingRemovalItemGroups += TemplateItemRemovalGroup(cadence, routineItemIds)
+    }
+
+    override suspend fun deleteAllPendingRemovals() {
+        deleteAllPendingRemovalsCount += 1
+    }
+
     override suspend fun reorderTemplateItems(
         cadence: RoutineCadence,
         routineItemIdsInOrder: List<Long>,
@@ -80,4 +117,14 @@ data class UpdatedTemplateItem(
     val title: String,
     val description: String?,
     val repeatTargetCount: Int? = null,
+)
+
+data class TemplateItemRemoval(
+    val cadence: RoutineCadence,
+    val routineItemId: Long,
+)
+
+data class TemplateItemRemovalGroup(
+    val cadence: RoutineCadence,
+    val routineItemIds: List<Long>,
 )

@@ -1,7 +1,15 @@
 package com.robertgasparian.routinehelper.ui.daily
 
+import com.robertgasparian.routinehelper.core.testing.FixedTimeProvider
+import com.robertgasparian.routinehelper.core.testing.MainDispatcherRule
 import com.robertgasparian.routinehelper.core.time.TimeProvider
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
+import com.robertgasparian.routinehelper.domain.removal.FakeRoutineRemovalUndoCoordinator
+import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalRequest
+import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalSource
+import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalUndoState
+import com.robertgasparian.routinehelper.domain.repository.AddedTemplateItem
 import com.robertgasparian.routinehelper.domain.repository.CheckedChange
 import com.robertgasparian.routinehelper.domain.repository.CountChange
 import com.robertgasparian.routinehelper.domain.repository.FakeRoutineHistoryRepository
@@ -9,6 +17,7 @@ import com.robertgasparian.routinehelper.domain.repository.FakeRoutineTemplateRe
 import com.robertgasparian.routinehelper.domain.repository.FakeTodayRoutineRepository
 import com.robertgasparian.routinehelper.domain.repository.HiddenChange
 import com.robertgasparian.routinehelper.domain.repository.NoteChange
+import com.robertgasparian.routinehelper.domain.usecase.AddTemplateItemUseCase
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ReorderDailyRoutineItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetTodayItemCheckedUseCase
@@ -19,11 +28,11 @@ import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayItemCompleted
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayItemNoteUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTodaySummaryNoteUseCase
 import com.robertgasparian.routinehelper.test.FakeNoteDateTimeTextProvider
-import com.robertgasparian.routinehelper.core.testing.FixedTimeProvider
-import com.robertgasparian.routinehelper.core.testing.MainDispatcherRule
+import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingDebugItemsPopulator
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingIntent
 import java.time.Instant
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -40,6 +49,7 @@ class DailyViewModelTest {
     private val historyRepository = FakeRoutineHistoryRepository()
     private val noteDateTimeTextProvider = FakeNoteDateTimeTextProvider()
     private val timeProvider = FixedTimeProvider()
+    private val removalUndoCoordinator = FakeRoutineRemovalUndoCoordinator()
 
     @Test
     fun `when item events are received then forwards them to daily use cases`() = runTest {
@@ -48,6 +58,7 @@ class DailyViewModelTest {
         viewModel.onIntent(RoutineTrackingIntent.CheckedChange(routineItemId = 10L, isChecked = true))
         viewModel.onIntent(RoutineTrackingIntent.CompletedCountChange(routineItemId = 10L, completedCount = 3))
         viewModel.onIntent(RoutineTrackingIntent.HiddenChange(routineItemId = 10L, isHidden = true))
+        viewModel.onIntent(RoutineTrackingIntent.RemoveItem(routineItemId = 10L))
         viewModel.onIntent(RoutineTrackingIntent.ReorderItems(listOf(10L, 11L)))
         advanceUntilIdle()
 
@@ -81,6 +92,10 @@ class DailyViewModelTest {
             ),
             todayRepository.hiddenChanges,
         )
+        assertEquals(
+            listOf(RoutineRemovalRequest(RoutineRemovalSource.Daily, itemId = 10L)),
+            removalUndoCoordinator.removalRequests,
+        )
         assertEquals(listOf(listOf(10L, 11L)), templateRepository.reorderedTemplateItemIds)
     }
 
@@ -102,6 +117,63 @@ class DailyViewModelTest {
                 ),
             ),
             todayRepository.noteChanges,
+        )
+    }
+
+    @Test
+    fun `given weekly removals are pending when observing state then daily removal is disabled`() = runTest {
+        removalUndoCoordinator.setState(
+            RoutineRemovalUndoState(
+                activeSource = RoutineRemovalSource.Weekly,
+                pendingItemCount = 1,
+            ),
+        )
+        val viewModel = createViewModel()
+
+        val state = viewModel.uiState.first { !it.canRemoveItems }
+
+        assertEquals(false, state.canRemoveItems)
+    }
+
+    @Test
+    fun `given daily list has an item when test items are added then appends twenty daily actions`() = runTest {
+        todayRepository.setItems(
+            date = TodayDate,
+            items = listOf(
+                TodayRoutineItem(
+                    routineItemId = 1L,
+                    actionId = 1L,
+                    title = "Existing daily action",
+                    description = null,
+                    position = 0,
+                    date = TodayDate,
+                    isChecked = false,
+                    note = null,
+                ),
+            ),
+        )
+        val viewModel = createViewModel()
+        viewModel.uiState.first { state -> state.items.size == 1 }
+
+        viewModel.onIntent(RoutineTrackingIntent.AddTestItemsClick)
+        advanceUntilIdle()
+
+        assertEquals(20, templateRepository.addedItems.size)
+        assertEquals(
+            AddedTemplateItem(
+                title = "daily action 2",
+                description = "description for daily action 2",
+                cadence = RoutineCadence.Daily,
+            ),
+            templateRepository.addedItems.first(),
+        )
+        assertEquals(
+            AddedTemplateItem(
+                title = "daily action 21",
+                description = null,
+                cadence = RoutineCadence.Daily,
+            ),
+            templateRepository.addedItems.last(),
         )
     }
 
@@ -154,10 +226,14 @@ class DailyViewModelTest {
         DailyViewModel(
             todayItemsUseCase = TodayItemsUseCase(todayRepository),
             todaySummaryNoteUseCase = TodaySummaryNoteUseCase(todayRepository),
+            debugItemsPopulator = RoutineTrackingDebugItemsPopulator(
+                addTemplateItemUseCase = AddTemplateItemUseCase(templateRepository),
+            ),
             finalizeTodayUseCase = FinalizeTodayUseCase(
                 todayRoutineRepository = todayRepository,
                 routineHistoryRepository = historyRepository,
             ),
+            routineRemovalUndoCoordinator = removalUndoCoordinator,
             reorderDailyRoutineItemsUseCase = ReorderDailyRoutineItemsUseCase(templateRepository),
             setTodayItemCheckedUseCase = SetTodayItemCheckedUseCase(todayRepository),
             setTodayItemHiddenUseCase = SetTodayItemHiddenUseCase(todayRepository),

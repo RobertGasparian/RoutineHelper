@@ -93,5 +93,6 @@ private fun DailyComponentPreviewContent(
     RoutineTrackingComponent(
         uiState = uiState,
         onIntent = {},
+        showSnapshotAction = true,
     )
 }

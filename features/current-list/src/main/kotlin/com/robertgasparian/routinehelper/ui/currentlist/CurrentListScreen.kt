@@ -8,7 +8,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.DoneAll
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.RemoveDone
 import androidx.compose.material.icons.filled.Settings
@@ -45,22 +47,22 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -73,8 +75,9 @@ import com.robertgasparian.routinehelper.ui.dsm.RoutineDialogTextButton
 import com.robertgasparian.routinehelper.ui.dsm.RoutineOutlinedTextField
 import com.robertgasparian.routinehelper.ui.dsm.RoutineReorderDragStartMode
 import com.robertgasparian.routinehelper.ui.dsm.RoutineReorderableLazyColumn
+import com.robertgasparian.routinehelper.ui.dsm.RoutineSwipeToReveal
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.filter
 
 @Composable
 fun CurrentListScreen(
@@ -114,7 +117,22 @@ fun CurrentListComponent(
     var isAddDialogVisible by rememberSaveable { mutableStateOf(false) }
     var isOverflowMenuVisible by rememberSaveable { mutableStateOf(false) }
     var isClearConfirmationVisible by rememberSaveable { mutableStateOf(false) }
+    var expandedItemMenuId by rememberSaveable { mutableStateOf<Long?>(null) }
+    var editingItemId by rememberSaveable { mutableStateOf<Long?>(null) }
+    var revealedItemId by rememberSaveable { mutableStateOf<Long?>(null) }
     val listState = rememberLazyListState()
+
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.isScrollInProgress }
+            .filter { isScrolling -> isScrolling }
+            .collect { revealedItemId = null }
+    }
+
+    LaunchedEffect(uiState.canRemoveItems) {
+        if (!uiState.canRemoveItems) {
+            revealedItemId = null
+        }
+    }
 
     Scaffold(
         modifier = modifier,
@@ -138,9 +156,8 @@ fun CurrentListComponent(
                         CurrentListOverflowMenu(
                             expanded = isOverflowMenuVisible,
                             showAddTestItems = showAddTestItems,
-                            canAddTestItems = !uiState.hasItems,
                             canShare = uiState.canShare,
-                            canClear = uiState.hasItems,
+                            canClear = uiState.hasItems && uiState.canRemoveItems,
                             onIntent = { menuIntent ->
                                 when (menuIntent) {
                                     CurrentListOverflowMenuIntent.Dismiss -> {
@@ -216,20 +233,61 @@ fun CurrentListComponent(
                     .fillMaxSize()
                     .padding(innerPadding),
             ) { item ->
-                SwipeToRemoveCurrentListItem(
-                    item = item,
-                    onRemove = { onIntent(CurrentListIntent.RemoveItem(item.id)) },
+                LaunchedEffect(isDragHandleActive) {
+                    if (isDragHandleActive && revealedItemId == item.id) {
+                        revealedItemId = null
+                    }
+                }
+                RoutineSwipeToReveal(
+                    isRevealed = revealedItemId == item.id && !isDragging,
+                    enabled = uiState.canRemoveItems && !isDragging,
+                    onRevealedChange = { isRevealed ->
+                        if (isRevealed) {
+                            expandedItemMenuId = null
+                            revealedItemId = item.id
+                        } else if (revealedItemId == item.id) {
+                            revealedItemId = null
+                        }
+                    },
+                    onAction = { onIntent(CurrentListIntent.RemoveItem(item.id)) },
+                    backgroundContent = {
+                        CurrentListDeleteBackground()
+                    },
+                    actionContent = { onDeleteClick ->
+                        CurrentListDeleteAction(
+                            itemTitle = item.title,
+                            onClick = onDeleteClick,
+                        )
+                    },
                 ) {
                     CurrentListItemCard(
                         item = item,
                         isDragging = isDragging,
-                        onCheckedChange = { isChecked ->
-                            onIntent(
-                                CurrentListIntent.CheckedChange(
-                                    itemId = item.id,
-                                    isChecked = isChecked,
-                                ),
-                            )
+                        isOverflowMenuExpanded = expandedItemMenuId == item.id && !isDragging,
+                        onIntent = { itemIntent ->
+                            when (itemIntent) {
+                                is CurrentListItemIntent.CheckedChange -> {
+                                    onIntent(
+                                        CurrentListIntent.CheckedChange(
+                                            itemId = item.id,
+                                            isChecked = itemIntent.isChecked,
+                                        ),
+                                    )
+                                }
+                                CurrentListItemIntent.OverflowMenuClick -> {
+                                    revealedItemId = null
+                                    expandedItemMenuId = item.id
+                                }
+                                CurrentListItemIntent.OverflowMenuDismiss -> {
+                                    if (expandedItemMenuId == item.id) {
+                                        expandedItemMenuId = null
+                                    }
+                                }
+                                CurrentListItemIntent.EditClick -> {
+                                    expandedItemMenuId = null
+                                    editingItemId = item.id
+                                }
+                            }
                         },
                         modifier = dragHandleModifier,
                     )
@@ -239,12 +297,37 @@ fun CurrentListComponent(
     }
 
     if (isAddDialogVisible) {
-        AddCurrentListItemDialog(
+        CurrentListItemEditorDialog(
+            dialogTitle = "Add item",
+            confirmButtonText = "Add",
             onDismiss = { isAddDialogVisible = false },
-            onAddClick = { title, description ->
+            onConfirmClick = { title, description ->
                 isAddDialogVisible = false
                 onIntent(
                     CurrentListIntent.AddItem(
+                        title = title,
+                        description = description,
+                    ),
+                )
+            },
+        )
+    }
+
+    val editingItem = editingItemId?.let { itemId ->
+        uiState.items.firstOrNull { item -> item.id == itemId }
+    }
+    if (editingItem != null) {
+        CurrentListItemEditorDialog(
+            dialogTitle = "Edit item",
+            confirmButtonText = "Save",
+            initialTitle = editingItem.title,
+            initialDescription = editingItem.description,
+            onDismiss = { editingItemId = null },
+            onConfirmClick = { title, description ->
+                editingItemId = null
+                onIntent(
+                    CurrentListIntent.UpdateItem(
+                        itemId = editingItem.id,
                         title = title,
                         description = description,
                     ),
@@ -346,7 +429,6 @@ private fun CurrentListBulkActionButton(
 private fun CurrentListOverflowMenu(
     expanded: Boolean,
     showAddTestItems: Boolean,
-    canAddTestItems: Boolean,
     canShare: Boolean,
     canClear: Boolean,
     onIntent: (CurrentListOverflowMenuIntent) -> Unit,
@@ -359,7 +441,6 @@ private fun CurrentListOverflowMenu(
     ) {
         if (showAddTestItems) {
             DropdownMenuItem(
-                enabled = canAddTestItems,
                 text = { Text(text = "Add test items") },
                 leadingIcon = {
                     Icon(
@@ -411,63 +492,55 @@ private sealed interface CurrentListOverflowMenuIntent {
     data object ClearClick : CurrentListOverflowMenuIntent
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SwipeToRemoveCurrentListItem(
-    item: CurrentListItemUiState,
-    onRemove: () -> Unit,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
-    val dismissState = rememberSwipeToDismissBoxState(
-        positionalThreshold = { totalDistance -> totalDistance * SwipeDismissThresholdFraction },
-    )
-    val coroutineScope = rememberCoroutineScope()
-
-    SwipeToDismissBox(
-        state = dismissState,
-        modifier = modifier,
-        enableDismissFromStartToEnd = false,
-        enableDismissFromEndToStart = true,
-        onDismiss = { value ->
-            if (value == SwipeToDismissBoxValue.EndToStart) {
-                coroutineScope.launch {
-                    dismissState.snapTo(SwipeToDismissBoxValue.Settled)
-                    onRemove()
-                }
-            }
-        },
-        backgroundContent = {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        color = MaterialTheme.colorScheme.errorContainer,
-                        shape = RoundedCornerShape(16.dp),
-                    )
-                    .padding(end = 24.dp),
-                contentAlignment = Alignment.CenterEnd,
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Remove ${item.title}",
-                    tint = MaterialTheme.colorScheme.onErrorContainer,
-                )
-            }
-        },
-        content = {
-            content()
-        },
-    )
+private fun CurrentListDeleteBackground(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.errorContainer,
+    ) {}
 }
 
-private const val SwipeDismissThresholdFraction = 0.5f
+@Composable
+private fun CurrentListDeleteAction(
+    itemTitle: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier
+            .fillMaxSize()
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                role = Role.Button,
+                onClick = onClick,
+            ),
+        shape = RoundedCornerShape(
+            topEnd = 16.dp,
+            bottomEnd = 16.dp,
+        ),
+        color = MaterialTheme.colorScheme.errorContainer,
+        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Remove $itemTitle",
+            )
+        }
+    }
+}
 
 @Composable
 private fun CurrentListItemCard(
     item: CurrentListItemUiState,
     isDragging: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
+    isOverflowMenuExpanded: Boolean,
+    onIntent: (CurrentListItemIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val dragActivationProgress by animateFloatAsState(
@@ -506,7 +579,9 @@ private fun CurrentListItemCard(
         ) {
             Checkbox(
                 checked = item.isChecked,
-                onCheckedChange = onCheckedChange,
+                onCheckedChange = { isChecked ->
+                    onIntent(CurrentListItemIntent.CheckedChange(isChecked))
+                },
             )
             Column(
                 modifier = Modifier.weight(1f),
@@ -531,8 +606,46 @@ private fun CurrentListItemCard(
                     )
                 }
             }
+            Box {
+                IconButton(
+                    enabled = !isDragging,
+                    onClick = { onIntent(CurrentListItemIntent.OverflowMenuClick) },
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "More options for ${item.title}",
+                    )
+                }
+                DropdownMenu(
+                    expanded = isOverflowMenuExpanded,
+                    onDismissRequest = { onIntent(CurrentListItemIntent.OverflowMenuDismiss) },
+                ) {
+                    DropdownMenuItem(
+                        text = { Text(text = "Edit") },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = null,
+                            )
+                        },
+                        onClick = { onIntent(CurrentListItemIntent.EditClick) },
+                    )
+                }
+            }
         }
     }
+}
+
+private sealed interface CurrentListItemIntent {
+    data class CheckedChange(
+        val isChecked: Boolean,
+    ) : CurrentListItemIntent
+
+    data object OverflowMenuClick : CurrentListItemIntent
+
+    data object OverflowMenuDismiss : CurrentListItemIntent
+
+    data object EditClick : CurrentListItemIntent
 }
 
 @Composable
@@ -577,18 +690,22 @@ private fun EmptyCurrentListContent(
 }
 
 @Composable
-private fun AddCurrentListItemDialog(
+private fun CurrentListItemEditorDialog(
+    dialogTitle: String,
+    confirmButtonText: String,
     onDismiss: () -> Unit,
-    onAddClick: (title: String, description: String?) -> Unit,
+    onConfirmClick: (title: String, description: String?) -> Unit,
+    initialTitle: String = "",
+    initialDescription: String? = null,
 ) {
-    var title by rememberSaveable { mutableStateOf("") }
-    var description by rememberSaveable { mutableStateOf("") }
+    var title by rememberSaveable { mutableStateOf(initialTitle) }
+    var description by rememberSaveable { mutableStateOf(initialDescription.orEmpty()) }
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         tonalElevation = 0.dp,
         title = {
-            Text(text = "Add item")
+            Text(text = dialogTitle)
         },
         text = {
             Column(
@@ -614,9 +731,9 @@ private fun AddCurrentListItemDialog(
         },
         confirmButton = {
             RoutineDialogFilledButton(
-                text = "Add",
+                text = confirmButtonText,
                 enabled = title.isNotBlank(),
-                onClick = { onAddClick(title, description) },
+                onClick = { onConfirmClick(title, description) },
             )
         },
         dismissButton = {

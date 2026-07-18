@@ -4,11 +4,13 @@ import com.robertgasparian.routinehelper.core.presentation.BaseViewModel
 import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.core.time.startOfCalendarWeek
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalSource
+import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalUndoCoordinator
 import com.robertgasparian.routinehelper.domain.time.SnapshotDates
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeWeeklyUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ReorderWeeklyRoutineItemsUseCase
-import com.robertgasparian.routinehelper.domain.usecase.SetWeeklyItemHiddenUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetWeeklyItemCheckedUseCase
+import com.robertgasparian.routinehelper.domain.usecase.SetWeeklyItemHiddenUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyItemCompletedCountUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyItemNoteUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklySummaryNoteUseCase
@@ -18,6 +20,7 @@ import com.robertgasparian.routinehelper.ui.tracking.NoteDateTimeTextProvider
 import com.robertgasparian.routinehelper.ui.tracking.NoteDraftUiState
 import com.robertgasparian.routinehelper.ui.tracking.NoteEditorTarget
 import com.robertgasparian.routinehelper.ui.tracking.NoteEditorUiState
+import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingDebugItemsPopulator
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingIntent
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingUiState
 import com.robertgasparian.routinehelper.ui.tracking.insertAtCursor
@@ -32,7 +35,9 @@ import kotlinx.coroutines.flow.combine
 class WeeklyViewModel @Inject constructor(
     weeklyItemsUseCase: WeeklyItemsUseCase,
     weeklySummaryNoteUseCase: WeeklySummaryNoteUseCase,
+    private val debugItemsPopulator: RoutineTrackingDebugItemsPopulator,
     private val finalizeWeeklyUseCase: FinalizeWeeklyUseCase,
+    private val routineRemovalUndoCoordinator: RoutineRemovalUndoCoordinator,
     private val reorderWeeklyRoutineItemsUseCase: ReorderWeeklyRoutineItemsUseCase,
     private val setWeeklyItemCheckedUseCase: SetWeeklyItemCheckedUseCase,
     private val setWeeklyItemHiddenUseCase: SetWeeklyItemHiddenUseCase,
@@ -50,12 +55,14 @@ class WeeklyViewModel @Inject constructor(
             weeklyItemsUseCase(weekStartDate),
             weeklySummaryNoteUseCase(weekStartDate),
             noteEditor,
-        ) { items, summaryNote, noteEditor ->
+            routineRemovalUndoCoordinator.state,
+        ) { items, summaryNote, noteEditor, removalState ->
             RoutineTrackingUiState(
                 date = "Week of $weekStartDate",
                 summaryNote = summaryNote.orEmpty(),
                 items = items.map { item -> item.toRoutineTrackingItemUiState() },
                 noteEditor = noteEditor,
+                canRemoveItems = removalState.allowsRemovalFrom(RoutineRemovalSource.Weekly),
             )
         }
             .stateInViewModel(initialValue = RoutineTrackingUiState(date = "Week of $weekStartDate"))
@@ -65,6 +72,7 @@ class WeeklyViewModel @Inject constructor(
             RoutineTrackingIntent.CreateActionClick,
             RoutineTrackingIntent.SettingsClick,
             is RoutineTrackingIntent.EditActionClick -> Unit
+            RoutineTrackingIntent.AddTestItemsClick -> addTestItems()
             is RoutineTrackingIntent.CheckedChange -> setChecked(
                 routineItemId = intent.routineItemId,
                 isChecked = intent.isChecked,
@@ -77,6 +85,7 @@ class WeeklyViewModel @Inject constructor(
                 routineItemId = intent.routineItemId,
                 isHidden = intent.isHidden,
             )
+            is RoutineTrackingIntent.RemoveItem -> removeItem(intent.routineItemId)
             is RoutineTrackingIntent.ReorderItems -> reorderItems(intent.routineItemIdsInOrder)
             RoutineTrackingIntent.SnapshotClick -> snapshotWeek()
             is RoutineTrackingIntent.SnapshotDateSelected -> snapshotWeek(snapshotWeekStartDate = intent.date)
@@ -125,6 +134,25 @@ class WeeklyViewModel @Inject constructor(
     private fun reorderItems(routineItemIdsInOrder: List<Long>) {
         launch {
             reorderWeeklyRoutineItemsUseCase(routineItemIdsInOrder)
+        }
+    }
+
+    private fun addTestItems() {
+        val existingItemCount = uiState.value.items.size
+        launch {
+            debugItemsPopulator(
+                cadence = RoutineCadence.Weekly,
+                existingItemCount = existingItemCount,
+            )
+        }
+    }
+
+    private fun removeItem(routineItemId: Long) {
+        launch {
+            routineRemovalUndoCoordinator.requestRemoval(
+                source = RoutineRemovalSource.Weekly,
+                itemId = routineItemId,
+            )
         }
     }
 

@@ -5,6 +5,8 @@ sealed interface RoutineTrackingIntent {
 
     data object SettingsClick : RoutineTrackingIntent
 
+    data object AddTestItemsClick : RoutineTrackingIntent
+
     data class EditActionClick(
         val actionId: Long,
     ) : RoutineTrackingIntent
@@ -22,6 +24,10 @@ sealed interface RoutineTrackingIntent {
     data class HiddenChange(
         val routineItemId: Long,
         val isHidden: Boolean,
+    ) : RoutineTrackingIntent
+
+    data class RemoveItem(
+        val routineItemId: Long,
     ) : RoutineTrackingIntent
 
     data class ReorderItems(

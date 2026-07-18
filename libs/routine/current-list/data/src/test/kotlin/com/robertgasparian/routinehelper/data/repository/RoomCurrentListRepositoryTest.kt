@@ -84,6 +84,49 @@ class RoomCurrentListRepositoryTest {
     }
 
     @Test
+    fun `given an item when updating content then preserves unrelated fields`() = runTest {
+        currentListItemDao.items += currentListItemEntity(
+            id = 10L,
+            title = "Old title",
+            description = "Old description",
+            position = 3,
+            isChecked = true,
+            createdAtMillis = 100L,
+            updatedAtMillis = 100L,
+        )
+
+        repository.updateItem(
+            itemId = 10L,
+            title = "New title",
+            description = null,
+        )
+
+        assertEquals(
+            currentListItemEntity(
+                id = 10L,
+                title = "New title",
+                description = null,
+                position = 3,
+                isChecked = true,
+                createdAtMillis = 100L,
+                updatedAtMillis = timeProvider.currentTimeMillis(),
+            ),
+            currentListItemDao.items.single(),
+        )
+        assertEquals(
+            listOf(
+                ContentUpdate(
+                    itemId = 10L,
+                    title = "New title",
+                    description = null,
+                    updatedAtMillis = timeProvider.currentTimeMillis(),
+                ),
+            ),
+            currentListItemDao.contentUpdates,
+        )
+    }
+
+    @Test
     fun `when mutating item state then forwards checked pending all checked and clear operations`() = runTest {
         repository.setChecked(itemId = 10L, isChecked = true)
         repository.setAllChecked(isChecked = false)
@@ -219,6 +262,7 @@ class RoomCurrentListRepositoryTest {
 
 private class FakeCurrentListItemDao : CurrentListItemDao {
     val items = mutableListOf<CurrentListItemEntity>()
+    val contentUpdates = mutableListOf<ContentUpdate>()
     val checkedUpdates = mutableListOf<CheckedUpdate>()
     val allCheckedUpdates = mutableListOf<AllCheckedUpdate>()
     val pendingRemovalUpdates = mutableListOf<PendingRemovalUpdate>()
@@ -246,6 +290,23 @@ private class FakeCurrentListItemDao : CurrentListItemDao {
         val insertedItem = item.copy(id = nextId)
         items += insertedItem
         return insertedItem.id
+    }
+
+    override suspend fun updateContent(
+        itemId: Long,
+        title: String,
+        description: String?,
+        updatedAtMillis: Long,
+    ) {
+        contentUpdates += ContentUpdate(itemId, title, description, updatedAtMillis)
+        val index = items.indexOfFirst { existingItem -> existingItem.id == itemId }
+        if (index >= 0) {
+            items[index] = items[index].copy(
+                title = title,
+                description = description,
+                updatedAtMillis = updatedAtMillis,
+            )
+        }
     }
 
     override suspend fun updatePosition(
@@ -315,6 +376,13 @@ private class FakeCurrentListItemDao : CurrentListItemDao {
 private data class CheckedUpdate(
     val itemId: Long,
     val isChecked: Boolean,
+    val updatedAtMillis: Long,
+)
+
+private data class ContentUpdate(
+    val itemId: Long,
+    val title: String,
+    val description: String?,
     val updatedAtMillis: Long,
 )
 

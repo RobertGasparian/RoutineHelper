@@ -41,6 +41,19 @@ class RoomCurrentListRepository @Inject constructor(
         )
     }
 
+    override suspend fun updateItem(
+        itemId: Long,
+        title: String,
+        description: String?,
+    ) {
+        currentListItemDao.updateContent(
+            itemId = itemId,
+            title = title,
+            description = description,
+            updatedAtMillis = timeProvider.currentTimeMillis(),
+        )
+    }
+
     override suspend fun setChecked(
         itemId: Long,
         isChecked: Boolean,
