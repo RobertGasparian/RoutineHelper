@@ -37,7 +37,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,6 +56,7 @@ import com.robertgasparian.routinehelper.ui.dsm.RoutineReorderableLazyColumn
 import com.robertgasparian.routinehelper.ui.dsm.RoutineReorderDragStartMode
 import com.robertgasparian.routinehelper.ui.dsm.RoutineSwipeToReveal
 import com.robertgasparian.routinehelper.ui.dsm.SummaryNoteCard
+import com.robertgasparian.routinehelper.ui.dsm.rememberLazyListIsActuallyScrolling
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 import java.time.Instant
 import java.time.LocalDate
@@ -92,11 +92,7 @@ fun RoutineTrackingComponent(
         }
     }
 
-    val fabVisible by remember {
-        derivedStateOf {
-            !listState.isScrollInProgress
-        }
-    }
+    val fabVisible = !rememberLazyListIsActuallyScrolling(listState)
     val fabScale by animateFloatAsState(
         targetValue = if (fabVisible) 1f else 0f,
         animationSpec = tween(durationMillis = 180),

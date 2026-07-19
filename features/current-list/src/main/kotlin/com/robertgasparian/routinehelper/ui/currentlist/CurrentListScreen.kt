@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -59,6 +60,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -76,6 +78,7 @@ import com.robertgasparian.routinehelper.ui.dsm.RoutineOutlinedTextField
 import com.robertgasparian.routinehelper.ui.dsm.RoutineReorderDragStartMode
 import com.robertgasparian.routinehelper.ui.dsm.RoutineReorderableLazyColumn
 import com.robertgasparian.routinehelper.ui.dsm.RoutineSwipeToReveal
+import com.robertgasparian.routinehelper.ui.dsm.rememberLazyListIsActuallyScrolling
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 import kotlinx.coroutines.flow.filter
 
@@ -134,6 +137,13 @@ fun CurrentListComponent(
         }
     }
 
+    val fabVisible = !rememberLazyListIsActuallyScrolling(listState)
+    val fabScale by animateFloatAsState(
+        targetValue = if (fabVisible) 1f else 0f,
+        animationSpec = tween(durationMillis = 180),
+        label = "CurrentListFabScale",
+    )
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -184,8 +194,14 @@ fun CurrentListComponent(
         },
         floatingActionButton = {
             FloatingActionButton(
-                modifier = Modifier.padding(bottom = CurrentListFabBottomClearance),
-                onClick = { isAddDialogVisible = true },
+                modifier = Modifier
+                    .padding(bottom = CurrentListFabBottomClearance)
+                    .scale(fabScale),
+                onClick = {
+                    if (fabVisible) {
+                        isAddDialogVisible = true
+                    }
+                },
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
