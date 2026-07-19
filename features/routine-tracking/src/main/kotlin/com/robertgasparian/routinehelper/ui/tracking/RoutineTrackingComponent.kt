@@ -230,8 +230,9 @@ fun RoutineTrackingComponent(
                 ) {
                     RoutineTrackingItem(
                         item = item,
+                        isDragging = isDragging,
                         onIntent = onIntent,
-                        dragHandleModifier = dragHandleModifier,
+                        modifier = dragHandleModifier,
                     )
                 }
             }
@@ -359,9 +360,9 @@ private fun DebugSnapshotDatePickerDialog(
 @Composable
 private fun RoutineTrackingItem(
     item: RoutineTrackingItemUiState,
+    isDragging: Boolean,
     onIntent: (RoutineTrackingIntent) -> Unit,
     modifier: Modifier = Modifier,
-    dragHandleModifier: Modifier = Modifier,
 ) {
     RoutineActionItemCard(
         modifier = modifier,
@@ -370,6 +371,7 @@ private fun RoutineTrackingItem(
         note = item.note.takeIf(String::isNotBlank),
         isChecked = item.isChecked,
         isHidden = item.isHidden,
+        isDragging = isDragging,
         repeatTargetCount = item.repeatTargetCount,
         completedCount = item.completedCount,
         onCheckedChange = { isChecked ->
@@ -393,7 +395,6 @@ private fun RoutineTrackingItem(
         onHiddenChange = { isHidden ->
             onIntent(RoutineTrackingIntent.HiddenChange(item.routineItemId, isHidden))
         },
-        dragHandleModifier = dragHandleModifier,
     )
 }
 

@@ -1,6 +1,7 @@
 package com.robertgasparian.routinehelper.ui.dsm
 
 import android.content.res.Configuration
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,7 +22,6 @@ import androidx.compose.material.icons.automirrored.filled.StickyNote2
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.DragIndicator
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Visibility
@@ -36,9 +36,12 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -56,6 +59,7 @@ fun RoutineActionItemCard(
     note: String? = null,
     isChecked: Boolean = false,
     isHidden: Boolean = false,
+    isDragging: Boolean = false,
     repeatTargetCount: Int? = null,
     completedCount: Int = 0,
     onCheckedChange: (Boolean) -> Unit = {},
@@ -63,7 +67,6 @@ fun RoutineActionItemCard(
     onEditActionClick: () -> Unit = {},
     onEditNoteClick: () -> Unit = {},
     onHiddenChange: (Boolean) -> Unit = {},
-    dragHandleModifier: Modifier = Modifier,
 ) {
     val isRepeatAction = repeatTargetCount != null
     val isComplete = !isHidden && if (isRepeatAction) {
@@ -71,19 +74,35 @@ fun RoutineActionItemCard(
     } else {
         isChecked
     }
+    val dragActivationProgress by animateFloatAsState(
+        targetValue = if (isDragging) 1f else 0f,
+        animationSpec = MaterialTheme.motionScheme.fastEffectsSpec(),
+        label = "Routine action item drag activation",
+    )
+    val idleContainerColor = if (isHidden) {
+        MaterialTheme.colorScheme.surfaceContainer
+    } else {
+        MaterialTheme.colorScheme.surfaceContainerLow
+    }
+    val containerColor = lerp(
+        start = idleContainerColor,
+        stop = MaterialTheme.colorScheme.surfaceContainerHigh,
+        fraction = dragActivationProgress,
+    )
+    val borderColor = lerp(
+        start = MaterialTheme.colorScheme.outlineVariant,
+        stop = MaterialTheme.colorScheme.primary,
+        fraction = dragActivationProgress,
+    )
 
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         border = CardDefaults.outlinedCardBorder().copy(
-            brush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.outlineVariant),
+            brush = SolidColor(borderColor),
         ),
         colors = CardDefaults.cardColors(
-            containerColor = if (isHidden) {
-                MaterialTheme.colorScheme.surfaceContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceContainerLow
-            },
+            containerColor = containerColor,
             contentColor = MaterialTheme.colorScheme.onSurface,
         ),
     ) {
@@ -147,7 +166,6 @@ fun RoutineActionItemCard(
 
                 RoutineActionItemCardActionColumn(
                     modifier = Modifier.align(Alignment.Top),
-                    dragHandleModifier = dragHandleModifier,
                     noteContentDescription = if (note.isNullOrBlank()) "Add note" else "Edit note",
                     isComplete = isComplete,
                     isHidden = isHidden,
@@ -336,7 +354,6 @@ private fun RoutineActionItemCardCounterButton(
 
 @Composable
 private fun RoutineActionItemCardActionColumn(
-    dragHandleModifier: Modifier,
     noteContentDescription: String,
     isComplete: Boolean,
     isHidden: Boolean,
@@ -350,15 +367,6 @@ private fun RoutineActionItemCardActionColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.Top),
     ) {
-        RoutineActionItemCardSmallIconButton(
-            modifier = dragHandleModifier,
-            onClick = {},
-            contentDescription = "Reorder action",
-            icon = Icons.Default.DragIndicator,
-            tint = localActionTint(isComplete),
-            buttonSize = 32.dp,
-            iconSize = 20.dp,
-        )
         RoutineActionItemCardSmallIconButton(
             onClick = { onHiddenChange(!isHidden) },
             contentDescription = if (isHidden) "Show action" else "Hide action",

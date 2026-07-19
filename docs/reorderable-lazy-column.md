@@ -11,7 +11,7 @@ Daily, or Weekly business knowledge. Its current consumers are:
   using whole-card long-press recognition, a trailing item overflow action, and a sticky bulk-actions
   header.
 - [Daily and Weekly tracking](../features/routine-tracking/src/main/kotlin/com/robertgasparian/routinehelper/ui/tracking/RoutineTrackingComponent.kt),
-  using long-press drag recognition, reveal-and-tap deletion, and a summary-note header.
+  using whole-card long-press recognition, reveal-and-tap deletion, and a summary-note header.
 
 The most important invariant is:
 
@@ -63,8 +63,8 @@ The caller must honor these rules:
 - `itemId` must return a unique, stable `Long`. Identity must not depend on the current index,
   visible content, or mutable presentation state.
 - Apply `dragHandleModifier` to the exact UI region that should start a reorder gesture. Do not put
-  a second reorder detector on the card or row. Current List applies it to the full card; tracking
-  applies it to its existing drag interaction region.
+  a second reorder detector on the card or row. Current List and tracking both apply it to the full
+  card for consistent whole-card long-press reordering.
 - `itemContent` must tolerate being moved from the LazyColumn item into the overlay composition
   during a drag. Important interaction state should be hoisted; do not rely on local composable
   state surviving that transition.
@@ -110,13 +110,14 @@ The overlay currently has no elevation animation or graphics layer. It is on top
 last child of the component's root `Box`. Elevation is a visual option, not a positioning tool, and
 must not be used to repair a bad handoff.
 
-Current List provides drag activation feedback without changing geometry. Its card animates from
-`surfaceContainerLow` to `surfaceContainerHigh` while its border animates from `outlineVariant` to
-`primary`. Both colors are driven by one progress animation, so they remain synchronized. This
-follows Material's distinction between effects motion, such as color, and spatial motion that
-changes shape or bounds. The project uses Material 3's standard `MotionScheme` because reordering is
-a recurring utility interaction, and the activation transition uses the theme's `fastEffectsSpec`.
-Keep the timing theme-driven instead of adding a local duration or easing curve.
+Current List and tracking provide drag activation feedback without changing geometry. Their cards
+animate from the normal container color to `surfaceContainerHigh` while the border animates from
+`outlineVariant` to `primary`. Both colors are driven by one progress animation, so they remain
+synchronized. This follows Material's distinction between effects motion, such as color, and
+spatial motion that changes shape or bounds. The project uses Material 3's standard `MotionScheme`
+because reordering is a recurring utility interaction, and the activation transition uses the
+theme's `fastEffectsSpec`. Keep the timing theme-driven instead of adding a local duration or easing
+curve.
 
 The trailing overflow icon replaces the former dedicated drag icon. A tap opens item actions, while
 the card's shared modifier recognizes a long press for reordering. The expanded item-menu ID is
@@ -617,9 +618,9 @@ Render them on the overlay. Keep the overlay as the last root child and do not m
 control when the overlay is removed. Verify at slow animator scales.
 
 For feature-owned card feedback, prefer effects that do not alter measured geometry. Current List
-uses synchronized container and border color animation from `isDragging`. Avoid padding and size
-changes because item size is captured once at drag start; avoid scale unless its center-origin edge
-movement is an intentional part of the motion design.
+and tracking use synchronized container and border color animation from `isDragging`. Avoid padding
+and size changes because item size is captured once at drag start; avoid scale unless its
+center-origin edge movement is an intentional part of the motion design.
 
 ### Add horizontal or grid reordering
 
@@ -665,9 +666,9 @@ Before changing the component:
 Manual regression matrix:
 
 - In a debug build, use **Add test items** from the overflow menu on Current List, Daily, and
-  Weekly. Verify every selection appends another 20 items even when the list is already populated,
+  Weekly. Verify every selection adds another 20 items even when the list is already populated,
   and that the generated numbering continues from the current visible item count.
-- Current List whole-card long-press drag and Daily/Weekly long-press drag.
+- Current List, Daily, and Weekly whole-card long-press drag.
 - Tap the Current List checkbox and trailing overflow icon without starting a drag; verify Edit opens
   the shared item dialog with the current title and description prefilled.
 - Current List horizontal swipe-to-reveal before the long-press timeout, including starting the
