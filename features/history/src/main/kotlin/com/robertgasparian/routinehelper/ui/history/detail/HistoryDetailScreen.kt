@@ -39,12 +39,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.features.history.BuildConfig
+import com.robertgasparian.routinehelper.features.history.R
 import com.robertgasparian.routinehelper.ui.dsm.RoutineDialogTextButton
 import com.robertgasparian.routinehelper.ui.dsm.SummaryNoteCard
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
@@ -66,6 +69,7 @@ fun HistoryDetailScreen(
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val shareTitle = stringResource(R.string.history_share_snapshot_chooser)
 
     LaunchedEffect(viewModel) {
         viewModel.uiEvents.collect { event ->
@@ -95,13 +99,13 @@ fun HistoryDetailScreen(
                     context.shareTextFile(
                         fileText = intent.draft.fileText,
                         messageText = intent.draft.messageText,
-                        title = "Share routine snapshot",
+                        title = shareTitle,
                         fileName = intent.draft.fileName,
                     )
                     viewModel.onIntent(HistoryDetailIntent.ShareDismiss)
                 }
                 is HistoryDetailIntent.ShareTextConfirm -> {
-                    context.shareText(text = intent.messageText, title = "Share routine snapshot")
+                    context.shareText(text = intent.messageText, title = shareTitle)
                     viewModel.onIntent(HistoryDetailIntent.ShareDismiss)
                 }
                 else -> viewModel.onIntent(intent)
@@ -130,12 +134,12 @@ fun HistoryDetailComponent(
                     IconButton(onClick = { onIntent(HistoryDetailIntent.BackClick) }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.history_back),
                         )
                     }
                 },
                 title = {
-                    Text(text = "Snapshot")
+                    Text(text = stringResource(R.string.history_snapshot_title))
                 },
                 actions = {
                     IconButton(
@@ -144,7 +148,7 @@ fun HistoryDetailComponent(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Share,
-                            contentDescription = "Share snapshot",
+                            contentDescription = stringResource(R.string.history_share_snapshot),
                         )
                     }
                     if (showDeleteAction) {
@@ -156,7 +160,7 @@ fun HistoryDetailComponent(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete snapshot",
+                                contentDescription = stringResource(R.string.history_delete_snapshot),
                             )
                         }
                     }
@@ -197,9 +201,9 @@ fun HistoryDetailComponent(
                         SummaryNoteCard(
                             note = uiState.summaryNote,
                             label = if (uiState.cadence == RoutineCadence.Weekly) {
-                                "Week note"
+                                stringResource(R.string.history_week_note)
                             } else {
-                                "Day note"
+                                stringResource(R.string.history_day_note)
                             },
                             onEditClick = {},
                             isEditable = false,
@@ -252,11 +256,11 @@ fun HistoryDetailComponent(
     if (showDeleteConfirmation) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirmation = false },
-            title = { Text(text = "Delete snapshot?") },
-            text = { Text(text = "This removes this saved history entry from the test database.") },
+            title = { Text(text = stringResource(R.string.history_delete_snapshot_title)) },
+            text = { Text(text = stringResource(R.string.history_delete_snapshot_message)) },
             confirmButton = {
                 RoutineDialogTextButton(
-                    text = "Delete",
+                    text = stringResource(R.string.history_delete),
                     onClick = {
                         showDeleteConfirmation = false
                         onIntent(HistoryDetailIntent.DeleteClick)
@@ -266,7 +270,7 @@ fun HistoryDetailComponent(
             },
             dismissButton = {
                 RoutineDialogTextButton(
-                    text = "Cancel",
+                    text = stringResource(R.string.history_cancel),
                     onClick = { showDeleteConfirmation = false },
                 )
             },
@@ -304,7 +308,7 @@ private fun HiddenActionsHeader(
         animationSpec = tween(durationMillis = 220),
         label = "HiddenActionsArrowRotation",
     )
-    val title = "$count Hidden ${if (count == 1) "Action" else "Actions"}"
+    val title = pluralStringResource(R.plurals.history_hidden_actions, count, count)
 
     Row(
         modifier = modifier
@@ -322,7 +326,13 @@ private fun HiddenActionsHeader(
             Icon(
                 modifier = Modifier.rotate(arrowRotation),
                 imageVector = Icons.Default.KeyboardArrowDown,
-                contentDescription = if (isExpanded) "Collapse hidden actions" else "Expand hidden actions",
+                contentDescription = stringResource(
+                    if (isExpanded) {
+                        R.string.history_collapse_hidden_actions
+                    } else {
+                        R.string.history_expand_hidden_actions
+                    },
+                ),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
@@ -356,7 +366,7 @@ private fun MissingSnapshotContent(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = "Snapshot not found",
+            text = stringResource(R.string.history_snapshot_not_found),
             style = MaterialTheme.typography.headlineSmall,
         )
     }
@@ -372,7 +382,7 @@ private fun EmptySnapshotContent(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = "No items in this snapshot",
+            text = stringResource(R.string.history_snapshot_empty),
             style = MaterialTheme.typography.headlineSmall,
         )
     }

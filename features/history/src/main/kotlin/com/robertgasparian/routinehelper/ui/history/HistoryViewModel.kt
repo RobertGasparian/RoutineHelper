@@ -2,7 +2,6 @@ package com.robertgasparian.routinehelper.ui.history
 
 import com.robertgasparian.routinehelper.core.presentation.BaseViewModel
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotSummary
-import com.robertgasparian.routinehelper.domain.formatter.SnapshotShareTextFormatter
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotSummariesUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotUseCase
@@ -17,7 +16,7 @@ import kotlinx.coroutines.flow.first
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
     private val deleteSnapshotUseCase: DeleteSnapshotUseCase,
-    private val snapshotShareTextFormatter: SnapshotShareTextFormatter,
+    private val historyTextProvider: HistoryTextProvider,
     snapshotSummariesUseCase: SnapshotSummariesUseCase,
     private val snapshotUseCase: SnapshotUseCase,
 ) : BaseViewModel<HistoryUiState, HistoryIntent, Nothing>() {
@@ -112,13 +111,13 @@ class HistoryViewModel @Inject constructor(
                 snapshotUseCase(snapshotId).first()
             }
             if (snapshots.isNotEmpty()) {
-                val exportText = snapshotShareTextFormatter(snapshots)
+                val exportText = historyTextProvider.snapshotsShareText(snapshots)
                 shareDraft.value = when (mode) {
                     ShareMode.Text -> ShareDraft.text(exportText)
                     ShareMode.File -> ShareDraft.file(
-                        messageText = snapshots.toHistoryFileShareMessage(),
+                        messageText = historyTextProvider.snapshotsFileMessage(snapshots),
                         fileText = exportText,
-                        fileName = "routine-snapshots-export.txt",
+                        fileName = historyTextProvider.snapshotsFileName(),
                     )
                 }
             }

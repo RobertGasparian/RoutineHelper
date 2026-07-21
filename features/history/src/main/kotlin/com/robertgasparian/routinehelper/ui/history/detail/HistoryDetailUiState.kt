@@ -6,7 +6,7 @@ import com.robertgasparian.routinehelper.ui.share.ShareDraft
 data class HistoryDetailUiState(
     val date: String = "",
     val cadence: RoutineCadence = RoutineCadence.Daily,
-    val finalizedLabel: String = "",
+    val finalizedTime: String = "",
     val summaryNote: String = "",
     val items: List<HistoryDetailItemUiState> = emptyList(),
     val isMissing: Boolean = false,
@@ -33,7 +33,7 @@ data class HistoryDetailUiState(
             HistoryDetailUiState(
                 date = "2026-05-29",
                 cadence = RoutineCadence.Daily,
-                finalizedLabel = "Finalized 11:45 PM",
+                finalizedTime = "11:45 PM",
                 summaryNote = "Low-energy day, but I kept the basics moving.",
                 items = listOf(
                     HistoryDetailItemUiState(
@@ -61,7 +61,7 @@ data class HistoryDetailUiState(
         fun previewEmpty(): HistoryDetailUiState =
             HistoryDetailUiState(
                 date = "2026-05-29",
-                finalizedLabel = "Finalized 11:45 PM",
+                finalizedTime = "11:45 PM",
             )
 
         fun previewShare(): HistoryDetailUiState =

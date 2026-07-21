@@ -29,10 +29,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.features.history.R
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -102,7 +104,9 @@ fun RoutineHistoryItemCard(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     Text(
-                        text = if (isWeekly) "Weekly" else "Daily",
+                        text = stringResource(
+                            if (isWeekly) R.string.history_cadence_weekly else R.string.history_cadence_daily,
+                        ),
                         style = MaterialTheme.typography.labelLarge,
                         color = RoutineHistoryAccent(isSelected),
                         fontWeight = FontWeight.SemiBold,
@@ -111,7 +115,7 @@ fun RoutineHistoryItemCard(
                         Icon(
                             modifier = Modifier.size(18.dp),
                             imageVector = Icons.AutoMirrored.Filled.StickyNote2,
-                            contentDescription = "Has summary note",
+                            contentDescription = stringResource(R.string.history_has_summary_note),
                             tint = RoutineHistoryAccent(isSelected),
                         )
                     }

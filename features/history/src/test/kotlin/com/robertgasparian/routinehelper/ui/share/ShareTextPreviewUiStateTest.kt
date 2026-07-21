@@ -12,7 +12,7 @@ class ShareTextPreviewUiStateTest {
 
         assertFalse(state.canShare)
         assertFalse(state.isOverSoftLimit)
-        assertEquals("3 characters", state.characterCountLabel)
+        assertEquals(3, state.text.length)
     }
 
     @Test
@@ -21,7 +21,7 @@ class ShareTextPreviewUiStateTest {
 
         assertTrue(state.canShare)
         assertFalse(state.isOverSoftLimit)
-        assertEquals("16 characters", state.characterCountLabel)
+        assertEquals(16, state.text.length)
     }
 
     @Test

@@ -30,10 +30,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.robertgasparian.routinehelper.features.history.R
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 import com.robertgasparian.routinehelper.ui.theme.routineCompletedColor
 import com.robertgasparian.routinehelper.ui.theme.routineCompletedContainerColor
@@ -138,7 +140,7 @@ private fun SnapshotHiddenMark(
         Icon(
             modifier = Modifier.size(22.dp),
             imageVector = Icons.Default.Block,
-            contentDescription = "Hidden action",
+            contentDescription = stringResource(R.string.history_hidden_action),
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
@@ -208,7 +210,7 @@ private fun SnapshotRepeatProgress(
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Text(
-            text = "$safeCompleted of $safeTarget completed",
+            text = stringResource(R.string.history_completion_of_total, safeCompleted, safeTarget),
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.SemiBold,
             color = if (isComplete) {

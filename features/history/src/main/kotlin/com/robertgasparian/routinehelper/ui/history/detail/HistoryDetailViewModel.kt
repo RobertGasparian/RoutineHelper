@@ -1,12 +1,10 @@
 package com.robertgasparian.routinehelper.ui.history.detail
 
 import com.robertgasparian.routinehelper.core.presentation.BaseViewModel
-import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
-import com.robertgasparian.routinehelper.domain.formatter.SnapshotShareTextFormatter
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotUseCase
-import com.robertgasparian.routinehelper.ui.history.historyLabel
+import com.robertgasparian.routinehelper.ui.history.HistoryTextProvider
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -20,9 +18,8 @@ import kotlinx.coroutines.flow.combine
 class HistoryDetailViewModel @AssistedInject constructor(
     @Assisted private val snapshotId: Long,
     private val deleteSnapshotUseCase: DeleteSnapshotUseCase,
-    private val snapshotShareTextFormatter: SnapshotShareTextFormatter,
+    private val historyTextProvider: HistoryTextProvider,
     snapshotUseCase: SnapshotUseCase,
-    private val timeProvider: TimeProvider,
 ) : BaseViewModel<HistoryDetailUiState, HistoryDetailIntent, HistoryDetailUiEvent>() {
     private val isShareFormatDialogVisible = MutableStateFlow(false)
     private val shareDraft = MutableStateFlow<ShareDraft?>(null)
@@ -36,7 +33,9 @@ class HistoryDetailViewModel @AssistedInject constructor(
             isShareFormatDialogVisible,
             shareDraft,
         ) { snapshot, isShareFormatDialogVisible, shareDraft ->
-            (snapshot?.toHistoryDetailUiState(timeProvider) ?: HistoryDetailUiState.previewMissing()).copy(
+            (snapshot?.toHistoryDetailUiState(
+                finalizedTime = historyTextProvider.finalizedTime(snapshot.finalizedAtMillis),
+            ) ?: HistoryDetailUiState.previewMissing()).copy(
                 isShareFormatDialogVisible = isShareFormatDialogVisible,
                 shareDraft = shareDraft,
             )
@@ -75,16 +74,16 @@ class HistoryDetailViewModel @AssistedInject constructor(
     private fun showTextSharePreview() {
         val snapshot = snapshot.value ?: return
         isShareFormatDialogVisible.value = false
-        shareDraft.value = ShareDraft.text(snapshotShareTextFormatter(snapshot))
+        shareDraft.value = ShareDraft.text(historyTextProvider.snapshotShareText(snapshot))
     }
 
     private fun showFileSharePreview() {
         val snapshot = snapshot.value ?: return
         isShareFormatDialogVisible.value = false
         shareDraft.value = ShareDraft.file(
-            messageText = "Here is the ${snapshot.cadence.historyLabel.lowercase()} routine snapshot from ${snapshot.historyDisplayDate}.",
-            fileText = snapshotShareTextFormatter(snapshot),
-            fileName = "routine-snapshot-${snapshot.historyDisplayDate}.txt",
+            messageText = historyTextProvider.snapshotFileMessage(snapshot),
+            fileText = historyTextProvider.snapshotShareText(snapshot),
+            fileName = historyTextProvider.snapshotFileName(snapshot),
         )
     }
 

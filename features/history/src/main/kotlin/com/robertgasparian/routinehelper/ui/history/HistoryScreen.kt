@@ -29,10 +29,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.features.history.R
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
 import com.robertgasparian.routinehelper.ui.share.ShareFileDialog
 import com.robertgasparian.routinehelper.ui.share.ShareFormatDialog
@@ -50,6 +54,7 @@ fun HistoryScreen(
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val shareTitle = stringResource(R.string.history_share_snapshots_chooser)
 
     LaunchedEffect(uiState.shareDraft) {
         when (val draft = uiState.shareDraft) {
@@ -71,13 +76,13 @@ fun HistoryScreen(
                     context.shareTextFile(
                         fileText = intent.draft.fileText,
                         messageText = intent.draft.messageText,
-                        title = "Share routine snapshots",
+                        title = shareTitle,
                         fileName = intent.draft.fileName,
                     )
                     viewModel.onIntent(HistoryIntent.ShareDismiss)
                 }
                 is HistoryIntent.ShareTextConfirm -> {
-                    context.shareText(text = intent.messageText, title = "Share routine snapshots")
+                    context.shareText(text = intent.messageText, title = shareTitle)
                     viewModel.onIntent(HistoryIntent.ShareDismiss)
                 }
                 is HistoryIntent.SnapshotClick -> {
@@ -110,7 +115,7 @@ fun HistoryComponent(
                         IconButton(onClick = { onIntent(HistoryIntent.ClearSelectionClick) }) {
                             Icon(
                                 imageVector = Icons.Default.Close,
-                                contentDescription = "Clear selection",
+                                contentDescription = stringResource(R.string.history_clear_selection),
                             )
                         }
                     }
@@ -118,9 +123,13 @@ fun HistoryComponent(
                 title = {
                     Text(
                         text = if (uiState.isSelectionMode) {
-                            "${uiState.selectedCount} selected"
+                            pluralStringResource(
+                                R.plurals.history_selected_count,
+                                uiState.selectedCount,
+                                uiState.selectedCount,
+                            )
                         } else {
-                            "History"
+                            stringResource(R.string.history_title)
                         },
                     )
                 },
@@ -132,7 +141,7 @@ fun HistoryComponent(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Share,
-                                contentDescription = "Share selected snapshots",
+                                contentDescription = stringResource(R.string.history_share_selected_snapshots),
                             )
                         }
                         IconButton(
@@ -141,14 +150,14 @@ fun HistoryComponent(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete selected snapshots",
+                                contentDescription = stringResource(R.string.history_delete_selected_snapshots),
                             )
                         }
                     } else {
                         IconButton(onClick = { onIntent(HistoryIntent.SettingsClick) }) {
                             Icon(
                                 imageVector = Icons.Default.Settings,
-                                contentDescription = "Open settings",
+                                contentDescription = stringResource(R.string.history_open_settings),
                             )
                         }
                     }
@@ -185,10 +194,24 @@ fun HistoryComponent(
                         items = uiState.snapshots,
                         key = { snapshot -> snapshot.snapshotId },
                     ) { snapshot ->
+                        val title = if (snapshot.cadence == RoutineCadence.Weekly) {
+                            stringResource(R.string.history_week_of, snapshot.date)
+                        } else {
+                            snapshot.date
+                        }
+                        val completionLabel = when {
+                            snapshot.totalCount == 0 -> stringResource(R.string.history_no_actions_saved)
+                            snapshot.isComplete -> stringResource(R.string.history_all_completed)
+                            else -> stringResource(
+                                R.string.history_completion_fraction,
+                                snapshot.completedCount,
+                                snapshot.totalCount,
+                            )
+                        }
                         RoutineHistoryItemCard(
                             cadence = snapshot.cadence,
-                            title = snapshot.date,
-                            completionLabel = snapshot.completionLabel,
+                            title = title,
+                            completionLabel = completionLabel,
                             isComplete = snapshot.isComplete,
                             hasSummaryNote = snapshot.hasSummaryNote,
                             isSelectionMode = uiState.isSelectionMode,
@@ -235,7 +258,7 @@ private fun HistoryFilterRow(
             FilterChip(
                 selected = selectedFilter == filter,
                 onClick = { onFilterClick(filter) },
-                label = { Text(text = filter.label) },
+                label = { Text(text = stringResource(filter.labelRes)) },
                 leadingIcon = filter.snapshotCadence?.let { cadence ->
                     {
                         Icon(
@@ -263,12 +286,12 @@ private fun EmptyHistoryContent(
             contentDescription = null,
         )
         Text(
-            text = "No snapshots yet",
+            text = stringResource(R.string.history_no_snapshots_title),
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(top = 16.dp),
         )
         Text(
-            text = "Use the Snapshot action on Daily or Weekly while we build the scheduled reset.",
+            text = stringResource(R.string.history_no_snapshots_description),
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(top = 8.dp),
         )

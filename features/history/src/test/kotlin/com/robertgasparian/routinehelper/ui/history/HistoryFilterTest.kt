@@ -13,9 +13,9 @@ class HistoryFilterTest {
     }
 
     @Test
-    fun `given history filter when mapped to label then matching label is returned`() {
-        assertEquals("All", HistoryFilter.All.label)
-        assertEquals("Daily", HistoryFilter.Daily.label)
-        assertEquals("Weekly", HistoryFilter.Weekly.label)
+    fun `given history filter when mapped to label resource then matching resource is returned`() {
+        assertEquals(com.robertgasparian.routinehelper.features.history.R.string.history_filter_all, HistoryFilter.All.labelRes)
+        assertEquals(com.robertgasparian.routinehelper.features.history.R.string.history_cadence_daily, HistoryFilter.Daily.labelRes)
+        assertEquals(com.robertgasparian.routinehelper.features.history.R.string.history_cadence_weekly, HistoryFilter.Weekly.labelRes)
     }
 }

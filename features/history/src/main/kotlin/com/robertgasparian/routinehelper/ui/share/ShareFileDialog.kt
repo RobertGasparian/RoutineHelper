@@ -17,9 +17,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
+import com.robertgasparian.routinehelper.features.history.R
 import com.robertgasparian.routinehelper.ui.dsm.RoutineDialogFilledButton
 import com.robertgasparian.routinehelper.ui.dsm.RoutineDialogTextButton
 import com.robertgasparian.routinehelper.ui.dsm.RoutineOutlinedTextField
@@ -39,7 +42,7 @@ fun ShareFileDialog(
         containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         tonalElevation = 0.dp,
         title = {
-            Text(text = "Export .txt")
+            Text(text = stringResource(R.string.history_export_txt))
         },
         text = {
             Column(
@@ -49,7 +52,7 @@ fun ShareFileDialog(
                 RoutineOutlinedTextField(
                     value = draft.fileName,
                     onValueChange = onFileNameChange,
-                    label = "File name",
+                    label = stringResource(R.string.history_file_name_label),
                     isRequired = true,
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
@@ -57,11 +60,17 @@ fun ShareFileDialog(
                 RoutineOutlinedTextField(
                     value = draft.messageText,
                     onValueChange = onTextChange,
-                    label = "Message",
+                    label = stringResource(R.string.history_message_label),
                     minLines = 3,
                     maxLines = 5,
                     supportingText = {
-                        Text(text = "${draft.messageText.length} characters")
+                        Text(
+                            text = pluralStringResource(
+                                R.plurals.history_character_count,
+                                draft.messageText.length,
+                                draft.messageText.length,
+                            ),
+                        )
                     },
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -72,7 +81,7 @@ fun ShareFileDialog(
                 horizontalArrangement = Arrangement.End,
             ) {
                 RoutineDialogFilledButton(
-                    text = "Share .txt",
+                    text = stringResource(R.string.history_share_txt),
                     enabled = draft.messageText.isNotBlank() && draft.fileName.isNotBlank(),
                     onClick = onShareClick,
                 )
@@ -80,7 +89,7 @@ fun ShareFileDialog(
         },
         dismissButton = {
             RoutineDialogTextButton(
-                text = "Cancel",
+                text = stringResource(R.string.history_cancel),
                 onClick = onDismiss,
             )
         },
@@ -105,14 +114,14 @@ private fun ShareFileDialogPreviewContent(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                text = "Export .txt",
+                text = stringResource(R.string.history_export_txt),
                 style = MaterialTheme.typography.headlineSmall,
             )
             ShareFileDescriptionBlock()
             RoutineOutlinedTextField(
                 value = draft.fileName,
                 onValueChange = {},
-                label = "File name",
+                label = stringResource(R.string.history_file_name_label),
                 isRequired = true,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
@@ -120,11 +129,17 @@ private fun ShareFileDialogPreviewContent(
             RoutineOutlinedTextField(
                 value = draft.messageText,
                 onValueChange = {},
-                label = "Message",
+                label = stringResource(R.string.history_message_label),
                 minLines = 3,
                 maxLines = 5,
                 supportingText = {
-                    Text(text = "${draft.messageText.length} characters")
+                    Text(
+                        text = pluralStringResource(
+                            R.plurals.history_character_count,
+                            draft.messageText.length,
+                            draft.messageText.length,
+                        ),
+                    )
                 },
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -133,11 +148,11 @@ private fun ShareFileDialogPreviewContent(
                 horizontalArrangement = Arrangement.End,
             ) {
                 RoutineDialogTextButton(
-                    text = "Cancel",
+                    text = stringResource(R.string.history_cancel),
                     onClick = {},
                 )
                 RoutineDialogFilledButton(
-                    text = "Share .txt",
+                    text = stringResource(R.string.history_share_txt),
                     enabled = draft.messageText.isNotBlank() && draft.fileName.isNotBlank(),
                     onClick = {},
                 )
@@ -157,7 +172,7 @@ private fun ShareFileDescriptionBlock(
         contentColor = MaterialTheme.colorScheme.onSurface,
     ) {
         Text(
-            text = "A text file will be attached. You can edit the file name and message.",
+            text = stringResource(R.string.history_file_share_description),
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,

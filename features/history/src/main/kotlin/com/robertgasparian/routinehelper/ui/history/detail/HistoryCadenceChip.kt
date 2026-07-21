@@ -11,11 +11,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.ui.history.historyIcon
-import com.robertgasparian.routinehelper.ui.history.historyLabel
+import com.robertgasparian.routinehelper.ui.history.historyLabelRes
 
 @Composable
 internal fun HistoryCadenceChip(
@@ -38,7 +39,7 @@ internal fun HistoryCadenceChip(
                 contentDescription = null,
             )
             Text(
-                text = cadence.historyLabel,
+                text = stringResource(cadence.historyLabelRes),
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
             )

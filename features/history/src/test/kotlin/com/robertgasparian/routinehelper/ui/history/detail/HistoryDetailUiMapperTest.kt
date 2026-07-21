@@ -3,7 +3,6 @@ package com.robertgasparian.routinehelper.ui.history.detail
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
-import com.robertgasparian.routinehelper.core.testing.FixedTimeProvider
 import java.time.Instant
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -38,13 +37,13 @@ class HistoryDetailUiMapperTest {
                     note = null,
                 ),
             ),
-        ).toHistoryDetailUiState(FixedTimeProvider())
+        ).toHistoryDetailUiState(finalizedTime = "12:00 PM")
 
         assertEquals(
             HistoryDetailUiState(
-                date = "Week of 2026-05-25",
+                date = "2026-05-25",
                 cadence = RoutineCadence.Weekly,
-                finalizedLabel = "Finalized 12:00 PM",
+                finalizedTime = "12:00 PM",
                 summaryNote = "Good week",
                 items = listOf(
                     HistoryDetailItemUiState(
@@ -83,7 +82,7 @@ class HistoryDetailUiMapperTest {
             items = emptyList(),
         )
 
-        val state = snapshot.toHistoryDetailUiState(FixedTimeProvider())
+        val state = snapshot.toHistoryDetailUiState(finalizedTime = "12:00 PM")
 
         assertEquals("2026-05-29", state.date)
         assertEquals("", state.summaryNote)

@@ -30,9 +30,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.robertgasparian.routinehelper.features.history.R
 import com.robertgasparian.routinehelper.ui.dsm.RoutineKeyboardAwareBottomActions
 import com.robertgasparian.routinehelper.ui.dsm.RoutineOutlinedTextField
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
@@ -76,11 +79,11 @@ fun ShareTextPreviewComponent(
                     IconButton(onClick = { onIntent(ShareTextPreviewIntent.BackClick) }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.history_back),
                         )
                     }
                 },
-                title = { Text(text = "Share text") },
+                title = { Text(text = stringResource(R.string.history_share_text_title)) },
             )
         },
         bottomBar = {
@@ -105,13 +108,19 @@ fun ShareTextPreviewComponent(
             RoutineOutlinedTextField(
                 value = uiState.text,
                 onValueChange = { value -> onIntent(ShareTextPreviewIntent.TextChange(value)) },
-                label = "Message",
+                label = stringResource(R.string.history_message_label),
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
                 minLines = 12,
                 supportingText = {
-                    Text(text = uiState.characterCountLabel)
+                    Text(
+                        text = pluralStringResource(
+                            R.plurals.history_character_count,
+                            uiState.text.length,
+                            uiState.text.length,
+                        ),
+                    )
                 },
             )
         }
@@ -129,7 +138,7 @@ private fun ShareTextPreviewHeader(
         contentColor = MaterialTheme.colorScheme.onSurface,
     ) {
         Text(
-            text = "Review and edit the message before sharing.",
+            text = stringResource(R.string.history_share_text_description),
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Medium,
@@ -171,12 +180,12 @@ private fun ShareTextLimitNote(
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 Text(
-                    text = "Long message",
+                    text = stringResource(R.string.history_long_message_title),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                    text = "Some apps may truncate long messages. Export as .txt if needed.",
+                    text = stringResource(R.string.history_long_message_description),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -193,10 +202,10 @@ private fun ShareTextPreviewBottomActions(
     modifier: Modifier = Modifier,
 ) {
     RoutineKeyboardAwareBottomActions(
-        primaryText = "Share text",
+        primaryText = stringResource(R.string.history_share_text),
         primaryEnabled = canShare,
         onPrimaryClick = onShareClick,
-        secondaryText = "Cancel",
+        secondaryText = stringResource(R.string.history_cancel),
         onSecondaryClick = onCancelClick,
         modifier = modifier,
     )

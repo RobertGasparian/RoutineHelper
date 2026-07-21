@@ -1,0 +1,89 @@
+<resources>
+    <string name="history_back">Back</string>
+    <string name="history_title">History</string>
+    <string name="history_snapshot_title">Snapshot</string>
+    <string name="history_open_settings">Open settings</string>
+    <string name="history_clear_selection">Clear selection</string>
+    <plurals name="history_selected_count">
+        <item quantity="one">%1$d selected</item>
+        <item quantity="other">%1$d selected</item>
+    </plurals>
+    <string name="history_share_selected_snapshots">Share selected snapshots</string>
+    <string name="history_delete_selected_snapshots">Delete selected snapshots</string>
+    <string name="history_filter_all">All</string>
+    <string name="history_cadence_daily">Daily</string>
+    <string name="history_cadence_weekly">Weekly</string>
+    <string name="history_has_summary_note">Has summary note</string>
+    <string name="history_no_snapshots_title">No snapshots yet</string>
+    <string name="history_no_snapshots_description">Use the Snapshot action on Daily or Weekly while we build the scheduled reset.</string>
+    <string name="history_week_of">Week of %1$s</string>
+    <string name="history_no_actions_saved">No actions saved</string>
+    <string name="history_all_completed">All completed!</string>
+    <string name="history_completion_fraction">%1$d/%2$d completed</string>
+    <string name="history_completion_of_total">%1$d of %2$d completed</string>
+    <string name="history_finalized">Finalized %1$s</string>
+
+    <string name="history_share_text_title">Share text</string>
+    <string name="history_message_label">Message</string>
+    <string name="history_share_text_description">Review and edit the message before sharing.</string>
+    <string name="history_long_message_title">Long message</string>
+    <string name="history_long_message_description">Some apps may truncate long messages. Export as .txt if needed.</string>
+    <string name="history_share_text">Share text</string>
+    <string name="history_cancel">Cancel</string>
+    <plurals name="history_character_count">
+        <item quantity="one">%1$d character</item>
+        <item quantity="other">%1$d characters</item>
+    </plurals>
+
+    <string name="history_share_snapshot">Share snapshot</string>
+    <string name="history_share_snapshot_description">Choose how to share this saved routine.</string>
+    <string name="history_editable_text">Editable text</string>
+    <string name="history_txt_file">TXT file</string>
+    <string name="history_export_snapshot_description">Export the snapshot as a .txt file.</string>
+    <string name="history_export_txt">Export .txt</string>
+    <string name="history_file_name_label">File name</string>
+    <string name="history_share_txt">Share .txt</string>
+    <string name="history_file_share_description">A text file will be attached. You can edit the file name and message.</string>
+
+    <string name="history_share_snapshots_chooser">Share routine snapshots</string>
+    <string name="history_share_snapshot_chooser">Share routine snapshot</string>
+    <string name="history_share_snapshots_message_empty">Here are the routine snapshots.</string>
+    <string name="history_share_snapshots_message_single">Here are the routine snapshots from %1$s.</string>
+    <string name="history_share_snapshots_message_range">Here are the routine snapshots from %1$s to %2$s.</string>
+    <string name="history_share_daily_snapshot_message">Here is the daily routine snapshot from %1$s.</string>
+    <string name="history_share_weekly_snapshot_message">Here is the weekly routine snapshot from the week of %1$s.</string>
+    <string name="history_snapshots_file_name" translatable="false">routine-snapshots-export.txt</string>
+    <string name="history_snapshot_file_name" translatable="false">routine-snapshot-%1$s.txt</string>
+
+    <string name="history_delete_snapshot">Delete snapshot</string>
+    <string name="history_delete_snapshot_title">Delete snapshot?</string>
+    <string name="history_delete_snapshot_message">This removes this saved history entry from the test database.</string>
+    <string name="history_delete">Delete</string>
+    <string name="history_day_note">Day note</string>
+    <string name="history_week_note">Week note</string>
+    <plurals name="history_hidden_actions">
+        <item quantity="one">%1$d Hidden Action</item>
+        <item quantity="other">%1$d Hidden Actions</item>
+    </plurals>
+    <string name="history_collapse_hidden_actions">Collapse hidden actions</string>
+    <string name="history_expand_hidden_actions">Expand hidden actions</string>
+    <string name="history_snapshot_not_found">Snapshot not found</string>
+    <string name="history_snapshot_empty">No items in this snapshot</string>
+    <string name="history_hidden_action">Hidden action</string>
+
+    <string name="history_export_daily_snapshot_title">Daily routine snapshot</string>
+    <string name="history_export_weekly_snapshot_title">Weekly routine snapshot</string>
+    <string name="history_export_daily_date">Date: %1$s</string>
+    <string name="history_export_weekly_date">Week of: %1$s</string>
+    <string name="history_export_finalized">Finalized: %1$s</string>
+    <string name="history_export_summary_note">Summary note:</string>
+    <string name="history_export_item" translatable="false">%1$d. %2$s %3$s</string>
+    <string name="history_export_count">Count: %1$d/%2$d</string>
+    <string name="history_export_description">Description: %1$s</string>
+    <string name="history_export_note">Note: %1$s</string>
+    <string name="history_export_daily_empty">No actions were saved for this day.</string>
+    <string name="history_export_weekly_empty">No actions were saved for this week.</string>
+    <string name="history_export_skipped_marker" translatable="false">[skipped]</string>
+    <string name="history_export_checked_marker" translatable="false">[x]</string>
+    <string name="history_export_unchecked_marker" translatable="false">[ ]</string>
+</resources>

@@ -11,13 +11,13 @@ import org.junit.Test
 class HistoryCadencePresentationTest {
     @Test
     fun `given daily cadence when mapped for history then daily label and event icon are returned`() {
-        assertEquals("Daily", RoutineCadence.Daily.historyLabel)
+        assertEquals(com.robertgasparian.routinehelper.features.history.R.string.history_cadence_daily, RoutineCadence.Daily.historyLabelRes)
         assertSame(Icons.Default.Event, RoutineCadence.Daily.historyIcon)
     }
 
     @Test
     fun `given weekly cadence when mapped for history then weekly label and view week icon are returned`() {
-        assertEquals("Weekly", RoutineCadence.Weekly.historyLabel)
+        assertEquals(com.robertgasparian.routinehelper.features.history.R.string.history_cadence_weekly, RoutineCadence.Weekly.historyLabelRes)
         assertSame(Icons.Default.ViewWeek, RoutineCadence.Weekly.historyIcon)
     }
 }

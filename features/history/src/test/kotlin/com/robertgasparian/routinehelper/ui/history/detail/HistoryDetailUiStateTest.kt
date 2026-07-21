@@ -11,7 +11,6 @@ class HistoryDetailUiStateTest {
         )
 
         assertEquals(HistoryDetailCompletionSummary.Empty, state.completionSummary)
-        assertEquals("No actions saved", state.completionSummary.label)
     }
 
     @Test
@@ -25,7 +24,6 @@ class HistoryDetailUiStateTest {
         )
 
         assertEquals(HistoryDetailCompletionSummary.AllComplete, state.completionSummary)
-        assertEquals("All completed!", state.completionSummary.label)
     }
 
     @Test
@@ -41,7 +39,6 @@ class HistoryDetailUiStateTest {
             HistoryDetailCompletionSummary.Partial(completedCount = 1, totalCount = 2),
             state.completionSummary,
         )
-        assertEquals("1 of 2 completed", state.completionSummary.label)
     }
 
     private fun item(

@@ -25,10 +25,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.robertgasparian.routinehelper.features.history.R
 import com.robertgasparian.routinehelper.ui.dsm.RoutineDialogTextButton
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 
@@ -45,7 +47,7 @@ fun ShareFormatDialog(
         shape = RoundedCornerShape(24.dp),
         title = {
             Text(
-                text = "Share snapshot",
+                text = stringResource(R.string.history_share_snapshot),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Medium,
             )
@@ -55,20 +57,20 @@ fun ShareFormatDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Text(
-                    text = "Choose how to share this saved routine.",
+                    text = stringResource(R.string.history_share_snapshot_description),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 ShareFormatOptionRow(
                     icon = Icons.AutoMirrored.Filled.Article,
-                    title = "Editable text",
-                    description = "Review and edit the message before sharing.",
+                    title = stringResource(R.string.history_editable_text),
+                    description = stringResource(R.string.history_share_text_description),
                     onClick = onTextClick,
                 )
                 ShareFormatOptionRow(
                     icon = Icons.Default.Description,
-                    title = "TXT file",
-                    description = "Export the snapshot as a .txt file.",
+                    title = stringResource(R.string.history_txt_file),
+                    description = stringResource(R.string.history_export_snapshot_description),
                     onClick = onFileClick,
                 )
             }
@@ -76,7 +78,7 @@ fun ShareFormatDialog(
         confirmButton = {},
         dismissButton = {
             RoutineDialogTextButton(
-                text = "Cancel",
+                text = stringResource(R.string.history_cancel),
                 onClick = onDismiss,
             )
         },
@@ -100,25 +102,25 @@ private fun ShareFormatDialogPreviewContent(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                text = "Share snapshot",
+                text = stringResource(R.string.history_share_snapshot),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Medium,
             )
             Text(
-                text = "Choose how to share this saved routine.",
+                text = stringResource(R.string.history_share_snapshot_description),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             ShareFormatOptionRow(
                 icon = Icons.AutoMirrored.Filled.Article,
-                title = "Editable text",
-                description = "Review and edit the message before sharing.",
+                title = stringResource(R.string.history_editable_text),
+                description = stringResource(R.string.history_share_text_description),
                 onClick = {},
             )
             ShareFormatOptionRow(
                 icon = Icons.Default.Description,
-                title = "TXT file",
-                description = "Export the snapshot as a .txt file.",
+                title = stringResource(R.string.history_txt_file),
+                description = stringResource(R.string.history_export_snapshot_description),
                 onClick = {},
             )
             FlowRow(
@@ -126,7 +128,7 @@ private fun ShareFormatDialogPreviewContent(
                 horizontalArrangement = Arrangement.End,
             ) {
                 RoutineDialogTextButton(
-                    text = "Cancel",
+                    text = stringResource(R.string.history_cancel),
                     onClick = {},
                 )
             }

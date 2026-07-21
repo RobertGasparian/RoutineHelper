@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history_back">Назад</string>
+    <string name="history_title">История</string>
+    <string name="history_snapshot_title">Снимок</string>
+    <string name="history_open_settings">Открыть настройки</string>
+    <string name="history_clear_selection">Снять выделение</string>
+    <plurals name="history_selected_count">
+        <item quantity="one">Выбрано: %1$d</item>
+        <item quantity="few">Выбрано: %1$d</item>
+        <item quantity="many">Выбрано: %1$d</item>
+        <item quantity="other">Выбрано: %1$d</item>
+    </plurals>
+    <string name="history_share_selected_snapshots">Поделиться выбранными снимками</string>
+    <string name="history_delete_selected_snapshots">Удалить выбранные снимки</string>
+    <string name="history_filter_all">Все</string>
+    <string name="history_cadence_daily">Ежедневные</string>
+    <string name="history_cadence_weekly">Еженедельные</string>
+    <string name="history_has_summary_note">С итоговой заметкой</string>
+    <string name="history_no_snapshots_title">Снимков пока нет</string>
+    <string name="history_no_snapshots_description">Используйте действие «Снимок» в разделе «День» или «Неделя», пока мы разрабатываем сброс по расписанию.</string>
+    <string name="history_week_of">Неделя с %1$s</string>
+    <string name="history_no_actions_saved">Нет сохранённых действий</string>
+    <string name="history_all_completed">Всё выполнено!</string>
+    <string name="history_completion_fraction">Выполнено: %1$d/%2$d</string>
+    <string name="history_completion_of_total">Выполнено %1$d из %2$d</string>
+    <string name="history_finalized">Завершено: %1$s</string>
+
+    <string name="history_share_text_title">Поделиться текстом</string>
+    <string name="history_message_label">Сообщение</string>
+    <string name="history_share_text_description">Проверьте и отредактируйте сообщение перед отправкой.</string>
+    <string name="history_long_message_title">Длинное сообщение</string>
+    <string name="history_long_message_description">Некоторые приложения могут обрезать длинные сообщения. При необходимости экспортируйте их в формате .txt.</string>
+    <string name="history_share_text">Поделиться текстом</string>
+    <string name="history_cancel">Отмена</string>
+    <plurals name="history_character_count">
+        <item quantity="one">%1$d символ</item>
+        <item quantity="few">%1$d символа</item>
+        <item quantity="many">%1$d символов</item>
+        <item quantity="other">%1$d символов</item>
+    </plurals>
+
+    <string name="history_share_snapshot">Поделиться снимком</string>
+    <string name="history_share_snapshot_description">Выберите способ отправки сохранённого распорядка.</string>
+    <string name="history_editable_text">Редактируемый текст</string>
+    <string name="history_txt_file">Файл TXT</string>
+    <string name="history_export_snapshot_description">Экспортировать снимок в файл .txt.</string>
+    <string name="history_export_txt">Экспортировать .txt</string>
+    <string name="history_file_name_label">Имя файла</string>
+    <string name="history_share_txt">Поделиться .txt</string>
+    <string name="history_file_share_description">Будет прикреплён текстовый файл. Имя файла и сообщение можно изменить.</string>
+
+    <string name="history_share_snapshots_chooser">Поделиться снимками распорядка</string>
+    <string name="history_share_snapshot_chooser">Поделиться снимком распорядка</string>
+    <string name="history_share_snapshots_message_empty">Снимки распорядка.</string>
+    <string name="history_share_snapshots_message_single">Снимки распорядка за %1$s.</string>
+    <string name="history_share_snapshots_message_range">Снимки распорядка с %1$s по %2$s.</string>
+    <string name="history_share_daily_snapshot_message">Ежедневный снимок распорядка за %1$s.</string>
+    <string name="history_share_weekly_snapshot_message">Еженедельный снимок распорядка за неделю с %1$s.</string>
+
+    <string name="history_delete_snapshot">Удалить снимок</string>
+    <string name="history_delete_snapshot_title">Удалить снимок?</string>
+    <string name="history_delete_snapshot_message">Эта сохранённая запись будет удалена из тестовой базы данных.</string>
+    <string name="history_delete">Удалить</string>
+    <string name="history_day_note">Заметка дня</string>
+    <string name="history_week_note">Заметка недели</string>
+    <plurals name="history_hidden_actions">
+        <item quantity="one">%1$d скрытое действие</item>
+        <item quantity="few">%1$d скрытых действия</item>
+        <item quantity="many">%1$d скрытых действий</item>
+        <item quantity="other">%1$d скрытых действий</item>
+    </plurals>
+    <string name="history_collapse_hidden_actions">Свернуть скрытые действия</string>
+    <string name="history_expand_hidden_actions">Развернуть скрытые действия</string>
+    <string name="history_snapshot_not_found">Снимок не найден</string>
+    <string name="history_snapshot_empty">В этом снимке нет элементов</string>
+    <string name="history_hidden_action">Скрытое действие</string>
+
+    <string name="history_export_daily_snapshot_title">Ежедневный снимок распорядка</string>
+    <string name="history_export_weekly_snapshot_title">Еженедельный снимок распорядка</string>
+    <string name="history_export_daily_date">Дата: %1$s</string>
+    <string name="history_export_weekly_date">Неделя с: %1$s</string>
+    <string name="history_export_finalized">Завершено: %1$s</string>
+    <string name="history_export_summary_note">Итоговая заметка:</string>
+    <string name="history_export_count">Количество: %1$d/%2$d</string>
+    <string name="history_export_description">Описание: %1$s</string>
+    <string name="history_export_note">Заметка: %1$s</string>
+    <string name="history_export_daily_empty">За этот день действия не сохранены.</string>
+    <string name="history_export_weekly_empty">За эту неделю действия не сохранены.</string>
+</resources>

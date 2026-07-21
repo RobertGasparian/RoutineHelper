@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history_back">Հետ</string>
+    <string name="history_title">Պատմություն</string>
+    <string name="history_snapshot_title">Պահված պատկեր</string>
+    <string name="history_open_settings">Բացել կարգավորումները</string>
+    <string name="history_clear_selection">Մաքրել ընտրությունը</string>
+    <plurals name="history_selected_count">
+        <item quantity="one">Ընտրված է՝ %1$d</item>
+        <item quantity="other">Ընտրված է՝ %1$d</item>
+    </plurals>
+    <string name="history_share_selected_snapshots">Կիսվել ընտրված պահված պատկերներով</string>
+    <string name="history_delete_selected_snapshots">Ջնջել ընտրված պահված պատկերները</string>
+    <string name="history_filter_all">Բոլորը</string>
+    <string name="history_cadence_daily">Օրական</string>
+    <string name="history_cadence_weekly">Շաբաթական</string>
+    <string name="history_has_summary_note">Ամփոփ նշումով</string>
+    <string name="history_no_snapshots_title">Պահված պատկերներ դեռ չկան</string>
+    <string name="history_no_snapshots_description">Օգտագործեք «Պահել պատկերը» գործողությունը «Օրական» կամ «Շաբաթական» բաժնում, մինչ մենք մշակում ենք պլանավորված զրոյացումը։</string>
+    <string name="history_week_of">%1$s-ի շաբաթը</string>
+    <string name="history_no_actions_saved">Պահված գործողություններ չկան</string>
+    <string name="history_all_completed">Բոլորն ավարտված են։</string>
+    <string name="history_completion_fraction">Կատարված՝ %1$d/%2$d</string>
+    <string name="history_completion_of_total">Կատարված՝ %1$d-ը %2$d-ից</string>
+    <string name="history_finalized">Ավարտվել է՝ %1$s</string>
+
+    <string name="history_share_text_title">Կիսվել տեքստով</string>
+    <string name="history_message_label">Հաղորդագրություն</string>
+    <string name="history_share_text_description">Կիսվելուց առաջ ստուգեք և խմբագրեք հաղորդագրությունը։</string>
+    <string name="history_long_message_title">Երկար հաղորդագրություն</string>
+    <string name="history_long_message_description">Որոշ հավելվածներ կարող են կրճատել երկար հաղորդագրությունները։ Անհրաժեշտության դեպքում արտահանեք որպես .txt։</string>
+    <string name="history_share_text">Կիսվել տեքստով</string>
+    <string name="history_cancel">Չեղարկել</string>
+    <plurals name="history_character_count">
+        <item quantity="one">%1$d նիշ</item>
+        <item quantity="other">%1$d նիշ</item>
+    </plurals>
+
+    <string name="history_share_snapshot">Կիսվել պահված պատկերով</string>
+    <string name="history_share_snapshot_description">Ընտրեք, թե ինչպես կիսվել այս պահված առօրյայով։</string>
+    <string name="history_editable_text">Խմբագրվող տեքստ</string>
+    <string name="history_txt_file">TXT ֆայլ</string>
+    <string name="history_export_snapshot_description">Արտահանել պահված պատկերը որպես .txt ֆայլ։</string>
+    <string name="history_export_txt">Արտահանել .txt</string>
+    <string name="history_file_name_label">Ֆայլի անուն</string>
+    <string name="history_share_txt">Կիսվել .txt-ով</string>
+    <string name="history_file_share_description">Տեքստային ֆայլ կկցվի։ Կարող եք խմբագրել ֆայլի անունն ու հաղորդագրությունը։</string>
+
+    <string name="history_share_snapshots_chooser">Կիսվել առօրյայի պահված պատկերներով</string>
+    <string name="history_share_snapshot_chooser">Կիսվել առօրյայի պահված պատկերով</string>
+    <string name="history_share_snapshots_message_empty">Ահա առօրյայի պահված պատկերները։</string>
+    <string name="history_share_snapshots_message_single">Ահա %1$s-ի առօրյայի պահված պատկերները։</string>
+    <string name="history_share_snapshots_message_range">Ահա %1$s-ից մինչև %2$s առօրյայի պահված պատկերները։</string>
+    <string name="history_share_daily_snapshot_message">Ահա %1$s-ի օրական առօրյայի պահված պատկերը։</string>
+    <string name="history_share_weekly_snapshot_message">Ահա %1$s-ի շաբաթվա առօրյայի պահված պատկերը։</string>
+
+    <string name="history_delete_snapshot">Ջնջել պահված պատկերը</string>
+    <string name="history_delete_snapshot_title">Ջնջե՞լ պահված պատկերը</string>
+    <string name="history_delete_snapshot_message">Պատմության այս պահված գրառումը կհեռացվի փորձնական տվյալների բազայից։</string>
+    <string name="history_delete">Ջնջել</string>
+    <string name="history_day_note">Օրվա նշում</string>
+    <string name="history_week_note">Շաբաթվա նշում</string>
+    <plurals name="history_hidden_actions">
+        <item quantity="one">%1$d թաքցված գործողություն</item>
+        <item quantity="other">%1$d թաքցված գործողություն</item>
+    </plurals>
+    <string name="history_collapse_hidden_actions">Ծալել թաքցված գործողությունները</string>
+    <string name="history_expand_hidden_actions">Բացել թաքցված գործողությունները</string>
+    <string name="history_snapshot_not_found">Պահված պատկերը չի գտնվել</string>
+    <string name="history_snapshot_empty">Այս պահված պատկերում տարրեր չկան</string>
+    <string name="history_hidden_action">Թաքցված գործողություն</string>
+
+    <string name="history_export_daily_snapshot_title">Օրական առօրյայի պահված պատկեր</string>
+    <string name="history_export_weekly_snapshot_title">Շաբաթական առօրյայի պահված պատկեր</string>
+    <string name="history_export_daily_date">Ամսաթիվ՝ %1$s</string>
+    <string name="history_export_weekly_date">Շաբաթը՝ %1$s</string>
+    <string name="history_export_finalized">Ավարտվել է՝ %1$s</string>
+    <string name="history_export_summary_note">Ամփոփ նշում՝</string>
+    <string name="history_export_count">Քանակ՝ %1$d/%2$d</string>
+    <string name="history_export_description">Նկարագրություն՝ %1$s</string>
+    <string name="history_export_note">Նշում՝ %1$s</string>
+    <string name="history_export_daily_empty">Այս օրվա համար գործողություններ չեն պահվել։</string>
+    <string name="history_export_weekly_empty">Այս շաբաթվա համար գործողություններ չեն պահվել։</string>
+</resources>

@@ -5,7 +5,6 @@ data class ShareTextPreviewUiState(
 ) {
     val canShare: Boolean = text.isNotBlank()
     val isOverSoftLimit: Boolean = text.length > SHARE_TEXT_SOFT_LIMIT
-    val characterCountLabel: String = "${text.length} characters"
 
     companion object {
         fun preview(): ShareTextPreviewUiState =

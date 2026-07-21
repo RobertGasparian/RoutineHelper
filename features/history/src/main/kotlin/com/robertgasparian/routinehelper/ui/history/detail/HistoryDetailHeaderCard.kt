@@ -22,10 +22,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.features.history.R
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 import com.robertgasparian.routinehelper.ui.theme.routineCompletedColor
 import com.robertgasparian.routinehelper.ui.theme.routineCompletedContainerColor
@@ -64,13 +66,19 @@ fun HistoryDetailHeaderCard(
                 )
             }
             Text(
-                text = uiState.date.ifBlank { "Snapshot" },
+                text = if (uiState.date.isBlank()) {
+                    stringResource(R.string.history_snapshot_title)
+                } else if (uiState.cadence == RoutineCadence.Weekly) {
+                    stringResource(R.string.history_week_of, uiState.date)
+                } else {
+                    uiState.date
+                },
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Medium,
             )
-            if (uiState.finalizedLabel.isNotBlank()) {
+            if (uiState.finalizedTime.isNotBlank()) {
                 Text(
-                    text = uiState.finalizedLabel,
+                    text = stringResource(R.string.history_finalized, uiState.finalizedTime),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -84,6 +92,15 @@ private fun CompletionSummaryChip(
     summary: HistoryDetailCompletionSummary,
     modifier: Modifier = Modifier,
 ) {
+    val label = when (summary) {
+        HistoryDetailCompletionSummary.Empty -> stringResource(R.string.history_no_actions_saved)
+        HistoryDetailCompletionSummary.AllComplete -> stringResource(R.string.history_all_completed)
+        is HistoryDetailCompletionSummary.Partial -> stringResource(
+            R.string.history_completion_of_total,
+            summary.completedCount,
+            summary.totalCount,
+        )
+    }
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(999.dp),
@@ -111,7 +128,7 @@ private fun CompletionSummaryChip(
                 )
             }
             Text(
-                text = summary.label,
+                text = label,
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
             )
@@ -152,7 +169,7 @@ private fun HistoryDetailHeaderCardPreviewContent() {
             HistoryDetailHeaderCard(
                 uiState = HistoryDetailUiState.preview().copy(
                     cadence = RoutineCadence.Weekly,
-                    date = "Week of 2026-05-25",
+                    date = "2026-05-25",
                     items = HistoryDetailUiState.preview().items.map { item ->
                         item.copy(isChecked = true, completedCount = item.repeatTargetCount ?: item.completedCount)
                     },

@@ -1,14 +1,13 @@
 package com.robertgasparian.routinehelper.ui.history.detail
 
-import com.robertgasparian.routinehelper.domain.formatter.SnapshotShareTextFormatter
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
 import com.robertgasparian.routinehelper.domain.repository.FakeRoutineHistoryRepository
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotUseCase
-import com.robertgasparian.routinehelper.core.testing.FixedTimeProvider
 import com.robertgasparian.routinehelper.core.testing.MainDispatcherRule
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
+import com.robertgasparian.routinehelper.ui.history.FakeHistoryTextProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -33,9 +32,9 @@ class HistoryDetailViewModelTest {
 
         val state = createViewModel(snapshotId).uiState.first { !it.isMissing }
 
-        assertEquals("Week of 2026-05-25", state.date)
+        assertEquals("2026-05-25", state.date)
         assertEquals(RoutineCadence.Weekly, state.cadence)
-        assertEquals("Finalized 12:00 PM", state.finalizedLabel)
+        assertEquals("12:00 PM", state.finalizedTime)
         assertEquals("Good week", state.summaryNote)
         assertEquals(
             listOf(
@@ -116,10 +115,10 @@ class HistoryDetailViewModelTest {
         val draft = requireNotNull(viewModel.uiState.first { it.shareDraft != null }.shareDraft) as ShareDraft.File
 
         assertEquals(
-            "Here is the weekly routine snapshot from Week of 2026-05-25.",
+            "Here is the weekly routine snapshot from the week of 2026-05-25.",
             draft.messageText,
         )
-        assertEquals("routine-snapshot-Week of 2026-05-25.txt", draft.fileName)
+        assertEquals("routine-snapshot-2026-05-25.txt", draft.fileName)
         assertTrue(draft.fileText.contains("Weekly routine snapshot"))
     }
 
@@ -144,9 +143,8 @@ class HistoryDetailViewModelTest {
         HistoryDetailViewModel(
             snapshotId = snapshotId,
             deleteSnapshotUseCase = DeleteSnapshotUseCase(repository),
-            snapshotShareTextFormatter = SnapshotShareTextFormatter(FixedTimeProvider()),
+            historyTextProvider = FakeHistoryTextProvider(),
             snapshotUseCase = SnapshotUseCase(repository),
-            timeProvider = FixedTimeProvider(),
         )
 
     private suspend fun saveWeeklySnapshot(): Long =

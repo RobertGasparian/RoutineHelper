@@ -1,6 +1,8 @@
 package com.robertgasparian.routinehelper.ui.history
 
+import androidx.annotation.StringRes
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.features.history.R
 
 enum class HistoryFilter {
     All,
@@ -15,5 +17,10 @@ internal val HistoryFilter.snapshotCadence: RoutineCadence?
         HistoryFilter.Weekly -> RoutineCadence.Weekly
     }
 
-internal val HistoryFilter.label: String
-    get() = snapshotCadence?.historyLabel ?: "All"
+@get:StringRes
+internal val HistoryFilter.labelRes: Int
+    get() = when (this) {
+        HistoryFilter.All -> R.string.history_filter_all
+        HistoryFilter.Daily -> R.string.history_cadence_daily
+        HistoryFilter.Weekly -> R.string.history_cadence_weekly
+    }

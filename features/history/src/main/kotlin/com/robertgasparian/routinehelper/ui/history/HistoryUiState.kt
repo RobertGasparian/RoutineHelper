@@ -25,7 +25,7 @@ data class HistoryUiState(
                     ),
                     HistorySnapshotUiState(
                         snapshotId = 2,
-                        date = "Week of 2026-05-24",
+                        date = "2026-05-24",
                         cadence = RoutineCadence.Weekly,
                         completedCount = 4,
                         totalCount = 5,
@@ -49,7 +49,7 @@ data class HistoryUiState(
                     ),
                     HistorySnapshotUiState(
                         snapshotId = 2,
-                        date = "Week of 2026-05-24",
+                        date = "2026-05-24",
                         cadence = RoutineCadence.Weekly,
                         completedCount = 4,
                         totalCount = 5,
