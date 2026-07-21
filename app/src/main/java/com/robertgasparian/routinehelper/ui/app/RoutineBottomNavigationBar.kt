@@ -17,11 +17,14 @@ import androidx.compose.material3.ShortNavigationBarItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.annotation.StringRes
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.robertgasparian.routinehelper.R
 
 internal val RoutineDestination?.topLevelTabIndex: Int?
     get() = TopLevelNavigationItems.indexOfFirst { item -> item.destination == this }
@@ -59,7 +62,7 @@ internal fun FloatingBottomNavigationBar(
                                 contentDescription = null,
                             )
                         },
-                        label = { Text(text = item.label) },
+                        label = { Text(text = stringResource(item.labelRes)) },
                     )
                 }
             }
@@ -69,29 +72,29 @@ internal fun FloatingBottomNavigationBar(
 
 private data class TopLevelNavigationItem(
     val destination: TopLevelDestination,
-    val label: String,
+    @param:StringRes val labelRes: Int,
     val icon: ImageVector,
 )
 
 private val TopLevelNavigationItems = listOf(
     TopLevelNavigationItem(
         destination = CurrentListDestination,
-        label = "List",
+        labelRes = R.string.app_nav_list,
         icon = Icons.Default.Checklist,
     ),
     TopLevelNavigationItem(
         destination = DailyDestination,
-        label = "Daily",
+        labelRes = R.string.app_nav_daily,
         icon = Icons.Default.Event,
     ),
     TopLevelNavigationItem(
         destination = WeeklyDestination,
-        label = "Weekly",
+        labelRes = R.string.app_nav_weekly,
         icon = Icons.Default.ViewWeek,
     ),
     TopLevelNavigationItem(
         destination = HistoryDestination,
-        label = "History",
+        labelRes = R.string.app_nav_history,
         icon = Icons.Default.History,
     ),
 )

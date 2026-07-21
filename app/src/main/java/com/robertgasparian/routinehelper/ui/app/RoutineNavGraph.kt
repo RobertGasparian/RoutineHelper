@@ -3,10 +3,12 @@ package com.robertgasparian.routinehelper.ui.app
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.robertgasparian.routinehelper.R
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.ui.actioneditor.ActionEditorScreen
 import com.robertgasparian.routinehelper.ui.currentlist.CurrentListScreen
@@ -26,6 +28,10 @@ internal fun RoutineNavGraph(
     onShareText: (text: String, title: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val shareCurrentListTitle = stringResource(R.string.app_share_current_list)
+    val shareRoutineSnapshotsTitle = stringResource(R.string.app_share_routine_snapshots)
+    val shareRoutineSnapshotTitle = stringResource(R.string.app_share_routine_snapshot)
+
     NavDisplay(
         backStack = backStack,
         modifier = modifier.fillMaxSize(),
@@ -82,7 +88,7 @@ internal fun RoutineNavGraph(
                         onNavigateToDetail(
                             ShareTextPreviewDestination(
                                 initialText = text,
-                                shareTitle = "Share current list",
+                                shareTitle = shareCurrentListTitle,
                             ),
                         )
                     },
@@ -101,7 +107,7 @@ internal fun RoutineNavGraph(
                         onNavigateToDetail(
                             ShareTextPreviewDestination(
                                 initialText = text,
-                                shareTitle = "Share routine snapshots",
+                                shareTitle = shareRoutineSnapshotsTitle,
                             ),
                         )
                     },
@@ -125,7 +131,7 @@ internal fun RoutineNavGraph(
                         onNavigateToDetail(
                             ShareTextPreviewDestination(
                                 initialText = text,
-                                shareTitle = "Share routine snapshot",
+                                shareTitle = shareRoutineSnapshotTitle,
                             ),
                         )
                     },

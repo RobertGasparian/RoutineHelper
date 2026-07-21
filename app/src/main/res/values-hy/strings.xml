@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_nav_list">Ցուցակ</string>
+    <string name="app_nav_daily">Օրական</string>
+    <string name="app_nav_weekly">Շաբաթական</string>
+    <string name="app_nav_history">Պատմություն</string>
+    <string name="app_share_current_list">Կիսվել ընթացիկ ցուցակով</string>
+    <string name="app_share_routine_snapshots">Կիսվել առօրյայի պահված պատկերներով</string>
+    <string name="app_share_routine_snapshot">Կիսվել առօրյայի պահված պատկերով</string>
+</resources>

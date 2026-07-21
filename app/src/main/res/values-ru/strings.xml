@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_nav_list">Список</string>
+    <string name="app_nav_daily">День</string>
+    <string name="app_nav_weekly">Неделя</string>
+    <string name="app_nav_history">История</string>
+    <string name="app_share_current_list">Поделиться текущим списком</string>
+    <string name="app_share_routine_snapshots">Поделиться снимками распорядка</string>
+    <string name="app_share_routine_snapshot">Поделиться снимком распорядка</string>
+</resources>

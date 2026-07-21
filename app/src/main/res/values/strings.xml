@@ -1,3 +1,10 @@
 <resources>
-    <string name="app_name">RoutineHelper</string>
+    <string name="app_name" translatable="false">RoutineHelper</string>
+    <string name="app_nav_list">List</string>
+    <string name="app_nav_daily">Daily</string>
+    <string name="app_nav_weekly">Weekly</string>
+    <string name="app_nav_history">History</string>
+    <string name="app_share_current_list">Share current list</string>
+    <string name="app_share_routine_snapshots">Share routine snapshots</string>
+    <string name="app_share_routine_snapshot">Share routine snapshot</string>
 </resources>
