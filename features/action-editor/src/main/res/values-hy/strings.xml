@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_editor_back">Հետ</string>
+    <string name="action_editor_add_action">Ավելացնել գործողություն</string>
+    <string name="action_editor_edit_action">Խմբագրել գործողությունը</string>
+    <string name="action_editor_delete_action">Ջնջել գործողությունը</string>
+    <string name="action_editor_title_label">Վերնագիր</string>
+    <string name="action_editor_title_placeholder">Անվանեք այս գործողությունը</string>
+    <string name="action_editor_description_label">Նկարագրություն</string>
+    <string name="action_editor_description_placeholder">Ավելացրեք լրացուցիչ մանրամասներ</string>
+    <string name="action_editor_daily_action">Օրական գործողություն</string>
+    <string name="action_editor_weekly_action">Շաբաթական գործողություն</string>
+    <string name="action_editor_completion_type">Կատարման տեսակ</string>
+    <string name="action_editor_target_count">Նպատակային քանակ</string>
+    <string name="action_editor_single">Մեկ անգամ</string>
+    <string name="action_editor_repeat">Կրկնվող</string>
+    <string name="action_editor_decrease_repeat_target">Նվազեցնել կրկնությունների նպատակը</string>
+    <string name="action_editor_increase_repeat_target">Ավելացնել կրկնությունների նպատակը</string>
+    <string name="action_editor_save">Պահպանել</string>
+    <string name="action_editor_cancel">Չեղարկել</string>
+    <string name="action_editor_delete_confirmation_title">Ջնջե՞լ գործողությունը</string>
+    <string name="action_editor_delete_confirmation_message">Գործողությունը կհեռացվի այս առօրյայի ցուցակից։ Պատմության արդեն պահված պատկերները կմնան անփոփոխ։</string>
+    <string name="action_editor_delete">Ջնջել</string>
+</resources>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="core_ui_action_hidden_today">Գործողությունն այսօր թաքցված է</string>
+    <string name="core_ui_add_note">Ավելացնել նշում</string>
+    <string name="core_ui_edit_note">Խմբագրել նշումը</string>
+    <string name="core_ui_hidden_action">Թաքցված գործողություն</string>
+    <string name="core_ui_checked">Նշված է</string>
+    <string name="core_ui_increase_completed_count">Ավելացնել կատարվածների քանակը</string>
+    <string name="core_ui_decrease_completed_count">Նվազեցնել կատարվածների քանակը</string>
+    <string name="core_ui_show_action">Ցուցադրել գործողությունը</string>
+    <string name="core_ui_hide_action">Թաքցնել գործողությունը</string>
+    <string name="core_ui_edit_action">Խմբագրել գործողությունը</string>
+    <string name="core_ui_add_summary_note">Ավելացնել ամփոփ նշում</string>
+    <string name="core_ui_edit_summary_note">Խմբագրել ամփոփ նշումը</string>
+    <string name="core_ui_note_saved_for_day">Այս նշումը պահվում է միայն այս օրվա համար։</string>
+    <string name="core_ui_note">Նշում</string>
+    <string name="core_ui_add_weekday">Ավելացնել շաբաթվա օրը</string>
+    <string name="core_ui_add_today_date">Ավելացնել այսօրվա ամսաթիվը</string>
+    <string name="core_ui_add_timestamp">Ավելացնել ժամադրոշմը</string>
+    <string name="core_ui_clear">Մաքրել</string>
+    <string name="core_ui_cancel">Չեղարկել</string>
+    <string name="core_ui_save">Պահպանել</string>
+</resources>

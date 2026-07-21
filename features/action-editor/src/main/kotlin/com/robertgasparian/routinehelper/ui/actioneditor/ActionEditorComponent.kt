@@ -46,11 +46,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.features.actioneditor.R
 import com.robertgasparian.routinehelper.ui.dsm.RoutineDialogTextButton
 import com.robertgasparian.routinehelper.ui.dsm.RoutineKeyboardAwareBottomActions
 import com.robertgasparian.routinehelper.ui.dsm.RoutineOutlinedTextField
@@ -74,19 +76,27 @@ fun ActionEditorComponent(
                     IconButton(onClick = { onIntent(ActionEditorIntent.BackClick) }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.action_editor_back),
                         )
                     }
                 },
                 title = {
-                    Text(text = if (uiState.isEditing) "Edit action" else "Add action")
+                    Text(
+                        text = stringResource(
+                            if (uiState.isEditing) {
+                                R.string.action_editor_edit_action
+                            } else {
+                                R.string.action_editor_add_action
+                            },
+                        ),
+                    )
                 },
                 actions = {
                     if (uiState.isEditing) {
                         IconButton(onClick = { showDeleteConfirmation = true }) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete action",
+                                contentDescription = stringResource(R.string.action_editor_delete_action),
                             )
                         }
                     }
@@ -156,17 +166,17 @@ private fun ActionEditorFormCard(
             RoutineOutlinedTextField(
                 value = uiState.title,
                 onValueChange = { title -> onIntent(ActionEditorIntent.TitleChange(title)) },
-                label = "Title",
+                label = stringResource(R.string.action_editor_title_label),
                 isRequired = true,
-                placeholder = "Name this action",
+                placeholder = stringResource(R.string.action_editor_title_placeholder),
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
             RoutineOutlinedTextField(
                 value = uiState.description,
                 onValueChange = { description -> onIntent(ActionEditorIntent.DescriptionChange(description)) },
-                label = "Description",
-                placeholder = "Add optional details",
+                label = stringResource(R.string.action_editor_description_label),
+                placeholder = stringResource(R.string.action_editor_description_placeholder),
                 minLines = 4,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -202,7 +212,9 @@ private fun ActionEditorCadenceRow(
                 tint = MaterialTheme.colorScheme.primary,
             )
             Text(
-                text = if (isWeekly) "Weekly action" else "Daily action",
+                text = stringResource(
+                    if (isWeekly) R.string.action_editor_weekly_action else R.string.action_editor_daily_action,
+                ),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -233,7 +245,7 @@ private fun RepeatTargetSection(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Text(
-                    text = "Completion type",
+                    text = stringResource(R.string.action_editor_completion_type),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.weight(1f),
@@ -252,7 +264,7 @@ private fun RepeatTargetSection(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Text(
-                        text = "Target count",
+                        text = stringResource(R.string.action_editor_target_count),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.weight(1f),
@@ -275,11 +287,11 @@ private fun RepeatModeButtonGroup(
     onRepeatEnabledChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val options = listOf("Single", "Repeat")
+    val options = listOf(R.string.action_editor_single, R.string.action_editor_repeat)
     val selectedIndex = if (isRepeatEnabled) 1 else 0
 
     SingleChoiceSegmentedButtonRow(modifier = modifier) {
-        options.forEachIndexed { index, label ->
+        options.forEachIndexed { index, labelRes ->
             SegmentedButton(
                 selected = selectedIndex == index,
                 onClick = { onRepeatEnabledChange(index == 1) },
@@ -300,7 +312,7 @@ private fun RepeatModeButtonGroup(
             )
             {
                 Text(
-                    text = label,
+                    text = stringResource(labelRes),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = if (selectedIndex == index) FontWeight.SemiBold else FontWeight.Medium,
                     modifier = Modifier.padding(horizontal = 4.dp),
@@ -336,7 +348,7 @@ private fun RepeatTargetStepper(
                 enabled = value > 2,
                 onClick = { onValueChange((value - 1).coerceAtLeast(2)) },
                 icon = Icons.Default.Remove,
-                contentDescription = "Decrease repeat target",
+                contentDescription = stringResource(R.string.action_editor_decrease_repeat_target),
             )
             Text(
                 text = value.toString(),
@@ -348,7 +360,7 @@ private fun RepeatTargetStepper(
             RepeatTargetStepButton(
                 onClick = { onValueChange(value + 1) },
                 icon = Icons.Default.Add,
-                contentDescription = "Increase repeat target",
+                contentDescription = stringResource(R.string.action_editor_increase_repeat_target),
             )
         }
     }
@@ -387,10 +399,10 @@ private fun ActionEditorBottomActions(
     modifier: Modifier = Modifier,
 ) {
     RoutineKeyboardAwareBottomActions(
-        primaryText = "Save",
+        primaryText = stringResource(R.string.action_editor_save),
         primaryEnabled = canSave,
         onPrimaryClick = onSaveClick,
-        secondaryText = "Cancel",
+        secondaryText = stringResource(R.string.action_editor_cancel),
         onSecondaryClick = onCancelClick,
         modifier = modifier,
     )
@@ -406,20 +418,20 @@ private fun DeleteActionConfirmationDialog(
         containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         tonalElevation = 0.dp,
         shape = RoundedCornerShape(24.dp),
-        title = { Text(text = "Delete action?") },
+        title = { Text(text = stringResource(R.string.action_editor_delete_confirmation_title)) },
         text = {
-            Text(text = "This removes the action from this routine list. Existing saved history snapshots stay unchanged.")
+            Text(text = stringResource(R.string.action_editor_delete_confirmation_message))
         },
         confirmButton = {
             RoutineDialogTextButton(
-                text = "Delete",
+                text = stringResource(R.string.action_editor_delete),
                 onClick = onDeleteClick,
                 isDestructive = true,
             )
         },
         dismissButton = {
             RoutineDialogTextButton(
-                text = "Cancel",
+                text = stringResource(R.string.action_editor_cancel),
                 onClick = onDismiss,
             )
         },

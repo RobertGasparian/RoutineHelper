@@ -1,0 +1,24 @@
+<resources>
+    <string name="core_ui_action_hidden_today">Action is hidden for today</string>
+    <string name="core_ui_add_note">Add note</string>
+    <string name="core_ui_edit_note">Edit note</string>
+    <string name="core_ui_hidden_action">Hidden action</string>
+    <string name="core_ui_checked">Checked</string>
+    <string name="core_ui_increase_completed_count">Increase completed count</string>
+    <string name="core_ui_decrease_completed_count">Decrease completed count</string>
+    <string name="core_ui_completed_count_fraction" translatable="false">%1$d/%2$d</string>
+    <string name="core_ui_show_action">Show action</string>
+    <string name="core_ui_hide_action">Hide action</string>
+    <string name="core_ui_edit_action">Edit action</string>
+    <string name="core_ui_add_summary_note">Add summary note</string>
+    <string name="core_ui_edit_summary_note">Edit summary note</string>
+    <string name="core_ui_note_saved_for_day">This note is saved for this day only.</string>
+    <string name="core_ui_note">Note</string>
+    <string name="core_ui_add_weekday">Add weekday</string>
+    <string name="core_ui_add_today_date">Add today\'s date</string>
+    <string name="core_ui_add_timestamp">Add timestamp</string>
+    <string name="core_ui_clear">Clear</string>
+    <string name="core_ui_cancel">Cancel</string>
+    <string name="core_ui_save">Save</string>
+    <string name="core_ui_required_indicator" translatable="false">*</string>
+</resources>

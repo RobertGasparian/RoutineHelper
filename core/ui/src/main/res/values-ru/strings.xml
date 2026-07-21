@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="core_ui_action_hidden_today">Действие скрыто на сегодня</string>
+    <string name="core_ui_add_note">Добавить заметку</string>
+    <string name="core_ui_edit_note">Изменить заметку</string>
+    <string name="core_ui_hidden_action">Скрытое действие</string>
+    <string name="core_ui_checked">Отмечено</string>
+    <string name="core_ui_increase_completed_count">Увеличить количество выполнений</string>
+    <string name="core_ui_decrease_completed_count">Уменьшить количество выполнений</string>
+    <string name="core_ui_show_action">Показать действие</string>
+    <string name="core_ui_hide_action">Скрыть действие</string>
+    <string name="core_ui_edit_action">Изменить действие</string>
+    <string name="core_ui_add_summary_note">Добавить итоговую заметку</string>
+    <string name="core_ui_edit_summary_note">Изменить итоговую заметку</string>
+    <string name="core_ui_note_saved_for_day">Эта заметка сохраняется только для этого дня.</string>
+    <string name="core_ui_note">Заметка</string>
+    <string name="core_ui_add_weekday">Добавить день недели</string>
+    <string name="core_ui_add_today_date">Добавить сегодняшнюю дату</string>
+    <string name="core_ui_add_timestamp">Добавить время</string>
+    <string name="core_ui_clear">Очистить</string>
+    <string name="core_ui_cancel">Отмена</string>
+    <string name="core_ui_save">Сохранить</string>
+</resources>

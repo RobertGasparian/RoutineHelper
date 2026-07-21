@@ -46,6 +46,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.robertgasparian.routinehelper.core.ui.R
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 import com.robertgasparian.routinehelper.ui.theme.routineCompletedColor
 import com.robertgasparian.routinehelper.ui.theme.routineCompletedContainerColor
@@ -150,7 +152,7 @@ fun RoutineActionItemCard(
                     )
                     if (isHidden) {
                         Text(
-                            text = "Action is hidden for today",
+                            text = stringResource(R.string.core_ui_action_hidden_today),
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -166,7 +168,9 @@ fun RoutineActionItemCard(
 
                 RoutineActionItemCardActionColumn(
                     modifier = Modifier.align(Alignment.Top),
-                    noteContentDescription = if (note.isNullOrBlank()) "Add note" else "Edit note",
+                    noteContentDescription = stringResource(
+                        if (note.isNullOrBlank()) R.string.core_ui_add_note else R.string.core_ui_edit_note,
+                    ),
                     isComplete = isComplete,
                     isHidden = isHidden,
                     onEditActionClick = onEditActionClick,
@@ -200,7 +204,7 @@ private fun RoutineActionItemCardHiddenMarker(
             Icon(
                 modifier = Modifier.size(18.dp),
                 imageVector = Icons.Default.Block,
-                contentDescription = "Hidden action",
+                contentDescription = stringResource(R.string.core_ui_hidden_action),
             )
         }
     }
@@ -240,7 +244,7 @@ private fun RoutineActionItemCardCheckControl(
                 Icon(
                     modifier = Modifier.size(20.dp),
                     imageVector = Icons.Default.Check,
-                    contentDescription = "Checked",
+                    contentDescription = stringResource(R.string.core_ui_checked),
                 )
             }
         }
@@ -288,19 +292,23 @@ private fun RoutineActionItemCardRepeatCounter(
             RoutineActionItemCardCounterButton(
                 enabled = enabled && completedCount < repeatTargetCount,
                 onClick = { onCompletedCountChange((completedCount + 1).coerceAtMost(repeatTargetCount)) },
-                contentDescription = "Increase completed count",
+                contentDescription = stringResource(R.string.core_ui_increase_completed_count),
                 icon = if (isComplete) Icons.Default.Check else Icons.Default.Add,
                 isComplete = isComplete,
             )
             Text(
-                text = "${completedCount.coerceIn(0, repeatTargetCount)}/$repeatTargetCount",
+                text = stringResource(
+                    R.string.core_ui_completed_count_fraction,
+                    completedCount.coerceIn(0, repeatTargetCount),
+                    repeatTargetCount,
+                ),
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.SemiBold,
             )
             RoutineActionItemCardCounterButton(
                 enabled = enabled && completedCount > 0,
                 onClick = { onCompletedCountChange((completedCount - 1).coerceAtLeast(0)) },
-                contentDescription = "Decrease completed count",
+                contentDescription = stringResource(R.string.core_ui_decrease_completed_count),
                 icon = Icons.Default.Remove,
                 isComplete = isComplete,
             )
@@ -369,7 +377,9 @@ private fun RoutineActionItemCardActionColumn(
     ) {
         RoutineActionItemCardSmallIconButton(
             onClick = { onHiddenChange(!isHidden) },
-            contentDescription = if (isHidden) "Show action" else "Hide action",
+            contentDescription = stringResource(
+                if (isHidden) R.string.core_ui_show_action else R.string.core_ui_hide_action,
+            ),
             icon = if (isHidden) Icons.Default.Visibility else Icons.Default.VisibilityOff,
             tint = localActionTint(isComplete),
             buttonSize = 32.dp,
@@ -378,7 +388,7 @@ private fun RoutineActionItemCardActionColumn(
         if (!isHidden) {
             RoutineActionItemCardSmallIconButton(
                 onClick = onEditActionClick,
-                contentDescription = "Edit action",
+                contentDescription = stringResource(R.string.core_ui_edit_action),
                 icon = Icons.Default.Edit,
                 tint = localActionTint(isComplete),
                 buttonSize = 32.dp,

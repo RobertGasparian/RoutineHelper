@@ -13,6 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.robertgasparian.routinehelper.core.ui.R
 
 @Composable
 fun RoutineOutlinedTextField(
@@ -97,7 +99,7 @@ private fun RoutineOutlinedTextFieldLabel(
         Text(text = text)
         if (isRequired) {
             Text(
-                text = "*",
+                text = stringResource(R.string.core_ui_required_indicator),
                 color = MaterialTheme.colorScheme.error,
                 fontWeight = FontWeight.Medium,
             )

@@ -32,6 +32,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.robertgasparian.routinehelper.core.ui.R
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 
 @Composable
@@ -136,7 +138,9 @@ private fun SummaryNoteEditButton(
         Icon(
             modifier = Modifier.size(20.dp),
             imageVector = if (hasNote) Icons.Default.Edit else Icons.Default.Add,
-            contentDescription = if (hasNote) "Edit summary note" else "Add summary note",
+            contentDescription = stringResource(
+                if (hasNote) R.string.core_ui_edit_summary_note else R.string.core_ui_add_summary_note,
+            ),
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }

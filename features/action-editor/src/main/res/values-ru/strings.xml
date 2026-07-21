@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_editor_back">Назад</string>
+    <string name="action_editor_add_action">Добавить действие</string>
+    <string name="action_editor_edit_action">Изменить действие</string>
+    <string name="action_editor_delete_action">Удалить действие</string>
+    <string name="action_editor_title_label">Название</string>
+    <string name="action_editor_title_placeholder">Назовите это действие</string>
+    <string name="action_editor_description_label">Описание</string>
+    <string name="action_editor_description_placeholder">Добавьте необязательные подробности</string>
+    <string name="action_editor_daily_action">Ежедневное действие</string>
+    <string name="action_editor_weekly_action">Еженедельное действие</string>
+    <string name="action_editor_completion_type">Тип выполнения</string>
+    <string name="action_editor_target_count">Целевое количество</string>
+    <string name="action_editor_single">Однократное</string>
+    <string name="action_editor_repeat">Повторяемое</string>
+    <string name="action_editor_decrease_repeat_target">Уменьшить целевое количество повторений</string>
+    <string name="action_editor_increase_repeat_target">Увеличить целевое количество повторений</string>
+    <string name="action_editor_save">Сохранить</string>
+    <string name="action_editor_cancel">Отмена</string>
+    <string name="action_editor_delete_confirmation_title">Удалить действие?</string>
+    <string name="action_editor_delete_confirmation_message">Действие будет удалено из этого списка распорядка. Существующие снимки истории останутся без изменений.</string>
+    <string name="action_editor_delete">Удалить</string>
+</resources>

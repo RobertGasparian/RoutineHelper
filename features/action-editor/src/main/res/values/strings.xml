@@ -1,0 +1,23 @@
+<resources>
+    <string name="action_editor_back">Back</string>
+    <string name="action_editor_add_action">Add action</string>
+    <string name="action_editor_edit_action">Edit action</string>
+    <string name="action_editor_delete_action">Delete action</string>
+    <string name="action_editor_title_label">Title</string>
+    <string name="action_editor_title_placeholder">Name this action</string>
+    <string name="action_editor_description_label">Description</string>
+    <string name="action_editor_description_placeholder">Add optional details</string>
+    <string name="action_editor_daily_action">Daily action</string>
+    <string name="action_editor_weekly_action">Weekly action</string>
+    <string name="action_editor_completion_type">Completion type</string>
+    <string name="action_editor_target_count">Target count</string>
+    <string name="action_editor_single">Single</string>
+    <string name="action_editor_repeat">Repeat</string>
+    <string name="action_editor_decrease_repeat_target">Decrease repeat target</string>
+    <string name="action_editor_increase_repeat_target">Increase repeat target</string>
+    <string name="action_editor_save">Save</string>
+    <string name="action_editor_cancel">Cancel</string>
+    <string name="action_editor_delete_confirmation_title">Delete action?</string>
+    <string name="action_editor_delete_confirmation_message">This removes the action from this routine list. Existing saved history snapshots stay unchanged.</string>
+    <string name="action_editor_delete">Delete</string>
+</resources>

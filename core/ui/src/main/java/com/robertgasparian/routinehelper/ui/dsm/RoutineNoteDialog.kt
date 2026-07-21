@@ -40,8 +40,10 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.robertgasparian.routinehelper.core.ui.R
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 
 @Composable
@@ -49,9 +51,11 @@ fun RoutineNoteDialog(
     value: TextFieldValue,
     onIntent: (RoutineNoteDialogIntent) -> Unit,
     modifier: Modifier = Modifier,
-    title: String = if (value.text.isBlank()) "Add note" else "Edit note",
-    supportingText: String = "This note is saved for this day only.",
-    label: String = "Note",
+    title: String = stringResource(
+        if (value.text.isBlank()) R.string.core_ui_add_note else R.string.core_ui_edit_note,
+    ),
+    supportingText: String = stringResource(R.string.core_ui_note_saved_for_day),
+    label: String = stringResource(R.string.core_ui_note),
     autoFocus: Boolean = true,
 ) {
     Dialog(
@@ -75,9 +79,11 @@ fun RoutineNoteDialogContent(
     value: TextFieldValue,
     onIntent: (RoutineNoteDialogIntent) -> Unit,
     modifier: Modifier = Modifier,
-    title: String = if (value.text.isBlank()) "Add note" else "Edit note",
-    supportingText: String = "This note is saved for this day only.",
-    label: String = "Note",
+    title: String = stringResource(
+        if (value.text.isBlank()) R.string.core_ui_add_note else R.string.core_ui_edit_note,
+    ),
+    supportingText: String = stringResource(R.string.core_ui_note_saved_for_day),
+    label: String = stringResource(R.string.core_ui_note),
     autoFocus: Boolean = true,
 ) {
     val focusRequester = remember { FocusRequester() }
@@ -134,7 +140,7 @@ fun RoutineNoteDialogContent(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Event,
-                        contentDescription = "Add weekday",
+                        contentDescription = stringResource(R.string.core_ui_add_weekday),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
@@ -143,7 +149,7 @@ fun RoutineNoteDialogContent(
                 ) {
                     Icon(
                         imageVector = Icons.Default.DateRange,
-                        contentDescription = "Add today's date",
+                        contentDescription = stringResource(R.string.core_ui_add_today_date),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
@@ -152,7 +158,7 @@ fun RoutineNoteDialogContent(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Schedule,
-                        contentDescription = "Add timestamp",
+                        contentDescription = stringResource(R.string.core_ui_add_timestamp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
@@ -173,13 +179,13 @@ fun RoutineNoteDialogContent(
             ) {
                 if (value.text.isNotBlank()) {
                     RoutineDialogTextButton(
-                        text = "Clear",
+                        text = stringResource(R.string.core_ui_clear),
                         onClick = { onIntent(RoutineNoteDialogIntent.ClearClick) },
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 RoutineDialogTextButton(
-                    text = "Cancel",
+                    text = stringResource(R.string.core_ui_cancel),
                     onClick = { onIntent(RoutineNoteDialogIntent.Dismiss) },
                 )
                 Button(
@@ -189,7 +195,7 @@ fun RoutineNoteDialogContent(
                         contentColor = MaterialTheme.colorScheme.onPrimary,
                     ),
                 ) {
-                    Text(text = "Save")
+                    Text(text = stringResource(R.string.core_ui_save))
                 }
             }
         }
