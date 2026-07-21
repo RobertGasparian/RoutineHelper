@@ -1,0 +1,31 @@
+<resources>
+    <string name="routine_tracking_daily_title">Daily</string>
+    <string name="routine_tracking_weekly_title">Weekly</string>
+    <string name="routine_tracking_daily_empty_title">No routine items yet</string>
+    <string name="routine_tracking_weekly_empty_title">No weekly items yet</string>
+    <string name="routine_tracking_daily_empty_description">Add your first daily action to start tracking.</string>
+    <string name="routine_tracking_weekly_empty_description">Add your first weekly action to start tracking this week.</string>
+    <string name="routine_tracking_week_of">Week of %1$s</string>
+    <string name="routine_tracking_snapshot">Snapshot</string>
+    <string name="routine_tracking_open_settings">Open settings</string>
+    <string name="routine_tracking_add_action">Add action</string>
+    <string name="routine_tracking_day_note">Day note</string>
+    <string name="routine_tracking_week_note">Week note</string>
+    <string name="routine_tracking_daily_note">Daily note</string>
+    <string name="routine_tracking_weekly_note">Weekly note</string>
+    <string name="routine_tracking_add_note">Add note</string>
+    <string name="routine_tracking_edit_note">Edit note</string>
+    <string name="routine_tracking_item_note_supporting_text">%1$s for %2$s</string>
+    <string name="routine_tracking_day_note_supporting_text">This note is saved for this day only.</string>
+    <string name="routine_tracking_week_note_supporting_text">This note is saved for the current week.</string>
+    <string name="routine_tracking_more_options">More options</string>
+    <string name="routine_tracking_add_test_items">Add test items</string>
+    <string name="routine_tracking_debug_daily_action">daily action</string>
+    <string name="routine_tracking_debug_weekly_action">weekly action</string>
+    <string name="routine_tracking_debug_item_title" translatable="false">%1$s %2$d</string>
+    <string name="routine_tracking_debug_item_description">description for %1$s %2$d</string>
+    <string name="routine_tracking_cancel">Cancel</string>
+    <string name="routine_tracking_snapshot_date">Snapshot date</string>
+    <string name="routine_tracking_test_snapshot_target">Test snapshot target</string>
+    <string name="routine_tracking_delete_action">Delete %1$s</string>
+</resources>

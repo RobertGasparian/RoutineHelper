@@ -3,6 +3,7 @@ package com.robertgasparian.routinehelper.ui.weekly
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import androidx.compose.runtime.Composable
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingComponent
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingUiState
@@ -19,7 +20,7 @@ class WeeklyComponentPaparazziTest {
     fun populated() {
         paparazzi.snapshot {
             RoutineHelperTheme {
-                WeeklyComponent(uiState = RoutineTrackingUiState.preview().copy(date = "Week of 2026-05-24"))
+                WeeklyComponent(uiState = RoutineTrackingUiState.preview().copy(date = "2026-05-24"))
             }
         }
     }
@@ -28,7 +29,7 @@ class WeeklyComponentPaparazziTest {
     fun empty() {
         paparazzi.snapshot {
             RoutineHelperTheme {
-                WeeklyComponent(uiState = RoutineTrackingUiState.previewEmpty().copy(date = "Week of 2026-05-24"))
+                WeeklyComponent(uiState = RoutineTrackingUiState.previewEmpty().copy(date = "2026-05-24"))
             }
         }
     }
@@ -39,9 +40,7 @@ private fun WeeklyComponent(uiState: RoutineTrackingUiState) {
     RoutineTrackingComponent(
         uiState = uiState,
         onIntent = {},
-        title = "Weekly",
-        emptyTitle = "No weekly items yet",
-        emptyDescription = "Add your first weekly action to start tracking this week.",
+        cadence = RoutineCadence.Weekly,
         showSnapshotAction = false,
     )
 }

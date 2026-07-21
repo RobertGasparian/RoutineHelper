@@ -30,6 +30,7 @@ import com.robertgasparian.routinehelper.domain.usecase.UpdateTodaySummaryNoteUs
 import com.robertgasparian.routinehelper.test.FakeNoteDateTimeTextProvider
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingDebugItemsPopulator
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingIntent
+import com.robertgasparian.routinehelper.ui.tracking.englishDebugTextProvider
 import java.time.Instant
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -228,6 +229,7 @@ class DailyViewModelTest {
             todaySummaryNoteUseCase = TodaySummaryNoteUseCase(todayRepository),
             debugItemsPopulator = RoutineTrackingDebugItemsPopulator(
                 addTemplateItemUseCase = AddTemplateItemUseCase(templateRepository),
+                debugTextProvider = englishDebugTextProvider,
             ),
             finalizeTodayUseCase = FinalizeTodayUseCase(
                 todayRoutineRepository = todayRepository,

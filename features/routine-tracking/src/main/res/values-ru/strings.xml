@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="routine_tracking_daily_title">Ежедневно</string>
+    <string name="routine_tracking_weekly_title">Еженедельно</string>
+    <string name="routine_tracking_daily_empty_title">В распорядке пока нет действий</string>
+    <string name="routine_tracking_weekly_empty_title">Еженедельных действий пока нет</string>
+    <string name="routine_tracking_daily_empty_description">Добавьте первое ежедневное действие, чтобы начать отслеживание.</string>
+    <string name="routine_tracking_weekly_empty_description">Добавьте первое еженедельное действие, чтобы начать отслеживание на этой неделе.</string>
+    <string name="routine_tracking_week_of">Неделя с %1$s</string>
+    <string name="routine_tracking_snapshot">Снимок</string>
+    <string name="routine_tracking_open_settings">Открыть настройки</string>
+    <string name="routine_tracking_add_action">Добавить действие</string>
+    <string name="routine_tracking_day_note">Заметка дня</string>
+    <string name="routine_tracking_week_note">Заметка недели</string>
+    <string name="routine_tracking_daily_note">Ежедневная заметка</string>
+    <string name="routine_tracking_weekly_note">Еженедельная заметка</string>
+    <string name="routine_tracking_add_note">Добавить заметку</string>
+    <string name="routine_tracking_edit_note">Изменить заметку</string>
+    <string name="routine_tracking_item_note_supporting_text">%1$s для %2$s</string>
+    <string name="routine_tracking_day_note_supporting_text">Эта заметка сохраняется только для этого дня.</string>
+    <string name="routine_tracking_week_note_supporting_text">Эта заметка сохраняется для текущей недели.</string>
+    <string name="routine_tracking_more_options">Дополнительные действия</string>
+    <string name="routine_tracking_add_test_items">Добавить тестовые элементы</string>
+    <string name="routine_tracking_debug_daily_action">ежедневное действие</string>
+    <string name="routine_tracking_debug_weekly_action">еженедельное действие</string>
+    <string name="routine_tracking_debug_item_description">описание для %1$s %2$d</string>
+    <string name="routine_tracking_cancel">Отмена</string>
+    <string name="routine_tracking_snapshot_date">Дата снимка</string>
+    <string name="routine_tracking_test_snapshot_target">Тестовая дата снимка</string>
+    <string name="routine_tracking_delete_action">Удалить %1$s</string>
+</resources>

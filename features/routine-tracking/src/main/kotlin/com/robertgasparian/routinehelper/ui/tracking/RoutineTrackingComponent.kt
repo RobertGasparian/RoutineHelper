@@ -46,9 +46,12 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.features.routinetracking.R
 import com.robertgasparian.routinehelper.ui.dsm.RoutineActionItemCard
 import com.robertgasparian.routinehelper.ui.dsm.RoutineNoteDialog
 import com.robertgasparian.routinehelper.ui.dsm.RoutineNoteDialogIntent
@@ -69,9 +72,7 @@ fun RoutineTrackingComponent(
     uiState: RoutineTrackingUiState,
     onIntent: (RoutineTrackingIntent) -> Unit,
     modifier: Modifier = Modifier,
-    title: String = "Daily",
-    emptyTitle: String = "No routine items yet",
-    emptyDescription: String = "Add your first daily action to start tracking.",
+    cadence: RoutineCadence = RoutineCadence.Daily,
     showSnapshotAction: Boolean = false,
     showAddTestItems: Boolean = false,
 ) {
@@ -79,6 +80,29 @@ fun RoutineTrackingComponent(
     var isSnapshotDatePickerVisible by rememberSaveable { mutableStateOf(false) }
     var revealedItemId by rememberSaveable { mutableStateOf<Long?>(null) }
     val listState = rememberLazyListState()
+    val isWeekly = cadence == RoutineCadence.Weekly
+    val title = stringResource(
+        if (isWeekly) R.string.routine_tracking_weekly_title else R.string.routine_tracking_daily_title,
+    )
+    val date = if (isWeekly) {
+        stringResource(R.string.routine_tracking_week_of, uiState.date)
+    } else {
+        uiState.date
+    }
+    val emptyTitle = stringResource(
+        if (isWeekly) {
+            R.string.routine_tracking_weekly_empty_title
+        } else {
+            R.string.routine_tracking_daily_empty_title
+        },
+    )
+    val emptyDescription = stringResource(
+        if (isWeekly) {
+            R.string.routine_tracking_weekly_empty_description
+        } else {
+            R.string.routine_tracking_daily_empty_description
+        },
+    )
 
     LaunchedEffect(listState) {
         snapshotFlow { listState.isScrollInProgress }
@@ -107,7 +131,7 @@ fun RoutineTrackingComponent(
                     Column {
                         Text(text = title)
                         Text(
-                            text = uiState.date,
+                            text = date,
                             style = MaterialTheme.typography.bodySmall,
                         )
                     }
@@ -120,13 +144,13 @@ fun RoutineTrackingComponent(
                                 isSnapshotDatePickerVisible = true
                             },
                         ) {
-                            Text(text = "Snapshot")
+                            Text(text = stringResource(R.string.routine_tracking_snapshot))
                         }
                     }
                     IconButton(onClick = { onIntent(RoutineTrackingIntent.SettingsClick) }) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = "Open settings",
+                            contentDescription = stringResource(R.string.routine_tracking_open_settings),
                         )
                     }
                     if (showAddTestItems) {
@@ -152,7 +176,7 @@ fun RoutineTrackingComponent(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Add action",
+                    contentDescription = stringResource(R.string.routine_tracking_add_action),
                 )
             }
         },
@@ -177,7 +201,9 @@ fun RoutineTrackingComponent(
             val summaryContent: @Composable () -> Unit = {
                 SummaryNoteCard(
                     note = uiState.summaryNote,
-                    label = if (title == "Weekly") "Week note" else "Day note",
+                    label = stringResource(
+                        if (isWeekly) R.string.routine_tracking_week_note else R.string.routine_tracking_day_note,
+                    ),
                     onEditClick = {
                         onIntent(RoutineTrackingIntent.EditSummaryNoteClick)
                     },
@@ -236,6 +262,41 @@ fun RoutineTrackingComponent(
     }
 
     uiState.noteEditor?.let { editor ->
+        val isItemEditor = editor.target is NoteEditorTarget.Item
+        val editorLabel = stringResource(
+            when {
+                isItemEditor && editor.cadence == RoutineCadence.Weekly -> R.string.routine_tracking_weekly_note
+                isItemEditor -> R.string.routine_tracking_daily_note
+                editor.cadence == RoutineCadence.Weekly -> R.string.routine_tracking_week_note
+                else -> R.string.routine_tracking_day_note
+            },
+        )
+        val editorTitle = if (isItemEditor) {
+            stringResource(
+                if (editor.value.text.isBlank()) {
+                    R.string.routine_tracking_add_note
+                } else {
+                    R.string.routine_tracking_edit_note
+                },
+            )
+        } else {
+            editorLabel
+        }
+        val editorSupportingText = if (isItemEditor) {
+            stringResource(
+                R.string.routine_tracking_item_note_supporting_text,
+                editorLabel,
+                editor.itemTitle.orEmpty(),
+            )
+        } else {
+            stringResource(
+                if (editor.cadence == RoutineCadence.Weekly) {
+                    R.string.routine_tracking_week_note_supporting_text
+                } else {
+                    R.string.routine_tracking_day_note_supporting_text
+                },
+            )
+        }
         RoutineNoteDialog(
             value = editor.value.toTextFieldValue(),
             onIntent = { dialogIntent ->
@@ -251,9 +312,9 @@ fun RoutineTrackingComponent(
                     RoutineNoteDialogIntent.TimeClick -> onIntent(RoutineTrackingIntent.NoteDraftTimeClick)
                 }
             },
-            title = editor.title,
-            supportingText = editor.supportingText,
-            label = editor.label,
+            title = editorTitle,
+            supportingText = editorSupportingText,
+            label = editorLabel,
         )
     }
 
@@ -279,7 +340,7 @@ private fun RoutineTrackingDebugOverflowMenu(
         IconButton(onClick = { isExpanded = true }) {
             Icon(
                 imageVector = Icons.Default.MoreVert,
-                contentDescription = "More options",
+                contentDescription = stringResource(R.string.routine_tracking_more_options),
             )
         }
         DropdownMenu(
@@ -287,7 +348,7 @@ private fun RoutineTrackingDebugOverflowMenu(
             onDismissRequest = { isExpanded = false },
         ) {
             DropdownMenuItem(
-                text = { Text(text = "Add test items") },
+                text = { Text(text = stringResource(R.string.routine_tracking_add_test_items)) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -326,12 +387,12 @@ private fun DebugSnapshotDatePickerDialog(
                         ?.let(onDateSelected)
                 },
             ) {
-                Text(text = "Snapshot")
+                Text(text = stringResource(R.string.routine_tracking_snapshot))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(text = "Cancel")
+                Text(text = stringResource(R.string.routine_tracking_cancel))
             }
         },
     ) {
@@ -339,13 +400,13 @@ private fun DebugSnapshotDatePickerDialog(
             state = datePickerState,
             title = {
                 Text(
-                    text = "Snapshot date",
+                    text = stringResource(R.string.routine_tracking_snapshot_date),
                     modifier = Modifier.padding(start = 24.dp, end = 12.dp, top = 16.dp),
                 )
             },
             headline = {
                 Text(
-                    text = "Test snapshot target",
+                    text = stringResource(R.string.routine_tracking_test_snapshot_target),
                     modifier = Modifier.padding(start = 24.dp, end = 12.dp, bottom = 12.dp),
                 )
             },
@@ -431,7 +492,7 @@ private fun RoutineTrackingDeleteAction(
         ) {
             Icon(
                 imageVector = Icons.Default.Delete,
-                contentDescription = "Delete $itemTitle",
+                contentDescription = stringResource(R.string.routine_tracking_delete_action, itemTitle),
             )
         }
     }
@@ -471,7 +532,7 @@ private fun EmptyRoutineTrackingContent(
             onClick = onAddClick,
             modifier = Modifier.padding(top = 20.dp),
         ) {
-            Text(text = "Add action")
+            Text(text = stringResource(R.string.routine_tracking_add_action))
         }
     }
 }

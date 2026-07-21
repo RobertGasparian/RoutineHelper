@@ -58,14 +58,14 @@ class WeeklyViewModel @Inject constructor(
             routineRemovalUndoCoordinator.state,
         ) { items, summaryNote, noteEditor, removalState ->
             RoutineTrackingUiState(
-                date = "Week of $weekStartDate",
+                date = weekStartDate,
                 summaryNote = summaryNote.orEmpty(),
                 items = items.map { item -> item.toRoutineTrackingItemUiState() },
                 noteEditor = noteEditor,
                 canRemoveItems = removalState.allowsRemovalFrom(RoutineRemovalSource.Weekly),
             )
         }
-            .stateInViewModel(initialValue = RoutineTrackingUiState(date = "Week of $weekStartDate"))
+            .stateInViewModel(initialValue = RoutineTrackingUiState(date = weekStartDate))
 
     override fun handleIntent(intent: RoutineTrackingIntent) {
         when (intent) {

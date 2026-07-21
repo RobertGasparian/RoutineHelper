@@ -14,9 +14,9 @@ class NoteEditorUiStateTest {
             itemTitle = "Drink water",
         )
 
-        assertEquals("Add note", state.title)
-        assertEquals("Daily note", state.label)
-        assertEquals("Daily note for Drink water", state.supportingText)
+        assertEquals(RoutineCadence.Daily, state.cadence)
+        assertEquals("Drink water", state.itemTitle)
+        assertEquals("", state.value.text)
         assertEquals(NoteEditorTarget.Item(routineItemId = 10L), state.target)
     }
 
@@ -29,9 +29,9 @@ class NoteEditorUiStateTest {
             itemTitle = "Stretch",
         )
 
-        assertEquals("Edit note", state.title)
-        assertEquals("Weekly note", state.label)
-        assertEquals("Weekly note for Stretch", state.supportingText)
+        assertEquals(RoutineCadence.Weekly, state.cadence)
+        assertEquals("Stretch", state.itemTitle)
+        assertEquals("Stretch after work.", state.value.text)
         assertEquals(NoteEditorTarget.Item(routineItemId = 20L), state.target)
     }
 
@@ -42,9 +42,9 @@ class NoteEditorUiStateTest {
             cadence = RoutineCadence.Daily,
         )
 
-        assertEquals("Day note", state.title)
-        assertEquals("Day note", state.label)
-        assertEquals("This note is saved for this day only.", state.supportingText)
+        assertEquals(RoutineCadence.Daily, state.cadence)
+        assertEquals(null, state.itemTitle)
+        assertEquals("Steady day.", state.value.text)
         assertEquals(NoteEditorTarget.Summary, state.target)
     }
 
@@ -55,9 +55,9 @@ class NoteEditorUiStateTest {
             cadence = RoutineCadence.Weekly,
         )
 
-        assertEquals("Week note", state.title)
-        assertEquals("Week note", state.label)
-        assertEquals("This note is saved for the current week.", state.supportingText)
+        assertEquals(RoutineCadence.Weekly, state.cadence)
+        assertEquals(null, state.itemTitle)
+        assertEquals("Good week.", state.value.text)
         assertEquals(NoteEditorTarget.Summary, state.target)
     }
 }

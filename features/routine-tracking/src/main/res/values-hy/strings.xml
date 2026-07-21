@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="routine_tracking_daily_title">Օրական</string>
+    <string name="routine_tracking_weekly_title">Շաբաթական</string>
+    <string name="routine_tracking_daily_empty_title">Առօրյայի տարրեր դեռ չկան</string>
+    <string name="routine_tracking_weekly_empty_title">Շաբաթական տարրեր դեռ չկան</string>
+    <string name="routine_tracking_daily_empty_description">Ավելացրեք առաջին օրական գործողությունը՝ հետևումը սկսելու համար։</string>
+    <string name="routine_tracking_weekly_empty_description">Ավելացրեք առաջին շաբաթական գործողությունը՝ այս շաբաթ հետևումը սկսելու համար։</string>
+    <string name="routine_tracking_week_of">%1$s-ի շաբաթը</string>
+    <string name="routine_tracking_snapshot">Պահել պատկերը</string>
+    <string name="routine_tracking_open_settings">Բացել կարգավորումները</string>
+    <string name="routine_tracking_add_action">Ավելացնել գործողություն</string>
+    <string name="routine_tracking_day_note">Օրվա նշում</string>
+    <string name="routine_tracking_week_note">Շաբաթվա նշում</string>
+    <string name="routine_tracking_daily_note">Օրական նշում</string>
+    <string name="routine_tracking_weekly_note">Շաբաթական նշում</string>
+    <string name="routine_tracking_add_note">Ավելացնել նշում</string>
+    <string name="routine_tracking_edit_note">Խմբագրել նշումը</string>
+    <string name="routine_tracking_item_note_supporting_text">%2$s-ի համար՝ %1$s</string>
+    <string name="routine_tracking_day_note_supporting_text">Այս նշումը պահվում է միայն այս օրվա համար։</string>
+    <string name="routine_tracking_week_note_supporting_text">Այս նշումը պահվում է ընթացիկ շաբաթվա համար։</string>
+    <string name="routine_tracking_more_options">Լրացուցիչ ընտրանքներ</string>
+    <string name="routine_tracking_add_test_items">Ավելացնել փորձնական տարրեր</string>
+    <string name="routine_tracking_debug_daily_action">օրական գործողություն</string>
+    <string name="routine_tracking_debug_weekly_action">շաբաթական գործողություն</string>
+    <string name="routine_tracking_debug_item_description">%1$s %2$d-ի նկարագրություն</string>
+    <string name="routine_tracking_cancel">Չեղարկել</string>
+    <string name="routine_tracking_snapshot_date">Պատկերի ամսաթիվը</string>
+    <string name="routine_tracking_test_snapshot_target">Փորձնական պատկերի ամսաթիվը</string>
+    <string name="routine_tracking_delete_action">Ջնջել՝ %1$s</string>
+</resources>

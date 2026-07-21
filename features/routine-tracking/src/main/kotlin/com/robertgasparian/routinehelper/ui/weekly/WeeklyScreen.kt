@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.features.routinetracking.BuildConfig
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingComponent
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingIntent
@@ -27,9 +28,7 @@ fun WeeklyScreen(
                 else -> viewModel.onIntent(intent)
             }
         },
-        title = "Weekly",
-        emptyTitle = "No weekly items yet",
-        emptyDescription = "Add your first weekly action to start tracking this week.",
+        cadence = RoutineCadence.Weekly,
         showSnapshotAction = BuildConfig.DEBUG,
         showAddTestItems = BuildConfig.DEBUG,
     )

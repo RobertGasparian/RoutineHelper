@@ -17,7 +17,7 @@ import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingUiState
 )
 @Composable
 private fun WeeklyComponentPhonePreview() {
-    WeeklyPreviewContent(uiState = RoutineTrackingUiState.preview().copy(date = "Week of 2026-05-24"))
+    WeeklyPreviewContent(uiState = RoutineTrackingUiState.preview().copy(date = "2026-05-24"))
 }
 
 @Preview(name = "Landscape - Light", showBackground = true, widthDp = 852, heightDp = 393)
@@ -30,25 +30,25 @@ private fun WeeklyComponentPhonePreview() {
 )
 @Composable
 private fun WeeklyComponentLandscapePreview() {
-    WeeklyPreviewContent(uiState = RoutineTrackingUiState.preview().copy(date = "Week of 2026-05-24"))
+    WeeklyPreviewContent(uiState = RoutineTrackingUiState.preview().copy(date = "2026-05-24"))
 }
 
 @Preview(name = "Tablet", showBackground = true, widthDp = 800, heightDp = 1280)
 @Composable
 private fun WeeklyComponentTabletPreview() {
-    WeeklyPreviewContent(uiState = RoutineTrackingUiState.preview().copy(date = "Week of 2026-05-24"))
+    WeeklyPreviewContent(uiState = RoutineTrackingUiState.preview().copy(date = "2026-05-24"))
 }
 
 @Preview(name = "Foldable", showBackground = true, widthDp = 673, heightDp = 841)
 @Composable
 private fun WeeklyComponentFoldablePreview() {
-    WeeklyPreviewContent(uiState = RoutineTrackingUiState.preview().copy(date = "Week of 2026-05-24"))
+    WeeklyPreviewContent(uiState = RoutineTrackingUiState.preview().copy(date = "2026-05-24"))
 }
 
 @Preview(name = "Empty", showBackground = true, widthDp = 393, heightDp = 852)
 @Composable
 private fun WeeklyComponentEmptyPreview() {
-    WeeklyPreviewContent(uiState = RoutineTrackingUiState.previewEmpty().copy(date = "Week of 2026-05-24"))
+    WeeklyPreviewContent(uiState = RoutineTrackingUiState.previewEmpty().copy(date = "2026-05-24"))
 }
 
 @Composable
@@ -57,9 +57,7 @@ private fun WeeklyPreviewContent(uiState: RoutineTrackingUiState) {
         RoutineTrackingComponent(
             uiState = uiState,
             onIntent = {},
-            title = "Weekly",
-            emptyTitle = "No weekly items yet",
-            emptyDescription = "Add your first weekly action to start tracking this week.",
+            cadence = com.robertgasparian.routinehelper.domain.model.RoutineCadence.Weekly,
             showSnapshotAction = false,
         )
     }
