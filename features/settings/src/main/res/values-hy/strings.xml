@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_back">Հետ</string>
+    <string name="settings_title">Կարգավորումներ</string>
+    <string name="settings_language">Լեզու</string>
+    <string name="settings_app_language">Հավելվածի լեզու</string>
+    <string name="settings_use_system_language">Օգտագործել համակարգի լեզուն</string>
+    <string name="settings_cancel">Չեղարկել</string>
+    <string name="settings_notifications">Ծանուցումներ</string>
+    <string name="settings_daily_summary_notification">Օրական գործողությունների ամփոփ ծանուցում</string>
+    <string name="settings_weekly_summary_notification">Շաբաթական գործողությունների ամփոփ ծանուցում</string>
+</resources>

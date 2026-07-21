@@ -17,6 +17,7 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+        resourceConfigurations += listOf("en", "ru", "hy")
     }
 
     buildTypes {
@@ -37,6 +38,10 @@ android {
     buildFeatures {
         compose = true
     }
+
+    androidResources {
+        generateLocaleConfig = true
+    }
 }
 
 dependencies {
@@ -52,7 +57,9 @@ dependencies {
     implementation(project(":libs:routine:template:domain"))
     implementation(project(":libs:routine:removal:domain"))
     implementation(project(":libs:routine:database"))
+    implementation(project(":libs:settings:data"))
 
+    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.work.runtime.ktx)

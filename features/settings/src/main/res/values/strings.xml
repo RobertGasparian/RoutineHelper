@@ -1,0 +1,14 @@
+<resources>
+    <string name="settings_back">Back</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_app_language">App language</string>
+    <string name="settings_use_system_language">Use system language</string>
+    <string name="settings_language_english" translatable="false">English</string>
+    <string name="settings_language_russian" translatable="false">Русский</string>
+    <string name="settings_language_armenian" translatable="false">Հայերեն</string>
+    <string name="settings_cancel">Cancel</string>
+    <string name="settings_notifications">Notifications</string>
+    <string name="settings_daily_summary_notification">Daily Actions Summary Notification</string>
+    <string name="settings_weekly_summary_notification">Weekly Actions Summary Notification</string>
+</resources>

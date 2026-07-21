@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_back">Назад</string>
+    <string name="settings_title">Настройки</string>
+    <string name="settings_language">Язык</string>
+    <string name="settings_app_language">Язык приложения</string>
+    <string name="settings_use_system_language">Использовать язык системы</string>
+    <string name="settings_cancel">Отмена</string>
+    <string name="settings_notifications">Уведомления</string>
+    <string name="settings_daily_summary_notification">Уведомление со сводкой ежедневных действий</string>
+    <string name="settings_weekly_summary_notification">Уведомление со сводкой еженедельных действий</string>
+</resources>

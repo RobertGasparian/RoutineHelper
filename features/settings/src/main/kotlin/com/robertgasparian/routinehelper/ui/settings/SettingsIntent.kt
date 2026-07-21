@@ -3,6 +3,10 @@ package com.robertgasparian.routinehelper.ui.settings
 sealed interface SettingsIntent {
     data object BackClick : SettingsIntent
 
+    data class AppLanguageChange(
+        val appLanguage: AppLanguage,
+    ) : SettingsIntent
+
     data class DailySummaryNotificationChange(
         val isEnabled: Boolean,
     ) : SettingsIntent
