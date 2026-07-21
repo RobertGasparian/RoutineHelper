@@ -6,32 +6,37 @@ import org.junit.Test
 
 class RoutineRemovalUndoUiStateTest {
     @Test
-    fun `given daily group when reading message then identifies source and count`() {
+    fun `given daily group then state exposes source count and visibility`() {
         val state = RoutineRemovalUndoUiState(
             activeSource = RoutineRemovalSource.Daily,
             pendingItemCount = 2,
         )
 
-        assertEquals("2 Daily actions removed", state.message)
+        assertEquals(RoutineRemovalSource.Daily, state.activeSource)
+        assertEquals(2, state.pendingItemCount)
+        assertEquals(true, state.isVisible)
     }
 
     @Test
-    fun `given one weekly removal when reading message then uses singular action`() {
+    fun `given one weekly removal then state remains visible`() {
         val state = RoutineRemovalUndoUiState(
             activeSource = RoutineRemovalSource.Weekly,
             pendingItemCount = 1,
         )
 
-        assertEquals("1 Weekly action removed", state.message)
+        assertEquals(RoutineRemovalSource.Weekly, state.activeSource)
+        assertEquals(1, state.pendingItemCount)
+        assertEquals(true, state.isVisible)
     }
 
     @Test
-    fun `given current list group when reading message then identifies current list`() {
+    fun `given current list group then state identifies current list`() {
         val state = RoutineRemovalUndoUiState(
             activeSource = RoutineRemovalSource.CurrentList,
             pendingItemCount = 1,
         )
 
-        assertEquals("1 Current List item removed", state.message)
+        assertEquals(RoutineRemovalSource.CurrentList, state.activeSource)
+        assertEquals(1, state.pendingItemCount)
     }
 }

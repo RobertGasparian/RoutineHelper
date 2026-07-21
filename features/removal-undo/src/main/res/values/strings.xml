@@ -1,0 +1,16 @@
+<resources>
+    <plurals name="removal_undo_current_list_items_removed">
+        <item quantity="one">%1$d Current List item removed</item>
+        <item quantity="other">%1$d Current List items removed</item>
+    </plurals>
+    <plurals name="removal_undo_daily_actions_removed">
+        <item quantity="one">%1$d Daily action removed</item>
+        <item quantity="other">%1$d Daily actions removed</item>
+    </plurals>
+    <plurals name="removal_undo_weekly_actions_removed">
+        <item quantity="one">%1$d Weekly action removed</item>
+        <item quantity="other">%1$d Weekly actions removed</item>
+    </plurals>
+    <string name="removal_undo_latest">Undo latest</string>
+    <string name="removal_undo_all">Undo all</string>
+</resources>

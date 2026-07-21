@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="removal_undo_current_list_items_removed">
+        <item quantity="one">Հեռացվեց ընթացիկ ցուցակի %1$d տարր</item>
+        <item quantity="other">Հեռացվեց ընթացիկ ցուցակի %1$d տարր</item>
+    </plurals>
+    <plurals name="removal_undo_daily_actions_removed">
+        <item quantity="one">Հեռացվեց %1$d օրական գործողություն</item>
+        <item quantity="other">Հեռացվեց %1$d օրական գործողություն</item>
+    </plurals>
+    <plurals name="removal_undo_weekly_actions_removed">
+        <item quantity="one">Հեռացվեց %1$d շաբաթական գործողություն</item>
+        <item quantity="other">Հեռացվեց %1$d շաբաթական գործողություն</item>
+    </plurals>
+    <string name="removal_undo_latest">Հետարկել վերջինը</string>
+    <string name="removal_undo_all">Հետարկել բոլորը</string>
+</resources>

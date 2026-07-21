@@ -32,7 +32,8 @@ class RoutineRemovalUndoViewModelTest {
         val state = viewModel.uiState.first { it.pendingItemCount == 2 }
 
         assertEquals(RoutineRemovalSource.Weekly, state.activeSource)
-        assertEquals("2 Weekly actions removed", state.message)
+        assertEquals(2, state.pendingItemCount)
+        assertEquals(true, state.isVisible)
     }
 
     @Test

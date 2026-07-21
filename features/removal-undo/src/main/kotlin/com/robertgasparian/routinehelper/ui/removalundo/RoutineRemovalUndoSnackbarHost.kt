@@ -22,8 +22,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalSource
+import com.robertgasparian.routinehelper.features.removalundo.R
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 
 @Composable
@@ -32,6 +36,25 @@ fun RoutineRemovalUndoSnackbarHost(
     onIntent: (RoutineRemovalUndoIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val message = when (uiState.activeSource) {
+        RoutineRemovalSource.CurrentList -> pluralStringResource(
+            R.plurals.removal_undo_current_list_items_removed,
+            uiState.pendingItemCount,
+            uiState.pendingItemCount,
+        )
+        RoutineRemovalSource.Daily -> pluralStringResource(
+            R.plurals.removal_undo_daily_actions_removed,
+            uiState.pendingItemCount,
+            uiState.pendingItemCount,
+        )
+        RoutineRemovalSource.Weekly -> pluralStringResource(
+            R.plurals.removal_undo_weekly_actions_removed,
+            uiState.pendingItemCount,
+            uiState.pendingItemCount,
+        )
+        null -> ""
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -64,7 +87,7 @@ fun RoutineRemovalUndoSnackbarHost(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     Text(
-                        text = uiState.message,
+                        text = message,
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     Row(
@@ -77,7 +100,7 @@ fun RoutineRemovalUndoSnackbarHost(
                             ),
                             onClick = { onIntent(RoutineRemovalUndoIntent.UndoLatestClick) },
                         ) {
-                            Text(text = "Undo latest")
+                            Text(text = stringResource(R.string.removal_undo_latest))
                         }
                         TextButton(
                             colors = ButtonDefaults.textButtonColors(
@@ -85,7 +108,7 @@ fun RoutineRemovalUndoSnackbarHost(
                             ),
                             onClick = { onIntent(RoutineRemovalUndoIntent.UndoAllClick) },
                         ) {
-                            Text(text = "Undo all")
+                            Text(text = stringResource(R.string.removal_undo_all))
                         }
                     }
                 }

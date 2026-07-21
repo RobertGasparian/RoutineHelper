@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="removal_undo_current_list_items_removed">
+        <item quantity="one">Удалён %1$d элемент текущего списка</item>
+        <item quantity="few">Удалено %1$d элемента текущего списка</item>
+        <item quantity="many">Удалено %1$d элементов текущего списка</item>
+        <item quantity="other">Удалено %1$d элементов текущего списка</item>
+    </plurals>
+    <plurals name="removal_undo_daily_actions_removed">
+        <item quantity="one">Удалено %1$d ежедневное действие</item>
+        <item quantity="few">Удалено %1$d ежедневных действия</item>
+        <item quantity="many">Удалено %1$d ежедневных действий</item>
+        <item quantity="other">Удалено %1$d ежедневных действий</item>
+    </plurals>
+    <plurals name="removal_undo_weekly_actions_removed">
+        <item quantity="one">Удалено %1$d еженедельное действие</item>
+        <item quantity="few">Удалено %1$d еженедельных действия</item>
+        <item quantity="many">Удалено %1$d еженедельных действий</item>
+        <item quantity="other">Удалено %1$d еженедельных действий</item>
+    </plurals>
+    <string name="removal_undo_latest">Отменить последнее</string>
+    <string name="removal_undo_all">Отменить всё</string>
+</resources>
