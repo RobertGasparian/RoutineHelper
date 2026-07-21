@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="current_list_title">Ընթացիկ ցուցակ</string>
+    <string name="current_list_open_settings">Բացել կարգավորումները</string>
+    <string name="current_list_more_options">Լրացուցիչ ընտրանքներ</string>
+    <string name="current_list_add_item">Ավելացնել տարր</string>
+    <string name="current_list_add">Ավելացնել</string>
+    <string name="current_list_edit_item">Խմբագրել տարրը</string>
+    <string name="current_list_save">Պահպանել</string>
+    <string name="current_list_check_all">Նշել բոլորը</string>
+    <string name="current_list_uncheck_all">Հանել բոլոր նշումները</string>
+    <string name="current_list_share_list">Կիսվել ցուցակով</string>
+    <string name="current_list_clear_list">Մաքրել ցուցակը</string>
+    <string name="current_list_remove_item">Հեռացնել՝ %1$s</string>
+    <string name="current_list_item_more_options">Լրացուցիչ ընտրանքներ՝ %1$s</string>
+    <string name="current_list_edit">Խմբագրել</string>
+    <string name="current_list_empty_title">Ցուցակում դեռ տարրեր չկան</string>
+    <string name="current_list_empty_description">Ավելացրեք այն ամենը, ինչ ցանկանում եք պահել մինչև ցուցակը մաքրելը։</string>
+    <string name="current_list_item_title_label">Վերնագիր</string>
+    <string name="current_list_item_description_label">Նկարագրություն</string>
+    <string name="current_list_cancel">Չեղարկել</string>
+    <string name="current_list_clear_confirmation_title">Մաքրե՞լ ցուցակը</string>
+    <string name="current_list_clear_confirmation_message">Ընթացիկ ցուցակի բոլոր տարրերը կհեռացվեն։</string>
+    <string name="current_list_clear">Մաքրել</string>
+    <string name="current_list_share_heading">Ընթացիկ ցուցակ</string>
+    <string name="current_list_share_no_items">Տարրեր չկան։</string>
+    <string name="current_list_share_description">Նկարագրություն՝ %1$s</string>
+    <string name="current_list_add_test_items">Ավելացնել փորձնական տարրեր</string>
+    <string name="current_list_debug_item_title">ցուցակի տարր %1$d</string>
+    <string name="current_list_debug_item_description">ցուցակի %1$d-րդ տարրի նկարագրություն</string>
+</resources>

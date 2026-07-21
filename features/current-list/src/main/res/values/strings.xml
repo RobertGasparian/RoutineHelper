@@ -1,0 +1,33 @@
+<resources>
+    <string name="current_list_title">Current List</string>
+    <string name="current_list_open_settings">Open settings</string>
+    <string name="current_list_more_options">More options</string>
+    <string name="current_list_add_item">Add item</string>
+    <string name="current_list_add">Add</string>
+    <string name="current_list_edit_item">Edit item</string>
+    <string name="current_list_save">Save</string>
+    <string name="current_list_check_all">Check all</string>
+    <string name="current_list_uncheck_all">Uncheck all</string>
+    <string name="current_list_share_list">Share list</string>
+    <string name="current_list_clear_list">Clear list</string>
+    <string name="current_list_remove_item">Remove %1$s</string>
+    <string name="current_list_item_more_options">More options for %1$s</string>
+    <string name="current_list_edit">Edit</string>
+    <string name="current_list_empty_title">No list items yet</string>
+    <string name="current_list_empty_description">Add anything you want to keep around until you clear it.</string>
+    <string name="current_list_item_title_label">Title</string>
+    <string name="current_list_item_description_label">Description</string>
+    <string name="current_list_cancel">Cancel</string>
+    <string name="current_list_clear_confirmation_title">Clear list?</string>
+    <string name="current_list_clear_confirmation_message">This removes every item from your current list.</string>
+    <string name="current_list_clear">Clear</string>
+    <string name="current_list_share_heading">Current list</string>
+    <string name="current_list_share_no_items">No items.</string>
+    <string name="current_list_share_item" translatable="false">%1$d. %2$s %3$s</string>
+    <string name="current_list_share_description">Description: %1$s</string>
+    <string name="current_list_share_checked_marker" translatable="false">[x]</string>
+    <string name="current_list_share_unchecked_marker" translatable="false">[ ]</string>
+    <string name="current_list_add_test_items">Add test items</string>
+    <string name="current_list_debug_item_title">list item %1$d</string>
+    <string name="current_list_debug_item_description">description for list item %1$d</string>
+</resources>

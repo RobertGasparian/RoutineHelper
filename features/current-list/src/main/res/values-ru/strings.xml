@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="current_list_title">Текущий список</string>
+    <string name="current_list_open_settings">Открыть настройки</string>
+    <string name="current_list_more_options">Дополнительные действия</string>
+    <string name="current_list_add_item">Добавить элемент</string>
+    <string name="current_list_add">Добавить</string>
+    <string name="current_list_edit_item">Изменить элемент</string>
+    <string name="current_list_save">Сохранить</string>
+    <string name="current_list_check_all">Отметить все</string>
+    <string name="current_list_uncheck_all">Снять все отметки</string>
+    <string name="current_list_share_list">Поделиться списком</string>
+    <string name="current_list_clear_list">Очистить список</string>
+    <string name="current_list_remove_item">Удалить %1$s</string>
+    <string name="current_list_item_more_options">Дополнительные действия: %1$s</string>
+    <string name="current_list_edit">Изменить</string>
+    <string name="current_list_empty_title">В списке пока ничего нет</string>
+    <string name="current_list_empty_description">Добавляйте сюда всё, что хотите сохранить до очистки списка.</string>
+    <string name="current_list_item_title_label">Название</string>
+    <string name="current_list_item_description_label">Описание</string>
+    <string name="current_list_cancel">Отмена</string>
+    <string name="current_list_clear_confirmation_title">Очистить список?</string>
+    <string name="current_list_clear_confirmation_message">Все элементы текущего списка будут удалены.</string>
+    <string name="current_list_clear">Очистить</string>
+    <string name="current_list_share_heading">Текущий список</string>
+    <string name="current_list_share_no_items">Нет элементов.</string>
+    <string name="current_list_share_description">Описание: %1$s</string>
+    <string name="current_list_add_test_items">Добавить тестовые элементы</string>
+    <string name="current_list_debug_item_title">элемент списка %1$d</string>
+    <string name="current_list_debug_item_description">описание элемента списка %1$d</string>
+</resources>

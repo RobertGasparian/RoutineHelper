@@ -1,7 +1,6 @@
 package com.robertgasparian.routinehelper.ui.currentlist
 
 import com.robertgasparian.routinehelper.core.testing.MainDispatcherRule
-import com.robertgasparian.routinehelper.domain.formatter.CurrentListShareTextFormatter
 import com.robertgasparian.routinehelper.domain.model.CurrentListItem
 import com.robertgasparian.routinehelper.domain.removal.FakeRoutineRemovalUndoCoordinator
 import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalRequest
@@ -183,7 +182,14 @@ class CurrentListViewModelTest {
             reorderCurrentListItemsUseCase = ReorderCurrentListItemsUseCase(repository),
             setAllCurrentListItemsCheckedUseCase = SetAllCurrentListItemsCheckedUseCase(repository),
             setCurrentListItemCheckedUseCase = SetCurrentListItemCheckedUseCase(repository),
-            currentListShareTextFormatter = CurrentListShareTextFormatter(),
+            currentListTextProvider = object : CurrentListTextProvider {
+                override fun shareText(items: List<CurrentListItem>): String = englishShareText(items)
+
+                override fun debugItemTitle(itemNumber: Int): String = "list item $itemNumber"
+
+                override fun debugItemDescription(itemNumber: Int): String =
+                    "description for list item $itemNumber"
+            },
             routineRemovalUndoCoordinator = removalUndoCoordinator,
         )
 
@@ -201,4 +207,21 @@ class CurrentListViewModelTest {
             position = position,
             isChecked = isChecked,
         )
+
+    private fun englishShareText(items: List<CurrentListItem>): String =
+        buildString {
+            appendLine("Current list")
+            appendLine()
+            if (items.isEmpty()) {
+                appendLine("No items.")
+                return@buildString
+            }
+            items.sortedBy(CurrentListItem::position).forEachIndexed { index, item ->
+                appendLine("${index + 1}. ${if (item.isChecked) "[x]" else "[ ]"} ${item.title}")
+                item.description?.takeIf(String::isNotBlank)?.let { description ->
+                    appendLine("   Description: $description")
+                }
+                if (index < items.lastIndex) appendLine()
+            }
+        }.trimEnd()
 }

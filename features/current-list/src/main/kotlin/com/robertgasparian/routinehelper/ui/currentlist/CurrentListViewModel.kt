@@ -1,7 +1,6 @@
 package com.robertgasparian.routinehelper.ui.currentlist
 
 import com.robertgasparian.routinehelper.core.presentation.BaseViewModel
-import com.robertgasparian.routinehelper.domain.formatter.CurrentListShareTextFormatter
 import com.robertgasparian.routinehelper.domain.model.CurrentListItem
 import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalSource
 import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalUndoCoordinator
@@ -24,7 +23,7 @@ class CurrentListViewModel @Inject constructor(
     private val reorderCurrentListItemsUseCase: ReorderCurrentListItemsUseCase,
     private val setAllCurrentListItemsCheckedUseCase: SetAllCurrentListItemsCheckedUseCase,
     private val setCurrentListItemCheckedUseCase: SetCurrentListItemCheckedUseCase,
-    private val currentListShareTextFormatter: CurrentListShareTextFormatter,
+    private val currentListTextProvider: CurrentListTextProvider,
     private val routineRemovalUndoCoordinator: RoutineRemovalUndoCoordinator,
 ) : BaseViewModel<CurrentListUiState, CurrentListIntent, Nothing>() {
     override val uiState: StateFlow<CurrentListUiState> =
@@ -34,7 +33,7 @@ class CurrentListViewModel @Inject constructor(
         ) { items, removalState ->
             CurrentListUiState(
                 items = items.map(CurrentListItem::toUiState),
-                shareText = currentListShareTextFormatter(items),
+                shareText = currentListTextProvider.shareText(items),
                 canRemoveItems = removalState.allowsRemovalFrom(RoutineRemovalSource.CurrentList),
             )
         }
@@ -71,9 +70,9 @@ class CurrentListViewModel @Inject constructor(
             repeat(DebugItemBatchSize) { offset ->
                 val itemNumber = firstItemNumber + offset
                 addCurrentListItemUseCase(
-                    title = "list item $itemNumber",
+                    title = currentListTextProvider.debugItemTitle(itemNumber),
                     description = if (itemNumber % 2 == 0) {
-                        "description for list item $itemNumber"
+                        currentListTextProvider.debugItemDescription(itemNumber)
                     } else {
                         null
                     },

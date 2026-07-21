@@ -64,6 +64,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -72,6 +73,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robertgasparian.routinehelper.features.currentlist.BuildConfig
+import com.robertgasparian.routinehelper.features.currentlist.R
 import com.robertgasparian.routinehelper.ui.dsm.RoutineDialogFilledButton
 import com.robertgasparian.routinehelper.ui.dsm.RoutineDialogTextButton
 import com.robertgasparian.routinehelper.ui.dsm.RoutineOutlinedTextField
@@ -148,19 +150,19 @@ fun CurrentListComponent(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text(text = "Current List") },
+                title = { Text(text = stringResource(R.string.current_list_title)) },
                 actions = {
                     IconButton(onClick = { onIntent(CurrentListIntent.SettingsClick) }) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = "Open settings",
+                            contentDescription = stringResource(R.string.current_list_open_settings),
                         )
                     }
                     Box {
                         IconButton(onClick = { isOverflowMenuVisible = true }) {
                             Icon(
                                 imageVector = Icons.Default.MoreVert,
-                                contentDescription = "More options",
+                                contentDescription = stringResource(R.string.current_list_more_options),
                             )
                         }
                         CurrentListOverflowMenu(
@@ -205,7 +207,7 @@ fun CurrentListComponent(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Add item",
+                    contentDescription = stringResource(R.string.current_list_add_item),
                 )
             }
         },
@@ -314,8 +316,8 @@ fun CurrentListComponent(
 
     if (isAddDialogVisible) {
         CurrentListItemEditorDialog(
-            dialogTitle = "Add item",
-            confirmButtonText = "Add",
+            dialogTitle = stringResource(R.string.current_list_add_item),
+            confirmButtonText = stringResource(R.string.current_list_add),
             onDismiss = { isAddDialogVisible = false },
             onConfirmClick = { title, description ->
                 isAddDialogVisible = false
@@ -334,8 +336,8 @@ fun CurrentListComponent(
     }
     if (editingItem != null) {
         CurrentListItemEditorDialog(
-            dialogTitle = "Edit item",
-            confirmButtonText = "Save",
+            dialogTitle = stringResource(R.string.current_list_edit_item),
+            confirmButtonText = stringResource(R.string.current_list_save),
             initialTitle = editingItem.title,
             initialDescription = editingItem.description,
             onDismiss = { editingItemId = null },
@@ -390,7 +392,7 @@ private fun CurrentListBulkActionsHeader(
             ) {
                 CurrentListBulkActionButton(
                     visible = canCheckAll,
-                    text = "Check all",
+                    text = stringResource(R.string.current_list_check_all),
                     imageVector = Icons.Default.DoneAll,
                     expandFrom = Alignment.Start,
                     shrinkTowards = Alignment.Start,
@@ -403,7 +405,7 @@ private fun CurrentListBulkActionsHeader(
             ) {
                 CurrentListBulkActionButton(
                     visible = canUncheckAll,
-                    text = "Uncheck all",
+                    text = stringResource(R.string.current_list_uncheck_all),
                     imageVector = Icons.Default.RemoveDone,
                     expandFrom = Alignment.End,
                     shrinkTowards = Alignment.End,
@@ -457,7 +459,7 @@ private fun CurrentListOverflowMenu(
     ) {
         if (showAddTestItems) {
             DropdownMenuItem(
-                text = { Text(text = "Add test items") },
+                text = { Text(text = stringResource(R.string.current_list_add_test_items)) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -469,7 +471,7 @@ private fun CurrentListOverflowMenu(
         }
         DropdownMenuItem(
             enabled = canShare,
-            text = { Text(text = "Share list") },
+            text = { Text(text = stringResource(R.string.current_list_share_list)) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Share,
@@ -482,7 +484,7 @@ private fun CurrentListOverflowMenu(
             enabled = canClear,
             text = {
                 Text(
-                    text = "Clear list",
+                    text = stringResource(R.string.current_list_clear_list),
                     color = if (canClear) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
                 )
             },
@@ -545,7 +547,7 @@ private fun CurrentListDeleteAction(
         ) {
             Icon(
                 imageVector = Icons.Default.Delete,
-                contentDescription = "Remove $itemTitle",
+                contentDescription = stringResource(R.string.current_list_remove_item, itemTitle),
             )
         }
     }
@@ -629,7 +631,7 @@ private fun CurrentListItemCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
-                        contentDescription = "More options for ${item.title}",
+                        contentDescription = stringResource(R.string.current_list_item_more_options, item.title),
                     )
                 }
                 DropdownMenu(
@@ -637,7 +639,7 @@ private fun CurrentListItemCard(
                     onDismissRequest = { onIntent(CurrentListItemIntent.OverflowMenuDismiss) },
                 ) {
                     DropdownMenuItem(
-                        text = { Text(text = "Edit") },
+                        text = { Text(text = stringResource(R.string.current_list_edit)) },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Edit,
@@ -688,17 +690,17 @@ private fun EmptyCurrentListContent(
             }
         }
         Text(
-            text = "No list items yet",
+            text = stringResource(R.string.current_list_empty_title),
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(top = 16.dp),
         )
         Text(
-            text = "Add anything you want to keep around until you clear it.",
+            text = stringResource(R.string.current_list_empty_description),
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(top = 8.dp),
         )
         RoutineDialogFilledButton(
-            text = "Add item",
+            text = stringResource(R.string.current_list_add_item),
             onClick = onAddClick,
             modifier = Modifier.padding(top = 20.dp),
         )
@@ -730,7 +732,7 @@ private fun CurrentListItemEditorDialog(
                 RoutineOutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    label = "Title",
+                    label = stringResource(R.string.current_list_item_title_label),
                     isRequired = true,
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
@@ -738,7 +740,7 @@ private fun CurrentListItemEditorDialog(
                 RoutineOutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
-                    label = "Description",
+                    label = stringResource(R.string.current_list_item_description_label),
                     minLines = 2,
                     maxLines = 4,
                     modifier = Modifier.fillMaxWidth(),
@@ -754,7 +756,7 @@ private fun CurrentListItemEditorDialog(
         },
         dismissButton = {
             RoutineDialogTextButton(
-                text = "Cancel",
+                text = stringResource(R.string.current_list_cancel),
                 onClick = onDismiss,
             )
         },
@@ -768,18 +770,18 @@ private fun ClearCurrentListConfirmationDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(text = "Clear list?") },
-        text = { Text(text = "This removes every item from your current list.") },
+        title = { Text(text = stringResource(R.string.current_list_clear_confirmation_title)) },
+        text = { Text(text = stringResource(R.string.current_list_clear_confirmation_message)) },
         confirmButton = {
             RoutineDialogTextButton(
-                text = "Clear",
+                text = stringResource(R.string.current_list_clear),
                 onClick = onClearClick,
                 isDestructive = true,
             )
         },
         dismissButton = {
             RoutineDialogTextButton(
-                text = "Cancel",
+                text = stringResource(R.string.current_list_cancel),
                 onClick = onDismiss,
             )
         },
