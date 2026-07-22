@@ -86,6 +86,13 @@
 - Keep feature-specific display mappings such as labels and icons in one feature-owned presentation mapping. Do not move business-specific mappings into `:core:ui` merely to reuse a visual component.
 - Debug-only UI actions in production source must be gated by debug build behavior when touched.
 
+## User-Facing Text And Localization
+
+- Put every production string that a user can see, hear through accessibility services, share, or export in the owning Android module's string resources. Do not hardcode user-facing text in Compose, ViewModels, formatters, notifications, dialogs, snackbars, accessibility semantics, or platform intents.
+- Treat meaningful accessibility text the same as visible text: user-facing `contentDescription` values must come from string resources. Use `null` only for decorative elements whose meaning is already conveyed elsewhere.
+- When adding or changing a translatable base string, add or update the corresponding translations for every supported app language in the same change. The currently supported resource sets are English (`values`), Russian (`values-ru`), and Armenian (`values-hy`); keep resource names and format placeholders consistent across them, and use plurals or formatted resources instead of assembling sentences in code.
+- Hardcoded text is allowed in previews, tests and test fixtures, logs, storage/schema keys, and other internal-only or debug-only code that cannot reach a release user. Technical constants and brand names may use `translatable="false"`; do not use this exemption for visible, accessible, shared, exported, or notification text.
+
 ## Presentation
 
 - ViewModels must depend on use cases or presentation-specific collaborators, not repositories or data sources.
