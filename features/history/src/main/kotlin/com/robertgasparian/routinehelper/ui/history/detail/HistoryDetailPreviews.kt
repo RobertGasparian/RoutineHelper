@@ -74,6 +74,39 @@ private fun HistoryDetailComponentEmptyPreview() {
     }
 }
 
+@Preview(name = "Add Summary Note", showBackground = true, widthDp = 393, heightDp = 852)
+@Composable
+private fun HistoryDetailComponentWithoutSummaryNotePreview() {
+    RoutineHelperTheme {
+        HistoryDetailComponent(
+            uiState = HistoryDetailUiState.previewWithoutSummaryNote(),
+            onIntent = {},
+        )
+    }
+}
+
+@Preview(name = "Edit Summary Note", showBackground = true, widthDp = 393, heightDp = 852)
+@Composable
+private fun HistoryDetailComponentSummaryNoteEditorPreview() {
+    RoutineHelperTheme {
+        HistoryDetailComponent(
+            uiState = HistoryDetailUiState.previewSummaryNoteEditor(),
+            onIntent = {},
+        )
+    }
+}
+
+@Preview(name = "Read-only Summary Note", showBackground = true, widthDp = 393, heightDp = 852)
+@Composable
+private fun HistoryDetailComponentReadOnlySummaryNotePreview() {
+    RoutineHelperTheme {
+        HistoryDetailComponent(
+            uiState = HistoryDetailUiState.previewReadOnlySummaryNote(),
+            onIntent = {},
+        )
+    }
+}
+
 @Preview(name = "Share Dialog", showBackground = true, widthDp = 393, heightDp = 852)
 @Composable
 private fun HistoryDetailComponentSharePreview() {

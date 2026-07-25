@@ -5,6 +5,7 @@ import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
 import com.robertgasparian.routinehelper.domain.repository.FakeRoutineHistoryRepository
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotUseCase
+import com.robertgasparian.routinehelper.domain.usecase.UpdateSnapshotSummaryNoteUseCase
 import com.robertgasparian.routinehelper.core.testing.MainDispatcherRule
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
 import com.robertgasparian.routinehelper.ui.history.FakeHistoryTextProvider
@@ -123,6 +124,102 @@ class HistoryDetailViewModelTest {
     }
 
     @Test
+    fun `given snapshot when summary edit is dismissed then original note is preserved`() = runTest {
+        val snapshotId = saveWeeklySnapshot()
+        val viewModel = createViewModel(snapshotId)
+        viewModel.uiState.first { !it.isMissing }
+
+        viewModel.onIntent(HistoryDetailIntent.EditSummaryNoteClick)
+        val openedEditor = requireNotNull(
+            viewModel.uiState.first { state -> state.summaryNoteEditor != null }.summaryNoteEditor,
+        )
+        assertEquals("Good week", openedEditor.text)
+
+        viewModel.onIntent(
+            HistoryDetailIntent.SummaryNoteDraftChange(
+                text = "Unsaved change",
+                selectionStart = 14,
+                selectionEnd = 14,
+            ),
+        )
+        viewModel.onIntent(HistoryDetailIntent.SummaryNoteEditorDismiss)
+
+        val dismissedState = viewModel.uiState.first { state -> state.summaryNoteEditor == null }
+        assertEquals("Good week", dismissedState.summaryNote)
+    }
+
+    @Test
+    fun `given snapshot when summary edit is saved then normalized note is persisted`() = runTest {
+        val snapshotId = saveWeeklySnapshot()
+        val viewModel = createViewModel(snapshotId)
+        viewModel.uiState.first { !it.isMissing }
+
+        viewModel.onIntent(HistoryDetailIntent.EditSummaryNoteClick)
+        viewModel.onIntent(
+            HistoryDetailIntent.SummaryNoteDraftChange(
+                text = "  Better week  ",
+                selectionStart = 15,
+                selectionEnd = 15,
+            ),
+        )
+        viewModel.onIntent(HistoryDetailIntent.SummaryNoteEditorSaveClick)
+        advanceUntilIdle()
+
+        val savedState = viewModel.uiState.first { state ->
+            state.summaryNote == "Better week" && state.summaryNoteEditor == null
+        }
+        assertEquals("Better week", savedState.summaryNote)
+    }
+
+    @Test
+    fun `given snapshot when summary is cleared and saved then note is removed`() = runTest {
+        val snapshotId = saveWeeklySnapshot()
+        val viewModel = createViewModel(snapshotId)
+        viewModel.uiState.first { !it.isMissing }
+
+        viewModel.onIntent(HistoryDetailIntent.EditSummaryNoteClick)
+        viewModel.onIntent(HistoryDetailIntent.SummaryNoteDraftClearClick)
+        val clearedEditor = requireNotNull(
+            viewModel.uiState.first { state -> state.summaryNoteEditor?.text == "" }.summaryNoteEditor,
+        )
+        assertEquals(0, clearedEditor.selectionStart)
+        assertEquals(0, clearedEditor.selectionEnd)
+
+        viewModel.onIntent(HistoryDetailIntent.SummaryNoteEditorSaveClick)
+        advanceUntilIdle()
+
+        val savedState = viewModel.uiState.first { state ->
+            state.summaryNote.isEmpty() && state.summaryNoteEditor == null
+        }
+        assertEquals("", savedState.summaryNote)
+    }
+
+    @Test
+    fun `given summary becomes read only when editor is open then editor closes and save is ignored`() = runTest {
+        val snapshotId = saveWeeklySnapshot()
+        val viewModel = createViewModel(snapshotId)
+        viewModel.uiState.first { !it.isMissing }
+
+        viewModel.onIntent(HistoryDetailIntent.EditSummaryNoteClick)
+        viewModel.uiState.first { state -> state.summaryNoteEditor != null }
+        val snapshot = requireNotNull(repository.snapshot(snapshotId).first())
+
+        repository.setSnapshot(snapshot.copy(isSummaryNoteEditable = false))
+
+        val readOnlyState = viewModel.uiState.first { state ->
+            !state.isSummaryNoteEditable && state.summaryNoteEditor == null
+        }
+        viewModel.onIntent(HistoryDetailIntent.EditSummaryNoteClick)
+        assertEquals(null, viewModel.uiState.value.summaryNoteEditor)
+
+        viewModel.onIntent(HistoryDetailIntent.SummaryNoteEditorSaveClick)
+        advanceUntilIdle()
+
+        assertEquals("Good week", readOnlyState.summaryNote)
+        assertEquals("Good week", repository.snapshot(snapshotId).first()?.summaryNote)
+    }
+
+    @Test
     fun `given snapshot when delete intent is handled then repository receives id and deleted event is emitted`() = runTest {
         val snapshotId = saveWeeklySnapshot()
         val viewModel = createViewModel(snapshotId)
@@ -145,6 +242,7 @@ class HistoryDetailViewModelTest {
             deleteSnapshotUseCase = DeleteSnapshotUseCase(repository),
             historyTextProvider = FakeHistoryTextProvider(),
             snapshotUseCase = SnapshotUseCase(repository),
+            updateSnapshotSummaryNoteUseCase = UpdateSnapshotSummaryNoteUseCase(repository),
         )
 
     private suspend fun saveWeeklySnapshot(): Long =

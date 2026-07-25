@@ -19,5 +19,14 @@ interface RoutineHistoryRepository {
         cadence: RoutineCadence,
     ): Long
 
+    /**
+     * Focused summary-note command endpoint. Keep it separate from whole-snapshot writes so a
+     * future editability policy can guard this action without risking unrelated snapshot fields.
+     */
+    suspend fun updateSnapshotSummaryNote(
+        snapshotId: Long,
+        summaryNote: String?,
+    )
+
     suspend fun deleteSnapshot(snapshotId: Long)
 }

@@ -1,6 +1,7 @@
 package com.robertgasparian.routinehelper.ui.app
 
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.ui.history.detail.HistoryDetailInitialAction
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -8,7 +9,12 @@ class RoutineDestinationBackStackSaverTest {
     @Test
     fun `given destination stack when saving and restoring then entries are preserved`() {
         val backStack = TopLevelBackStack<RoutineDestination>(HistoryDestination).apply {
-            add(HistoryDetailDestination(snapshotId = 42L))
+            add(
+                HistoryDetailDestination(
+                    snapshotId = 42L,
+                    initialAction = HistoryDetailInitialAction.OpenSummaryEditor,
+                ),
+            )
             add(
                 ShareTextPreviewDestination(
                     initialText = "Snapshot text",

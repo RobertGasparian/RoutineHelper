@@ -1,6 +1,7 @@
 package com.robertgasparian.routinehelper.ui.history.detail
 
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.ui.dsm.RoutineNoteDraftUiState
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
 
 data class HistoryDetailUiState(
@@ -8,8 +9,11 @@ data class HistoryDetailUiState(
     val cadence: RoutineCadence = RoutineCadence.Daily,
     val finalizedTime: String = "",
     val summaryNote: String = "",
+    /** Intentional UI capability for future summary edit restrictions; currently always true. */
+    val isSummaryNoteEditable: Boolean = true,
     val items: List<HistoryDetailItemUiState> = emptyList(),
     val isMissing: Boolean = false,
+    val summaryNoteEditor: RoutineNoteDraftUiState? = null,
     val isShareFormatDialogVisible: Boolean = false,
     val shareDraft: ShareDraft? = null,
 ) {
@@ -98,6 +102,19 @@ data class HistoryDetailUiState(
             preview().copy(
                 isShareFormatDialogVisible = true,
             )
+
+        fun previewWithoutSummaryNote(): HistoryDetailUiState =
+            preview().copy(summaryNote = "")
+
+        fun previewSummaryNoteEditor(): HistoryDetailUiState =
+            preview().copy(
+                summaryNoteEditor = RoutineNoteDraftUiState.fromText(
+                    "Low-energy day, but I kept the basics moving.",
+                ),
+            )
+
+        fun previewReadOnlySummaryNote(): HistoryDetailUiState =
+            preview().copy(isSummaryNoteEditable = false)
 
         fun previewMissing(): HistoryDetailUiState =
             HistoryDetailUiState(isMissing = true)

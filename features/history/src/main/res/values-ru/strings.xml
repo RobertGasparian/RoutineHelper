@@ -64,6 +64,8 @@
     <string name="history_delete">Удалить</string>
     <string name="history_day_note">Заметка дня</string>
     <string name="history_week_note">Заметка недели</string>
+    <string name="history_summary_note_supporting_text">Эта заметка сохраняется вместе с этим снимком истории.</string>
+    <string name="history_add_summary">Добавить итоговую заметку</string>
     <plurals name="history_hidden_actions">
         <item quantity="one">%1$d скрытое действие</item>
         <item quantity="few">%1$d скрытых действия</item>
@@ -87,4 +89,5 @@
     <string name="history_export_note">Заметка: %1$s</string>
     <string name="history_export_daily_empty">За этот день действия не сохранены.</string>
     <string name="history_export_weekly_empty">За эту неделю действия не сохранены.</string>
+    <string name="history_send_test_summary_notification">Отправить тестовое напоминание об итоговой заметке</string>
 </resources>

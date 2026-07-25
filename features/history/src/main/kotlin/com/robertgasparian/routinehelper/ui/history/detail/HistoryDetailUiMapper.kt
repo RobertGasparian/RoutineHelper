@@ -10,6 +10,7 @@ internal fun RoutineSnapshot.toHistoryDetailUiState(finalizedTime: String): Hist
         cadence = cadence,
         finalizedTime = finalizedTime,
         summaryNote = summaryNote.orEmpty(),
+        isSummaryNoteEditable = isSummaryNoteEditable,
         items = items.map(RoutineSnapshotItem::toHistoryDetailItemUiState),
     )
 

@@ -3,6 +3,7 @@ package com.robertgasparian.routinehelper.ui.app
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.ui.history.detail.HistoryDetailInitialAction
 
 internal val RoutineDestinationBackStackSaver: Saver<TopLevelBackStack<RoutineDestination>, Any> =
     listSaver(
@@ -42,7 +43,11 @@ private fun RoutineDestination.toSaveableRoute(): List<Any?> =
         CurrentListDestination -> listOf(RouteCurrentList)
         HistoryDestination -> listOf(RouteHistory)
         SettingsDestination -> listOf(RouteSettings)
-        is HistoryDetailDestination -> listOf(RouteHistoryDetail, snapshotId)
+        is HistoryDetailDestination -> listOf(
+            RouteHistoryDetail,
+            snapshotId,
+            initialAction?.toSaveableValue(),
+        )
         is ActionEditorDestination -> listOf(RouteActionEditor, actionId, cadence.toSaveableValue())
         is ShareTextPreviewDestination -> listOf(RouteShareTextPreview, initialText, shareTitle)
     }
@@ -54,9 +59,17 @@ private fun List<*>.toRoutineDestinationOrNull(): RoutineDestination? =
         RouteCurrentList -> CurrentListDestination
         RouteHistory -> HistoryDestination
         RouteSettings -> SettingsDestination
-        RouteHistoryDetail -> HistoryDetailDestination(
-            snapshotId = getOrNull(1).asLongOrNull() ?: return null,
-        )
+        RouteHistoryDetail -> {
+            val savedInitialAction = getOrNull(2)
+            HistoryDetailDestination(
+                snapshotId = getOrNull(1).asLongOrNull() ?: return null,
+                initialAction = if (savedInitialAction == null) {
+                    null
+                } else {
+                    savedInitialAction.toHistoryDetailInitialActionOrNull() ?: return null
+                },
+            )
+        }
         RouteActionEditor -> ActionEditorDestination(
             actionId = getOrNull(1).asLongOrNull(),
             cadence = getOrNull(2).toRoutineCadenceOrNull() ?: return null,
@@ -81,6 +94,17 @@ private fun Any?.toRoutineCadenceOrNull(): RoutineCadence? =
         else -> null
     }
 
+private fun HistoryDetailInitialAction.toSaveableValue(): String =
+    when (this) {
+        HistoryDetailInitialAction.OpenSummaryEditor -> InitialActionOpenSummaryEditor
+    }
+
+private fun Any?.toHistoryDetailInitialActionOrNull(): HistoryDetailInitialAction? =
+    when (this) {
+        InitialActionOpenSummaryEditor -> HistoryDetailInitialAction.OpenSummaryEditor
+        else -> null
+    }
+
 private fun Any?.asLongOrNull(): Long? =
     when (this) {
         is Long -> this
@@ -99,3 +123,4 @@ private const val RouteShareTextPreview = "share_text_preview"
 
 private const val CadenceDaily = "daily"
 private const val CadenceWeekly = "weekly"
+private const val InitialActionOpenSummaryEditor = "open_summary_editor"

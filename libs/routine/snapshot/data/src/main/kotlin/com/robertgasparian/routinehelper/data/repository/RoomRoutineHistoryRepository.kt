@@ -77,6 +77,16 @@ class RoomRoutineHistoryRepository @Inject constructor(
         snapshotId
     }
 
+    override suspend fun updateSnapshotSummaryNote(
+        snapshotId: Long,
+        summaryNote: String?,
+    ) {
+        routineSnapshotDao.updateSummaryNote(
+            snapshotId = snapshotId,
+            summaryNote = summaryNote?.trim()?.takeIf(String::isNotEmpty),
+        )
+    }
+
     override suspend fun deleteSnapshot(snapshotId: Long) {
         routineSnapshotDao.deleteSnapshot(snapshotId)
     }
@@ -103,6 +113,9 @@ private fun RoutineSnapshotWithEntries.toDomain(): RoutineSnapshot =
         cadence = snapshot.cadence.toRoutineCadence(),
         summaryNote = snapshot.summaryNote,
         items = entries.toDomainItems(),
+        // Current policy: every stored snapshot summary is editable. Keep this explicit so a
+        // future persisted or computed policy has a single mapping point.
+        isSummaryNoteEditable = true,
     )
 
 private fun List<RoutineSnapshotEntryEntity>.toDomainItems(): List<RoutineSnapshotItem> =

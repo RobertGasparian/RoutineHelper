@@ -23,6 +23,16 @@ class TopLevelBackStack<T : Any>(
         backStack.add(key)
     }
 
+    fun replaceWithTopLevelPath(
+        topLevelKey: T,
+        nestedKeys: List<T>,
+    ) {
+        this.topLevelKey = topLevelKey
+        backStack.clear()
+        backStack.add(topLevelKey)
+        backStack.addAll(nestedKeys)
+    }
+
     fun removeLast(): Boolean {
         if (backStack.size > 1) {
             backStack.removeLastOrNull()

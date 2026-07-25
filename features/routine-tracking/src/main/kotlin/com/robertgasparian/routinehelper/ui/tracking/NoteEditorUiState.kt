@@ -1,12 +1,13 @@
 package com.robertgasparian.routinehelper.ui.tracking
 
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.ui.dsm.RoutineNoteDraftUiState
 
 data class NoteEditorUiState(
     val target: NoteEditorTarget,
     val cadence: RoutineCadence,
     val itemTitle: String? = null,
-    val value: NoteDraftUiState,
+    val value: RoutineNoteDraftUiState,
 ) {
     val canClear: Boolean = value.text.isNotBlank()
 
@@ -21,7 +22,7 @@ data class NoteEditorUiState(
                 target = NoteEditorTarget.Item(routineItemId),
                 cadence = cadence,
                 itemTitle = itemTitle,
-                value = NoteDraftUiState.fromText(note),
+                value = RoutineNoteDraftUiState.fromText(note),
             )
         }
 
@@ -32,7 +33,7 @@ data class NoteEditorUiState(
             return NoteEditorUiState(
                 target = NoteEditorTarget.Summary,
                 cadence = cadence,
-                value = NoteDraftUiState.fromText(note),
+                value = RoutineNoteDraftUiState.fromText(note),
             )
         }
     }

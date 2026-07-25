@@ -47,4 +47,22 @@ class TopLevelBackStackTest {
         assertEquals("weekly", backStack.topLevelKey)
         assertEquals(listOf("weekly"), backStack.backStack)
     }
+
+    @Test
+    fun `given top level path when replacing stack then root and nested destinations match manual navigation`() {
+        val backStack = TopLevelBackStack(startKey = "daily").apply {
+            add("editor")
+        }
+
+        backStack.replaceWithTopLevelPath(
+            topLevelKey = "history",
+            nestedKeys = listOf("snapshot"),
+        )
+
+        assertEquals("history", backStack.topLevelKey)
+        assertEquals(listOf("history", "snapshot"), backStack.backStack)
+        assertTrue(backStack.removeLast())
+        assertEquals(listOf("history"), backStack.backStack)
+        assertFalse(backStack.removeLast())
+    }
 }

@@ -25,6 +25,7 @@ internal fun RoutineNavGraph(
     transitionDirection: HorizontalDirection,
     onNavigateToDetail: (RoutineDestination) -> Unit,
     onBack: () -> Boolean,
+    onDebugSummaryNotificationClick: (snapshotId: Long) -> Unit,
     onShareText: (text: String, title: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -126,7 +127,11 @@ internal fun RoutineNavGraph(
             entry<HistoryDetailDestination> { destination ->
                 HistoryDetailScreen(
                     snapshotId = destination.snapshotId,
+                    initialAction = destination.initialAction,
                     onBackClick = { onBack() },
+                    onDebugSummaryNotificationClick = {
+                        onDebugSummaryNotificationClick(destination.snapshotId)
+                    },
                     onShareTextPreviewClick = { text ->
                         onNavigateToDetail(
                             ShareTextPreviewDestination(

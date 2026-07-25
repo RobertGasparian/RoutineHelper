@@ -60,6 +60,8 @@
     <string name="history_delete">Ջնջել</string>
     <string name="history_day_note">Օրվա նշում</string>
     <string name="history_week_note">Շաբաթվա նշում</string>
+    <string name="history_summary_note_supporting_text">Այս նշումը պահվում է պատմության այս պահպանված պատկերի հետ։</string>
+    <string name="history_add_summary">Ավելացնել ամփոփ նշում</string>
     <plurals name="history_hidden_actions">
         <item quantity="one">%1$d թաքցված գործողություն</item>
         <item quantity="other">%1$d թաքցված գործողություն</item>
@@ -81,4 +83,5 @@
     <string name="history_export_note">Նշում՝ %1$s</string>
     <string name="history_export_daily_empty">Այս օրվա համար գործողություններ չեն պահվել։</string>
     <string name="history_export_weekly_empty">Այս շաբաթվա համար գործողություններ չեն պահվել։</string>
+    <string name="history_send_test_summary_notification">Ուղարկել ամփոփ նշման փորձնական ծանուցում</string>
 </resources>

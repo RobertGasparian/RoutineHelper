@@ -47,6 +47,12 @@ interface RoutineSnapshotDao {
         summaryNote: String?,
     )
 
+    @Query("UPDATE routine_snapshots SET summaryNote = :summaryNote WHERE id = :snapshotId")
+    suspend fun updateSummaryNote(
+        snapshotId: Long,
+        summaryNote: String?,
+    )
+
     @Insert
     suspend fun insertEntries(entries: List<RoutineSnapshotEntryEntity>)
 

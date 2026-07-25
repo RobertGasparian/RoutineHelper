@@ -28,6 +28,11 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
         )
     }
 
+    fun setSnapshot(snapshot: RoutineSnapshot) {
+        snapshots.value = snapshots.value.replaceById(snapshot)
+        summaries.value = summaries.value.replaceById(snapshot.toSummary())
+    }
+
     override fun snapshotSummaries(cadence: RoutineCadence?): Flow<List<RoutineSnapshotSummary>> =
         summaries.map { summaryList ->
             summaryList.filter { summary -> cadence == null || summary.cadence == cadence }
@@ -77,6 +82,19 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
             summary.periodStartDate == periodStartDate && summary.cadence == cadence
         } + snapshot.toSummary()
         return snapshotId
+    }
+
+    override suspend fun updateSnapshotSummaryNote(
+        snapshotId: Long,
+        summaryNote: String?,
+    ) {
+        val normalizedSummaryNote = summaryNote?.trim()?.takeIf(String::isNotEmpty)
+        val existingSnapshot = snapshots.value.firstOrNull { snapshot ->
+            snapshot.snapshotId == snapshotId
+        } ?: return
+        val updatedSnapshot = existingSnapshot.copy(summaryNote = normalizedSummaryNote)
+        snapshots.value = snapshots.value.replaceById(updatedSnapshot)
+        summaries.value = summaries.value.replaceById(updatedSnapshot.toSummary())
     }
 
     suspend fun saveSnapshot(

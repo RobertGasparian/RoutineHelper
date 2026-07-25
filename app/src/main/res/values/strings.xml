@@ -7,4 +7,7 @@
     <string name="app_share_current_list">Share current list</string>
     <string name="app_share_routine_snapshots">Share routine snapshots</string>
     <string name="app_share_routine_snapshot">Share routine snapshot</string>
+    <string name="app_summary_reminder_channel_name">Summary reminders</string>
+    <string name="app_summary_reminder_title">Add a summary</string>
+    <string name="app_summary_reminder_message">Capture what stood out in this saved routine entry.</string>
 </resources>

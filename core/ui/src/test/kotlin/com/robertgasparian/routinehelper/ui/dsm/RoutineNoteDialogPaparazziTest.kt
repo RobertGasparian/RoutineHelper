@@ -44,4 +44,21 @@ class RoutineNoteDialogPaparazziTest {
             }
         }
     }
+
+    @Test
+    fun withoutInsertActions() {
+        paparazzi.snapshot {
+            RoutineHelperTheme {
+                RoutineNoteDialogContent(
+                    value = TextFieldValue("Low-energy day, but I kept the basics moving."),
+                    onIntent = {},
+                    title = "Edit note",
+                    supportingText = "This note is saved with this history snapshot.",
+                    label = "Day note",
+                    showInsertActions = false,
+                    autoFocus = false,
+                )
+            }
+        }
+    }
 }

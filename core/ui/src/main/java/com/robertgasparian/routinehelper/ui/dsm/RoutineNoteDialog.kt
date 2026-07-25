@@ -57,6 +57,7 @@ fun RoutineNoteDialog(
     supportingText: String = stringResource(R.string.core_ui_note_saved_for_day),
     label: String = stringResource(R.string.core_ui_note),
     autoFocus: Boolean = true,
+    showInsertActions: Boolean = true,
 ) {
     Dialog(
         onDismissRequest = { onIntent(RoutineNoteDialogIntent.Dismiss) },
@@ -69,6 +70,7 @@ fun RoutineNoteDialog(
             supportingText = supportingText,
             label = label,
             autoFocus = autoFocus,
+            showInsertActions = showInsertActions,
             modifier = modifier,
         )
     }
@@ -85,6 +87,7 @@ fun RoutineNoteDialogContent(
     supportingText: String = stringResource(R.string.core_ui_note_saved_for_day),
     label: String = stringResource(R.string.core_ui_note),
     autoFocus: Boolean = true,
+    showInsertActions: Boolean = true,
 ) {
     val focusRequester = remember { FocusRequester() }
 
@@ -131,36 +134,38 @@ fun RoutineNoteDialogContent(
                 }
             }
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                IconButton(
-                    onClick = { onIntent(RoutineNoteDialogIntent.WeekdayClick) },
+            if (showInsertActions) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Event,
-                        contentDescription = stringResource(R.string.core_ui_add_weekday),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                IconButton(
-                    onClick = { onIntent(RoutineNoteDialogIntent.DateClick) },
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.DateRange,
-                        contentDescription = stringResource(R.string.core_ui_add_today_date),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                IconButton(
-                    onClick = { onIntent(RoutineNoteDialogIntent.TimeClick) },
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Schedule,
-                        contentDescription = stringResource(R.string.core_ui_add_timestamp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    IconButton(
+                        onClick = { onIntent(RoutineNoteDialogIntent.WeekdayClick) },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Event,
+                            contentDescription = stringResource(R.string.core_ui_add_weekday),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    IconButton(
+                        onClick = { onIntent(RoutineNoteDialogIntent.DateClick) },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.DateRange,
+                            contentDescription = stringResource(R.string.core_ui_add_today_date),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    IconButton(
+                        onClick = { onIntent(RoutineNoteDialogIntent.TimeClick) },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Schedule,
+                            contentDescription = stringResource(R.string.core_ui_add_timestamp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
             }
 

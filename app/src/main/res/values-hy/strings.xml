@@ -7,4 +7,7 @@
     <string name="app_share_current_list">Կիսվել ընթացիկ ցուցակով</string>
     <string name="app_share_routine_snapshots">Կիսվել առօրյայի պահված պատկերներով</string>
     <string name="app_share_routine_snapshot">Կիսվել առօրյայի պահված պատկերով</string>
+    <string name="app_summary_reminder_channel_name">Ամփոփ նշումների հիշեցումներ</string>
+    <string name="app_summary_reminder_title">Ավելացրեք ամփոփ նշում</string>
+    <string name="app_summary_reminder_message">Գրեք, թե ինչն էր կարևոր այս պահպանված գրառման մեջ։</string>
 </resources>

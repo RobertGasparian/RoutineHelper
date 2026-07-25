@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
 }
 
@@ -60,6 +61,7 @@ dependencies {
     implementation(project(":libs:settings:data"))
 
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.work.runtime.ktx)
@@ -71,6 +73,7 @@ dependencies {
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.javax.inject)
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.serialization.core)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.animation)
@@ -87,4 +90,5 @@ dependencies {
     ksp(libs.hilt.compiler)
 
     testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
 }

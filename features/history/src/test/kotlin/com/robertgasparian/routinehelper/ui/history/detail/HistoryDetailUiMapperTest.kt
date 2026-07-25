@@ -79,6 +79,7 @@ class HistoryDetailUiMapperTest {
             finalizedAtMillis = FINALIZED_AT_MILLIS,
             cadence = RoutineCadence.Daily,
             summaryNote = null,
+            isSummaryNoteEditable = false,
             items = emptyList(),
         )
 
@@ -86,6 +87,7 @@ class HistoryDetailUiMapperTest {
 
         assertEquals("2026-05-29", state.date)
         assertEquals("", state.summaryNote)
+        assertEquals(false, state.isSummaryNoteEditable)
         assertEquals("2026-05-29", snapshot.historyDisplayDate)
     }
 

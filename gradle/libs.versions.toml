@@ -12,14 +12,16 @@ lifecycleRuntimeCompose = "2.10.0"
 lifecycleViewModelCompose = "2.10.0"
 hiltNavigationCompose = "1.4.0-beta01"
 hiltWork = "1.2.0"
-navigation3 = "1.2.0-alpha02"
+navigation3 = "1.2.0-alpha06"
 room = "2.8.4"
 work = "2.10.5"
 ksp = "2.3.7"
 hilt = "2.59.2"
 paparazzi = "2.0.0-alpha05"
 junit = "4.13.2"
+robolectric = "4.16.1"
 coroutines = "1.11.0"
+kotlinxSerialization = "1.7.3"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
@@ -43,8 +45,10 @@ hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltWork" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
 hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 junit = { module = "junit:junit", version.ref = "junit" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerialization" }
 javax-inject = { module = "javax.inject:javax.inject", version = "1" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 androidx-compose-animation = { module = "androidx.compose.animation:animation" }
@@ -68,5 +72,6 @@ androidx-room = { id = "androidx.room", version.ref = "room" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 paparazzi = { id = "app.cash.paparazzi", version.ref = "paparazzi" }

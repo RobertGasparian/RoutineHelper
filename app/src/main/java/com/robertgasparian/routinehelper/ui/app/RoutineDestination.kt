@@ -1,6 +1,7 @@
 package com.robertgasparian.routinehelper.ui.app
 
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.ui.history.detail.HistoryDetailInitialAction
 
 sealed interface RoutineDestination
 
@@ -18,6 +19,7 @@ data object SettingsDestination : RoutineDestination
 
 data class HistoryDetailDestination(
     val snapshotId: Long,
+    val initialAction: HistoryDetailInitialAction? = null,
 ) : RoutineDestination
 
 data class ActionEditorDestination(

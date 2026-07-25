@@ -58,6 +58,7 @@ import com.robertgasparian.routinehelper.ui.dsm.RoutineNoteDialogIntent
 import com.robertgasparian.routinehelper.ui.dsm.RoutineReorderableLazyColumn
 import com.robertgasparian.routinehelper.ui.dsm.RoutineReorderDragStartMode
 import com.robertgasparian.routinehelper.ui.dsm.RoutineSwipeToReveal
+import com.robertgasparian.routinehelper.ui.dsm.toTextFieldValue
 import com.robertgasparian.routinehelper.ui.dsm.SummaryNoteCard
 import com.robertgasparian.routinehelper.ui.dsm.rememberLazyListIsActuallyScrolling
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme

@@ -19,6 +19,7 @@ class HistoryDetailComponentPaparazziTest {
                 HistoryDetailComponent(
                     uiState = HistoryDetailUiState.preview(),
                     onIntent = {},
+                    showDebugNotificationAction = false,
                 )
             }
         }
@@ -31,6 +32,33 @@ class HistoryDetailComponentPaparazziTest {
                 HistoryDetailComponent(
                     uiState = HistoryDetailUiState.previewEmpty(),
                     onIntent = {},
+                    showDebugNotificationAction = false,
+                )
+            }
+        }
+    }
+
+    @Test
+    fun withoutSummaryNote() {
+        paparazzi.snapshot {
+            RoutineHelperTheme {
+                HistoryDetailComponent(
+                    uiState = HistoryDetailUiState.previewWithoutSummaryNote(),
+                    onIntent = {},
+                    showDebugNotificationAction = false,
+                )
+            }
+        }
+    }
+
+    @Test
+    fun readOnlySummaryNote() {
+        paparazzi.snapshot {
+            RoutineHelperTheme {
+                HistoryDetailComponent(
+                    uiState = HistoryDetailUiState.previewReadOnlySummaryNote(),
+                    onIntent = {},
+                    showDebugNotificationAction = false,
                 )
             }
         }
@@ -43,6 +71,7 @@ class HistoryDetailComponentPaparazziTest {
                 HistoryDetailComponent(
                     uiState = HistoryDetailUiState.previewShare(),
                     onIntent = {},
+                    showDebugNotificationAction = false,
                 )
             }
         }
@@ -55,6 +84,7 @@ class HistoryDetailComponentPaparazziTest {
                 HistoryDetailComponent(
                     uiState = HistoryDetailUiState.previewShareOptions(),
                     onIntent = {},
+                    showDebugNotificationAction = false,
                 )
             }
         }
@@ -67,6 +97,7 @@ class HistoryDetailComponentPaparazziTest {
                 HistoryDetailComponent(
                     uiState = HistoryDetailUiState.previewFileShare(),
                     onIntent = {},
+                    showDebugNotificationAction = false,
                 )
             }
         }

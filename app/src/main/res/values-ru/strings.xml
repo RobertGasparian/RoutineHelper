@@ -7,4 +7,7 @@
     <string name="app_share_current_list">Поделиться текущим списком</string>
     <string name="app_share_routine_snapshots">Поделиться снимками распорядка</string>
     <string name="app_share_routine_snapshot">Поделиться снимком распорядка</string>
+    <string name="app_summary_reminder_channel_name">Напоминания об итоговых заметках</string>
+    <string name="app_summary_reminder_title">Добавьте итоговую заметку</string>
+    <string name="app_summary_reminder_message">Запишите, что было важным в этой сохранённой записи.</string>
 </resources>

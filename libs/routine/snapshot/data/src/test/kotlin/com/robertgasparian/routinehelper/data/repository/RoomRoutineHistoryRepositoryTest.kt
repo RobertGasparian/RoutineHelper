@@ -226,6 +226,42 @@ class RoomRoutineHistoryRepositoryTest {
     }
 
     @Test
+    fun `given stored snapshot when updating summary note then only normalized summary changes`() = runTest {
+        val originalSnapshot = snapshotEntity(
+            id = 10L,
+            periodStartDate = "2026-05-29",
+            cadence = "DAILY",
+            summaryNote = "Old note",
+        )
+        val originalEntries = listOf(
+            entry(snapshotId = 10L, actionId = 1L, position = 0, isChecked = true),
+        )
+        routineSnapshotDao.storeSnapshot(
+            snapshot = originalSnapshot,
+            entries = originalEntries,
+        )
+
+        repository.updateSnapshotSummaryNote(
+            snapshotId = 10L,
+            summaryNote = "  Updated reflection  ",
+        )
+
+        assertEquals(
+            originalSnapshot.copy(summaryNote = "Updated reflection"),
+            routineSnapshotDao.snapshots.getValue(10L),
+        )
+        assertEquals(originalEntries, routineSnapshotDao.entries.getValue(10L))
+        assertEquals(listOf(10L), routineSnapshotDao.updatedSummaryNoteSnapshotIds)
+
+        repository.updateSnapshotSummaryNote(
+            snapshotId = 10L,
+            summaryNote = "   ",
+        )
+
+        assertEquals(null, routineSnapshotDao.snapshots.getValue(10L).summaryNote)
+    }
+
+    @Test
     fun `given stored snapshot when deleting it then removes header and entries`() = runTest {
         routineSnapshotDao.storeSnapshot(
             snapshot = snapshotEntity(id = 10L, periodStartDate = "2026-05-29", cadence = "DAILY"),
@@ -309,6 +345,7 @@ private class FakeRoutineSnapshotDao : RoutineSnapshotDao {
     val requestedCadences = mutableListOf<String>()
     val requestedSnapshotIds = mutableListOf<Long>()
     val updatedSnapshotIds = mutableListOf<Long>()
+    val updatedSummaryNoteSnapshotIds = mutableListOf<Long>()
     val deletedEntrySnapshotIds = mutableListOf<Long>()
     val deletedSnapshotIds = mutableListOf<Long>()
     private var nextSnapshotId = 1_000L
@@ -352,6 +389,14 @@ private class FakeRoutineSnapshotDao : RoutineSnapshotDao {
             summaryNote = summaryNote,
         )
         updatedSnapshotIds += id
+    }
+
+    override suspend fun updateSummaryNote(
+        snapshotId: Long,
+        summaryNote: String?,
+    ) {
+        snapshots[snapshotId] = snapshots.getValue(snapshotId).copy(summaryNote = summaryNote)
+        updatedSummaryNoteSnapshotIds += snapshotId
     }
 
     override suspend fun insertEntries(entries: List<RoutineSnapshotEntryEntity>) {

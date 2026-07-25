@@ -61,6 +61,8 @@
     <string name="history_delete">Delete</string>
     <string name="history_day_note">Day note</string>
     <string name="history_week_note">Week note</string>
+    <string name="history_summary_note_supporting_text">This note is saved with this history snapshot.</string>
+    <string name="history_add_summary">Add summary</string>
     <plurals name="history_hidden_actions">
         <item quantity="one">%1$d Hidden Action</item>
         <item quantity="other">%1$d Hidden Actions</item>
@@ -86,4 +88,5 @@
     <string name="history_export_skipped_marker" translatable="false">[skipped]</string>
     <string name="history_export_checked_marker" translatable="false">[x]</string>
     <string name="history_export_unchecked_marker" translatable="false">[ ]</string>
+    <string name="history_send_test_summary_notification">Send test summary notification</string>
 </resources>

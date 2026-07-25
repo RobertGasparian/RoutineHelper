@@ -15,14 +15,14 @@ import com.robertgasparian.routinehelper.domain.usecase.TodaySummaryNoteUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayItemCompletedCountUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayItemNoteUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTodaySummaryNoteUseCase
+import com.robertgasparian.routinehelper.ui.dsm.RoutineNoteDraftUiState
+import com.robertgasparian.routinehelper.ui.dsm.insertAtCursor
 import com.robertgasparian.routinehelper.ui.tracking.NoteDateTimeTextProvider
-import com.robertgasparian.routinehelper.ui.tracking.NoteDraftUiState
 import com.robertgasparian.routinehelper.ui.tracking.NoteEditorTarget
 import com.robertgasparian.routinehelper.ui.tracking.NoteEditorUiState
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingDebugItemsPopulator
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingIntent
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingUiState
-import com.robertgasparian.routinehelper.ui.tracking.insertAtCursor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -198,7 +198,7 @@ class DailyViewModel @Inject constructor(
 
     private fun updateNoteDraft(intent: RoutineTrackingIntent.NoteDraftChange) {
         noteEditor.value = noteEditor.value?.copy(
-            value = NoteDraftUiState(
+            value = RoutineNoteDraftUiState(
                 text = intent.text,
                 selectionStart = intent.selectionStart,
                 selectionEnd = intent.selectionEnd,
@@ -219,7 +219,7 @@ class DailyViewModel @Inject constructor(
     }
 
     private fun clearNoteDraft() {
-        noteEditor.value = noteEditor.value?.copy(value = NoteDraftUiState.fromText(""))
+        noteEditor.value = noteEditor.value?.copy(value = RoutineNoteDraftUiState.fromText(""))
     }
 
     private fun dismissNoteEditor() {

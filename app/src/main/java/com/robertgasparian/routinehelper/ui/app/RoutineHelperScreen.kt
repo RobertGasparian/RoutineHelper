@@ -1,6 +1,11 @@
 package com.robertgasparian.routinehelper.ui.app
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -8,6 +13,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -16,8 +22,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.robertgasparian.routinehelper.notification.HistorySummaryReminderNotificationPublisher
+import com.robertgasparian.routinehelper.ui.app.deeplink.RoutineNavigationCommand
 import com.robertgasparian.routinehelper.ui.removalundo.RoutineRemovalUndoIntent
 import com.robertgasparian.routinehelper.ui.removalundo.RoutineRemovalUndoSnackbarHost
 import com.robertgasparian.routinehelper.ui.removalundo.RoutineRemovalUndoUiState
@@ -26,13 +35,25 @@ import com.robertgasparian.routinehelper.ui.share.shareText
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 
 @Composable
-fun RoutineHelperScreen(
+internal fun RoutineHelperScreen(
+    navigationRequestId: Long? = null,
+    navigationCommand: RoutineNavigationCommand? = null,
+    onNavigationCommandConsumed: () -> Unit = {},
     routineRemovalUndoViewModel: RoutineRemovalUndoViewModel = hiltViewModel<RoutineRemovalUndoViewModel>(),
 ) {
     val topLevelBackStack = rememberSaveable(saver = RoutineDestinationBackStackSaver) {
         TopLevelBackStack<RoutineDestination>(DailyDestination)
     }
     val routineRemovalUndoUiState by routineRemovalUndoViewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(navigationRequestId) {
+        val command = navigationCommand ?: return@LaunchedEffect
+        topLevelBackStack.replaceWithTopLevelPath(
+            topLevelKey = command.topLevelDestination,
+            nestedKeys = command.nestedDestinations,
+        )
+        onNavigationCommandConsumed()
+    }
 
     RoutineHelperComponent(
         topLevelBackStack = topLevelBackStack,
@@ -51,8 +72,38 @@ fun RoutineHelperComponent(
 ) {
     val currentDestination = topLevelBackStack.backStack.lastOrNull()
     val context = LocalContext.current
+    val historySummaryReminderNotificationPublisher = remember(context) {
+        HistorySummaryReminderNotificationPublisher(context)
+    }
+    var pendingDebugNotificationSnapshotId by rememberSaveable {
+        mutableStateOf<Long?>(null)
+    }
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { isGranted ->
+        val snapshotId = pendingDebugNotificationSnapshotId
+        pendingDebugNotificationSnapshotId = null
+        if (isGranted && snapshotId != null) {
+            historySummaryReminderNotificationPublisher.publish(snapshotId)
+        }
+    }
     val showBottomNavigation = currentDestination is TopLevelDestination
     var navigationTransitionDirection by remember { mutableStateOf(HorizontalDirection.Right) }
+
+    fun publishDebugSummaryNotification(snapshotId: Long) {
+        if (
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS,
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            historySummaryReminderNotificationPublisher.publish(snapshotId)
+        } else {
+            pendingDebugNotificationSnapshotId = snapshotId
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
 
     fun navigateToTopLevel(destination: TopLevelDestination) {
         if (destination == topLevelBackStack.topLevelKey) return
@@ -103,6 +154,7 @@ fun RoutineHelperComponent(
             transitionDirection = navigationTransitionDirection,
             onNavigateToDetail = ::navigateToDetail,
             onBack = { navigateBack() },
+            onDebugSummaryNotificationClick = ::publishDebugSummaryNotification,
             onShareText = { text, title ->
                 context.shareText(text = text, title = title)
             },

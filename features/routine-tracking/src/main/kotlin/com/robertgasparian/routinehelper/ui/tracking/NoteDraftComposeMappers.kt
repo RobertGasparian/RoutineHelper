@@ -1,20 +1,13 @@
 package com.robertgasparian.routinehelper.ui.tracking
 
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import com.robertgasparian.routinehelper.ui.dsm.toRoutineNoteDraftUiState
 
-fun NoteDraftUiState.toTextFieldValue(): TextFieldValue =
-    TextFieldValue(
-        text = text,
-        selection = TextRange(
-            start = selectionStart.coerceIn(0, text.length),
-            end = selectionEnd.coerceIn(0, text.length),
-        ),
+fun TextFieldValue.toNoteDraftChange(): RoutineTrackingIntent.NoteDraftChange {
+    val draft = toRoutineNoteDraftUiState()
+    return RoutineTrackingIntent.NoteDraftChange(
+        text = draft.text,
+        selectionStart = draft.selectionStart,
+        selectionEnd = draft.selectionEnd,
     )
-
-fun TextFieldValue.toNoteDraftChange(): RoutineTrackingIntent.NoteDraftChange =
-    RoutineTrackingIntent.NoteDraftChange(
-        text = text,
-        selectionStart = selection.start.coerceIn(0, text.length),
-        selectionEnd = selection.end.coerceIn(0, text.length),
-    )
+}
