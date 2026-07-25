@@ -10,4 +10,8 @@
     <string name="app_summary_reminder_channel_name">Summary reminders</string>
     <string name="app_summary_reminder_title">Add a summary</string>
     <string name="app_summary_reminder_message">Capture what stood out in this saved routine entry.</string>
+    <string name="app_daily_routine_reminder_title">Build your daily routine</string>
+    <string name="app_daily_routine_reminder_message">Add daily actions to create a routine that works for you.</string>
+    <string name="app_weekly_routine_reminder_title">Build your weekly routine</string>
+    <string name="app_weekly_routine_reminder_message">Add weekly actions to create a routine that works for you.</string>
 </resources>

@@ -24,6 +24,7 @@ dependencies {
     implementation(project(":core:time"))
     implementation(project(":libs:routine:snapshot:domain"))
     implementation(project(":libs:routine:tracking:domain"))
+    implementation(project(":libs:settings:domain"))
 
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.hilt.android)
@@ -33,6 +34,7 @@ dependencies {
     ksp(libs.hilt.compiler)
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(project(":core:testing"))
     testImplementation(testFixtures(project(":libs:routine:snapshot:domain")))
     testImplementation(testFixtures(project(":libs:routine:tracking:domain")))

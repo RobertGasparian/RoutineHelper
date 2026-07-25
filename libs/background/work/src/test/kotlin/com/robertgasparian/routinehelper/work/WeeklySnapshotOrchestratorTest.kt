@@ -1,11 +1,13 @@
 package com.robertgasparian.routinehelper.work
 
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
 import com.robertgasparian.routinehelper.domain.model.WeeklyRoutineItem
 import com.robertgasparian.routinehelper.domain.repository.FakeRoutineHistoryRepository
 import com.robertgasparian.routinehelper.domain.repository.FakeWeeklyRoutineRepository
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeWeeklyUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ResetWeeklyUseCase
+import com.robertgasparian.routinehelper.domain.usecase.SnapshotSummariesUseCase
 import com.robertgasparian.routinehelper.core.testing.FixedTimeProvider
 import java.time.ZonedDateTime
 import java.time.ZoneId
@@ -22,6 +24,7 @@ class WeeklySnapshotOrchestratorTest {
     private val orchestrator = WeeklySnapshotOrchestrator(
         finalizeWeeklyUseCase = FinalizeWeeklyUseCase(weeklyRepository, historyRepository),
         resetWeeklyUseCase = ResetWeeklyUseCase(weeklyRepository),
+        snapshotSummariesUseCase = SnapshotSummariesUseCase(historyRepository),
         timeProvider = FixedTimeProvider(now.toInstant(), zoneId),
     )
 
@@ -48,6 +51,30 @@ class WeeklySnapshotOrchestratorTest {
         assertTrue(historyRepository.savedSnapshots.isEmpty())
         assertEquals(listOf("2026-05-25"), weeklyRepository.resetWeeks)
     }
+
+    @Test
+    fun `given previous week snapshot already exists when orchestrated then snapshot is preserved and week is reset`() =
+        runTest {
+            historyRepository.setSnapshot(
+                RoutineSnapshot(
+                    snapshotId = 84L,
+                    periodStartDate = "2026-05-25",
+                    finalizedAtMillis = 100L,
+                    cadence = RoutineCadence.Weekly,
+                    items = emptyList(),
+                    summaryNote = "Already finalized",
+                ),
+            )
+            weeklyRepository.setItems(
+                weekStartDate = "2026-05-25",
+                items = listOf(weeklyItem(weekStartDate = "2026-05-25")),
+            )
+
+            orchestrator.finalizePreviousWeek(now)
+
+            assertTrue(historyRepository.savedSnapshots.isEmpty())
+            assertEquals(listOf("2026-05-25"), weeklyRepository.resetWeeks)
+        }
 
     private fun weeklyItem(weekStartDate: String): WeeklyRoutineItem =
         WeeklyRoutineItem(

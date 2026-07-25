@@ -14,7 +14,7 @@ import com.robertgasparian.routinehelper.ui.app.RoutineDestination
 import com.robertgasparian.routinehelper.ui.app.RoutineHelperComponent
 import com.robertgasparian.routinehelper.ui.app.RoutineHelperScreen
 import com.robertgasparian.routinehelper.ui.app.TopLevelBackStack
-import com.robertgasparian.routinehelper.ui.app.deeplink.RoutineDeepLinkRegistry
+import com.robertgasparian.routinehelper.ui.app.deeplink.RoutineDeepLinkIntentConsumer
 import com.robertgasparian.routinehelper.ui.app.deeplink.RoutineNavigationCommand
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -23,16 +23,14 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     @Inject
-    internal lateinit var deepLinkRegistry: RoutineDeepLinkRegistry
+    internal lateinit var deepLinkIntentConsumer: RoutineDeepLinkIntentConsumer
 
     private var pendingNavigationRequest by mutableStateOf<PendingNavigationRequest?>(null)
     private var nextNavigationRequestId = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (savedInstanceState == null) {
-            acceptDeepLink(intent)
-        }
+        acceptDeepLink(intent)
 
         setContent {
             RoutineHelperTheme {
@@ -53,7 +51,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun acceptDeepLink(intent: Intent) {
-        val command = deepLinkRegistry.resolve(intent.dataString) ?: return
+        val command = deepLinkIntentConsumer.consume(intent) ?: return
+        setIntent(intent)
         pendingNavigationRequest = PendingNavigationRequest(
             id = ++nextNavigationRequestId,
             command = command,

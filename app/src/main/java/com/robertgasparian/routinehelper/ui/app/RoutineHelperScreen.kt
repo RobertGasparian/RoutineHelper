@@ -25,7 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.robertgasparian.routinehelper.notification.HistorySummaryReminderNotificationPublisher
+import com.robertgasparian.routinehelper.notification.RoutineSummaryReminderNotificationPublisher
 import com.robertgasparian.routinehelper.ui.app.deeplink.RoutineNavigationCommand
 import com.robertgasparian.routinehelper.ui.removalundo.RoutineRemovalUndoIntent
 import com.robertgasparian.routinehelper.ui.removalundo.RoutineRemovalUndoSnackbarHost
@@ -72,8 +72,8 @@ fun RoutineHelperComponent(
 ) {
     val currentDestination = topLevelBackStack.backStack.lastOrNull()
     val context = LocalContext.current
-    val historySummaryReminderNotificationPublisher = remember(context) {
-        HistorySummaryReminderNotificationPublisher(context)
+    val summaryReminderNotificationPublisher = remember(context) {
+        RoutineSummaryReminderNotificationPublisher(context)
     }
     var pendingDebugNotificationSnapshotId by rememberSaveable {
         mutableStateOf<Long?>(null)
@@ -84,7 +84,7 @@ fun RoutineHelperComponent(
         val snapshotId = pendingDebugNotificationSnapshotId
         pendingDebugNotificationSnapshotId = null
         if (isGranted && snapshotId != null) {
-            historySummaryReminderNotificationPublisher.publish(snapshotId)
+            summaryReminderNotificationPublisher.showSummaryEditorReminder(snapshotId)
         }
     }
     val showBottomNavigation = currentDestination is TopLevelDestination
@@ -98,7 +98,7 @@ fun RoutineHelperComponent(
                 Manifest.permission.POST_NOTIFICATIONS,
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            historySummaryReminderNotificationPublisher.publish(snapshotId)
+            summaryReminderNotificationPublisher.showSummaryEditorReminder(snapshotId)
         } else {
             pendingDebugNotificationSnapshotId = snapshotId
             notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)

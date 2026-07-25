@@ -10,4 +10,8 @@
     <string name="app_summary_reminder_channel_name">Ամփոփ նշումների հիշեցումներ</string>
     <string name="app_summary_reminder_title">Ավելացրեք ամփոփ նշում</string>
     <string name="app_summary_reminder_message">Գրեք, թե ինչն էր կարևոր այս պահպանված գրառման մեջ։</string>
+    <string name="app_daily_routine_reminder_title">Կազմեք ձեր ամենօրյա ռեժիմը</string>
+    <string name="app_daily_routine_reminder_message">Ավելացրեք ամենօրյա գործողություններ՝ ձեզ հարմար ռեժիմ ստեղծելու համար։</string>
+    <string name="app_weekly_routine_reminder_title">Կազմեք ձեր շաբաթական ռեժիմը</string>
+    <string name="app_weekly_routine_reminder_message">Ավելացրեք շաբաթական գործողություններ՝ ձեզ հարմար ռեժիմ ստեղծելու համար։</string>
 </resources>

@@ -10,6 +10,7 @@ import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeWeeklyUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ResetTodayUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ResetWeeklyUseCase
+import com.robertgasparian.routinehelper.domain.usecase.SnapshotSummariesUseCase
 import com.robertgasparian.routinehelper.core.testing.FixedTimeProvider
 import java.time.ZonedDateTime
 import java.time.ZoneId
@@ -111,11 +112,13 @@ class RoutineSnapshotBackfillTest {
             dailySnapshotOrchestrator = DailySnapshotOrchestrator(
                 finalizeTodayUseCase = FinalizeTodayUseCase(todayRepository, historyRepository),
                 resetTodayUseCase = ResetTodayUseCase(todayRepository),
+                snapshotSummariesUseCase = SnapshotSummariesUseCase(historyRepository),
                 timeProvider = timeProvider,
             ),
             weeklySnapshotOrchestrator = WeeklySnapshotOrchestrator(
                 finalizeWeeklyUseCase = FinalizeWeeklyUseCase(weeklyRepository, historyRepository),
                 resetWeeklyUseCase = ResetWeeklyUseCase(weeklyRepository),
+                snapshotSummariesUseCase = SnapshotSummariesUseCase(historyRepository),
                 timeProvider = timeProvider,
             ),
             timeProvider = timeProvider,

@@ -11,6 +11,12 @@ Deep-link delivery and in-app navigation are intentionally separate:
 4. The command replaces the root back stack with the same top-level and nested path that manual
    navigation would produce.
 
+`MainActivity` inspects every incoming intent, including intents received while Android restores an
+existing task. Once a supported URI is resolved, `RoutineDeepLinkIntentConsumer` clears that URI
+from the activity intent. This one-shot consumption prevents ordinary activity recreation from
+replaying old navigation while still allowing a later intent, even one with the same URI, to be
+handled normally.
+
 This means a link's source never changes its back behavior. For example, the History summary link
 creates `HistoryDestination -> HistoryDetailDestination`, so Back returns to the normal History
 root.
@@ -20,12 +26,23 @@ contract, while a destination is internal presentation state; coupling them woul
 force unrelated destinations to become serializable and could expose presentation-only fields as
 link parameters.
 
-## Current link
+## Current links
 
 `routinehelper://history/snapshots/{snapshotId}/summary/edit`
 
 The snapshot ID must be positive. Opening the link selects History, opens that snapshot, and requests
 the summary editor as a one-time initial action.
+
+`routinehelper://routines/{cadence}`
+
+Supported cadence values are `daily` and `weekly`. Opening the link replaces the root path with the
+corresponding top-level destination, exactly like selecting that bottom-navigation tab. Summary
+reminders use these links when the completed period had no actions and therefore has no History
+snapshot.
+
+The routine-tab links currently arrive through explicit notification intents, so they do not need
+an Android manifest filter. Once their URI reaches `MainActivity`, they use the same registry and
+back-stack mechanism as every other deep link.
 
 ## Adding a link
 

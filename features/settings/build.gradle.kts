@@ -31,6 +31,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":libs:settings:domain"))
 
+    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)

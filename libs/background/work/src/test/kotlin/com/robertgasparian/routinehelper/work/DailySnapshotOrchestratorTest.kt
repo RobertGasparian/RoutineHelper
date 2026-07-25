@@ -1,11 +1,13 @@
 package com.robertgasparian.routinehelper.work
 
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import com.robertgasparian.routinehelper.domain.repository.FakeRoutineHistoryRepository
 import com.robertgasparian.routinehelper.domain.repository.FakeTodayRoutineRepository
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ResetTodayUseCase
+import com.robertgasparian.routinehelper.domain.usecase.SnapshotSummariesUseCase
 import com.robertgasparian.routinehelper.core.testing.FixedTimeProvider
 import java.time.ZonedDateTime
 import java.time.ZoneId
@@ -22,6 +24,7 @@ class DailySnapshotOrchestratorTest {
     private val orchestrator = DailySnapshotOrchestrator(
         finalizeTodayUseCase = FinalizeTodayUseCase(todayRepository, historyRepository),
         resetTodayUseCase = ResetTodayUseCase(todayRepository),
+        snapshotSummariesUseCase = SnapshotSummariesUseCase(historyRepository),
         timeProvider = FixedTimeProvider(now.toInstant(), zoneId),
     )
 
@@ -48,6 +51,30 @@ class DailySnapshotOrchestratorTest {
         assertTrue(historyRepository.savedSnapshots.isEmpty())
         assertEquals(listOf("2026-06-01"), todayRepository.resetDates)
     }
+
+    @Test
+    fun `given previous day snapshot already exists when orchestrated then snapshot is preserved and day is reset`() =
+        runTest {
+            historyRepository.setSnapshot(
+                RoutineSnapshot(
+                    snapshotId = 42L,
+                    periodStartDate = "2026-06-01",
+                    finalizedAtMillis = 100L,
+                    cadence = RoutineCadence.Daily,
+                    items = emptyList(),
+                    summaryNote = "Already finalized",
+                ),
+            )
+            todayRepository.setItems(
+                date = "2026-06-01",
+                items = listOf(todayItem(date = "2026-06-01")),
+            )
+
+            orchestrator.finalizePreviousDay(now)
+
+            assertTrue(historyRepository.savedSnapshots.isEmpty())
+            assertEquals(listOf("2026-06-01"), todayRepository.resetDates)
+        }
 
     private fun todayItem(date: String): TodayRoutineItem =
         TodayRoutineItem(

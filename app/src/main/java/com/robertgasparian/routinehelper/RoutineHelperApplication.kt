@@ -6,6 +6,7 @@ import androidx.work.Configuration
 import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalUndoCoordinator
 import com.robertgasparian.routinehelper.work.RoutineSnapshotBackfill
 import com.robertgasparian.routinehelper.work.RoutineSnapshotWorkScheduler
+import com.robertgasparian.routinehelper.work.RoutineSummaryReminderWorkScheduler
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -27,6 +28,9 @@ class RoutineHelperApplication : Application(), Configuration.Provider {
     lateinit var routineSnapshotBackfill: RoutineSnapshotBackfill
 
     @Inject
+    lateinit var routineSummaryReminderWorkScheduler: RoutineSummaryReminderWorkScheduler
+
+    @Inject
     lateinit var routineRemovalUndoCoordinator: RoutineRemovalUndoCoordinator
 
     override val workManagerConfiguration: Configuration
@@ -43,5 +47,6 @@ class RoutineHelperApplication : Application(), Configuration.Provider {
             routineRemovalUndoCoordinator.finalizeDanglingPendingRemovalsOnLaunch()
         }
         routineSnapshotWorkScheduler.scheduleRecurringSnapshots()
+        routineSummaryReminderWorkScheduler.scheduleRecurringReminders()
     }
 }

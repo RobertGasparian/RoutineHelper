@@ -10,4 +10,8 @@
     <string name="app_summary_reminder_channel_name">Напоминания об итоговых заметках</string>
     <string name="app_summary_reminder_title">Добавьте итоговую заметку</string>
     <string name="app_summary_reminder_message">Запишите, что было важным в этой сохранённой записи.</string>
+    <string name="app_daily_routine_reminder_title">Составьте свой распорядок на день</string>
+    <string name="app_daily_routine_reminder_message">Добавьте ежедневные действия, чтобы создать удобный для себя распорядок.</string>
+    <string name="app_weekly_routine_reminder_title">Составьте свой распорядок на неделю</string>
+    <string name="app_weekly_routine_reminder_message">Добавьте еженедельные действия, чтобы создать удобный для себя распорядок.</string>
 </resources>

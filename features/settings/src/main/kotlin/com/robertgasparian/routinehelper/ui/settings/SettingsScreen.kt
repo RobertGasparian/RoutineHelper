@@ -1,5 +1,13 @@
 package com.robertgasparian.routinehelper.ui.settings
 
+import android.Manifest
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,10 +48,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robertgasparian.routinehelper.features.settings.R
@@ -57,8 +68,54 @@ fun SettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val configuration = LocalConfiguration.current
+    val context = LocalContext.current
     val appLanguage = remember(configuration) {
         AppLanguage.fromLocaleList(AppCompatDelegate.getApplicationLocales())
+    }
+    var pendingNotificationPermissionTarget by rememberSaveable {
+        mutableStateOf<NotificationPermissionTarget?>(null)
+    }
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { isGranted ->
+        val target = pendingNotificationPermissionTarget
+        pendingNotificationPermissionTarget = null
+        if (isGranted && target != null) {
+            if (context.areAppNotificationsEnabled()) {
+                viewModel.onIntent(target.enableIntent())
+            } else {
+                context.openAppNotificationSettings()
+            }
+        }
+    }
+
+    fun updateNotificationSetting(
+        target: NotificationPermissionTarget,
+        isEnabled: Boolean,
+    ) {
+        if (!isEnabled) {
+            viewModel.onIntent(target.intent(isEnabled = false))
+            return
+        }
+
+        val hasRuntimePermission =
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS,
+            ) == PackageManager.PERMISSION_GRANTED
+        if (!hasRuntimePermission) {
+            pendingNotificationPermissionTarget = target
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            return
+        }
+
+        if (!context.areAppNotificationsEnabled()) {
+            context.openAppNotificationSettings()
+            return
+        }
+
+        viewModel.onIntent(target.enableIntent())
     }
 
     SettingsComponent(
@@ -69,10 +126,48 @@ fun SettingsScreen(
                 is SettingsIntent.AppLanguageChange -> {
                     AppCompatDelegate.setApplicationLocales(intent.appLanguage.toLocaleList())
                 }
-                else -> viewModel.onIntent(intent)
+                is SettingsIntent.DailySummaryNotificationChange -> {
+                    updateNotificationSetting(
+                        target = NotificationPermissionTarget.Daily,
+                        isEnabled = intent.isEnabled,
+                    )
+                }
+                is SettingsIntent.WeeklySummaryNotificationChange -> {
+                    updateNotificationSetting(
+                        target = NotificationPermissionTarget.Weekly,
+                        isEnabled = intent.isEnabled,
+                    )
+                }
             }
         },
         modifier = modifier,
+    )
+}
+
+private enum class NotificationPermissionTarget {
+    Daily,
+    Weekly,
+}
+
+private fun NotificationPermissionTarget.enableIntent(): SettingsIntent =
+    intent(isEnabled = true)
+
+private fun NotificationPermissionTarget.intent(isEnabled: Boolean): SettingsIntent =
+    when (this) {
+        NotificationPermissionTarget.Daily ->
+            SettingsIntent.DailySummaryNotificationChange(isEnabled)
+        NotificationPermissionTarget.Weekly ->
+            SettingsIntent.WeeklySummaryNotificationChange(isEnabled)
+    }
+
+private fun Context.areAppNotificationsEnabled(): Boolean =
+    NotificationManagerCompat.from(this).areNotificationsEnabled()
+
+private fun Context.openAppNotificationSettings() {
+    startActivity(
+        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+            putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+        },
     )
 }
 

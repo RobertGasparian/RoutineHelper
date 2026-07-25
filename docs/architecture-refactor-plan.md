@@ -12,7 +12,7 @@ The post-modularization class-by-class review is tracked in [`refactor-review-ch
 - History/detail/sharing, Current List, Action Editor, and Settings live in their own feature modules.
 - Template, current-list, tracking, and snapshot capabilities each have separate `:domain` and `:data` modules.
 - `:libs:routine:database` owns only Room database/schema/DAO composition. Capability data modules own repository implementations and their Hilt bindings.
-- `:libs:background:work` owns WorkManager integration. Thin workers delegate structured flows to Daily and Weekly snapshot orchestrators, which compose focused use cases.
+- `:libs:background:work` owns WorkManager integration. Thin workers delegate snapshot and summary-reminder decisions to focused orchestrators that compose use cases.
 - `:core:time`, `:core:presentation`, `:core:ui`, and `:core:testing` own cross-cutting time, ViewModel infrastructure, design-system, and shared test infrastructure.
 - ViewModels depend on use cases or presentation collaborators rather than repositories. Feature modules do not import Room, repository implementations, or workers.
 - Repository, use-case, orchestrator, ViewModel, mapper, state-holder, and component snapshot coverage is distributed with the modules that own those behaviors.
@@ -25,7 +25,7 @@ The post-modularization class-by-class review is tracked in [`refactor-review-ch
 - Time-sensitive business and presentation code uses `TimeProvider`; direct system-clock access is isolated to the provider or debug-only UI tooling.
 - Daily and Weekly follow the same MVI naming and screen/component/state/intent structure while retaining cadence-specific names and behavior.
 - Snapshot finalization uses explicit Daily and Weekly orchestrators rather than one broad use case.
-- WorkManager code is outside `:app` and ready to coexist with future unrelated workers.
+- WorkManager code is outside `:app`; snapshot finalization and daily/weekly summary reminders share the established thin-worker and testable-schedule patterns.
 - Existing Paparazzi baselines remain unchanged.
 
 ## Remaining Targets
@@ -35,7 +35,7 @@ The post-modularization class-by-class review is tracked in [`refactor-review-ch
 - Record the approved initial Current List Paparazzi goldens after the new component visuals have been reviewed.
 - Keep existing debug-only snapshot/delete affordances gated and remove them when their replacement tooling or UX is ready.
 - Defer visual cleanup and component redesign to the separately planned UI/UX overhaul.
-- Create reflection, reminder, deadline, or monthly modules only when those capabilities are implemented and their boundaries are concrete.
+- Create reflection, deadline, monthly, or a standalone reminder module only when those capabilities or boundaries become concrete enough to justify another module.
 
 ## Target Module Direction
 
