@@ -85,17 +85,6 @@ private fun HistoryDetailComponentWithoutSummaryNotePreview() {
     }
 }
 
-@Preview(name = "Edit Summary Note", showBackground = true, widthDp = 393, heightDp = 852)
-@Composable
-private fun HistoryDetailComponentSummaryNoteEditorPreview() {
-    RoutineHelperTheme {
-        HistoryDetailComponent(
-            uiState = HistoryDetailUiState.previewSummaryNoteEditor(),
-            onIntent = {},
-        )
-    }
-}
-
 @Preview(name = "Read-only Summary Note", showBackground = true, widthDp = 393, heightDp = 852)
 @Composable
 private fun HistoryDetailComponentReadOnlySummaryNotePreview() {

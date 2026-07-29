@@ -31,7 +31,7 @@ class HistoryDetailViewModelTest {
     fun `given weekly snapshot when observing state then snapshot details are mapped`() = runTest {
         val snapshotId = saveWeeklySnapshot()
 
-        val state = createViewModel(snapshotId).uiState.first { !it.isMissing }
+        val state = createViewModel(snapshotId).uiState.first { !it.isLoading }
 
         assertEquals("2026-05-25", state.date)
         assertEquals(RoutineCadence.Weekly, state.cadence)
@@ -66,7 +66,7 @@ class HistoryDetailViewModelTest {
     @Test
     fun `given missing snapshot when share is requested then missing state remains unchanged`() = runTest {
         val viewModel = createViewModel(snapshotId = 404L)
-        val initialState = viewModel.uiState.first()
+        val initialState = viewModel.uiState.first { !it.isLoading }
 
         viewModel.onIntent(HistoryDetailIntent.ShareClick)
         viewModel.onIntent(HistoryDetailIntent.ShareAsTextClick)
@@ -80,7 +80,7 @@ class HistoryDetailViewModelTest {
     fun `given snapshot when text share is edited and dismissed then draft updates and clears`() = runTest {
         val snapshotId = saveWeeklySnapshot()
         val viewModel = createViewModel(snapshotId)
-        viewModel.uiState.first { !it.isMissing }
+        viewModel.uiState.first { !it.isLoading }
 
         viewModel.onIntent(HistoryDetailIntent.ShareClick)
         assertTrue(viewModel.uiState.first { it.isShareFormatDialogVisible }.isShareFormatDialogVisible)
@@ -110,7 +110,7 @@ class HistoryDetailViewModelTest {
     fun `given weekly snapshot when file share is requested then weekly file draft is emitted`() = runTest {
         val snapshotId = saveWeeklySnapshot()
         val viewModel = createViewModel(snapshotId)
-        viewModel.uiState.first { !it.isMissing }
+        viewModel.uiState.first { !it.isLoading }
 
         viewModel.onIntent(HistoryDetailIntent.ShareAsFileClick)
         val draft = requireNotNull(viewModel.uiState.first { it.shareDraft != null }.shareDraft) as ShareDraft.File
@@ -124,95 +124,44 @@ class HistoryDetailViewModelTest {
     }
 
     @Test
-    fun `given snapshot when summary edit is dismissed then original note is preserved`() = runTest {
+    fun `given editable snapshot when Reflection save is received then normalized note is persisted`() = runTest {
         val snapshotId = saveWeeklySnapshot()
         val viewModel = createViewModel(snapshotId)
-        viewModel.uiState.first { !it.isMissing }
-
-        viewModel.onIntent(HistoryDetailIntent.EditSummaryNoteClick)
-        val openedEditor = requireNotNull(
-            viewModel.uiState.first { state -> state.summaryNoteEditor != null }.summaryNoteEditor,
-        )
-        assertEquals("Good week", openedEditor.text)
+        viewModel.uiState.first { !it.isLoading }
 
         viewModel.onIntent(
-            HistoryDetailIntent.SummaryNoteDraftChange(
-                text = "Unsaved change",
-                selectionStart = 14,
-                selectionEnd = 14,
-            ),
+            HistoryDetailIntent.SaveSummaryNote("  Better week  "),
         )
-        viewModel.onIntent(HistoryDetailIntent.SummaryNoteEditorDismiss)
-
-        val dismissedState = viewModel.uiState.first { state -> state.summaryNoteEditor == null }
-        assertEquals("Good week", dismissedState.summaryNote)
-    }
-
-    @Test
-    fun `given snapshot when summary edit is saved then normalized note is persisted`() = runTest {
-        val snapshotId = saveWeeklySnapshot()
-        val viewModel = createViewModel(snapshotId)
-        viewModel.uiState.first { !it.isMissing }
-
-        viewModel.onIntent(HistoryDetailIntent.EditSummaryNoteClick)
-        viewModel.onIntent(
-            HistoryDetailIntent.SummaryNoteDraftChange(
-                text = "  Better week  ",
-                selectionStart = 15,
-                selectionEnd = 15,
-            ),
-        )
-        viewModel.onIntent(HistoryDetailIntent.SummaryNoteEditorSaveClick)
         advanceUntilIdle()
 
-        val savedState = viewModel.uiState.first { state ->
-            state.summaryNote == "Better week" && state.summaryNoteEditor == null
-        }
+        val savedState = viewModel.uiState.first { state -> state.summaryNote == "Better week" }
         assertEquals("Better week", savedState.summaryNote)
     }
 
     @Test
-    fun `given snapshot when summary is cleared and saved then note is removed`() = runTest {
+    fun `given editable snapshot when Reflection saves empty summary then note is removed`() = runTest {
         val snapshotId = saveWeeklySnapshot()
         val viewModel = createViewModel(snapshotId)
-        viewModel.uiState.first { !it.isMissing }
+        viewModel.uiState.first { !it.isLoading }
 
-        viewModel.onIntent(HistoryDetailIntent.EditSummaryNoteClick)
-        viewModel.onIntent(HistoryDetailIntent.SummaryNoteDraftClearClick)
-        val clearedEditor = requireNotNull(
-            viewModel.uiState.first { state -> state.summaryNoteEditor?.text == "" }.summaryNoteEditor,
-        )
-        assertEquals(0, clearedEditor.selectionStart)
-        assertEquals(0, clearedEditor.selectionEnd)
-
-        viewModel.onIntent(HistoryDetailIntent.SummaryNoteEditorSaveClick)
+        viewModel.onIntent(HistoryDetailIntent.SaveSummaryNote(""))
         advanceUntilIdle()
 
-        val savedState = viewModel.uiState.first { state ->
-            state.summaryNote.isEmpty() && state.summaryNoteEditor == null
-        }
+        val savedState = viewModel.uiState.first { state -> state.summaryNote.isEmpty() }
         assertEquals("", savedState.summaryNote)
     }
 
     @Test
-    fun `given summary becomes read only when editor is open then editor closes and save is ignored`() = runTest {
+    fun `given read only summary when Reflection save is received then save is ignored`() = runTest {
         val snapshotId = saveWeeklySnapshot()
         val viewModel = createViewModel(snapshotId)
-        viewModel.uiState.first { !it.isMissing }
+        viewModel.uiState.first { !it.isLoading }
 
-        viewModel.onIntent(HistoryDetailIntent.EditSummaryNoteClick)
-        viewModel.uiState.first { state -> state.summaryNoteEditor != null }
         val snapshot = requireNotNull(repository.snapshot(snapshotId).first())
-
         repository.setSnapshot(snapshot.copy(isSummaryNoteEditable = false))
+        val readOnlyState = viewModel.uiState.first { state -> !state.isSummaryNoteEditable }
 
-        val readOnlyState = viewModel.uiState.first { state ->
-            !state.isSummaryNoteEditable && state.summaryNoteEditor == null
-        }
-        viewModel.onIntent(HistoryDetailIntent.EditSummaryNoteClick)
-        assertEquals(null, viewModel.uiState.value.summaryNoteEditor)
-
-        viewModel.onIntent(HistoryDetailIntent.SummaryNoteEditorSaveClick)
+        viewModel.onIntent(HistoryDetailIntent.SaveSummaryNote("Should not save"))
         advanceUntilIdle()
 
         assertEquals("Good week", readOnlyState.summaryNote)

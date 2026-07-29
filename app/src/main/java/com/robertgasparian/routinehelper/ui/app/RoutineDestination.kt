@@ -22,6 +22,10 @@ data class HistoryDetailDestination(
     val initialAction: HistoryDetailInitialAction? = null,
 ) : RoutineDestination
 
+data class ReflectionEditorDestination(
+    val parentContentKey: String,
+) : RoutineDestination
+
 data class ActionEditorDestination(
     val actionId: Long? = null,
     val cadence: RoutineCadence = RoutineCadence.Daily,

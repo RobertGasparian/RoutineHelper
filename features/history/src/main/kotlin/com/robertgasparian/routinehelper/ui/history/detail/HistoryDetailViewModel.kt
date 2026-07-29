@@ -5,7 +5,6 @@ import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateSnapshotSummaryNoteUseCase
-import com.robertgasparian.routinehelper.ui.dsm.RoutineNoteDraftUiState
 import com.robertgasparian.routinehelper.ui.history.HistoryTextProvider
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
 import dagger.assisted.Assisted
@@ -15,7 +14,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.map
 
 @HiltViewModel(assistedFactory = HistoryDetailViewModel.Factory::class)
 class HistoryDetailViewModel @AssistedInject constructor(
@@ -27,35 +26,32 @@ class HistoryDetailViewModel @AssistedInject constructor(
 ) : BaseViewModel<HistoryDetailUiState, HistoryDetailIntent, HistoryDetailUiEvent>() {
     private val isShareFormatDialogVisible = MutableStateFlow(false)
     private val shareDraft = MutableStateFlow<ShareDraft?>(null)
-    private val summaryNoteEditor = MutableStateFlow<RoutineNoteDraftUiState?>(null)
 
-    private val snapshot: StateFlow<RoutineSnapshot?> =
+    private val snapshot: StateFlow<SnapshotLoadState> =
         snapshotUseCase(snapshotId)
-            .onEach { snapshot ->
-                if (snapshot?.isSummaryNoteEditable != true) {
-                    summaryNoteEditor.value = null
-                }
-            }
-            .stateInViewModel(initialValue = null)
+            .map(SnapshotLoadState::Loaded)
+            .stateInViewModel(initialValue = SnapshotLoadState.Loading)
 
     override val uiState: StateFlow<HistoryDetailUiState> =
         combine(
             snapshot,
             isShareFormatDialogVisible,
             shareDraft,
-            summaryNoteEditor,
-        ) { snapshot, isShareFormatDialogVisible, shareDraft, summaryNoteEditor ->
-            (snapshot?.toHistoryDetailUiState(
-                finalizedTime = historyTextProvider.finalizedTime(snapshot.finalizedAtMillis),
-            ) ?: HistoryDetailUiState.previewMissing()).copy(
+        ) { snapshotLoadState, isShareFormatDialogVisible, shareDraft ->
+            val snapshotState = when (snapshotLoadState) {
+                SnapshotLoadState.Loading -> HistoryDetailUiState.loading()
+                is SnapshotLoadState.Loaded -> snapshotLoadState.snapshot?.toHistoryDetailUiState(
+                    finalizedTime = historyTextProvider.finalizedTime(
+                        snapshotLoadState.snapshot.finalizedAtMillis,
+                    ),
+                ) ?: HistoryDetailUiState.previewMissing()
+            }
+            snapshotState.copy(
                 isShareFormatDialogVisible = isShareFormatDialogVisible,
                 shareDraft = shareDraft,
-                summaryNoteEditor = summaryNoteEditor.takeIf {
-                    snapshot?.isSummaryNoteEditable == true
-                },
             )
         }
-            .stateInViewModel(initialValue = HistoryDetailUiState.previewMissing())
+            .stateInViewModel(initialValue = HistoryDetailUiState.loading())
 
     override fun handleIntent(intent: HistoryDetailIntent) {
         when (intent) {
@@ -64,58 +60,25 @@ class HistoryDetailViewModel @AssistedInject constructor(
             is HistoryDetailIntent.ShareFileConfirm,
             is HistoryDetailIntent.ShareTextConfirm -> Unit
             HistoryDetailIntent.DeleteClick -> deleteSnapshot()
-            HistoryDetailIntent.EditSummaryNoteClick -> showSummaryNoteEditor()
+            HistoryDetailIntent.EditSummaryNoteClick -> Unit
+            is HistoryDetailIntent.SaveSummaryNote -> saveSummaryNote(intent.note)
             HistoryDetailIntent.ShareAsFileClick -> showFileSharePreview()
             HistoryDetailIntent.ShareAsTextClick -> showTextSharePreview()
             HistoryDetailIntent.ShareClick -> showShareOptions()
             HistoryDetailIntent.ShareDismiss -> dismissSharePreview()
             is HistoryDetailIntent.ShareFileNameChange -> updateShareFileName(intent.fileName)
             is HistoryDetailIntent.ShareTextChange -> updateShareText(intent.text)
-            is HistoryDetailIntent.SummaryNoteDraftChange -> updateSummaryNoteDraft(intent)
-            HistoryDetailIntent.SummaryNoteDraftClearClick -> clearSummaryNoteDraft()
-            HistoryDetailIntent.SummaryNoteEditorDismiss -> dismissSummaryNoteEditor()
-            HistoryDetailIntent.SummaryNoteEditorSaveClick -> saveSummaryNote()
         }
     }
 
-    private fun showSummaryNoteEditor() {
-        val snapshot = snapshot.value?.takeIf(RoutineSnapshot::isSummaryNoteEditable) ?: return
-        summaryNoteEditor.value = RoutineNoteDraftUiState.fromText(snapshot.summaryNote.orEmpty())
-    }
-
-    private fun updateSummaryNoteDraft(intent: HistoryDetailIntent.SummaryNoteDraftChange) {
-        summaryNoteEditor.value = summaryNoteEditor.value?.copy(
-            text = intent.text,
-            selectionStart = intent.selectionStart,
-            selectionEnd = intent.selectionEnd,
-        )
-    }
-
-    private fun clearSummaryNoteDraft() {
-        summaryNoteEditor.value = summaryNoteEditor.value?.copy(
-            text = "",
-            selectionStart = 0,
-            selectionEnd = 0,
-        )
-    }
-
-    private fun dismissSummaryNoteEditor() {
-        summaryNoteEditor.value = null
-    }
-
-    private fun saveSummaryNote() {
-        val editor = summaryNoteEditor.value ?: return
-        if (snapshot.value?.isSummaryNoteEditable != true) {
-            summaryNoteEditor.value = null
-            return
-        }
+    private fun saveSummaryNote(note: String) {
+        if (currentSnapshot()?.isSummaryNoteEditable != true) return
 
         launch {
             updateSnapshotSummaryNoteUseCase(
                 snapshotId = snapshotId,
-                summaryNote = editor.text,
+                summaryNote = note,
             )
-            summaryNoteEditor.value = null
         }
     }
 
@@ -128,19 +91,19 @@ class HistoryDetailViewModel @AssistedInject constructor(
     }
 
     private fun showShareOptions() {
-        if (snapshot.value != null) {
+        if (currentSnapshot() != null) {
             isShareFormatDialogVisible.value = true
         }
     }
 
     private fun showTextSharePreview() {
-        val snapshot = snapshot.value ?: return
+        val snapshot = currentSnapshot() ?: return
         isShareFormatDialogVisible.value = false
         shareDraft.value = ShareDraft.text(historyTextProvider.snapshotShareText(snapshot))
     }
 
     private fun showFileSharePreview() {
-        val snapshot = snapshot.value ?: return
+        val snapshot = currentSnapshot() ?: return
         isShareFormatDialogVisible.value = false
         shareDraft.value = ShareDraft.file(
             messageText = historyTextProvider.snapshotFileMessage(snapshot),
@@ -170,8 +133,19 @@ class HistoryDetailViewModel @AssistedInject constructor(
         shareDraft.value = null
     }
 
+    private fun currentSnapshot(): RoutineSnapshot? =
+        (snapshot.value as? SnapshotLoadState.Loaded)?.snapshot
+
     @AssistedFactory
     interface Factory {
         fun create(snapshotId: Long): HistoryDetailViewModel
     }
+}
+
+private sealed interface SnapshotLoadState {
+    data object Loading : SnapshotLoadState
+
+    data class Loaded(
+        val snapshot: RoutineSnapshot?,
+    ) : SnapshotLoadState
 }

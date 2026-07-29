@@ -31,6 +31,9 @@
 - A capability's `:data` submodule owns the dependency-injection binding from its repository implementation to its domain repository contract.
 - `:core:*` modules are cross-cutting building blocks that are not specific to RoutineHelper business capabilities.
 - `:core:presentation` owns shared ViewModel infrastructure. Keep it generic: no feature, routine, Room, WorkManager, Compose, or business-language dependencies.
+- `:core:navigation` owns business-neutral Navigation 3 decorators, scenes, and flow-lifetime
+  infrastructure. Read [`navigation-scopes.md`](navigation-scopes.md) before sharing state between
+  destinations.
 - Do not create a broad `routine`, `domain`, or `data` module whose job is "shared app logic." Prefer capability boundaries such as template, tracking, snapshot, reminders, reflection, and background work.
 - `:features:*` may depend on `:libs:*` APIs and `:core:*`.
 - `:features:*` must not depend on Room DAOs, Room entities, Room database classes, WorkManager workers, or repository implementations.
@@ -38,6 +41,11 @@
 - Avoid feature-to-feature implementation dependencies. Route cross-feature navigation through `:app` or a small feature API/navigation contract only when needed.
 - Root navigation should use typed destination contracts instead of `Any` route values. Keep top-level destinations as a narrower subtype when top-level navigation needs special behavior.
 - Root navigation back-stack state should be saveable with an explicit app-owned saver. Encode destinations into primitive saveable fields instead of relying on broad object serialization.
+- State shared by related destinations uses an explicit parent navigation-flow scope. The parent
+  entry must remain on the back stack, child metadata must reference its stable saveable content
+  key, and the shared store must be cleared when the parent is popped.
+- Keep feature-to-feature implementation dependencies out of shared flows. Put the narrow state and
+  result contract in a feature API module; let `:app` compose the client and implementation.
 - Keep root navigation files focused as the app shell grows: destination contracts, back-stack persistence, graph entries, transitions, and bottom navigation metadata may live in separate app-owned files.
 - Cadence variants that share one presentation workflow may live as packages inside one cohesive feature module; cadence packages must share neutral presentation contracts rather than depend on one another.
 - `:libs:*` may depend on `:core:*` and other `:libs:*` APIs when there is a clear one-way capability relationship.
@@ -69,6 +77,10 @@
 
 ## UI
 
+- The app renders edge-to-edge. `MainActivity` must call `enableEdgeToEdge()` before `setContent`,
+  and its manifest entry must retain `android:windowSoftInputMode="adjustResize"` so Compose
+  receives animated IME insets. Apply insets at the owning layout or Material component and avoid
+  applying the same inset twice.
 - Before changing shared drag/reorder behavior or overhauling its item UI, read the
   [`RoutineReorderableLazyColumn` maintenance guide](reorderable-lazy-column.md). Preserve its
   pointer-ownership, overlay, measured drag-start/drop-target, and source-reconciliation invariants

@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -55,11 +56,8 @@ import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.features.history.BuildConfig
 import com.robertgasparian.routinehelper.features.history.R
 import com.robertgasparian.routinehelper.ui.dsm.RoutineDialogTextButton
-import com.robertgasparian.routinehelper.ui.dsm.RoutineNoteDialog
-import com.robertgasparian.routinehelper.ui.dsm.RoutineNoteDialogIntent
 import com.robertgasparian.routinehelper.ui.dsm.SummaryNoteCard
-import com.robertgasparian.routinehelper.ui.dsm.toRoutineNoteDraftUiState
-import com.robertgasparian.routinehelper.ui.dsm.toTextFieldValue
+import com.robertgasparian.routinehelper.ui.reflection.api.ReflectionEditorSession
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
 import com.robertgasparian.routinehelper.ui.share.ShareFileDialog
 import com.robertgasparian.routinehelper.ui.share.ShareFormatDialog
@@ -72,6 +70,9 @@ fun HistoryDetailScreen(
     snapshotId: Long,
     initialAction: HistoryDetailInitialAction? = null,
     onBackClick: () -> Unit,
+    onSummaryEditorClick: () -> Unit,
+    onInitialSummaryEditorUnavailable: () -> Unit,
+    reflectionEditorSession: ReflectionEditorSession,
     onShareTextPreviewClick: (String) -> Unit,
     onDebugSummaryNotificationClick: () -> Unit = {},
     modifier: Modifier = Modifier,
@@ -81,6 +82,7 @@ fun HistoryDetailScreen(
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val reflectionState by reflectionEditorSession.state.collectAsStateWithLifecycle()
     val shareTitle = stringResource(R.string.history_share_snapshot_chooser)
     var initialActionConsumed by rememberSaveable(snapshotId, initialAction) {
         mutableStateOf(false)
@@ -88,15 +90,14 @@ fun HistoryDetailScreen(
     LaunchedEffect(
         initialAction,
         initialActionConsumed,
-        uiState.date,
+        uiState.isLoading,
         uiState.isMissing,
         uiState.isSummaryNoteEditable,
     ) {
         if (
             initialActionConsumed ||
             initialAction == null ||
-            uiState.date.isBlank() ||
-            uiState.isMissing
+            uiState.isLoading
         ) {
             return@LaunchedEffect
         }
@@ -104,10 +105,28 @@ fun HistoryDetailScreen(
         initialActionConsumed = true
         if (
             initialAction == HistoryDetailInitialAction.OpenSummaryEditor &&
+            !uiState.isMissing &&
             uiState.isSummaryNoteEditable
         ) {
-            viewModel.onIntent(HistoryDetailIntent.EditSummaryNoteClick)
+            reflectionEditorSession.start(uiState.summaryNote)
+        } else {
+            onInitialSummaryEditorUnavailable()
         }
+    }
+
+    LaunchedEffect(
+        reflectionState.saveRequest?.requestId,
+        uiState.isLoading,
+        uiState.isMissing,
+        uiState.isSummaryNoteEditable,
+    ) {
+        val request = reflectionState.saveRequest ?: return@LaunchedEffect
+        if (uiState.isLoading) return@LaunchedEffect
+
+        if (!uiState.isMissing && uiState.isSummaryNoteEditable) {
+            viewModel.onIntent(HistoryDetailIntent.SaveSummaryNote(request.text))
+        }
+        reflectionEditorSession.consumeSaveRequest(request.requestId)
     }
 
     LaunchedEffect(viewModel) {
@@ -135,6 +154,12 @@ fun HistoryDetailScreen(
             when (intent) {
                 HistoryDetailIntent.BackClick -> onBackClick()
                 HistoryDetailIntent.DebugSummaryNotificationClick -> onDebugSummaryNotificationClick()
+                HistoryDetailIntent.EditSummaryNoteClick -> {
+                    if (uiState.isSummaryNoteEditable && !uiState.isMissing) {
+                        reflectionEditorSession.start(uiState.summaryNote)
+                        onSummaryEditorClick()
+                    }
+                }
                 is HistoryDetailIntent.ShareFileConfirm -> {
                     context.shareTextFile(
                         fileText = intent.draft.fileText,
@@ -225,6 +250,12 @@ fun HistoryDetailComponent(
         },
     ) { innerPadding ->
         when {
+            uiState.isLoading -> LoadingSnapshotContent(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+            )
+
             uiState.isMissing -> MissingSnapshotContent(
                 modifier = Modifier
                     .fillMaxSize()
@@ -350,47 +381,6 @@ fun HistoryDetailComponent(
         )
     }
 
-    uiState.summaryNoteEditor?.let { editor ->
-        RoutineNoteDialog(
-            value = editor.toTextFieldValue(),
-            onIntent = { dialogIntent ->
-                when (dialogIntent) {
-                    is RoutineNoteDialogIntent.ValueChange -> {
-                        val draft = dialogIntent.value.toRoutineNoteDraftUiState()
-                        onIntent(
-                            HistoryDetailIntent.SummaryNoteDraftChange(
-                                text = draft.text,
-                                selectionStart = draft.selectionStart,
-                                selectionEnd = draft.selectionEnd,
-                            ),
-                        )
-                    }
-                    RoutineNoteDialogIntent.ClearClick -> {
-                        onIntent(HistoryDetailIntent.SummaryNoteDraftClearClick)
-                    }
-                    RoutineNoteDialogIntent.Dismiss -> {
-                        onIntent(HistoryDetailIntent.SummaryNoteEditorDismiss)
-                    }
-                    RoutineNoteDialogIntent.SaveClick -> {
-                        onIntent(HistoryDetailIntent.SummaryNoteEditorSaveClick)
-                    }
-                    RoutineNoteDialogIntent.DateClick,
-                    RoutineNoteDialogIntent.TimeClick,
-                    RoutineNoteDialogIntent.WeekdayClick -> Unit
-                }
-            },
-            supportingText = stringResource(R.string.history_summary_note_supporting_text),
-            label = stringResource(
-                if (uiState.cadence == RoutineCadence.Weekly) {
-                    R.string.history_week_note
-                } else {
-                    R.string.history_day_note
-                },
-            ),
-            showInsertActions = false,
-        )
-    }
-
     if (uiState.isShareFormatDialogVisible) {
         ShareFormatDialog(
             onDismiss = { onIntent(HistoryDetailIntent.ShareDismiss) },
@@ -468,6 +458,19 @@ private fun ShareSnapshotDialog(
         onDismiss = onDismiss,
         onShareClick = onShareClick,
     )
+}
+
+@Composable
+private fun LoadingSnapshotContent(
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        CircularProgressIndicator()
+    }
 }
 
 @Composable

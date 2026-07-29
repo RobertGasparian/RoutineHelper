@@ -19,30 +19,15 @@ data class NoteEditorUiState(
             itemTitle: String,
         ): NoteEditorUiState {
             return NoteEditorUiState(
-                target = NoteEditorTarget.Item(routineItemId),
+                target = NoteEditorTarget(routineItemId),
                 cadence = cadence,
                 itemTitle = itemTitle,
-                value = RoutineNoteDraftUiState.fromText(note),
-            )
-        }
-
-        fun summary(
-            note: String,
-            cadence: RoutineCadence,
-        ): NoteEditorUiState {
-            return NoteEditorUiState(
-                target = NoteEditorTarget.Summary,
-                cadence = cadence,
                 value = RoutineNoteDraftUiState.fromText(note),
             )
         }
     }
 }
 
-sealed interface NoteEditorTarget {
-    data class Item(
-        val routineItemId: Long,
-    ) : NoteEditorTarget
-
-    data object Summary : NoteEditorTarget
-}
+data class NoteEditorTarget(
+    val routineItemId: Long,
+)

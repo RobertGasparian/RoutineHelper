@@ -8,6 +8,7 @@ appcompat = "1.7.1"
 coreKtx = "1.18.0"
 dataStore = "1.2.1"
 lifecycle = "2.11.0"
+savedState = "1.5.0"
 androidxHilt = "1.4.0"
 navigation3 = "1.2.0-alpha06"
 room = "2.8.4"
@@ -30,6 +31,7 @@ androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-ru
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycle" }
+androidx-savedstate-compose = { module = "androidx.savedstate:savedstate-compose", version.ref = "savedState" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }

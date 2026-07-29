@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reflection_editor_title">Итоги</string>
+    <string name="reflection_editor_supporting_text">Запишите, что было важным и как ощущался распорядок.</string>
+    <string name="reflection_editor_note_label">Краткий итог</string>
+    <string name="reflection_editor_clear">Очистить</string>
+    <string name="reflection_editor_cancel">Отмена</string>
+    <string name="reflection_editor_save">Сохранить</string>
+</resources>

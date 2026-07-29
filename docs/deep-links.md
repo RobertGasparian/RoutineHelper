@@ -18,8 +18,9 @@ replaying old navigation while still allowing a later intent, even one with the 
 handled normally.
 
 This means a link's source never changes its back behavior. For example, the History summary link
-creates `HistoryDestination -> HistoryDetailDestination`, so Back returns to the normal History
-root.
+creates `HistoryDestination -> HistoryDetailDestination -> ReflectionEditorDestination`. The first
+Back dismisses the same Reflection sheet used by a manual edit; the next Back returns to the normal
+History root.
 
 External parsing keys must remain separate from `RoutineDestination` types. A URI is a public input
 contract, while a destination is internal presentation state; coupling them would make URI changes
@@ -30,8 +31,9 @@ link parameters.
 
 `routinehelper://history/snapshots/{snapshotId}/summary/edit`
 
-The snapshot ID must be positive. Opening the link selects History, opens that snapshot, and requests
-the summary editor as a one-time initial action.
+The snapshot ID must be positive. Opening the link selects History, opens that snapshot, and pushes
+the Reflection editor as a child of the History detail flow scope. History loads and supplies the
+initial summary through the shared session; Reflection does not load History data itself.
 
 `routinehelper://routines/{cadence}`
 

@@ -51,12 +51,14 @@ android {
 
 dependencies {
     implementation(project(":core:time"))
+    implementation(project(":core:navigation"))
     implementation(project(":core:ui"))
     implementation(project(":features:routine-tracking"))
     implementation(project(":features:current-list"))
     implementation(project(":features:removal-undo"))
     implementation(project(":features:action-editor"))
     implementation(project(":features:history"))
+    implementation(project(":features:reflection"))
     implementation(project(":features:settings"))
     implementation(project(":libs:background:work"))
     implementation(project(":libs:routine:template:domain"))

@@ -6,6 +6,8 @@ import androidx.navigation3.runtime.deeplink.DeepLinkRequest
 import androidx.navigation3.runtime.deeplink.UriDeepLinkMatcher
 import com.robertgasparian.routinehelper.ui.app.HistoryDestination
 import com.robertgasparian.routinehelper.ui.app.HistoryDetailDestination
+import com.robertgasparian.routinehelper.ui.app.ReflectionEditorDestination
+import com.robertgasparian.routinehelper.ui.app.historyDetailNavigationContentKey
 import com.robertgasparian.routinehelper.ui.history.detail.HistoryDetailInitialAction
 import dagger.Binds
 import dagger.Module
@@ -29,6 +31,9 @@ internal class HistorySummaryEditDeepLinkHandler @Inject constructor() : Routine
                 HistoryDetailDestination(
                     snapshotId = key.snapshotId,
                     initialAction = HistoryDetailInitialAction.OpenSummaryEditor,
+                ),
+                ReflectionEditorDestination(
+                    parentContentKey = historyDetailNavigationContentKey(key.snapshotId),
                 ),
             ),
         )

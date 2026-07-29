@@ -6,14 +6,16 @@ The post-modularization class-by-class review is tracked in [`refactor-review-ch
 
 ## Current Shape
 
-- The project has 20 Gradle modules across `:app`, `:features:*`, `:libs:*`, and `:core:*`.
+- The project has 27 Gradle modules across `:app`, `:features:*`, `:libs:*`, and `:core:*`.
 - `:app` is a thin Android shell. It owns `MainActivity`, `RoutineHelperApplication`, root Navigation 3 composition, app startup, and dependency aggregation.
 - Daily and Weekly presentation live together in `:features:routine-tracking`, with cadence-specific ViewModels/mappers and neutral shared tracking state/components.
-- History/detail/sharing, Current List, Action Editor, and Settings live in their own feature modules.
+- History/detail/sharing, Reflection, Current List, Action Editor, and Settings live in their own feature modules.
 - Template, current-list, tracking, and snapshot capabilities each have separate `:domain` and `:data` modules.
 - `:libs:routine:database` owns only Room database/schema/DAO composition. Capability data modules own repository implementations and their Hilt bindings.
 - `:libs:background:work` owns WorkManager integration. Thin workers delegate snapshot and summary-reminder decisions to focused orchestrators that compose use cases.
-- `:core:time`, `:core:presentation`, `:core:ui`, and `:core:testing` own cross-cutting time, ViewModel infrastructure, design-system, and shared test infrastructure.
+- `:core:time`, `:core:presentation`, `:core:navigation`, `:core:ui`, and `:core:testing`
+  own cross-cutting time, ViewModel, Navigation 3 flow-lifetime, design-system, and shared test
+  infrastructure.
 - ViewModels depend on use cases or presentation collaborators rather than repositories. Feature modules do not import Room, repository implementations, or workers.
 - Repository, use-case, orchestrator, ViewModel, mapper, state-holder, and component snapshot coverage is distributed with the modules that own those behaviors.
 - Current List undo is a feature-owned app-lifetime workflow: Room persists pending-removal state, a singleton coordinator serializes undo/finalization, a root-scoped feature ViewModel exposes feedback state, and `:app` owns only startup invocation and renderer placement.
@@ -27,15 +29,20 @@ The post-modularization class-by-class review is tracked in [`refactor-review-ch
 - Snapshot finalization uses explicit Daily and Weekly orchestrators rather than one broad use case.
 - WorkManager code is outside `:app`; snapshot finalization and daily/weekly summary reminders share the established thin-worker and testable-schedule patterns.
 - Existing Paparazzi baselines remain unchanged.
+- Navigation-flow state can now be scoped to a parent back-stack entry. Reflection uses that scope
+  from Daily, Weekly, and History without introducing feature-to-feature implementation
+  dependencies.
 
 ## Remaining Targets
 
 - Finish final dependency-visibility and build/test-command audits, then document the supported verification commands.
 - Add Room migration tests when the schema first moves beyond version 1; there is no migration path to test yet.
 - Record the approved initial Current List Paparazzi goldens after the new component visuals have been reviewed.
+- Record the approved initial Reflection editor Paparazzi golden after the new component visual has
+  been reviewed.
 - Keep existing debug-only snapshot/delete affordances gated and remove them when their replacement tooling or UX is ready.
 - Defer visual cleanup and component redesign to the separately planned UI/UX overhaul.
-- Create reflection, deadline, monthly, or a standalone reminder module only when those capabilities or boundaries become concrete enough to justify another module.
+- Create deadline, monthly, or a standalone reminder module only when those capabilities or boundaries become concrete enough to justify another module.
 
 ## Target Module Direction
 
@@ -75,8 +82,10 @@ Current and planned module families:
 - A separate share feature is not introduced while sharing is only part of History. If another feature later needs the same complete presentation flow, reevaluate the boundary without adding a feature-to-feature dependency.
 - `:features:settings`
   - Settings UI and future settings state management.
+- `:features:reflection-api`
+  - Narrow draft/save session contract shared with Reflection clients.
 - `:features:reflection`
-  - Future reflection UI flows.
+  - Reflection editor presentation and its parent-entry-scoped session ViewModel.
 - `:libs:routine:template:domain`
   - Platform-independent template models, repository contracts, and use cases for reusable action definitions such as title, description, cadence, repeat target count, and future deadline configuration if deadlines are configured on actions.
 - `:libs:routine:template:data`
@@ -111,6 +120,8 @@ Current and planned module families:
   - Generic calendar helpers such as calendar-week start belong here; capability modules own only business-specific period rules.
 - `:core:presentation`
   - Shared ViewModel infrastructure such as `BaseViewModel`, outside-in intent handling, optional one-off UI event plumbing, and common `StateFlow`/coroutine helpers.
+- `:core:navigation`
+  - Business-neutral Navigation 3 entry decorators, parent flow scopes, and reusable scene strategies.
 - `:core:ui`
   - Theme, design-system components from `ui.dsm`, reusable UI helpers, and shared component test helpers where appropriate.
 - `:core:testing`

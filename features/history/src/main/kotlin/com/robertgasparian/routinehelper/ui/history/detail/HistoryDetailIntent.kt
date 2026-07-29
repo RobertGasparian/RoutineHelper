@@ -25,17 +25,9 @@ sealed interface HistoryDetailIntent {
 
     data object EditSummaryNoteClick : HistoryDetailIntent
 
-    data class SummaryNoteDraftChange(
-        val text: String,
-        val selectionStart: Int,
-        val selectionEnd: Int = selectionStart,
+    data class SaveSummaryNote(
+        val note: String,
     ) : HistoryDetailIntent
-
-    data object SummaryNoteDraftClearClick : HistoryDetailIntent
-
-    data object SummaryNoteEditorDismiss : HistoryDetailIntent
-
-    data object SummaryNoteEditorSaveClick : HistoryDetailIntent
 
     data class ShareTextConfirm(
         val messageText: String,

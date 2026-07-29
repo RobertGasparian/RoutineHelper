@@ -16,6 +16,11 @@ class RoutineDestinationBackStackSaverTest {
                 ),
             )
             add(
+                ReflectionEditorDestination(
+                    parentContentKey = historyDetailNavigationContentKey(snapshotId = 42L),
+                ),
+            )
+            add(
                 ShareTextPreviewDestination(
                     initialText = "Snapshot text",
                     shareTitle = "Share routine snapshot",

@@ -24,7 +24,8 @@ Snapshot finalization deliberately does not store empty snapshots. The reminder 
 that invariant for the completed period:
 
 - A matching snapshot means the respective routine contained actions. The notification deep-links
-  to that History detail and opens the summary editor, unless that snapshot already has a summary.
+  to that History detail and opens the same flow-scoped Reflection sheet used by manual summary
+  editing, unless that snapshot already has a summary.
 - A matching snapshot that already has a summary produces no notification.
 - No matching snapshot means the respective routine was empty. The generic notification deep-links
   to the Daily or Weekly top-level tab so the user can start constructing a routine.

@@ -15,6 +15,7 @@ import com.robertgasparian.routinehelper.domain.repository.WeeklyCheckedChange
 import com.robertgasparian.routinehelper.domain.repository.WeeklyCountChange
 import com.robertgasparian.routinehelper.domain.repository.WeeklyHiddenChange
 import com.robertgasparian.routinehelper.domain.repository.WeeklyNoteChange
+import com.robertgasparian.routinehelper.domain.repository.WeeklySummaryNoteChange
 import com.robertgasparian.routinehelper.domain.usecase.AddTemplateItemUseCase
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeWeeklyUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ReorderWeeklyRoutineItemsUseCase
@@ -116,6 +117,24 @@ class WeeklyViewModelTest {
                 ),
             ),
             weeklyRepository.noteChanges,
+        )
+    }
+
+    @Test
+    fun `when Reflection summary save is received then forwards it to weekly summary use case`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(RoutineTrackingIntent.SaveSummaryNote("  Better week  "))
+        advanceUntilIdle()
+
+        assertEquals(
+            listOf(
+                WeeklySummaryNoteChange(
+                    weekStartDate = WeekStartDate,
+                    note = "  Better week  ",
+                ),
+            ),
+            weeklyRepository.summaryNoteChanges,
         )
     }
 

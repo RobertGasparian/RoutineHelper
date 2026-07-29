@@ -6,7 +6,9 @@ import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.ui.app.DailyDestination
 import com.robertgasparian.routinehelper.ui.app.HistoryDestination
 import com.robertgasparian.routinehelper.ui.app.HistoryDetailDestination
+import com.robertgasparian.routinehelper.ui.app.ReflectionEditorDestination
 import com.robertgasparian.routinehelper.ui.app.WeeklyDestination
+import com.robertgasparian.routinehelper.ui.app.historyDetailNavigationContentKey
 import com.robertgasparian.routinehelper.ui.history.detail.HistoryDetailInitialAction
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -40,6 +42,9 @@ class RoutineDeepLinkRegistryTest {
                     HistoryDetailDestination(
                         snapshotId = 42L,
                         initialAction = HistoryDetailInitialAction.OpenSummaryEditor,
+                    ),
+                    ReflectionEditorDestination(
+                        parentContentKey = historyDetailNavigationContentKey(snapshotId = 42L),
                     ),
                 ),
             ),

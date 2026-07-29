@@ -48,6 +48,7 @@ private fun RoutineDestination.toSaveableRoute(): List<Any?> =
             snapshotId,
             initialAction?.toSaveableValue(),
         )
+        is ReflectionEditorDestination -> listOf(RouteReflectionEditor, parentContentKey)
         is ActionEditorDestination -> listOf(RouteActionEditor, actionId, cadence.toSaveableValue())
         is ShareTextPreviewDestination -> listOf(RouteShareTextPreview, initialText, shareTitle)
     }
@@ -70,6 +71,9 @@ private fun List<*>.toRoutineDestinationOrNull(): RoutineDestination? =
                 },
             )
         }
+        RouteReflectionEditor -> ReflectionEditorDestination(
+            parentContentKey = getOrNull(1) as? String ?: return null,
+        )
         RouteActionEditor -> ActionEditorDestination(
             actionId = getOrNull(1).asLongOrNull(),
             cadence = getOrNull(2).toRoutineCadenceOrNull() ?: return null,
@@ -118,6 +122,7 @@ private const val RouteCurrentList = "current_list"
 private const val RouteHistory = "history"
 private const val RouteSettings = "settings"
 private const val RouteHistoryDetail = "history_detail"
+private const val RouteReflectionEditor = "reflection_editor"
 private const val RouteActionEditor = "action_editor"
 private const val RouteShareTextPreview = "share_text_preview"
 

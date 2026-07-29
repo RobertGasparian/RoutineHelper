@@ -263,41 +263,25 @@ fun RoutineTrackingComponent(
     }
 
     uiState.noteEditor?.let { editor ->
-        val isItemEditor = editor.target is NoteEditorTarget.Item
         val editorLabel = stringResource(
-            when {
-                isItemEditor && editor.cadence == RoutineCadence.Weekly -> R.string.routine_tracking_weekly_note
-                isItemEditor -> R.string.routine_tracking_daily_note
-                editor.cadence == RoutineCadence.Weekly -> R.string.routine_tracking_week_note
-                else -> R.string.routine_tracking_day_note
+            if (editor.cadence == RoutineCadence.Weekly) {
+                R.string.routine_tracking_weekly_note
+            } else {
+                R.string.routine_tracking_daily_note
             },
         )
-        val editorTitle = if (isItemEditor) {
-            stringResource(
-                if (editor.value.text.isBlank()) {
-                    R.string.routine_tracking_add_note
-                } else {
-                    R.string.routine_tracking_edit_note
-                },
-            )
-        } else {
-            editorLabel
-        }
-        val editorSupportingText = if (isItemEditor) {
-            stringResource(
-                R.string.routine_tracking_item_note_supporting_text,
-                editorLabel,
-                editor.itemTitle.orEmpty(),
-            )
-        } else {
-            stringResource(
-                if (editor.cadence == RoutineCadence.Weekly) {
-                    R.string.routine_tracking_week_note_supporting_text
-                } else {
-                    R.string.routine_tracking_day_note_supporting_text
-                },
-            )
-        }
+        val editorTitle = stringResource(
+            if (editor.value.text.isBlank()) {
+                R.string.routine_tracking_add_note
+            } else {
+                R.string.routine_tracking_edit_note
+            },
+        )
+        val editorSupportingText = stringResource(
+            R.string.routine_tracking_item_note_supporting_text,
+            editorLabel,
+            editor.itemTitle.orEmpty(),
+        )
         RoutineNoteDialog(
             value = editor.value.toTextFieldValue(),
             onIntent = { dialogIntent ->

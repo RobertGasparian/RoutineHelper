@@ -94,7 +94,8 @@ class WeeklyViewModel @Inject constructor(
                 note = intent.note,
                 itemTitle = intent.itemTitle,
             )
-            RoutineTrackingIntent.EditSummaryNoteClick -> showSummaryNoteEditor(uiState.value.summaryNote)
+            RoutineTrackingIntent.EditSummaryNoteClick -> Unit
+            is RoutineTrackingIntent.SaveSummaryNote -> updateSummaryNote(intent.note)
             is RoutineTrackingIntent.NoteDraftChange -> updateNoteDraft(intent)
             RoutineTrackingIntent.NoteDraftClearClick -> clearNoteDraft()
             RoutineTrackingIntent.NoteDraftDateClick -> insertCurrentDateIntoNoteDraft()
@@ -191,13 +192,6 @@ class WeeklyViewModel @Inject constructor(
         )
     }
 
-    private fun showSummaryNoteEditor(summaryNote: String) {
-        noteEditor.value = NoteEditorUiState.summary(
-            note = summaryNote,
-            cadence = RoutineCadence.Weekly,
-        )
-    }
-
     private fun updateNoteDraft(intent: RoutineTrackingIntent.NoteDraftChange) {
         noteEditor.value = noteEditor.value?.copy(
             value = RoutineNoteDraftUiState(
@@ -230,13 +224,11 @@ class WeeklyViewModel @Inject constructor(
 
     private fun saveNoteDraft() {
         val editor = noteEditor.value ?: return
-        when (val target = editor.target) {
-            is NoteEditorTarget.Item -> updateNote(
-                routineItemId = target.routineItemId,
-                note = editor.value.text,
-            )
-            NoteEditorTarget.Summary -> updateSummaryNote(editor.value.text)
-        }
+        val target = editor.target
+        updateNote(
+            routineItemId = target.routineItemId,
+            note = editor.value.text,
+        )
         noteEditor.value = null
     }
 

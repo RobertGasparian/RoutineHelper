@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reflection_editor_title">Ամփոփում</string>
+    <string name="reflection_editor_supporting_text">Գրեք, թե ինչն էր կարևոր և ինչպես անցավ առօրյան։</string>
+    <string name="reflection_editor_note_label">Ամփոփագիր</string>
+    <string name="reflection_editor_clear">Մաքրել</string>
+    <string name="reflection_editor_cancel">Չեղարկել</string>
+    <string name="reflection_editor_save">Պահպանել</string>
+</resources>

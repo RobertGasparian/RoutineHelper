@@ -17,6 +17,7 @@ import com.robertgasparian.routinehelper.domain.repository.FakeRoutineTemplateRe
 import com.robertgasparian.routinehelper.domain.repository.FakeTodayRoutineRepository
 import com.robertgasparian.routinehelper.domain.repository.HiddenChange
 import com.robertgasparian.routinehelper.domain.repository.NoteChange
+import com.robertgasparian.routinehelper.domain.repository.SummaryNoteChange
 import com.robertgasparian.routinehelper.domain.usecase.AddTemplateItemUseCase
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ReorderDailyRoutineItemsUseCase
@@ -118,6 +119,19 @@ class DailyViewModelTest {
                 ),
             ),
             todayRepository.noteChanges,
+        )
+    }
+
+    @Test
+    fun `when Reflection summary save is received then forwards it to daily summary use case`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.onIntent(RoutineTrackingIntent.SaveSummaryNote("  Better day  "))
+        advanceUntilIdle()
+
+        assertEquals(
+            listOf(SummaryNoteChange(date = TodayDate, note = "  Better day  ")),
+            todayRepository.summaryNoteChanges,
         )
     }
 

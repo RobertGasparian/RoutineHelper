@@ -48,6 +48,10 @@ sealed interface RoutineTrackingIntent {
 
     data object EditSummaryNoteClick : RoutineTrackingIntent
 
+    data class SaveSummaryNote(
+        val note: String,
+    ) : RoutineTrackingIntent
+
     data class NoteDraftChange(
         val text: String,
         val selectionStart: Int,
