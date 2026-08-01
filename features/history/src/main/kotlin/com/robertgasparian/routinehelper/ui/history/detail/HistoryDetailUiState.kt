@@ -1,6 +1,7 @@
 package com.robertgasparian.routinehelper.ui.history.detail
 
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
 
 data class HistoryDetailUiState(
@@ -8,14 +9,16 @@ data class HistoryDetailUiState(
     val cadence: RoutineCadence = RoutineCadence.Daily,
     val finalizedTime: String = "",
     val summaryNote: String = "",
+    val rating: ReflectionRating? = null,
     /** Intentional UI capability for future summary edit restrictions; currently always true. */
-    val isSummaryNoteEditable: Boolean = true,
+    val isReflectionEditable: Boolean = true,
     val items: List<HistoryDetailItemUiState> = emptyList(),
     val isLoading: Boolean = false,
     val isMissing: Boolean = false,
     val isShareFormatDialogVisible: Boolean = false,
     val shareDraft: ShareDraft? = null,
 ) {
+    val hasReflection: Boolean = summaryNote.isNotBlank() || rating != null
     val visibleItems: List<HistoryDetailItemUiState> = items.filterNot { item -> item.isHidden }
     val hiddenItems: List<HistoryDetailItemUiState> = items.filter { item -> item.isHidden }
     val completionSummary: HistoryDetailCompletionSummary
@@ -38,6 +41,7 @@ data class HistoryDetailUiState(
                 cadence = RoutineCadence.Daily,
                 finalizedTime = "11:45 PM",
                 summaryNote = "Low-energy day, but I kept the basics moving.",
+                rating = ReflectionRating(4),
                 items = listOf(
                     HistoryDetailItemUiState(
                         actionId = 100,
@@ -103,10 +107,13 @@ data class HistoryDetailUiState(
             )
 
         fun previewWithoutSummaryNote(): HistoryDetailUiState =
-            preview().copy(summaryNote = "")
+            preview().copy(
+                summaryNote = "",
+                rating = null,
+            )
 
         fun previewReadOnlySummaryNote(): HistoryDetailUiState =
-            preview().copy(isSummaryNoteEditable = false)
+            preview().copy(isReflectionEditable = false)
 
         fun previewMissing(): HistoryDetailUiState =
             HistoryDetailUiState(isMissing = true)

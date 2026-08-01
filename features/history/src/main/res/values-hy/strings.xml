@@ -84,4 +84,5 @@
     <string name="history_export_daily_empty">Այս օրվա համար գործողություններ չեն պահվել։</string>
     <string name="history_export_weekly_empty">Այս շաբաթվա համար գործողություններ չեն պահվել։</string>
     <string name="history_send_test_summary_notification">Ուղարկել ամփոփ նշման փորձնական ծանուցում</string>
+    <string name="history_export_rating">Գնահատական՝ %1$d/%2$d</string>
 </resources>

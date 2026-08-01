@@ -6,9 +6,10 @@ import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robertgasparian.routinehelper.features.routinetracking.BuildConfig
+import com.robertgasparian.routinehelper.ui.reflection.api.ReflectionEditorInitialState
+import com.robertgasparian.routinehelper.ui.reflection.api.ReflectionEditorSession
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingComponent
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingIntent
-import com.robertgasparian.routinehelper.ui.reflection.api.ReflectionEditorSession
 
 @Composable
 fun DailyScreen(
@@ -24,7 +25,12 @@ fun DailyScreen(
 
     LaunchedEffect(reflectionState.saveRequest?.requestId) {
         val request = reflectionState.saveRequest ?: return@LaunchedEffect
-        viewModel.onIntent(RoutineTrackingIntent.SaveSummaryNote(request.text))
+        viewModel.onIntent(
+            RoutineTrackingIntent.SaveReflection(
+                summaryNote = request.text,
+                rating = request.rating,
+            ),
+        )
         reflectionEditorSession.consumeSaveRequest(request.requestId)
     }
 
@@ -35,8 +41,13 @@ fun DailyScreen(
                 RoutineTrackingIntent.CreateActionClick -> onCreateActionClick()
                 RoutineTrackingIntent.SettingsClick -> onSettingsClick()
                 is RoutineTrackingIntent.EditActionClick -> onEditActionClick(intent.actionId)
-                RoutineTrackingIntent.EditSummaryNoteClick -> {
-                    reflectionEditorSession.start(uiState.summaryNote)
+                RoutineTrackingIntent.EditReflectionClick -> {
+                    reflectionEditorSession.start(
+                        ReflectionEditorInitialState(
+                            text = uiState.summaryNote,
+                            rating = uiState.rating,
+                        ),
+                    )
                     onSummaryEditorClick()
                 }
                 else -> viewModel.onIntent(intent)

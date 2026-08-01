@@ -3,10 +3,11 @@ package com.robertgasparian.routinehelper.data.local.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "daily_summary_notes")
-data class DailySummaryNoteEntity(
+@Entity(tableName = "weekly_reflections")
+data class WeeklyReflectionEntity(
     @PrimaryKey
-    val date: String,
-    val note: String,
+    val weekStartDate: String,
+    val summaryNote: String?,
+    val rating: Int?,
     val updatedAtMillis: Long,
 )

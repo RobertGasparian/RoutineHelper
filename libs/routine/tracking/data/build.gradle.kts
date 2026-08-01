@@ -22,6 +22,7 @@ android {
 
 dependencies {
     api(project(":core:time"))
+    implementation(project(":libs:routine:reflection:domain"))
     api(project(":libs:routine:template:data"))
     implementation(project(":libs:routine:template:domain"))
     api(project(":libs:routine:tracking:domain"))

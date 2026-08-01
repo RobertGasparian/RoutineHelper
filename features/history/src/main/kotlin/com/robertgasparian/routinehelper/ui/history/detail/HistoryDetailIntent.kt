@@ -1,5 +1,6 @@
 package com.robertgasparian.routinehelper.ui.history.detail
 
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
 
 sealed interface HistoryDetailIntent {
@@ -23,10 +24,11 @@ sealed interface HistoryDetailIntent {
 
     data object ShareDismiss : HistoryDetailIntent
 
-    data object EditSummaryNoteClick : HistoryDetailIntent
+    data object EditReflectionClick : HistoryDetailIntent
 
-    data class SaveSummaryNote(
-        val note: String,
+    data class SaveReflection(
+        val summaryNote: String,
+        val rating: ReflectionRating?,
     ) : HistoryDetailIntent
 
     data class ShareTextConfirm(

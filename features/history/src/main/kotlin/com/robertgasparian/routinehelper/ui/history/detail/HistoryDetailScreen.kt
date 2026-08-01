@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -27,6 +26,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,10 +42,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -56,7 +56,8 @@ import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.features.history.BuildConfig
 import com.robertgasparian.routinehelper.features.history.R
 import com.robertgasparian.routinehelper.ui.dsm.RoutineDialogTextButton
-import com.robertgasparian.routinehelper.ui.dsm.SummaryNoteCard
+import com.robertgasparian.routinehelper.ui.reflection.api.ReflectionCard
+import com.robertgasparian.routinehelper.ui.reflection.api.ReflectionEditorInitialState
 import com.robertgasparian.routinehelper.ui.reflection.api.ReflectionEditorSession
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
 import com.robertgasparian.routinehelper.ui.share.ShareFileDialog
@@ -92,7 +93,7 @@ fun HistoryDetailScreen(
         initialActionConsumed,
         uiState.isLoading,
         uiState.isMissing,
-        uiState.isSummaryNoteEditable,
+        uiState.isReflectionEditable,
     ) {
         if (
             initialActionConsumed ||
@@ -106,9 +107,14 @@ fun HistoryDetailScreen(
         if (
             initialAction == HistoryDetailInitialAction.OpenSummaryEditor &&
             !uiState.isMissing &&
-            uiState.isSummaryNoteEditable
+            uiState.isReflectionEditable
         ) {
-            reflectionEditorSession.start(uiState.summaryNote)
+            reflectionEditorSession.start(
+                ReflectionEditorInitialState(
+                    text = uiState.summaryNote,
+                    rating = uiState.rating,
+                ),
+            )
         } else {
             onInitialSummaryEditorUnavailable()
         }
@@ -118,13 +124,18 @@ fun HistoryDetailScreen(
         reflectionState.saveRequest?.requestId,
         uiState.isLoading,
         uiState.isMissing,
-        uiState.isSummaryNoteEditable,
+        uiState.isReflectionEditable,
     ) {
         val request = reflectionState.saveRequest ?: return@LaunchedEffect
         if (uiState.isLoading) return@LaunchedEffect
 
-        if (!uiState.isMissing && uiState.isSummaryNoteEditable) {
-            viewModel.onIntent(HistoryDetailIntent.SaveSummaryNote(request.text))
+        if (!uiState.isMissing && uiState.isReflectionEditable) {
+            viewModel.onIntent(
+                HistoryDetailIntent.SaveReflection(
+                    summaryNote = request.text,
+                    rating = request.rating,
+                ),
+            )
         }
         reflectionEditorSession.consumeSaveRequest(request.requestId)
     }
@@ -154,9 +165,14 @@ fun HistoryDetailScreen(
             when (intent) {
                 HistoryDetailIntent.BackClick -> onBackClick()
                 HistoryDetailIntent.DebugSummaryNotificationClick -> onDebugSummaryNotificationClick()
-                HistoryDetailIntent.EditSummaryNoteClick -> {
-                    if (uiState.isSummaryNoteEditable && !uiState.isMissing) {
-                        reflectionEditorSession.start(uiState.summaryNote)
+                HistoryDetailIntent.EditReflectionClick -> {
+                    if (uiState.isReflectionEditable && !uiState.isMissing) {
+                        reflectionEditorSession.start(
+                            ReflectionEditorInitialState(
+                                text = uiState.summaryNote,
+                                rating = uiState.rating,
+                            ),
+                        )
                         onSummaryEditorClick()
                     }
                 }
@@ -283,11 +299,11 @@ fun HistoryDetailComponent(
                 item {
                     HistoryDetailHeaderCard(uiState = uiState)
                 }
-                if (uiState.summaryNote.isBlank()) {
-                    if (uiState.isSummaryNoteEditable) {
+                if (!uiState.hasReflection) {
+                    if (uiState.isReflectionEditable) {
                         item {
                             Button(
-                                onClick = { onIntent(HistoryDetailIntent.EditSummaryNoteClick) },
+                                onClick = { onIntent(HistoryDetailIntent.EditReflectionClick) },
                                 modifier = Modifier.fillMaxWidth(),
                             ) {
                                 Icon(
@@ -302,15 +318,16 @@ fun HistoryDetailComponent(
                     }
                 } else {
                     item {
-                        SummaryNoteCard(
-                            note = uiState.summaryNote,
+                        ReflectionCard(
+                            summaryNote = uiState.summaryNote,
+                            rating = uiState.rating,
                             label = if (uiState.cadence == RoutineCadence.Weekly) {
                                 stringResource(R.string.history_week_note)
                             } else {
                                 stringResource(R.string.history_day_note)
                             },
-                            onEditClick = { onIntent(HistoryDetailIntent.EditSummaryNoteClick) },
-                            isEditable = uiState.isSummaryNoteEditable,
+                            onEditClick = { onIntent(HistoryDetailIntent.EditReflectionClick) },
+                            isEditable = uiState.isReflectionEditable,
                         )
                     }
                 }

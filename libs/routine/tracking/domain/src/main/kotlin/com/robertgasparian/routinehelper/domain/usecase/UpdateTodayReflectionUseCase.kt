@@ -1,15 +1,16 @@
 package com.robertgasparian.routinehelper.domain.usecase
 
+import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.repository.TodayRoutineRepository
 import javax.inject.Inject
 
-class UpdateTodaySummaryNoteUseCase @Inject constructor(
+class UpdateTodayReflectionUseCase @Inject constructor(
     private val todayRoutineRepository: TodayRoutineRepository,
 ) {
     suspend operator fun invoke(
         date: String,
-        note: String?,
+        reflection: RoutineReflection,
     ) {
-        todayRoutineRepository.updateSummaryNote(date = date, note = note)
+        todayRoutineRepository.updateReflection(date = date, reflection = reflection)
     }
 }

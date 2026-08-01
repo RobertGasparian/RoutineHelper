@@ -1,11 +1,13 @@
 package com.robertgasparian.routinehelper.domain.usecase
 
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.repository.FakeWeeklyRoutineRepository
 import com.robertgasparian.routinehelper.domain.repository.WeeklyCheckedChange
 import com.robertgasparian.routinehelper.domain.repository.WeeklyCountChange
 import com.robertgasparian.routinehelper.domain.repository.WeeklyHiddenChange
 import com.robertgasparian.routinehelper.domain.repository.WeeklyNoteChange
-import com.robertgasparian.routinehelper.domain.repository.WeeklySummaryNoteChange
+import com.robertgasparian.routinehelper.domain.repository.WeeklyReflectionChange
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -94,20 +96,25 @@ class WeeklyItemCommandUseCaseTest {
     }
 
     @Test
-    fun `given summary note when updating week then repository receives the change`() = runTest {
-        UpdateWeeklySummaryNoteUseCase(repository)(
+    fun `given reflection when updating week then repository receives the change`() = runTest {
+        val reflection = RoutineReflection(
+            summaryNote = "Kept most weekly priorities moving.",
+            rating = ReflectionRating(4),
+        )
+
+        UpdateWeeklyReflectionUseCase(repository)(
             weekStartDate = "2026-05-24",
-            note = "Kept most weekly priorities moving.",
+            reflection = reflection,
         )
 
         assertEquals(
             listOf(
-                WeeklySummaryNoteChange(
+                WeeklyReflectionChange(
                     weekStartDate = "2026-05-24",
-                    note = "Kept most weekly priorities moving.",
+                    reflection = reflection,
                 ),
             ),
-            repository.summaryNoteChanges,
+            repository.reflectionChanges,
         )
     }
 }

@@ -22,6 +22,7 @@ android {
 
 dependencies {
     api(project(":libs:routine:snapshot:domain"))
+    implementation(project(":libs:routine:reflection:domain"))
     implementation(project(":libs:routine:template:domain"))
 
     implementation(libs.androidx.room.ktx)

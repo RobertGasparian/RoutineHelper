@@ -1,11 +1,13 @@
 package com.robertgasparian.routinehelper.domain.usecase
 
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.repository.CheckedChange
 import com.robertgasparian.routinehelper.domain.repository.CountChange
 import com.robertgasparian.routinehelper.domain.repository.FakeTodayRoutineRepository
 import com.robertgasparian.routinehelper.domain.repository.HiddenChange
 import com.robertgasparian.routinehelper.domain.repository.NoteChange
-import com.robertgasparian.routinehelper.domain.repository.SummaryNoteChange
+import com.robertgasparian.routinehelper.domain.repository.ReflectionChange
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -86,18 +88,23 @@ class TodayItemCommandUseCaseTest {
     }
 
     @Test
-    fun `given summary note when updating today then repository receives the change`() = runTest {
-        UpdateTodaySummaryNoteUseCase(repository)(
+    fun `given reflection when updating today then repository receives the change`() = runTest {
+        val reflection = RoutineReflection(
+            summaryNote = "Low-energy day.",
+            rating = ReflectionRating(2),
+        )
+
+        UpdateTodayReflectionUseCase(repository)(
             date = "2026-05-29",
-            note = "Low-energy day.",
+            reflection = reflection,
         )
 
         assertEquals(
-            SummaryNoteChange(
+            ReflectionChange(
                 date = "2026-05-29",
-                note = "Low-energy day.",
+                reflection = reflection,
             ),
-            repository.summaryNoteChanges.single(),
+            repository.reflectionChanges.single(),
         )
     }
 }

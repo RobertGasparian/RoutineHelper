@@ -60,6 +60,7 @@ fun ReflectionEditorScreen(
                     selectionStart = intent.selectionStart,
                     selectionEnd = intent.selectionEnd,
                 )
+                is ReflectionEditorIntent.RatingChange -> viewModel.updateRating(intent.rating)
                 ReflectionEditorIntent.ClearClick -> viewModel.clearDraft()
                 ReflectionEditorIntent.CancelClick -> {
                     viewModel.cancel()
@@ -103,6 +104,12 @@ fun ReflectionEditorComponent(
         )
 
         if (state.isInitialized) {
+            CompactPillRatingSelector(
+                rating = state.draftRating,
+                onRatingChange = { rating ->
+                    onIntent(ReflectionEditorIntent.RatingChange(rating))
+                },
+            )
             ReflectionTextField(
                 state = state,
                 onValueChange = { value ->

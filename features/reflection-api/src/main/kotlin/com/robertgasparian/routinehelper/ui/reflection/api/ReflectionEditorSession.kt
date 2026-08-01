@@ -1,5 +1,6 @@
 package com.robertgasparian.routinehelper.ui.reflection.api
 
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -11,15 +12,22 @@ import kotlinx.coroutines.flow.StateFlow
 interface ReflectionEditorSession {
     val state: StateFlow<ReflectionEditorState>
 
-    fun start(initialText: String)
+    fun start(initialState: ReflectionEditorInitialState)
 
     fun consumeSaveRequest(requestId: Long)
 }
 
+data class ReflectionEditorInitialState(
+    val text: String,
+    val rating: ReflectionRating?,
+)
+
 data class ReflectionEditorState(
     val isInitialized: Boolean = false,
     val originalText: String = "",
+    val originalRating: ReflectionRating? = null,
     val draftText: String = "",
+    val draftRating: ReflectionRating? = null,
     val selectionStart: Int = 0,
     val selectionEnd: Int = 0,
     val saveRequest: ReflectionEditorSaveRequest? = null,
@@ -31,7 +39,9 @@ data class ReflectionEditorState(
             ReflectionEditorState(
                 isInitialized = true,
                 originalText = "A steady day with good progress.",
+                originalRating = ReflectionRating(4),
                 draftText = "A steady day with good progress.",
+                draftRating = ReflectionRating(4),
                 selectionStart = 32,
                 selectionEnd = 32,
             )
@@ -41,4 +51,5 @@ data class ReflectionEditorState(
 data class ReflectionEditorSaveRequest(
     val requestId: Long,
     val text: String,
+    val rating: ReflectionRating?,
 )

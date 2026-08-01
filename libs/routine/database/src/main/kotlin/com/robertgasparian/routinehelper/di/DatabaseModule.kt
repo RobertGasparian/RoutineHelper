@@ -8,11 +8,11 @@ import com.robertgasparian.routinehelper.data.local.RoutineDatabase
 import com.robertgasparian.routinehelper.data.local.dao.ActionDao
 import com.robertgasparian.routinehelper.data.local.dao.CurrentListItemDao
 import com.robertgasparian.routinehelper.data.local.dao.DailyEntryDao
-import com.robertgasparian.routinehelper.data.local.dao.DailySummaryNoteDao
+import com.robertgasparian.routinehelper.data.local.dao.DailyReflectionDao
 import com.robertgasparian.routinehelper.data.local.dao.RoutineSnapshotDao
 import com.robertgasparian.routinehelper.data.local.dao.RoutineItemDao
 import com.robertgasparian.routinehelper.data.local.dao.WeeklyEntryDao
-import com.robertgasparian.routinehelper.data.local.dao.WeeklySummaryNoteDao
+import com.robertgasparian.routinehelper.data.local.dao.WeeklyReflectionDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -52,10 +52,10 @@ object DatabaseModule {
     fun provideWeeklyEntryDao(database: RoutineDatabase): WeeklyEntryDao = database.weeklyEntryDao()
 
     @Provides
-    fun provideDailySummaryNoteDao(database: RoutineDatabase): DailySummaryNoteDao = database.dailySummaryNoteDao()
+    fun provideDailyReflectionDao(database: RoutineDatabase): DailyReflectionDao = database.dailyReflectionDao()
 
     @Provides
-    fun provideWeeklySummaryNoteDao(database: RoutineDatabase): WeeklySummaryNoteDao = database.weeklySummaryNoteDao()
+    fun provideWeeklyReflectionDao(database: RoutineDatabase): WeeklyReflectionDao = database.weeklyReflectionDao()
 
     @Provides
     fun provideRoutineSnapshotDao(database: RoutineDatabase): RoutineSnapshotDao = database.routineSnapshotDao()

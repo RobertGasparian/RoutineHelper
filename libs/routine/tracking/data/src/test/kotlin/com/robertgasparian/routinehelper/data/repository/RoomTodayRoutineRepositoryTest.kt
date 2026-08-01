@@ -1,11 +1,13 @@
 package com.robertgasparian.routinehelper.data.repository
 
-import com.robertgasparian.routinehelper.data.local.dao.DailyEntryDao
-import com.robertgasparian.routinehelper.data.local.entity.DailySummaryNoteEntity
-import com.robertgasparian.routinehelper.data.local.dao.DailySummaryNoteDao
-import com.robertgasparian.routinehelper.data.local.entity.DailyEntryEntity
-import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import com.robertgasparian.routinehelper.core.testing.FixedTimeProvider
+import com.robertgasparian.routinehelper.data.local.dao.DailyEntryDao
+import com.robertgasparian.routinehelper.data.local.dao.DailyReflectionDao
+import com.robertgasparian.routinehelper.data.local.entity.DailyEntryEntity
+import com.robertgasparian.routinehelper.data.local.entity.DailyReflectionEntity
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+import com.robertgasparian.routinehelper.domain.model.RoutineReflection
+import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
@@ -17,13 +19,13 @@ class RoomTodayRoutineRepositoryTest {
     private val database = TrackingTestRoomDatabase()
     private val routineItemDao = FakeRoutineItemDao()
     private val dailyEntryDao = FakeDailyEntryDao()
-    private val dailySummaryNoteDao = FakeDailySummaryNoteDao()
+    private val dailyReflectionDao = FakeDailyReflectionDao()
     private val timeProvider = FixedTimeProvider()
     private val repository = RoomTodayRoutineRepository(
         database = database,
         routineItemDao = routineItemDao,
         dailyEntryDao = dailyEntryDao,
-        dailySummaryNoteDao = dailySummaryNoteDao,
+        dailyReflectionDao = dailyReflectionDao,
         timeProvider = timeProvider,
     )
 
@@ -155,41 +157,69 @@ class RoomTodayRoutineRepositoryTest {
     }
 
     @Test
-    fun `given persisted summary note when observing it then emits its text`() = runTest {
-        dailySummaryNoteDao.notes[DATE] = DailySummaryNoteEntity(
+    fun `given persisted reflection when observing it then emits text and rating`() = runTest {
+        dailyReflectionDao.reflections[DATE] = DailyReflectionEntity(
             date = DATE,
-            note = "Steady day",
+            summaryNote = "Steady day",
+            rating = 4,
             updatedAtMillis = 1L,
         )
 
-        assertEquals("Steady day", repository.summaryNote(DATE).first())
+        assertEquals(
+            RoutineReflection(summaryNote = "Steady day", rating = ReflectionRating(4)),
+            repository.reflection(DATE).first(),
+        )
     }
 
     @Test
-    fun `given summary note text when updating it then trims content and deletes blank content`() = runTest {
-        repository.updateSummaryNote(DATE, "  Steady day  ")
-
-        assertEquals(
-            DailySummaryNoteEntity(
-                date = DATE,
-                note = "Steady day",
-                updatedAtMillis = timeProvider.currentTimeMillis(),
-            ),
-            dailySummaryNoteDao.notes[DATE],
+    fun `given reflection when updating it then trims text and deletes an empty reflection`() = runTest {
+        repository.updateReflection(
+            DATE,
+            RoutineReflection(summaryNote = "  Steady day  ", rating = ReflectionRating(4)),
         )
 
-        repository.updateSummaryNote(DATE, "   ")
+        assertEquals(
+            DailyReflectionEntity(
+                date = DATE,
+                summaryNote = "Steady day",
+                rating = 4,
+                updatedAtMillis = timeProvider.currentTimeMillis(),
+            ),
+            dailyReflectionDao.reflections[DATE],
+        )
 
-        assertEquals(emptyMap<String, DailySummaryNoteEntity>(), dailySummaryNoteDao.notes)
-        assertEquals(listOf(DATE), dailySummaryNoteDao.deletedDates)
+        repository.updateReflection(DATE, RoutineReflection(summaryNote = "   "))
+
+        assertEquals(emptyMap<String, DailyReflectionEntity>(), dailyReflectionDao.reflections)
+        assertEquals(listOf(DATE), dailyReflectionDao.deletedDates)
     }
 
     @Test
-    fun `given stored daily state when resetting the date then deletes entries and summary note`() = runTest {
+    fun `given rating without text when updating reflection then rating remains persisted`() = runTest {
+        repository.updateReflection(
+            DATE,
+            RoutineReflection(rating = ReflectionRating(3)),
+        )
+
+        assertEquals(
+            DailyReflectionEntity(
+                date = DATE,
+                summaryNote = null,
+                rating = 3,
+                updatedAtMillis = timeProvider.currentTimeMillis(),
+            ),
+            dailyReflectionDao.reflections[DATE],
+        )
+        assertEquals(emptyList<String>(), dailyReflectionDao.deletedDates)
+    }
+
+    @Test
+    fun `given stored daily state when resetting the date then deletes entries and reflection`() = runTest {
         dailyEntryDao.entries[DATE to 10L] = dailyEntry(routineItemId = 10L)
-        dailySummaryNoteDao.notes[DATE] = DailySummaryNoteEntity(
+        dailyReflectionDao.reflections[DATE] = DailyReflectionEntity(
             date = DATE,
-            note = "Steady day",
+            summaryNote = "Steady day",
+            rating = null,
             updatedAtMillis = 1L,
         )
 
@@ -197,8 +227,8 @@ class RoomTodayRoutineRepositoryTest {
 
         assertEquals(emptyMap<Pair<String, Long>, DailyEntryEntity>(), dailyEntryDao.entries)
         assertEquals(listOf(DATE), dailyEntryDao.deletedDates)
-        assertEquals(emptyMap<String, DailySummaryNoteEntity>(), dailySummaryNoteDao.notes)
-        assertEquals(listOf(DATE), dailySummaryNoteDao.deletedDates)
+        assertEquals(emptyMap<String, DailyReflectionEntity>(), dailyReflectionDao.reflections)
+        assertEquals(listOf(DATE), dailyReflectionDao.deletedDates)
         assertEquals(1, database.transactionBegins)
         assertEquals(1, database.transactionSuccesses)
         assertEquals(1, database.transactionEnds)
@@ -301,19 +331,19 @@ private class FakeDailyEntryDao : DailyEntryDao {
     }
 }
 
-private class FakeDailySummaryNoteDao : DailySummaryNoteDao {
-    val notes = mutableMapOf<String, DailySummaryNoteEntity>()
+private class FakeDailyReflectionDao : DailyReflectionDao {
+    val reflections = mutableMapOf<String, DailyReflectionEntity>()
     val deletedDates = mutableListOf<String>()
 
-    override fun noteForDate(date: String): Flow<DailySummaryNoteEntity?> =
-        flowOf(notes[date])
+    override fun reflectionForDate(date: String): Flow<DailyReflectionEntity?> =
+        flowOf(reflections[date])
 
-    override suspend fun upsert(note: DailySummaryNoteEntity) {
-        notes[note.date] = note
+    override suspend fun upsert(reflection: DailyReflectionEntity) {
+        reflections[reflection.date] = reflection
     }
 
     override suspend fun deleteForDate(date: String) {
-        notes.remove(date)
+        reflections.remove(date)
         deletedDates += date
     }
 }

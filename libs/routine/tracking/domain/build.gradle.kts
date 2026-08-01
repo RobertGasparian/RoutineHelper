@@ -10,6 +10,7 @@ kotlin {
 }
 
 dependencies {
+    api(project(":libs:routine:reflection:domain"))
     api(project(":libs:routine:template:domain"))
 
     implementation(libs.dagger.runtime)

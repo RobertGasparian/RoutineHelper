@@ -1,11 +1,13 @@
 package com.robertgasparian.routinehelper.ui.history.detail
 
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
 import com.robertgasparian.routinehelper.domain.repository.FakeRoutineHistoryRepository
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotUseCase
-import com.robertgasparian.routinehelper.domain.usecase.UpdateSnapshotSummaryNoteUseCase
+import com.robertgasparian.routinehelper.domain.usecase.UpdateSnapshotReflectionUseCase
 import com.robertgasparian.routinehelper.core.testing.MainDispatcherRule
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
 import com.robertgasparian.routinehelper.ui.history.FakeHistoryTextProvider
@@ -37,6 +39,7 @@ class HistoryDetailViewModelTest {
         assertEquals(RoutineCadence.Weekly, state.cadence)
         assertEquals("12:00 PM", state.finalizedTime)
         assertEquals("Good week", state.summaryNote)
+        assertEquals(ReflectionRating(4), state.rating)
         assertEquals(
             listOf(
                 HistoryDetailItemUiState(
@@ -124,18 +127,22 @@ class HistoryDetailViewModelTest {
     }
 
     @Test
-    fun `given editable snapshot when Reflection save is received then normalized note is persisted`() = runTest {
+    fun `given editable snapshot when reflection save is received then text and rating are persisted`() = runTest {
         val snapshotId = saveWeeklySnapshot()
         val viewModel = createViewModel(snapshotId)
         viewModel.uiState.first { !it.isLoading }
 
         viewModel.onIntent(
-            HistoryDetailIntent.SaveSummaryNote("  Better week  "),
+            HistoryDetailIntent.SaveReflection(
+                summaryNote = "  Better week  ",
+                rating = ReflectionRating(5),
+            ),
         )
         advanceUntilIdle()
 
         val savedState = viewModel.uiState.first { state -> state.summaryNote == "Better week" }
         assertEquals("Better week", savedState.summaryNote)
+        assertEquals(ReflectionRating(5), savedState.rating)
     }
 
     @Test
@@ -144,7 +151,12 @@ class HistoryDetailViewModelTest {
         val viewModel = createViewModel(snapshotId)
         viewModel.uiState.first { !it.isLoading }
 
-        viewModel.onIntent(HistoryDetailIntent.SaveSummaryNote(""))
+        viewModel.onIntent(
+            HistoryDetailIntent.SaveReflection(
+                summaryNote = "",
+                rating = null,
+            ),
+        )
         advanceUntilIdle()
 
         val savedState = viewModel.uiState.first { state -> state.summaryNote.isEmpty() }
@@ -158,10 +170,15 @@ class HistoryDetailViewModelTest {
         viewModel.uiState.first { !it.isLoading }
 
         val snapshot = requireNotNull(repository.snapshot(snapshotId).first())
-        repository.setSnapshot(snapshot.copy(isSummaryNoteEditable = false))
-        val readOnlyState = viewModel.uiState.first { state -> !state.isSummaryNoteEditable }
+        repository.setSnapshot(snapshot.copy(isReflectionEditable = false))
+        val readOnlyState = viewModel.uiState.first { state -> !state.isReflectionEditable }
 
-        viewModel.onIntent(HistoryDetailIntent.SaveSummaryNote("Should not save"))
+        viewModel.onIntent(
+            HistoryDetailIntent.SaveReflection(
+                summaryNote = "Should not save",
+                rating = ReflectionRating(1),
+            ),
+        )
         advanceUntilIdle()
 
         assertEquals("Good week", readOnlyState.summaryNote)
@@ -191,7 +208,7 @@ class HistoryDetailViewModelTest {
             deleteSnapshotUseCase = DeleteSnapshotUseCase(repository),
             historyTextProvider = FakeHistoryTextProvider(),
             snapshotUseCase = SnapshotUseCase(repository),
-            updateSnapshotSummaryNoteUseCase = UpdateSnapshotSummaryNoteUseCase(repository),
+            updateSnapshotReflectionUseCase = UpdateSnapshotReflectionUseCase(repository),
         )
 
     private suspend fun saveWeeklySnapshot(): Long =
@@ -219,7 +236,10 @@ class HistoryDetailViewModelTest {
                     note = null,
                 ),
             ),
-            summaryNote = "Good week",
+            reflection = RoutineReflection(
+                summaryNote = "Good week",
+                rating = ReflectionRating(4),
+            ),
             cadence = RoutineCadence.Weekly,
         )
 }

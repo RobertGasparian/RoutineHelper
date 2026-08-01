@@ -4,6 +4,8 @@ import com.robertgasparian.routinehelper.core.testing.FixedTimeProvider
 import com.robertgasparian.routinehelper.core.testing.MainDispatcherRule
 import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import com.robertgasparian.routinehelper.domain.removal.FakeRoutineRemovalUndoCoordinator
 import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalRequest
@@ -17,17 +19,17 @@ import com.robertgasparian.routinehelper.domain.repository.FakeRoutineTemplateRe
 import com.robertgasparian.routinehelper.domain.repository.FakeTodayRoutineRepository
 import com.robertgasparian.routinehelper.domain.repository.HiddenChange
 import com.robertgasparian.routinehelper.domain.repository.NoteChange
-import com.robertgasparian.routinehelper.domain.repository.SummaryNoteChange
+import com.robertgasparian.routinehelper.domain.repository.ReflectionChange
 import com.robertgasparian.routinehelper.domain.usecase.AddTemplateItemUseCase
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ReorderDailyRoutineItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetTodayItemCheckedUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetTodayItemHiddenUseCase
 import com.robertgasparian.routinehelper.domain.usecase.TodayItemsUseCase
-import com.robertgasparian.routinehelper.domain.usecase.TodaySummaryNoteUseCase
+import com.robertgasparian.routinehelper.domain.usecase.TodayReflectionUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayItemCompletedCountUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayItemNoteUseCase
-import com.robertgasparian.routinehelper.domain.usecase.UpdateTodaySummaryNoteUseCase
+import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayReflectionUseCase
 import com.robertgasparian.routinehelper.test.FakeNoteDateTimeTextProvider
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingDebugItemsPopulator
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingIntent
@@ -123,15 +125,28 @@ class DailyViewModelTest {
     }
 
     @Test
-    fun `when Reflection summary save is received then forwards it to daily summary use case`() = runTest {
+    fun `when reflection save is received then forwards text and rating to daily use case`() = runTest {
         val viewModel = createViewModel()
 
-        viewModel.onIntent(RoutineTrackingIntent.SaveSummaryNote("  Better day  "))
+        viewModel.onIntent(
+            RoutineTrackingIntent.SaveReflection(
+                summaryNote = "  Better day  ",
+                rating = ReflectionRating(4),
+            ),
+        )
         advanceUntilIdle()
 
         assertEquals(
-            listOf(SummaryNoteChange(date = TodayDate, note = "  Better day  ")),
-            todayRepository.summaryNoteChanges,
+            listOf(
+                ReflectionChange(
+                    date = TodayDate,
+                    reflection = RoutineReflection(
+                        summaryNote = "  Better day  ",
+                        rating = ReflectionRating(4),
+                    ),
+                ),
+            ),
+            todayRepository.reflectionChanges,
         )
     }
 
@@ -240,7 +255,7 @@ class DailyViewModelTest {
     private fun createViewModel(): DailyViewModel =
         DailyViewModel(
             todayItemsUseCase = TodayItemsUseCase(todayRepository),
-            todaySummaryNoteUseCase = TodaySummaryNoteUseCase(todayRepository),
+            todayReflectionUseCase = TodayReflectionUseCase(todayRepository),
             debugItemsPopulator = RoutineTrackingDebugItemsPopulator(
                 addTemplateItemUseCase = AddTemplateItemUseCase(templateRepository),
                 debugTextProvider = englishDebugTextProvider,
@@ -255,7 +270,7 @@ class DailyViewModelTest {
             setTodayItemHiddenUseCase = SetTodayItemHiddenUseCase(todayRepository),
             updateTodayItemCompletedCountUseCase = UpdateTodayItemCompletedCountUseCase(todayRepository),
             updateTodayItemNoteUseCase = UpdateTodayItemNoteUseCase(todayRepository),
-            updateTodaySummaryNoteUseCase = UpdateTodaySummaryNoteUseCase(todayRepository),
+            updateTodayReflectionUseCase = UpdateTodayReflectionUseCase(todayRepository),
             noteDateTimeTextProvider = noteDateTimeTextProvider,
             timeProvider = timeProvider,
         )

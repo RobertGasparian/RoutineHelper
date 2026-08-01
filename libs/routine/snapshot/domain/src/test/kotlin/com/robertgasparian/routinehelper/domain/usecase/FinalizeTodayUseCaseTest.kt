@@ -1,6 +1,8 @@
 package com.robertgasparian.routinehelper.domain.usecase
 
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotSummary
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
@@ -47,9 +49,12 @@ class FinalizeTodayUseCaseTest {
                 ),
             ),
         )
-        todayRepository.setSummaryNote(
+        todayRepository.setReflection(
             date = "2026-05-29",
-            note = "Low-energy day, but I kept the basics moving.",
+            reflection = RoutineReflection(
+                summaryNote = "Low-energy day, but I kept the basics moving.",
+                rating = ReflectionRating(3),
+            ),
         )
 
         val snapshotId = useCase(
@@ -65,6 +70,7 @@ class FinalizeTodayUseCaseTest {
                 finalizedAtMillis = 123L,
                 cadence = RoutineCadence.Daily,
                 summaryNote = "Low-energy day, but I kept the basics moving.",
+                rating = ReflectionRating(3),
                 items = listOf(
                     RoutineSnapshotItem(
                         actionId = 100L,

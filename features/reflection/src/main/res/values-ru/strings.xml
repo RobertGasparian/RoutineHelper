@@ -2,6 +2,9 @@
 <resources>
     <string name="reflection_editor_title">Итоги</string>
     <string name="reflection_editor_supporting_text">Запишите, что было важным и как ощущался распорядок.</string>
+    <string name="reflection_editor_rating_label">Как бы вы оценили этот период?</string>
+    <string name="reflection_editor_rating_option">Оценка: %1$d из %2$d</string>
+    <string name="reflection_editor_clear_rating">Сбросить оценку</string>
     <string name="reflection_editor_note_label">Краткий итог</string>
     <string name="reflection_editor_clear">Очистить</string>
     <string name="reflection_editor_cancel">Отмена</string>

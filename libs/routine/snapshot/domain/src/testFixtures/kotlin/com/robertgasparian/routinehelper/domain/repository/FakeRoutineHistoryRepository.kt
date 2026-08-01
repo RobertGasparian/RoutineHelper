@@ -1,6 +1,8 @@
 package com.robertgasparian.routinehelper.domain.repository
 
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotSummary
@@ -49,7 +51,7 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
         periodStartDate: String,
         finalizedAtMillis: Long,
         items: List<RoutineSnapshotItem>,
-        summaryNote: String?,
+        reflection: RoutineReflection,
         cadence: RoutineCadence,
     ): Long {
         val existingSnapshot = snapshots.value.firstOrNull { snapshot ->
@@ -62,7 +64,8 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
             periodStartDate = periodStartDate,
             finalizedAtMillis = finalizedAtMillis,
             items = items,
-            summaryNote = summaryNote,
+            summaryNote = reflection.summaryNote,
+            rating = reflection.rating,
             cadence = cadence,
         )
         savedSnapshots.removeAll { snapshot -> snapshot.periodStartDate == periodStartDate && snapshot.cadence == cadence }
@@ -72,7 +75,8 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
             periodStartDate = periodStartDate,
             finalizedAtMillis = finalizedAtMillis,
             cadence = cadence,
-            summaryNote = summaryNote,
+            summaryNote = reflection.summaryNote,
+            rating = reflection.rating,
             items = items,
         )
         snapshots.value = snapshots.value.filterNot { snapshot ->
@@ -84,15 +88,20 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
         return snapshotId
     }
 
-    override suspend fun updateSnapshotSummaryNote(
+    override suspend fun updateSnapshotReflection(
         snapshotId: Long,
-        summaryNote: String?,
+        reflection: RoutineReflection,
     ) {
-        val normalizedSummaryNote = summaryNote?.trim()?.takeIf(String::isNotEmpty)
+        val normalizedReflection = reflection.copy(
+            summaryNote = reflection.summaryNote?.trim()?.takeIf(String::isNotEmpty),
+        )
         val existingSnapshot = snapshots.value.firstOrNull { snapshot ->
             snapshot.snapshotId == snapshotId
         } ?: return
-        val updatedSnapshot = existingSnapshot.copy(summaryNote = normalizedSummaryNote)
+        val updatedSnapshot = existingSnapshot.copy(
+            summaryNote = normalizedReflection.summaryNote,
+            rating = normalizedReflection.rating,
+        )
         snapshots.value = snapshots.value.replaceById(updatedSnapshot)
         summaries.value = summaries.value.replaceById(updatedSnapshot.toSummary())
     }
@@ -107,7 +116,7 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
             periodStartDate = periodStartDate,
             finalizedAtMillis = finalizedAtMillis,
             items = items,
-            summaryNote = null,
+            reflection = RoutineReflection(),
             cadence = cadence,
         )
 
@@ -147,4 +156,5 @@ data class SavedSnapshot(
     val items: List<RoutineSnapshotItem>,
     val cadence: RoutineCadence,
     val summaryNote: String? = null,
+    val rating: ReflectionRating? = null,
 )

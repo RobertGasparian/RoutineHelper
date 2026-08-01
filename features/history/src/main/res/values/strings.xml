@@ -79,6 +79,7 @@
     <string name="history_export_weekly_date">Week of: %1$s</string>
     <string name="history_export_finalized">Finalized: %1$s</string>
     <string name="history_export_summary_note">Summary note:</string>
+    <string name="history_export_rating">Rating: %1$d/%2$d</string>
     <string name="history_export_item" translatable="false">%1$d. %2$s %3$s</string>
     <string name="history_export_count">Count: %1$d/%2$d</string>
     <string name="history_export_description">Description: %1$s</string>

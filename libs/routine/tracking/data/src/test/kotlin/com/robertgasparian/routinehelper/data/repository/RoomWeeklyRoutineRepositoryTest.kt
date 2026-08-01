@@ -1,11 +1,13 @@
 package com.robertgasparian.routinehelper.data.repository
 
-import com.robertgasparian.routinehelper.data.local.dao.WeeklyEntryDao
-import com.robertgasparian.routinehelper.data.local.dao.WeeklySummaryNoteDao
-import com.robertgasparian.routinehelper.data.local.entity.WeeklyEntryEntity
-import com.robertgasparian.routinehelper.data.local.entity.WeeklySummaryNoteEntity
-import com.robertgasparian.routinehelper.domain.model.WeeklyRoutineItem
 import com.robertgasparian.routinehelper.core.testing.FixedTimeProvider
+import com.robertgasparian.routinehelper.data.local.dao.WeeklyEntryDao
+import com.robertgasparian.routinehelper.data.local.dao.WeeklyReflectionDao
+import com.robertgasparian.routinehelper.data.local.entity.WeeklyEntryEntity
+import com.robertgasparian.routinehelper.data.local.entity.WeeklyReflectionEntity
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+import com.robertgasparian.routinehelper.domain.model.RoutineReflection
+import com.robertgasparian.routinehelper.domain.model.WeeklyRoutineItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
@@ -17,13 +19,13 @@ class RoomWeeklyRoutineRepositoryTest {
     private val database = TrackingTestRoomDatabase()
     private val routineItemDao = FakeRoutineItemDao()
     private val weeklyEntryDao = FakeWeeklyEntryDao()
-    private val weeklySummaryNoteDao = FakeWeeklySummaryNoteDao()
+    private val weeklyReflectionDao = FakeWeeklyReflectionDao()
     private val timeProvider = FixedTimeProvider()
     private val repository = RoomWeeklyRoutineRepository(
         database = database,
         routineItemDao = routineItemDao,
         weeklyEntryDao = weeklyEntryDao,
-        weeklySummaryNoteDao = weeklySummaryNoteDao,
+        weeklyReflectionDao = weeklyReflectionDao,
         timeProvider = timeProvider,
     )
 
@@ -158,41 +160,69 @@ class RoomWeeklyRoutineRepositoryTest {
     }
 
     @Test
-    fun `given persisted weekly summary note when observing it then emits its text`() = runTest {
-        weeklySummaryNoteDao.notes[WEEK_START_DATE] = WeeklySummaryNoteEntity(
+    fun `given persisted weekly reflection when observing it then emits text and rating`() = runTest {
+        weeklyReflectionDao.reflections[WEEK_START_DATE] = WeeklyReflectionEntity(
             weekStartDate = WEEK_START_DATE,
-            note = "Good progress",
+            summaryNote = "Good progress",
+            rating = 5,
             updatedAtMillis = 1L,
         )
 
-        assertEquals("Good progress", repository.summaryNote(WEEK_START_DATE).first())
+        assertEquals(
+            RoutineReflection(summaryNote = "Good progress", rating = ReflectionRating(5)),
+            repository.reflection(WEEK_START_DATE).first(),
+        )
     }
 
     @Test
-    fun `given weekly summary text when updating it then trims content and deletes blank content`() = runTest {
-        repository.updateSummaryNote(WEEK_START_DATE, "  Good progress  ")
-
-        assertEquals(
-            WeeklySummaryNoteEntity(
-                weekStartDate = WEEK_START_DATE,
-                note = "Good progress",
-                updatedAtMillis = timeProvider.currentTimeMillis(),
-            ),
-            weeklySummaryNoteDao.notes[WEEK_START_DATE],
+    fun `given weekly reflection when updating it then trims text and deletes an empty reflection`() = runTest {
+        repository.updateReflection(
+            WEEK_START_DATE,
+            RoutineReflection(summaryNote = "  Good progress  ", rating = ReflectionRating(5)),
         )
 
-        repository.updateSummaryNote(WEEK_START_DATE, "   ")
+        assertEquals(
+            WeeklyReflectionEntity(
+                weekStartDate = WEEK_START_DATE,
+                summaryNote = "Good progress",
+                rating = 5,
+                updatedAtMillis = timeProvider.currentTimeMillis(),
+            ),
+            weeklyReflectionDao.reflections[WEEK_START_DATE],
+        )
 
-        assertEquals(emptyMap<String, WeeklySummaryNoteEntity>(), weeklySummaryNoteDao.notes)
-        assertEquals(listOf(WEEK_START_DATE), weeklySummaryNoteDao.deletedWeekStartDates)
+        repository.updateReflection(WEEK_START_DATE, RoutineReflection(summaryNote = "   "))
+
+        assertEquals(emptyMap<String, WeeklyReflectionEntity>(), weeklyReflectionDao.reflections)
+        assertEquals(listOf(WEEK_START_DATE), weeklyReflectionDao.deletedWeekStartDates)
     }
 
     @Test
-    fun `given stored weekly state when resetting the week then deletes entries and summary note`() = runTest {
+    fun `given rating without text when updating weekly reflection then rating remains persisted`() = runTest {
+        repository.updateReflection(
+            WEEK_START_DATE,
+            RoutineReflection(rating = ReflectionRating(2)),
+        )
+
+        assertEquals(
+            WeeklyReflectionEntity(
+                weekStartDate = WEEK_START_DATE,
+                summaryNote = null,
+                rating = 2,
+                updatedAtMillis = timeProvider.currentTimeMillis(),
+            ),
+            weeklyReflectionDao.reflections[WEEK_START_DATE],
+        )
+        assertEquals(emptyList<String>(), weeklyReflectionDao.deletedWeekStartDates)
+    }
+
+    @Test
+    fun `given stored weekly state when resetting the week then deletes entries and reflection`() = runTest {
         weeklyEntryDao.entries[WEEK_START_DATE to 10L] = weeklyEntry(routineItemId = 10L)
-        weeklySummaryNoteDao.notes[WEEK_START_DATE] = WeeklySummaryNoteEntity(
+        weeklyReflectionDao.reflections[WEEK_START_DATE] = WeeklyReflectionEntity(
             weekStartDate = WEEK_START_DATE,
-            note = "Good progress",
+            summaryNote = "Good progress",
+            rating = null,
             updatedAtMillis = 1L,
         )
 
@@ -200,8 +230,8 @@ class RoomWeeklyRoutineRepositoryTest {
 
         assertEquals(emptyMap<Pair<String, Long>, WeeklyEntryEntity>(), weeklyEntryDao.entries)
         assertEquals(listOf(WEEK_START_DATE), weeklyEntryDao.deletedWeekStartDates)
-        assertEquals(emptyMap<String, WeeklySummaryNoteEntity>(), weeklySummaryNoteDao.notes)
-        assertEquals(listOf(WEEK_START_DATE), weeklySummaryNoteDao.deletedWeekStartDates)
+        assertEquals(emptyMap<String, WeeklyReflectionEntity>(), weeklyReflectionDao.reflections)
+        assertEquals(listOf(WEEK_START_DATE), weeklyReflectionDao.deletedWeekStartDates)
         assertEquals(1, database.transactionBegins)
         assertEquals(1, database.transactionSuccesses)
         assertEquals(1, database.transactionEnds)
@@ -304,19 +334,19 @@ private class FakeWeeklyEntryDao : WeeklyEntryDao {
     }
 }
 
-private class FakeWeeklySummaryNoteDao : WeeklySummaryNoteDao {
-    val notes = mutableMapOf<String, WeeklySummaryNoteEntity>()
+private class FakeWeeklyReflectionDao : WeeklyReflectionDao {
+    val reflections = mutableMapOf<String, WeeklyReflectionEntity>()
     val deletedWeekStartDates = mutableListOf<String>()
 
-    override fun noteForWeek(weekStartDate: String): Flow<WeeklySummaryNoteEntity?> =
-        flowOf(notes[weekStartDate])
+    override fun reflectionForWeek(weekStartDate: String): Flow<WeeklyReflectionEntity?> =
+        flowOf(reflections[weekStartDate])
 
-    override suspend fun upsert(note: WeeklySummaryNoteEntity) {
-        notes[note.weekStartDate] = note
+    override suspend fun upsert(reflection: WeeklyReflectionEntity) {
+        reflections[reflection.weekStartDate] = reflection
     }
 
     override suspend fun deleteForWeek(weekStartDate: String) {
-        notes.remove(weekStartDate)
+        reflections.remove(weekStartDate)
         deletedWeekStartDates += weekStartDate
     }
 }

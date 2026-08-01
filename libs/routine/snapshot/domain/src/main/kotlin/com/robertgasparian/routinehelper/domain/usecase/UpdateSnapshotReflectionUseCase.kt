@@ -1,24 +1,25 @@
 package com.robertgasparian.routinehelper.domain.usecase
 
+import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.repository.RoutineHistoryRepository
 import javax.inject.Inject
 
 /**
- * Intentional command boundary for summary edits.
+ * Intentional command boundary for reflection edits.
  *
  * Keep this use case even while editing is universally allowed; future authorization or lifecycle
  * rules should be enforced here before the field-specific repository update is invoked.
  */
-class UpdateSnapshotSummaryNoteUseCase @Inject constructor(
+class UpdateSnapshotReflectionUseCase @Inject constructor(
     private val routineHistoryRepository: RoutineHistoryRepository,
 ) {
     suspend operator fun invoke(
         snapshotId: Long,
-        summaryNote: String?,
+        reflection: RoutineReflection,
     ) {
-        routineHistoryRepository.updateSnapshotSummaryNote(
+        routineHistoryRepository.updateSnapshotReflection(
             snapshotId = snapshotId,
-            summaryNote = summaryNote,
+            reflection = reflection,
         )
     }
 }

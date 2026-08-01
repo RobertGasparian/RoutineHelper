@@ -1,0 +1,5 @@
+<resources>
+    <string name="reflection_card_add_reflection">Add reflection</string>
+    <string name="reflection_card_edit_reflection">Edit reflection</string>
+    <string name="reflection_card_rating">Rating: %1$d out of %2$d</string>
+</resources>

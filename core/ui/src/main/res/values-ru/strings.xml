@@ -10,8 +10,6 @@
     <string name="core_ui_show_action">Показать действие</string>
     <string name="core_ui_hide_action">Скрыть действие</string>
     <string name="core_ui_edit_action">Изменить действие</string>
-    <string name="core_ui_add_summary_note">Добавить итоговую заметку</string>
-    <string name="core_ui_edit_summary_note">Изменить итоговую заметку</string>
     <string name="core_ui_note_saved_for_day">Эта заметка сохраняется только для этого дня.</string>
     <string name="core_ui_note">Заметка</string>
     <string name="core_ui_add_weekday">Добавить день недели</string>

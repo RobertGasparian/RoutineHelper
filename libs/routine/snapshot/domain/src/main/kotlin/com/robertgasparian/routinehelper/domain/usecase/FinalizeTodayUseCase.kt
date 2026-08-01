@@ -32,13 +32,13 @@ class FinalizeTodayUseCase @Inject constructor(
         }
         if (snapshotItems.isEmpty()) return null
 
-        val summaryNote = todayRoutineRepository.summaryNote(date).first()
+        val reflection = todayRoutineRepository.reflection(date).first()
 
         val snapshotId = routineHistoryRepository.saveSnapshot(
             periodStartDate = snapshotPeriodStartDate,
             finalizedAtMillis = finalizedAtMillis,
             items = snapshotItems,
-            summaryNote = summaryNote,
+            reflection = reflection,
             cadence = RoutineCadence.Daily,
         )
         return snapshotId

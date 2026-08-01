@@ -10,8 +10,6 @@
     <string name="core_ui_show_action">Ցուցադրել գործողությունը</string>
     <string name="core_ui_hide_action">Թաքցնել գործողությունը</string>
     <string name="core_ui_edit_action">Խմբագրել գործողությունը</string>
-    <string name="core_ui_add_summary_note">Ավելացնել ամփոփ նշում</string>
-    <string name="core_ui_edit_summary_note">Խմբագրել ամփոփ նշումը</string>
     <string name="core_ui_note_saved_for_day">Այս նշումը պահվում է միայն այս օրվա համար։</string>
     <string name="core_ui_note">Նշում</string>
     <string name="core_ui_add_weekday">Ավելացնել շաբաթվա օրը</string>

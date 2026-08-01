@@ -3,6 +3,8 @@ package com.robertgasparian.routinehelper.ui.daily
 import com.robertgasparian.routinehelper.core.presentation.BaseViewModel
 import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalSource
 import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalUndoCoordinator
 import com.robertgasparian.routinehelper.domain.time.SnapshotDates
@@ -11,10 +13,10 @@ import com.robertgasparian.routinehelper.domain.usecase.ReorderDailyRoutineItems
 import com.robertgasparian.routinehelper.domain.usecase.SetTodayItemCheckedUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetTodayItemHiddenUseCase
 import com.robertgasparian.routinehelper.domain.usecase.TodayItemsUseCase
-import com.robertgasparian.routinehelper.domain.usecase.TodaySummaryNoteUseCase
+import com.robertgasparian.routinehelper.domain.usecase.TodayReflectionUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayItemCompletedCountUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayItemNoteUseCase
-import com.robertgasparian.routinehelper.domain.usecase.UpdateTodaySummaryNoteUseCase
+import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayReflectionUseCase
 import com.robertgasparian.routinehelper.ui.dsm.RoutineNoteDraftUiState
 import com.robertgasparian.routinehelper.ui.dsm.insertAtCursor
 import com.robertgasparian.routinehelper.ui.tracking.NoteDateTimeTextProvider
@@ -32,7 +34,7 @@ import kotlinx.coroutines.flow.combine
 @HiltViewModel
 class DailyViewModel @Inject constructor(
     todayItemsUseCase: TodayItemsUseCase,
-    todaySummaryNoteUseCase: TodaySummaryNoteUseCase,
+    todayReflectionUseCase: TodayReflectionUseCase,
     private val debugItemsPopulator: RoutineTrackingDebugItemsPopulator,
     private val finalizeTodayUseCase: FinalizeTodayUseCase,
     private val routineRemovalUndoCoordinator: RoutineRemovalUndoCoordinator,
@@ -41,7 +43,7 @@ class DailyViewModel @Inject constructor(
     private val setTodayItemHiddenUseCase: SetTodayItemHiddenUseCase,
     private val updateTodayItemCompletedCountUseCase: UpdateTodayItemCompletedCountUseCase,
     private val updateTodayItemNoteUseCase: UpdateTodayItemNoteUseCase,
-    private val updateTodaySummaryNoteUseCase: UpdateTodaySummaryNoteUseCase,
+    private val updateTodayReflectionUseCase: UpdateTodayReflectionUseCase,
     private val noteDateTimeTextProvider: NoteDateTimeTextProvider,
     private val timeProvider: TimeProvider,
 ) : BaseViewModel<RoutineTrackingUiState, RoutineTrackingIntent, Nothing>() {
@@ -51,13 +53,14 @@ class DailyViewModel @Inject constructor(
     override val uiState: StateFlow<RoutineTrackingUiState> =
         combine(
             todayItemsUseCase(todayDate),
-            todaySummaryNoteUseCase(todayDate),
+            todayReflectionUseCase(todayDate),
             noteEditor,
             routineRemovalUndoCoordinator.state,
-        ) { items, summaryNote, noteEditor, removalState ->
+        ) { items, reflection, noteEditor, removalState ->
             RoutineTrackingUiState(
                 date = todayDate,
-                summaryNote = summaryNote.orEmpty(),
+                summaryNote = reflection.summaryNote.orEmpty(),
+                rating = reflection.rating,
                 items = items.map { item -> item.toRoutineTrackingItemUiState() },
                 noteEditor = noteEditor,
                 canRemoveItems = removalState.allowsRemovalFrom(RoutineRemovalSource.Daily),
@@ -92,8 +95,11 @@ class DailyViewModel @Inject constructor(
                 note = intent.note,
                 itemTitle = intent.itemTitle,
             )
-            RoutineTrackingIntent.EditSummaryNoteClick -> Unit
-            is RoutineTrackingIntent.SaveSummaryNote -> updateSummaryNote(intent.note)
+            RoutineTrackingIntent.EditReflectionClick -> Unit
+            is RoutineTrackingIntent.SaveReflection -> updateReflection(
+                summaryNote = intent.summaryNote,
+                rating = intent.rating,
+            )
             is RoutineTrackingIntent.NoteDraftChange -> updateNoteDraft(intent)
             RoutineTrackingIntent.NoteDraftClearClick -> clearNoteDraft()
             RoutineTrackingIntent.NoteDraftDateClick -> insertCurrentDateIntoNoteDraft()
@@ -168,11 +174,17 @@ class DailyViewModel @Inject constructor(
         }
     }
 
-    private fun updateSummaryNote(note: String) {
+    private fun updateReflection(
+        summaryNote: String,
+        rating: ReflectionRating?,
+    ) {
         launch {
-            updateTodaySummaryNoteUseCase(
+            updateTodayReflectionUseCase(
                 date = todayDate,
-                note = note,
+                reflection = RoutineReflection(
+                    summaryNote = summaryNote,
+                    rating = rating,
+                ),
             )
         }
     }

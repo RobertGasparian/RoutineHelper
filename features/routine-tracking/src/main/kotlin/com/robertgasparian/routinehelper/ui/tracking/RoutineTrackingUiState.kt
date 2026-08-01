@@ -1,8 +1,11 @@
 package com.robertgasparian.routinehelper.ui.tracking
 
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+
 data class RoutineTrackingUiState(
     val date: String,
     val summaryNote: String = "",
+    val rating: ReflectionRating? = null,
     val items: List<RoutineTrackingItemUiState> = emptyList(),
     val noteEditor: NoteEditorUiState? = null,
     val canRemoveItems: Boolean = true,
@@ -12,6 +15,7 @@ data class RoutineTrackingUiState(
             RoutineTrackingUiState(
                 date = "2026-05-29",
                 summaryNote = "Low-energy day, but I kept the basics moving.",
+                rating = ReflectionRating(4),
                 items = listOf(
                     RoutineTrackingItemUiState(
                         routineItemId = 1,

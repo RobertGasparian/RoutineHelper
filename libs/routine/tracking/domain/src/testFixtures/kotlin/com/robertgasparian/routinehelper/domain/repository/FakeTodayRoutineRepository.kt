@@ -1,5 +1,6 @@
 package com.robertgasparian.routinehelper.domain.repository
 
+import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -7,12 +8,12 @@ import kotlinx.coroutines.flow.map
 
 class FakeTodayRoutineRepository : TodayRoutineRepository {
     private val itemsByDate = mutableMapOf<String, MutableStateFlow<List<TodayRoutineItem>>>()
-    private val summaryNotesByDate = MutableStateFlow<Map<String, String>>(emptyMap())
+    private val reflectionsByDate = MutableStateFlow<Map<String, RoutineReflection>>(emptyMap())
     val checkedChanges = mutableListOf<CheckedChange>()
     val hiddenChanges = mutableListOf<HiddenChange>()
     val noteChanges = mutableListOf<NoteChange>()
     val countChanges = mutableListOf<CountChange>()
-    val summaryNoteChanges = mutableListOf<SummaryNoteChange>()
+    val reflectionChanges = mutableListOf<ReflectionChange>()
     val resetDates = mutableListOf<String>()
 
     fun setItems(
@@ -25,14 +26,24 @@ class FakeTodayRoutineRepository : TodayRoutineRepository {
     override fun todayItems(date: String): Flow<List<TodayRoutineItem>> =
         itemsByDate.getOrPut(date) { MutableStateFlow(emptyList()) }
 
-    override fun summaryNote(date: String): Flow<String?> =
-        summaryNotesByDate.map { notes -> notes[date] }
+    override fun reflection(date: String): Flow<RoutineReflection> =
+        reflectionsByDate.map { reflections -> reflections[date] ?: RoutineReflection() }
 
     fun setSummaryNote(
         date: String,
         note: String,
     ) {
-        summaryNotesByDate.value = summaryNotesByDate.value + (date to note)
+        setReflection(
+            date = date,
+            reflection = RoutineReflection(summaryNote = note),
+        )
+    }
+
+    fun setReflection(
+        date: String,
+        reflection: RoutineReflection,
+    ) {
+        reflectionsByDate.value = reflectionsByDate.value + (date to reflection)
     }
 
     override suspend fun setChecked(
@@ -83,21 +94,21 @@ class FakeTodayRoutineRepository : TodayRoutineRepository {
         )
     }
 
-    override suspend fun updateSummaryNote(
+    override suspend fun updateReflection(
         date: String,
-        note: String?,
+        reflection: RoutineReflection,
     ) {
-        summaryNoteChanges += SummaryNoteChange(date = date, note = note)
-        summaryNotesByDate.value = if (note == null) {
-            summaryNotesByDate.value - date
+        reflectionChanges += ReflectionChange(date = date, reflection = reflection)
+        reflectionsByDate.value = if (reflection.isEmpty) {
+            reflectionsByDate.value - date
         } else {
-            summaryNotesByDate.value + (date to note)
+            reflectionsByDate.value + (date to reflection)
         }
     }
 
     override suspend fun resetDate(date: String) {
         resetDates += date
-        summaryNotesByDate.value = summaryNotesByDate.value - date
+        reflectionsByDate.value = reflectionsByDate.value - date
     }
 }
 
@@ -125,7 +136,7 @@ data class CountChange(
     val completedCount: Int,
 )
 
-data class SummaryNoteChange(
+data class ReflectionChange(
     val date: String,
-    val note: String?,
+    val reflection: RoutineReflection,
 )

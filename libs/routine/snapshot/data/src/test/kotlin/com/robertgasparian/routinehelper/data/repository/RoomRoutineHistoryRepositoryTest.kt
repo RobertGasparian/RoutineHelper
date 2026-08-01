@@ -7,6 +7,8 @@ import com.robertgasparian.routinehelper.data.local.entity.RoutineSnapshotEntity
 import com.robertgasparian.routinehelper.data.local.entity.RoutineSnapshotEntryEntity
 import com.robertgasparian.routinehelper.data.local.model.RoutineSnapshotWithEntries
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotSummary
@@ -108,6 +110,7 @@ class RoomRoutineHistoryRepositoryTest {
                 periodStartDate = "2026-05-25",
                 cadence = "WEEKLY",
                 summaryNote = "Good week",
+                rating = 4,
             ),
             entries = listOf(
                 entry(snapshotId = 20L, actionId = 2L, position = 1, isChecked = false),
@@ -131,6 +134,7 @@ class RoomRoutineHistoryRepositoryTest {
                 finalizedAtMillis = FINALIZED_AT_MILLIS,
                 cadence = RoutineCadence.Weekly,
                 summaryNote = "Good week",
+                rating = ReflectionRating(4),
                 items = listOf(
                     RoutineSnapshotItem(
                         actionId = 1L,
@@ -160,7 +164,10 @@ class RoomRoutineHistoryRepositoryTest {
         val snapshotId = repository.saveSnapshot(
             periodStartDate = "2026-05-29",
             finalizedAtMillis = FINALIZED_AT_MILLIS,
-            summaryNote = "  Good day  ",
+            reflection = RoutineReflection(
+                summaryNote = "  Good day  ",
+                rating = ReflectionRating(5),
+            ),
             cadence = RoutineCadence.Daily,
             items = listOf(
                 snapshotItem(actionId = 2L, position = 1, isChecked = false),
@@ -183,6 +190,7 @@ class RoomRoutineHistoryRepositoryTest {
                 finalizedAtMillis = FINALIZED_AT_MILLIS,
                 cadence = "DAILY",
                 summaryNote = "Good day",
+                rating = 5,
             ),
             routineSnapshotDao.snapshots.getValue(snapshotId),
         )
@@ -211,7 +219,10 @@ class RoomRoutineHistoryRepositoryTest {
         val snapshotId = repository.saveSnapshot(
             periodStartDate = "2026-05-29",
             finalizedAtMillis = FINALIZED_AT_MILLIS + 1,
-            summaryNote = "   ",
+            reflection = RoutineReflection(
+                summaryNote = "   ",
+                rating = ReflectionRating(2),
+            ),
             cadence = RoutineCadence.Daily,
             items = listOf(snapshotItem(actionId = 1L, position = 0, isChecked = false)),
         )
@@ -219,6 +230,7 @@ class RoomRoutineHistoryRepositoryTest {
         assertEquals(10L, snapshotId)
         assertEquals(FINALIZED_AT_MILLIS + 1, routineSnapshotDao.snapshots.getValue(10L).finalizedAtMillis)
         assertEquals(null, routineSnapshotDao.snapshots.getValue(10L).summaryNote)
+        assertEquals(2, routineSnapshotDao.snapshots.getValue(10L).rating)
         assertEquals(listOf(10L), routineSnapshotDao.updatedSnapshotIds)
         assertEquals(listOf(10L), routineSnapshotDao.deletedEntrySnapshotIds)
         assertEquals(listOf(1L), routineSnapshotDao.entries.getValue(10L).map { it.actionId })
@@ -226,7 +238,7 @@ class RoomRoutineHistoryRepositoryTest {
     }
 
     @Test
-    fun `given stored snapshot when updating summary note then only normalized summary changes`() = runTest {
+    fun `given stored snapshot when updating reflection then only normalized reflection changes`() = runTest {
         val originalSnapshot = snapshotEntity(
             id = 10L,
             periodStartDate = "2026-05-29",
@@ -241,21 +253,24 @@ class RoomRoutineHistoryRepositoryTest {
             entries = originalEntries,
         )
 
-        repository.updateSnapshotSummaryNote(
+        repository.updateSnapshotReflection(
             snapshotId = 10L,
-            summaryNote = "  Updated reflection  ",
+            reflection = RoutineReflection(
+                summaryNote = "  Updated reflection  ",
+                rating = ReflectionRating(4),
+            ),
         )
 
         assertEquals(
-            originalSnapshot.copy(summaryNote = "Updated reflection"),
+            originalSnapshot.copy(summaryNote = "Updated reflection", rating = 4),
             routineSnapshotDao.snapshots.getValue(10L),
         )
         assertEquals(originalEntries, routineSnapshotDao.entries.getValue(10L))
-        assertEquals(listOf(10L), routineSnapshotDao.updatedSummaryNoteSnapshotIds)
+        assertEquals(listOf(10L), routineSnapshotDao.updatedReflectionSnapshotIds)
 
-        repository.updateSnapshotSummaryNote(
+        repository.updateSnapshotReflection(
             snapshotId = 10L,
-            summaryNote = "   ",
+            reflection = RoutineReflection(summaryNote = "   "),
         )
 
         assertEquals(null, routineSnapshotDao.snapshots.getValue(10L).summaryNote)
@@ -280,6 +295,7 @@ class RoomRoutineHistoryRepositoryTest {
         periodStartDate: String,
         cadence: String,
         summaryNote: String? = null,
+        rating: Int? = null,
     ): RoutineSnapshotEntity =
         RoutineSnapshotEntity(
             id = id,
@@ -287,6 +303,7 @@ class RoomRoutineHistoryRepositoryTest {
             finalizedAtMillis = FINALIZED_AT_MILLIS,
             cadence = cadence,
             summaryNote = summaryNote,
+            rating = rating,
         )
 
     private fun entry(
@@ -345,7 +362,7 @@ private class FakeRoutineSnapshotDao : RoutineSnapshotDao {
     val requestedCadences = mutableListOf<String>()
     val requestedSnapshotIds = mutableListOf<Long>()
     val updatedSnapshotIds = mutableListOf<Long>()
-    val updatedSummaryNoteSnapshotIds = mutableListOf<Long>()
+    val updatedReflectionSnapshotIds = mutableListOf<Long>()
     val deletedEntrySnapshotIds = mutableListOf<Long>()
     val deletedSnapshotIds = mutableListOf<Long>()
     private var nextSnapshotId = 1_000L
@@ -383,20 +400,26 @@ private class FakeRoutineSnapshotDao : RoutineSnapshotDao {
         id: Long,
         finalizedAtMillis: Long,
         summaryNote: String?,
+        rating: Int?,
     ) {
         snapshots[id] = snapshots.getValue(id).copy(
             finalizedAtMillis = finalizedAtMillis,
             summaryNote = summaryNote,
+            rating = rating,
         )
         updatedSnapshotIds += id
     }
 
-    override suspend fun updateSummaryNote(
+    override suspend fun updateReflection(
         snapshotId: Long,
         summaryNote: String?,
+        rating: Int?,
     ) {
-        snapshots[snapshotId] = snapshots.getValue(snapshotId).copy(summaryNote = summaryNote)
-        updatedSummaryNoteSnapshotIds += snapshotId
+        snapshots[snapshotId] = snapshots.getValue(snapshotId).copy(
+            summaryNote = summaryNote,
+            rating = rating,
+        )
+        updatedReflectionSnapshotIds += snapshotId
     }
 
     override suspend fun insertEntries(entries: List<RoutineSnapshotEntryEntity>) {

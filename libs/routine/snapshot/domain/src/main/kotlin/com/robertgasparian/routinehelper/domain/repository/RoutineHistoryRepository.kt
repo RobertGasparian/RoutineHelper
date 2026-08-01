@@ -1,6 +1,7 @@
 package com.robertgasparian.routinehelper.domain.repository
 
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotSummary
@@ -15,17 +16,17 @@ interface RoutineHistoryRepository {
         periodStartDate: String,
         finalizedAtMillis: Long,
         items: List<RoutineSnapshotItem>,
-        summaryNote: String?,
+        reflection: RoutineReflection = RoutineReflection(),
         cadence: RoutineCadence,
     ): Long
 
     /**
-     * Focused summary-note command endpoint. Keep it separate from whole-snapshot writes so a
-     * future editability policy can guard this action without risking unrelated snapshot fields.
+     * Focused reflection command endpoint. Keep it separate from whole-snapshot writes so a future
+     * editability policy can guard this action without risking unrelated snapshot fields.
      */
-    suspend fun updateSnapshotSummaryNote(
+    suspend fun updateSnapshotReflection(
         snapshotId: Long,
-        summaryNote: String?,
+        reflection: RoutineReflection,
     )
 
     suspend fun deleteSnapshot(snapshotId: Long)

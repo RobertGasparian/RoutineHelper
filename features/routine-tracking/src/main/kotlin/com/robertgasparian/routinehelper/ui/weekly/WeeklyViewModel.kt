@@ -4,6 +4,8 @@ import com.robertgasparian.routinehelper.core.presentation.BaseViewModel
 import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.core.time.startOfCalendarWeek
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalSource
 import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalUndoCoordinator
 import com.robertgasparian.routinehelper.domain.time.SnapshotDates
@@ -13,9 +15,9 @@ import com.robertgasparian.routinehelper.domain.usecase.SetWeeklyItemCheckedUseC
 import com.robertgasparian.routinehelper.domain.usecase.SetWeeklyItemHiddenUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyItemCompletedCountUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyItemNoteUseCase
-import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklySummaryNoteUseCase
+import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyReflectionUseCase
 import com.robertgasparian.routinehelper.domain.usecase.WeeklyItemsUseCase
-import com.robertgasparian.routinehelper.domain.usecase.WeeklySummaryNoteUseCase
+import com.robertgasparian.routinehelper.domain.usecase.WeeklyReflectionUseCase
 import com.robertgasparian.routinehelper.ui.dsm.RoutineNoteDraftUiState
 import com.robertgasparian.routinehelper.ui.dsm.insertAtCursor
 import com.robertgasparian.routinehelper.ui.tracking.NoteDateTimeTextProvider
@@ -34,7 +36,7 @@ import kotlinx.coroutines.flow.combine
 @HiltViewModel
 class WeeklyViewModel @Inject constructor(
     weeklyItemsUseCase: WeeklyItemsUseCase,
-    weeklySummaryNoteUseCase: WeeklySummaryNoteUseCase,
+    weeklyReflectionUseCase: WeeklyReflectionUseCase,
     private val debugItemsPopulator: RoutineTrackingDebugItemsPopulator,
     private val finalizeWeeklyUseCase: FinalizeWeeklyUseCase,
     private val routineRemovalUndoCoordinator: RoutineRemovalUndoCoordinator,
@@ -43,7 +45,7 @@ class WeeklyViewModel @Inject constructor(
     private val setWeeklyItemHiddenUseCase: SetWeeklyItemHiddenUseCase,
     private val updateWeeklyItemCompletedCountUseCase: UpdateWeeklyItemCompletedCountUseCase,
     private val updateWeeklyItemNoteUseCase: UpdateWeeklyItemNoteUseCase,
-    private val updateWeeklySummaryNoteUseCase: UpdateWeeklySummaryNoteUseCase,
+    private val updateWeeklyReflectionUseCase: UpdateWeeklyReflectionUseCase,
     private val noteDateTimeTextProvider: NoteDateTimeTextProvider,
     private val timeProvider: TimeProvider,
 ) : BaseViewModel<RoutineTrackingUiState, RoutineTrackingIntent, Nothing>() {
@@ -53,13 +55,14 @@ class WeeklyViewModel @Inject constructor(
     override val uiState: StateFlow<RoutineTrackingUiState> =
         combine(
             weeklyItemsUseCase(weekStartDate),
-            weeklySummaryNoteUseCase(weekStartDate),
+            weeklyReflectionUseCase(weekStartDate),
             noteEditor,
             routineRemovalUndoCoordinator.state,
-        ) { items, summaryNote, noteEditor, removalState ->
+        ) { items, reflection, noteEditor, removalState ->
             RoutineTrackingUiState(
                 date = weekStartDate,
-                summaryNote = summaryNote.orEmpty(),
+                summaryNote = reflection.summaryNote.orEmpty(),
+                rating = reflection.rating,
                 items = items.map { item -> item.toRoutineTrackingItemUiState() },
                 noteEditor = noteEditor,
                 canRemoveItems = removalState.allowsRemovalFrom(RoutineRemovalSource.Weekly),
@@ -94,8 +97,11 @@ class WeeklyViewModel @Inject constructor(
                 note = intent.note,
                 itemTitle = intent.itemTitle,
             )
-            RoutineTrackingIntent.EditSummaryNoteClick -> Unit
-            is RoutineTrackingIntent.SaveSummaryNote -> updateSummaryNote(intent.note)
+            RoutineTrackingIntent.EditReflectionClick -> Unit
+            is RoutineTrackingIntent.SaveReflection -> updateReflection(
+                summaryNote = intent.summaryNote,
+                rating = intent.rating,
+            )
             is RoutineTrackingIntent.NoteDraftChange -> updateNoteDraft(intent)
             RoutineTrackingIntent.NoteDraftClearClick -> clearNoteDraft()
             RoutineTrackingIntent.NoteDraftDateClick -> insertCurrentDateIntoNoteDraft()
@@ -170,11 +176,17 @@ class WeeklyViewModel @Inject constructor(
         }
     }
 
-    private fun updateSummaryNote(note: String) {
+    private fun updateReflection(
+        summaryNote: String,
+        rating: ReflectionRating?,
+    ) {
         launch {
-            updateWeeklySummaryNoteUseCase(
+            updateWeeklyReflectionUseCase(
                 weekStartDate = weekStartDate,
-                note = note,
+                reflection = RoutineReflection(
+                    summaryNote = summaryNote,
+                    rating = rating,
+                ),
             )
         }
     }

@@ -12,6 +12,7 @@ kotlin {
 dependencies {
     api(project(":core:time"))
 
+    api(project(":libs:routine:reflection:domain"))
     api(project(":libs:routine:template:domain"))
     api(project(":libs:routine:tracking:domain"))
 

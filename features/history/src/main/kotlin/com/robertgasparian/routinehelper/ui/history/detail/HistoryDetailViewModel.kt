@@ -1,10 +1,12 @@
 package com.robertgasparian.routinehelper.ui.history.detail
 
 import com.robertgasparian.routinehelper.core.presentation.BaseViewModel
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotUseCase
-import com.robertgasparian.routinehelper.domain.usecase.UpdateSnapshotSummaryNoteUseCase
+import com.robertgasparian.routinehelper.domain.usecase.UpdateSnapshotReflectionUseCase
 import com.robertgasparian.routinehelper.ui.history.HistoryTextProvider
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
 import dagger.assisted.Assisted
@@ -22,7 +24,7 @@ class HistoryDetailViewModel @AssistedInject constructor(
     private val deleteSnapshotUseCase: DeleteSnapshotUseCase,
     private val historyTextProvider: HistoryTextProvider,
     snapshotUseCase: SnapshotUseCase,
-    private val updateSnapshotSummaryNoteUseCase: UpdateSnapshotSummaryNoteUseCase,
+    private val updateSnapshotReflectionUseCase: UpdateSnapshotReflectionUseCase,
 ) : BaseViewModel<HistoryDetailUiState, HistoryDetailIntent, HistoryDetailUiEvent>() {
     private val isShareFormatDialogVisible = MutableStateFlow(false)
     private val shareDraft = MutableStateFlow<ShareDraft?>(null)
@@ -60,8 +62,11 @@ class HistoryDetailViewModel @AssistedInject constructor(
             is HistoryDetailIntent.ShareFileConfirm,
             is HistoryDetailIntent.ShareTextConfirm -> Unit
             HistoryDetailIntent.DeleteClick -> deleteSnapshot()
-            HistoryDetailIntent.EditSummaryNoteClick -> Unit
-            is HistoryDetailIntent.SaveSummaryNote -> saveSummaryNote(intent.note)
+            HistoryDetailIntent.EditReflectionClick -> Unit
+            is HistoryDetailIntent.SaveReflection -> saveReflection(
+                summaryNote = intent.summaryNote,
+                rating = intent.rating,
+            )
             HistoryDetailIntent.ShareAsFileClick -> showFileSharePreview()
             HistoryDetailIntent.ShareAsTextClick -> showTextSharePreview()
             HistoryDetailIntent.ShareClick -> showShareOptions()
@@ -71,13 +76,19 @@ class HistoryDetailViewModel @AssistedInject constructor(
         }
     }
 
-    private fun saveSummaryNote(note: String) {
-        if (currentSnapshot()?.isSummaryNoteEditable != true) return
+    private fun saveReflection(
+        summaryNote: String,
+        rating: ReflectionRating?,
+    ) {
+        if (currentSnapshot()?.isReflectionEditable != true) return
 
         launch {
-            updateSnapshotSummaryNoteUseCase(
+            updateSnapshotReflectionUseCase(
                 snapshotId = snapshotId,
-                summaryNote = note,
+                reflection = RoutineReflection(
+                    summaryNote = summaryNote,
+                    rating = rating,
+                ),
             )
         }
     }

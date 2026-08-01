@@ -1,12 +1,13 @@
 package com.robertgasparian.routinehelper.domain.repository
 
+import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import kotlinx.coroutines.flow.Flow
 
 interface TodayRoutineRepository {
     fun todayItems(date: String): Flow<List<TodayRoutineItem>>
 
-    fun summaryNote(date: String): Flow<String?>
+    fun reflection(date: String): Flow<RoutineReflection>
 
     suspend fun setChecked(
         date: String,
@@ -32,9 +33,9 @@ interface TodayRoutineRepository {
         isHidden: Boolean,
     )
 
-    suspend fun updateSummaryNote(
+    suspend fun updateReflection(
         date: String,
-        note: String?,
+        reflection: RoutineReflection,
     )
 
     suspend fun resetDate(date: String)

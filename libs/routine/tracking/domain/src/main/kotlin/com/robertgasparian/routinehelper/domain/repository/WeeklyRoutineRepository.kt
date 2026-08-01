@@ -1,12 +1,13 @@
 package com.robertgasparian.routinehelper.domain.repository
 
+import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.model.WeeklyRoutineItem
 import kotlinx.coroutines.flow.Flow
 
 interface WeeklyRoutineRepository {
     fun weeklyItems(weekStartDate: String): Flow<List<WeeklyRoutineItem>>
 
-    fun summaryNote(weekStartDate: String): Flow<String?>
+    fun reflection(weekStartDate: String): Flow<RoutineReflection>
 
     suspend fun setChecked(
         weekStartDate: String,
@@ -32,9 +33,9 @@ interface WeeklyRoutineRepository {
         isHidden: Boolean,
     )
 
-    suspend fun updateSummaryNote(
+    suspend fun updateReflection(
         weekStartDate: String,
-        note: String?,
+        reflection: RoutineReflection,
     )
 
     suspend fun resetWeek(weekStartDate: String)

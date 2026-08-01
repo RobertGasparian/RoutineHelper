@@ -10,8 +10,6 @@
     <string name="core_ui_show_action">Show action</string>
     <string name="core_ui_hide_action">Hide action</string>
     <string name="core_ui_edit_action">Edit action</string>
-    <string name="core_ui_add_summary_note">Add summary note</string>
-    <string name="core_ui_edit_summary_note">Edit summary note</string>
     <string name="core_ui_note_saved_for_day">This note is saved for this day only.</string>
     <string name="core_ui_note">Note</string>
     <string name="core_ui_add_weekday">Add weekday</string>

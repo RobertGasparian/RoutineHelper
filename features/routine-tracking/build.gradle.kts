@@ -32,6 +32,7 @@ dependencies {
     implementation(project(":core:time"))
     implementation(project(":core:ui"))
     implementation(project(":features:reflection-api"))
+    implementation(project(":libs:routine:reflection:domain"))
     implementation(project(":libs:routine:snapshot:domain"))
     implementation(project(":libs:routine:removal:domain"))
     implementation(project(":libs:routine:template:domain"))

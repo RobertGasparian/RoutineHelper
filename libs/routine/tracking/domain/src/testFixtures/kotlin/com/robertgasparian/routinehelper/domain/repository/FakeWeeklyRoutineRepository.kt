@@ -1,5 +1,6 @@
 package com.robertgasparian.routinehelper.domain.repository
 
+import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.model.WeeklyRoutineItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -7,12 +8,12 @@ import kotlinx.coroutines.flow.map
 
 class FakeWeeklyRoutineRepository : WeeklyRoutineRepository {
     private val itemsByWeek = mutableMapOf<String, MutableStateFlow<List<WeeklyRoutineItem>>>()
-    private val summaryNotesByWeek = MutableStateFlow<Map<String, String>>(emptyMap())
+    private val reflectionsByWeek = MutableStateFlow<Map<String, RoutineReflection>>(emptyMap())
     val checkedChanges = mutableListOf<WeeklyCheckedChange>()
     val hiddenChanges = mutableListOf<WeeklyHiddenChange>()
     val noteChanges = mutableListOf<WeeklyNoteChange>()
     val countChanges = mutableListOf<WeeklyCountChange>()
-    val summaryNoteChanges = mutableListOf<WeeklySummaryNoteChange>()
+    val reflectionChanges = mutableListOf<WeeklyReflectionChange>()
     val resetWeeks = mutableListOf<String>()
 
     fun setItems(
@@ -25,14 +26,24 @@ class FakeWeeklyRoutineRepository : WeeklyRoutineRepository {
     override fun weeklyItems(weekStartDate: String): Flow<List<WeeklyRoutineItem>> =
         itemsByWeek.getOrPut(weekStartDate) { MutableStateFlow(emptyList()) }
 
-    override fun summaryNote(weekStartDate: String): Flow<String?> =
-        summaryNotesByWeek.map { notes -> notes[weekStartDate] }
+    override fun reflection(weekStartDate: String): Flow<RoutineReflection> =
+        reflectionsByWeek.map { reflections -> reflections[weekStartDate] ?: RoutineReflection() }
 
     fun setSummaryNote(
         weekStartDate: String,
         note: String,
     ) {
-        summaryNotesByWeek.value = summaryNotesByWeek.value + (weekStartDate to note)
+        setReflection(
+            weekStartDate = weekStartDate,
+            reflection = RoutineReflection(summaryNote = note),
+        )
+    }
+
+    fun setReflection(
+        weekStartDate: String,
+        reflection: RoutineReflection,
+    ) {
+        reflectionsByWeek.value = reflectionsByWeek.value + (weekStartDate to reflection)
     }
 
     override suspend fun setChecked(
@@ -83,21 +94,24 @@ class FakeWeeklyRoutineRepository : WeeklyRoutineRepository {
         )
     }
 
-    override suspend fun updateSummaryNote(
+    override suspend fun updateReflection(
         weekStartDate: String,
-        note: String?,
+        reflection: RoutineReflection,
     ) {
-        summaryNoteChanges += WeeklySummaryNoteChange(weekStartDate = weekStartDate, note = note)
-        summaryNotesByWeek.value = if (note == null) {
-            summaryNotesByWeek.value - weekStartDate
+        reflectionChanges += WeeklyReflectionChange(
+            weekStartDate = weekStartDate,
+            reflection = reflection,
+        )
+        reflectionsByWeek.value = if (reflection.isEmpty) {
+            reflectionsByWeek.value - weekStartDate
         } else {
-            summaryNotesByWeek.value + (weekStartDate to note)
+            reflectionsByWeek.value + (weekStartDate to reflection)
         }
     }
 
     override suspend fun resetWeek(weekStartDate: String) {
         resetWeeks += weekStartDate
-        summaryNotesByWeek.value = summaryNotesByWeek.value - weekStartDate
+        reflectionsByWeek.value = reflectionsByWeek.value - weekStartDate
     }
 }
 
@@ -125,7 +139,7 @@ data class WeeklyCountChange(
     val completedCount: Int,
 )
 
-data class WeeklySummaryNoteChange(
+data class WeeklyReflectionChange(
     val weekStartDate: String,
-    val note: String?,
+    val reflection: RoutineReflection,
 )

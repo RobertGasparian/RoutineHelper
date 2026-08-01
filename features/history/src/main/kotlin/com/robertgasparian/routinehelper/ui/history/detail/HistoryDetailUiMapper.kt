@@ -10,7 +10,8 @@ internal fun RoutineSnapshot.toHistoryDetailUiState(finalizedTime: String): Hist
         cadence = cadence,
         finalizedTime = finalizedTime,
         summaryNote = summaryNote.orEmpty(),
-        isSummaryNoteEditable = isSummaryNoteEditable,
+        rating = rating,
+        isReflectionEditable = isReflectionEditable,
         items = items.map(RoutineSnapshotItem::toHistoryDetailItemUiState),
     )
 

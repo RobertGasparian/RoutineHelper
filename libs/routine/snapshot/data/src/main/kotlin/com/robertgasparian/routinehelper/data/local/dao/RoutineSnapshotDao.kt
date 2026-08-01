@@ -37,7 +37,8 @@ interface RoutineSnapshotDao {
         """
         UPDATE routine_snapshots
         SET finalizedAtMillis = :finalizedAtMillis,
-            summaryNote = :summaryNote
+            summaryNote = :summaryNote,
+            rating = :rating
         WHERE id = :id
         """,
     )
@@ -45,12 +46,21 @@ interface RoutineSnapshotDao {
         id: Long,
         finalizedAtMillis: Long,
         summaryNote: String?,
+        rating: Int?,
     )
 
-    @Query("UPDATE routine_snapshots SET summaryNote = :summaryNote WHERE id = :snapshotId")
-    suspend fun updateSummaryNote(
+    @Query(
+        """
+        UPDATE routine_snapshots
+        SET summaryNote = :summaryNote,
+            rating = :rating
+        WHERE id = :snapshotId
+        """,
+    )
+    suspend fun updateReflection(
         snapshotId: Long,
         summaryNote: String?,
+        rating: Int?,
     )
 
     @Insert

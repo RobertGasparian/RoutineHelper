@@ -2,6 +2,7 @@ package com.robertgasparian.routinehelper.ui.history
 
 import android.content.Context
 import com.robertgasparian.routinehelper.core.time.TimeProvider
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
@@ -73,6 +74,17 @@ class AndroidHistoryTextProvider @Inject constructor(
                 ),
             )
             appendLine()
+
+            snapshot.rating?.let { rating ->
+                appendLine(
+                    context.getString(
+                        R.string.history_export_rating,
+                        rating.value,
+                        ReflectionRating.MAXIMUM,
+                    ),
+                )
+                appendLine()
+            }
 
             snapshot.summaryNote
                 ?.takeIf(String::isNotBlank)

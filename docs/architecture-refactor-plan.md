@@ -83,7 +83,9 @@ Current and planned module families:
 - `:features:settings`
   - Settings UI and future settings state management.
 - `:features:reflection-api`
-  - Narrow draft/save session contract shared with Reflection clients.
+  - Narrow draft/save session contract and shared `ReflectionCard` presentation used by Reflection
+    clients. It depends on the reflection domain contract, not on tracking or snapshot business
+    logic.
 - `:features:reflection`
   - Reflection editor presentation and its parent-entry-scoped session ViewModel.
 - `:libs:routine:template:domain`
@@ -91,7 +93,9 @@ Current and planned module families:
 - `:libs:routine:template:data`
   - Room-backed template entities, DAOs, relation models, and repository implementations.
 - `:libs:routine:tracking:domain`
-  - Platform-independent per-period models, repository contracts, and use cases for today/weekly entries, checked state, hidden state, notes, completed count, and future check availability or lock state.
+  - Platform-independent per-period models, repository contracts, and use cases for today/weekly
+    entries, checked state, hidden state, item notes, completed count, and future check availability
+    or lock state. Its reflection operations use the shared reflection-domain model.
 - `:libs:routine:tracking:data`
   - Room-backed per-period entities, DAOs, and repository implementations.
   - It depends on template data for the routine definitions that tracked entries reference.
@@ -100,15 +104,20 @@ Current and planned module families:
 - `:libs:routine:current-list:data`
   - Room-backed Current List entity, DAO, repository implementation, pending-removal persistence, and repository binding.
 - `:libs:routine:snapshot:domain`
-  - Platform-independent snapshot models, snapshot-period calculations, history repository contracts, finalization, queries, deletion, and share-text use cases.
+  - Platform-independent snapshot models, snapshot-period calculations, history repository
+    contracts, finalization, queries, deletion, and share-text use cases. Snapshot reflection values
+    use the shared reflection-domain model.
 - `:libs:routine:snapshot:data`
   - Room-backed snapshot entities, DAOs, relation models, and repository implementations.
 - `:libs:routine:database`
   - Shared Room database composition, schema export, and future migrations.
   - It may depend on capability data modules to aggregate their entities and DAOs and provide the shared database/DAO bindings, but it must not own repositories or business rules.
   - Each capability data module owns the DI binding between its repository implementation and domain repository contract; `:app` only aggregates those modules.
-- `:libs:reflection`
-  - Future reflection business rules, data, and use cases.
+- `:libs:routine:reflection:domain`
+  - Platform-independent `RoutineReflection` and `ReflectionRating` contracts shared by current
+    tracking, stored snapshots, the editor, and History. `ReflectionRating` is the single authority
+    for the supported one-to-five scale; Room stores only its integer value and maps it at data
+    boundaries.
 - `:libs:reminder`
   - Future reminder scheduling intent, reminder settings, and reminder business rules.
 - `:libs:background:work`

@@ -1,10 +1,9 @@
-package com.robertgasparian.routinehelper.ui.dsm
+package com.robertgasparian.routinehelper.ui.reflection.api
 
 import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,38 +19,46 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.StickyNote2
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.res.stringResource
-import com.robertgasparian.routinehelper.core.ui.R
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+import com.robertgasparian.routinehelper.features.reflection.api.R
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 
 @Composable
-fun SummaryNoteCard(
-    note: String,
+fun ReflectionCard(
+    summaryNote: String,
     label: String,
     onEditClick: () -> Unit,
     modifier: Modifier = Modifier,
     isEditable: Boolean = true,
+    rating: ReflectionRating? = null,
 ) {
-    val hasNote = note.isNotBlank()
+    val hasNote = summaryNote.isNotBlank()
+    val hasReflection = hasNote || rating != null
 
     OutlinedCard(
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         border = CardDefaults.outlinedCardBorder().copy(
-            brush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.outlineVariant),
+            brush = SolidColor(MaterialTheme.colorScheme.outlineVariant),
         ),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -67,7 +74,7 @@ fun SummaryNoteCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                SummaryNoteIcon()
+                ReflectionIcon()
 
                 Column(
                     modifier = Modifier
@@ -83,22 +90,24 @@ fun SummaryNoteCard(
                 }
 
                 if (isEditable) {
-                    SummaryNoteEditButton(
-                        hasNote = hasNote,
+                    ReflectionEditButton(
+                        hasReflection = hasReflection,
                         onClick = onEditClick,
                     )
                 }
             }
 
+            rating?.let { ReflectionRatingIndicator(rating = it) }
+
             if (hasNote) {
-                SummaryNoteTextBlock(text = note)
+                ReflectionTextBlock(text = summaryNote)
             }
         }
     }
 }
 
 @Composable
-private fun SummaryNoteIcon(
+private fun ReflectionIcon(
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -124,22 +133,24 @@ private fun SummaryNoteIcon(
 }
 
 @Composable
-private fun SummaryNoteEditButton(
-    hasNote: Boolean,
+private fun ReflectionEditButton(
+    hasReflection: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(
-        modifier = modifier
-            .size(32.dp)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
+    IconButton(
+        onClick = onClick,
+        modifier = modifier,
     ) {
         Icon(
             modifier = Modifier.size(20.dp),
-            imageVector = if (hasNote) Icons.Default.Edit else Icons.Default.Add,
+            imageVector = if (hasReflection) Icons.Default.Edit else Icons.Default.Add,
             contentDescription = stringResource(
-                if (hasNote) R.string.core_ui_edit_summary_note else R.string.core_ui_add_summary_note,
+                if (hasReflection) {
+                    R.string.reflection_card_edit_reflection
+                } else {
+                    R.string.reflection_card_add_reflection
+                },
             ),
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -147,7 +158,43 @@ private fun SummaryNoteEditButton(
 }
 
 @Composable
-private fun SummaryNoteTextBlock(
+private fun ReflectionRatingIndicator(
+    rating: ReflectionRating,
+    modifier: Modifier = Modifier,
+) {
+    val ratingDescription = stringResource(
+        R.string.reflection_card_rating,
+        rating.value,
+        ReflectionRating.MAXIMUM,
+    )
+    Row(
+        modifier = modifier.semantics {
+            contentDescription = ratingDescription
+        },
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        ReflectionRating.options.forEach { option ->
+            Icon(
+                imageVector = if (option <= rating.value) {
+                    Icons.Filled.Star
+                } else {
+                    Icons.Outlined.StarOutline
+                },
+                contentDescription = null,
+                tint = if (option <= rating.value) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.outline
+                },
+                modifier = Modifier.size(18.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ReflectionTextBlock(
     text: String,
     modifier: Modifier = Modifier,
 ) {
@@ -169,22 +216,22 @@ private fun SummaryNoteTextBlock(
 
 @Preview(showBackground = true, widthDp = 390, heightDp = 620)
 @Composable
-private fun SummaryNoteCardAllStatesPreview() {
+private fun ReflectionCardAllStatesPreview() {
     RoutineHelperTheme(dynamicColor = false) {
-        SummaryNoteCardPreviewContent()
+        ReflectionCardPreviewContent()
     }
 }
 
 @Preview(showBackground = true, widthDp = 390, heightDp = 620, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun SummaryNoteCardAllStatesDarkPreview() {
+private fun ReflectionCardAllStatesDarkPreview() {
     RoutineHelperTheme(dynamicColor = false) {
-        SummaryNoteCardPreviewContent()
+        ReflectionCardPreviewContent()
     }
 }
 
 @Composable
-private fun SummaryNoteCardPreviewContent() {
+private fun ReflectionCardPreviewContent() {
     Column(
         modifier = Modifier
             .widthIn(max = 390.dp)
@@ -192,34 +239,37 @@ private fun SummaryNoteCardPreviewContent() {
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        SummaryNoteCard(
-            note = "",
+        ReflectionCard(
+            summaryNote = "",
             label = "Day note",
             onEditClick = {},
         )
-        SummaryNoteCard(
-            note = "Felt easier after moving the walk to the beginning of the routine.",
+        ReflectionCard(
+            summaryNote = "Felt easier after moving the walk to the beginning of the routine.",
             label = "Day note",
             onEditClick = {},
+            rating = ReflectionRating(4),
         )
-        SummaryNoteCard(
-            note = "",
+        ReflectionCard(
+            summaryNote = "",
+            label = "Week note",
+            onEditClick = {},
+            rating = ReflectionRating(3),
+        )
+        ReflectionCard(
+            summaryNote = "Keep the morning list shorter this week. The evening stretch is still useful.",
             label = "Week note",
             onEditClick = {},
         )
-        SummaryNoteCard(
-            note = "Keep the morning list shorter this week. The evening stretch is still useful.",
-            label = "Week note",
-            onEditClick = {},
-        )
-        SummaryNoteCard(
-            note = "This is a longer note preview to check wrapping. It should stay compact and stop after a few lines instead of turning the summary area into a large writing surface.",
+        ReflectionCard(
+            summaryNote = "Reflection is visible but locked by policy.",
             label = "Day note",
             onEditClick = {},
+            isEditable = false,
         )
-        SummaryNoteCard(
-            note = "Read-only snapshot note with no edit action.",
-            label = "Snapshot note",
+        ReflectionCard(
+            summaryNote = "",
+            label = "Week note",
             onEditClick = {},
             isEditable = false,
         )

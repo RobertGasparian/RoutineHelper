@@ -7,13 +7,15 @@ import com.robertgasparian.routinehelper.data.local.entity.RoutineSnapshotEntity
 import com.robertgasparian.routinehelper.data.local.entity.RoutineSnapshotEntryEntity
 import com.robertgasparian.routinehelper.data.local.model.RoutineSnapshotWithEntries
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotSummary
 import com.robertgasparian.routinehelper.domain.repository.RoutineHistoryRepository
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
 
 class RoomRoutineHistoryRepository @Inject constructor(
     private val database: RoomDatabase,
@@ -36,25 +38,27 @@ class RoomRoutineHistoryRepository @Inject constructor(
         periodStartDate: String,
         finalizedAtMillis: Long,
         items: List<RoutineSnapshotItem>,
-        summaryNote: String?,
+        reflection: RoutineReflection,
         cadence: RoutineCadence,
     ): Long = database.withTransaction {
         val storageCadence = cadence.toStorageValue()
-        val normalizedSummaryNote = summaryNote?.trim()?.takeIf(String::isNotEmpty)
+        val normalizedReflection = reflection.normalized()
         val existingSnapshot = routineSnapshotDao.snapshotForPeriodStartDateOnce(periodStartDate, storageCadence)
         val snapshotId = existingSnapshot?.id ?: routineSnapshotDao.insertSnapshot(
             RoutineSnapshotEntity(
                 periodStartDate = periodStartDate,
                 finalizedAtMillis = finalizedAtMillis,
                 cadence = storageCadence,
-                summaryNote = normalizedSummaryNote,
+                summaryNote = normalizedReflection.summaryNote,
+                rating = normalizedReflection.rating?.value,
             ),
         )
         if (existingSnapshot != null) {
             routineSnapshotDao.updateSnapshot(
                 id = snapshotId,
                 finalizedAtMillis = finalizedAtMillis,
-                summaryNote = normalizedSummaryNote,
+                summaryNote = normalizedReflection.summaryNote,
+                rating = normalizedReflection.rating?.value,
             )
             routineSnapshotDao.deleteEntries(snapshotId)
         }
@@ -77,13 +81,15 @@ class RoomRoutineHistoryRepository @Inject constructor(
         snapshotId
     }
 
-    override suspend fun updateSnapshotSummaryNote(
+    override suspend fun updateSnapshotReflection(
         snapshotId: Long,
-        summaryNote: String?,
+        reflection: RoutineReflection,
     ) {
-        routineSnapshotDao.updateSummaryNote(
+        val normalizedReflection = reflection.normalized()
+        routineSnapshotDao.updateReflection(
             snapshotId = snapshotId,
-            summaryNote = summaryNote?.trim()?.takeIf(String::isNotEmpty),
+            summaryNote = normalizedReflection.summaryNote,
+            rating = normalizedReflection.rating?.value,
         )
     }
 
@@ -91,6 +97,9 @@ class RoomRoutineHistoryRepository @Inject constructor(
         routineSnapshotDao.deleteSnapshot(snapshotId)
     }
 }
+
+private fun RoutineReflection.normalized(): RoutineReflection =
+    copy(summaryNote = summaryNote?.trim()?.takeIf(String::isNotEmpty))
 
 private fun RoutineCadence.toStorageValue(): String =
     when (this) {
@@ -112,10 +121,11 @@ private fun RoutineSnapshotWithEntries.toDomain(): RoutineSnapshot =
         finalizedAtMillis = snapshot.finalizedAtMillis,
         cadence = snapshot.cadence.toRoutineCadence(),
         summaryNote = snapshot.summaryNote,
+        rating = snapshot.rating?.let(::ReflectionRating),
         items = entries.toDomainItems(),
         // Current policy: every stored snapshot summary is editable. Keep this explicit so a
         // future persisted or computed policy has a single mapping point.
-        isSummaryNoteEditable = true,
+        isReflectionEditable = true,
     )
 
 private fun List<RoutineSnapshotEntryEntity>.toDomainItems(): List<RoutineSnapshotItem> =

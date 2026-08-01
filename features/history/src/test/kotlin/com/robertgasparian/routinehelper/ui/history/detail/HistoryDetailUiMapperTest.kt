@@ -1,6 +1,7 @@
 package com.robertgasparian.routinehelper.ui.history.detail
 
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
 import java.time.Instant
@@ -16,6 +17,7 @@ class HistoryDetailUiMapperTest {
             finalizedAtMillis = FINALIZED_AT_MILLIS,
             cadence = RoutineCadence.Weekly,
             summaryNote = "Good week",
+            rating = ReflectionRating(4),
             items = listOf(
                 RoutineSnapshotItem(
                     actionId = 100L,
@@ -45,6 +47,7 @@ class HistoryDetailUiMapperTest {
                 cadence = RoutineCadence.Weekly,
                 finalizedTime = "12:00 PM",
                 summaryNote = "Good week",
+                rating = ReflectionRating(4),
                 items = listOf(
                     HistoryDetailItemUiState(
                         actionId = 100L,
@@ -79,7 +82,7 @@ class HistoryDetailUiMapperTest {
             finalizedAtMillis = FINALIZED_AT_MILLIS,
             cadence = RoutineCadence.Daily,
             summaryNote = null,
-            isSummaryNoteEditable = false,
+            isReflectionEditable = false,
             items = emptyList(),
         )
 
@@ -87,7 +90,7 @@ class HistoryDetailUiMapperTest {
 
         assertEquals("2026-05-29", state.date)
         assertEquals("", state.summaryNote)
-        assertEquals(false, state.isSummaryNoteEditable)
+        assertEquals(false, state.isReflectionEditable)
         assertEquals("2026-05-29", snapshot.historyDisplayDate)
     }
 

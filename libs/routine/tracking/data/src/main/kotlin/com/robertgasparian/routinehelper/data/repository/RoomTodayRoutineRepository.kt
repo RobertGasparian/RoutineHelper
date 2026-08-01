@@ -4,24 +4,26 @@ import androidx.room.RoomDatabase
 import androidx.room.withTransaction
 import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.data.local.dao.DailyEntryDao
-import com.robertgasparian.routinehelper.data.local.dao.DailySummaryNoteDao
+import com.robertgasparian.routinehelper.data.local.dao.DailyReflectionDao
 import com.robertgasparian.routinehelper.data.local.dao.RoutineItemDao
 import com.robertgasparian.routinehelper.data.local.entity.DailyEntryEntity
-import com.robertgasparian.routinehelper.data.local.entity.DailySummaryNoteEntity
+import com.robertgasparian.routinehelper.data.local.entity.DailyReflectionEntity
 import com.robertgasparian.routinehelper.data.local.entity.RoutineItemEntity
 import com.robertgasparian.routinehelper.data.local.model.RoutineItemWithAction
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import com.robertgasparian.routinehelper.domain.repository.TodayRoutineRepository
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
 
 class RoomTodayRoutineRepository @Inject constructor(
     private val database: RoomDatabase,
     private val routineItemDao: RoutineItemDao,
     private val dailyEntryDao: DailyEntryDao,
-    private val dailySummaryNoteDao: DailySummaryNoteDao,
+    private val dailyReflectionDao: DailyReflectionDao,
     private val timeProvider: TimeProvider,
 ) : TodayRoutineRepository {
     override fun todayItems(date: String): Flow<List<TodayRoutineItem>> =
@@ -38,8 +40,13 @@ class RoomTodayRoutineRepository @Inject constructor(
             }
         }
 
-    override fun summaryNote(date: String): Flow<String?> =
-        dailySummaryNoteDao.noteForDate(date).map { note -> note?.note }
+    override fun reflection(date: String): Flow<RoutineReflection> =
+        dailyReflectionDao.reflectionForDate(date).map { storedReflection ->
+            RoutineReflection(
+                summaryNote = storedReflection?.summaryNote,
+                rating = storedReflection?.rating?.let(::ReflectionRating),
+            )
+        }
 
     override suspend fun setChecked(
         date: String,
@@ -94,18 +101,19 @@ class RoomTodayRoutineRepository @Inject constructor(
         )
     }
 
-    override suspend fun updateSummaryNote(
+    override suspend fun updateReflection(
         date: String,
-        note: String?,
+        reflection: RoutineReflection,
     ) {
-        val normalizedNote = note?.trim()?.takeIf(String::isNotEmpty)
-        if (normalizedNote == null) {
-            dailySummaryNoteDao.deleteForDate(date)
+        val normalizedReflection = reflection.normalized()
+        if (normalizedReflection.isEmpty) {
+            dailyReflectionDao.deleteForDate(date)
         } else {
-            dailySummaryNoteDao.upsert(
-                DailySummaryNoteEntity(
+            dailyReflectionDao.upsert(
+                DailyReflectionEntity(
                     date = date,
-                    note = normalizedNote,
+                    summaryNote = normalizedReflection.summaryNote,
+                    rating = normalizedReflection.rating?.value,
                     updatedAtMillis = timeProvider.currentTimeMillis(),
                 ),
             )
@@ -115,10 +123,13 @@ class RoomTodayRoutineRepository @Inject constructor(
     override suspend fun resetDate(date: String) {
         database.withTransaction {
             dailyEntryDao.deleteEntriesForDate(date)
-            dailySummaryNoteDao.deleteForDate(date)
+            dailyReflectionDao.deleteForDate(date)
         }
     }
 }
+
+private fun RoutineReflection.normalized(): RoutineReflection =
+    copy(summaryNote = summaryNote?.trim()?.takeIf(String::isNotEmpty))
 
 private fun RoutineItemWithAction.toTodayDomain(
     date: String,

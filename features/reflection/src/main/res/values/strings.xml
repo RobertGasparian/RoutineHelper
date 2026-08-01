@@ -2,6 +2,9 @@
 <resources>
     <string name="reflection_editor_title">Reflection</string>
     <string name="reflection_editor_supporting_text">Capture what stood out and how the routine felt.</string>
+    <string name="reflection_editor_rating_label">How would you rate this period?</string>
+    <string name="reflection_editor_rating_option">Rating: %1$d out of %2$d</string>
+    <string name="reflection_editor_clear_rating">Clear rating</string>
     <string name="reflection_editor_note_label">Summary</string>
     <string name="reflection_editor_clear">Clear</string>
     <string name="reflection_editor_cancel">Cancel</string>

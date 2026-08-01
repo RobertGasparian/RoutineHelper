@@ -2,6 +2,8 @@ package com.robertgasparian.routinehelper.ui.reflection
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+import com.robertgasparian.routinehelper.ui.reflection.api.ReflectionEditorInitialState
 import com.robertgasparian.routinehelper.ui.reflection.api.ReflectionEditorSaveRequest
 import com.robertgasparian.routinehelper.ui.reflection.api.ReflectionEditorSession
 import com.robertgasparian.routinehelper.ui.reflection.api.ReflectionEditorState
@@ -18,14 +20,16 @@ class ReflectionEditorSessionViewModel @Inject constructor(
     private val mutableState = MutableStateFlow(savedStateHandle.restoreState())
     override val state: StateFlow<ReflectionEditorState> = mutableState.asStateFlow()
 
-    override fun start(initialText: String) {
+    override fun start(initialState: ReflectionEditorInitialState) {
         updateState(
             ReflectionEditorState(
                 isInitialized = true,
-                originalText = initialText,
-                draftText = initialText,
-                selectionStart = initialText.length,
-                selectionEnd = initialText.length,
+                originalText = initialState.text,
+                originalRating = initialState.rating,
+                draftText = initialState.text,
+                draftRating = initialState.rating,
+                selectionStart = initialState.text.length,
+                selectionEnd = initialState.text.length,
             ),
         )
     }
@@ -58,6 +62,12 @@ class ReflectionEditorSessionViewModel @Inject constructor(
         )
     }
 
+    internal fun updateRating(rating: ReflectionRating?) {
+        if (!state.value.isInitialized) return
+
+        updateState(state.value.copy(draftRating = rating))
+    }
+
     internal fun requestSave() {
         val currentState = state.value
         if (!currentState.isInitialized || currentState.saveRequest != null) return
@@ -69,6 +79,7 @@ class ReflectionEditorSessionViewModel @Inject constructor(
                 saveRequest = ReflectionEditorSaveRequest(
                     requestId = requestId,
                     text = currentState.draftText,
+                    rating = currentState.draftRating,
                 ),
             ),
         )
@@ -88,11 +99,14 @@ class ReflectionEditorSessionViewModel @Inject constructor(
         mutableState.value = updatedState
         savedStateHandle[IsInitializedKey] = updatedState.isInitialized
         savedStateHandle[OriginalTextKey] = updatedState.originalText
+        savedStateHandle[OriginalRatingKey] = updatedState.originalRating?.value
         savedStateHandle[DraftTextKey] = updatedState.draftText
+        savedStateHandle[DraftRatingKey] = updatedState.draftRating?.value
         savedStateHandle[SelectionStartKey] = updatedState.selectionStart
         savedStateHandle[SelectionEndKey] = updatedState.selectionEnd
         savedStateHandle[SaveRequestIdKey] = updatedState.saveRequest?.requestId
         savedStateHandle[SaveRequestTextKey] = updatedState.saveRequest?.text
+        savedStateHandle[SaveRequestRatingKey] = updatedState.saveRequest?.rating?.value
     }
 
     private fun SavedStateHandle.restoreState(): ReflectionEditorState {
@@ -101,13 +115,16 @@ class ReflectionEditorSessionViewModel @Inject constructor(
         return ReflectionEditorState(
             isInitialized = get<Boolean>(IsInitializedKey) ?: false,
             originalText = get<String>(OriginalTextKey).orEmpty(),
+            originalRating = get<Int>(OriginalRatingKey)?.let(::ReflectionRating),
             draftText = get<String>(DraftTextKey).orEmpty(),
+            draftRating = get<Int>(DraftRatingKey)?.let(::ReflectionRating),
             selectionStart = get<Int>(SelectionStartKey) ?: 0,
             selectionEnd = get<Int>(SelectionEndKey) ?: 0,
             saveRequest = if (requestId != null && requestText != null) {
                 ReflectionEditorSaveRequest(
                     requestId = requestId,
                     text = requestText,
+                    rating = get<Int>(SaveRequestRatingKey)?.let(::ReflectionRating),
                 )
             } else {
                 null
@@ -118,11 +135,14 @@ class ReflectionEditorSessionViewModel @Inject constructor(
     private companion object {
         const val IsInitializedKey = "reflection.isInitialized"
         const val OriginalTextKey = "reflection.originalText"
+        const val OriginalRatingKey = "reflection.originalRating"
         const val DraftTextKey = "reflection.draftText"
+        const val DraftRatingKey = "reflection.draftRating"
         const val SelectionStartKey = "reflection.selectionStart"
         const val SelectionEndKey = "reflection.selectionEnd"
         const val SaveRequestIdKey = "reflection.saveRequestId"
         const val SaveRequestTextKey = "reflection.saveRequestText"
+        const val SaveRequestRatingKey = "reflection.saveRequestRating"
         const val NextRequestIdKey = "reflection.nextRequestId"
     }
 }

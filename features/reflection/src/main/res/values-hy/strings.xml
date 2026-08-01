@@ -2,6 +2,9 @@
 <resources>
     <string name="reflection_editor_title">Ամփոփում</string>
     <string name="reflection_editor_supporting_text">Գրեք, թե ինչն էր կարևոր և ինչպես անցավ առօրյան։</string>
+    <string name="reflection_editor_rating_label">Ինչպե՞ս կգնահատեիք այս ժամանակահատվածը։</string>
+    <string name="reflection_editor_rating_option">Գնահատական՝ %1$d / %2$d</string>
+    <string name="reflection_editor_clear_rating">Մաքրել գնահատականը</string>
     <string name="reflection_editor_note_label">Ամփոփագիր</string>
     <string name="reflection_editor_clear">Մաքրել</string>
     <string name="reflection_editor_cancel">Չեղարկել</string>

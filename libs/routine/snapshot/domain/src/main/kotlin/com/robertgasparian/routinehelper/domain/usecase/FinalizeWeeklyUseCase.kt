@@ -32,13 +32,13 @@ class FinalizeWeeklyUseCase @Inject constructor(
         }
         if (snapshotItems.isEmpty()) return null
 
-        val summaryNote = weeklyRoutineRepository.summaryNote(weekStartDate).first()
+        val reflection = weeklyRoutineRepository.reflection(weekStartDate).first()
 
         val snapshotId = routineHistoryRepository.saveSnapshot(
             periodStartDate = snapshotPeriodStartDate,
             finalizedAtMillis = finalizedAtMillis,
             items = snapshotItems,
-            summaryNote = summaryNote,
+            reflection = reflection,
             cadence = RoutineCadence.Weekly,
         )
         return snapshotId

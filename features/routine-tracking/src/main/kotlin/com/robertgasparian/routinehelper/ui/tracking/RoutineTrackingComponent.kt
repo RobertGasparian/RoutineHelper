@@ -59,7 +59,7 @@ import com.robertgasparian.routinehelper.ui.dsm.RoutineReorderableLazyColumn
 import com.robertgasparian.routinehelper.ui.dsm.RoutineReorderDragStartMode
 import com.robertgasparian.routinehelper.ui.dsm.RoutineSwipeToReveal
 import com.robertgasparian.routinehelper.ui.dsm.toTextFieldValue
-import com.robertgasparian.routinehelper.ui.dsm.SummaryNoteCard
+import com.robertgasparian.routinehelper.ui.reflection.api.ReflectionCard
 import com.robertgasparian.routinehelper.ui.dsm.rememberLazyListIsActuallyScrolling
 import com.robertgasparian.routinehelper.ui.theme.RoutineHelperTheme
 import java.time.Instant
@@ -200,13 +200,14 @@ fun RoutineTrackingComponent(
                 bottom = RoutineTrackingListBottomSafeSpace,
             )
             val summaryContent: @Composable () -> Unit = {
-                SummaryNoteCard(
-                    note = uiState.summaryNote,
+                ReflectionCard(
+                    summaryNote = uiState.summaryNote,
+                    rating = uiState.rating,
                     label = stringResource(
                         if (isWeekly) R.string.routine_tracking_week_note else R.string.routine_tracking_day_note,
                     ),
                     onEditClick = {
-                        onIntent(RoutineTrackingIntent.EditSummaryNoteClick)
+                        onIntent(RoutineTrackingIntent.EditReflectionClick)
                     },
                 )
             }

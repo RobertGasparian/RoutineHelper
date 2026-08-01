@@ -3,6 +3,8 @@ package com.robertgasparian.routinehelper.ui.weekly
 import com.robertgasparian.routinehelper.core.testing.FixedTimeProvider
 import com.robertgasparian.routinehelper.core.testing.MainDispatcherRule
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.model.WeeklyRoutineItem
 import com.robertgasparian.routinehelper.domain.removal.FakeRoutineRemovalUndoCoordinator
 import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalRequest
@@ -15,7 +17,7 @@ import com.robertgasparian.routinehelper.domain.repository.WeeklyCheckedChange
 import com.robertgasparian.routinehelper.domain.repository.WeeklyCountChange
 import com.robertgasparian.routinehelper.domain.repository.WeeklyHiddenChange
 import com.robertgasparian.routinehelper.domain.repository.WeeklyNoteChange
-import com.robertgasparian.routinehelper.domain.repository.WeeklySummaryNoteChange
+import com.robertgasparian.routinehelper.domain.repository.WeeklyReflectionChange
 import com.robertgasparian.routinehelper.domain.usecase.AddTemplateItemUseCase
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeWeeklyUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ReorderWeeklyRoutineItemsUseCase
@@ -23,9 +25,9 @@ import com.robertgasparian.routinehelper.domain.usecase.SetWeeklyItemCheckedUseC
 import com.robertgasparian.routinehelper.domain.usecase.SetWeeklyItemHiddenUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyItemCompletedCountUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyItemNoteUseCase
-import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklySummaryNoteUseCase
+import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyReflectionUseCase
 import com.robertgasparian.routinehelper.domain.usecase.WeeklyItemsUseCase
-import com.robertgasparian.routinehelper.domain.usecase.WeeklySummaryNoteUseCase
+import com.robertgasparian.routinehelper.domain.usecase.WeeklyReflectionUseCase
 import com.robertgasparian.routinehelper.test.FakeNoteDateTimeTextProvider
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingDebugItemsPopulator
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingIntent
@@ -121,20 +123,28 @@ class WeeklyViewModelTest {
     }
 
     @Test
-    fun `when Reflection summary save is received then forwards it to weekly summary use case`() = runTest {
+    fun `when reflection save is received then forwards text and rating to weekly use case`() = runTest {
         val viewModel = createViewModel()
 
-        viewModel.onIntent(RoutineTrackingIntent.SaveSummaryNote("  Better week  "))
+        viewModel.onIntent(
+            RoutineTrackingIntent.SaveReflection(
+                summaryNote = "  Better week  ",
+                rating = ReflectionRating(5),
+            ),
+        )
         advanceUntilIdle()
 
         assertEquals(
             listOf(
-                WeeklySummaryNoteChange(
+                WeeklyReflectionChange(
                     weekStartDate = WeekStartDate,
-                    note = "  Better week  ",
+                    reflection = RoutineReflection(
+                        summaryNote = "  Better week  ",
+                        rating = ReflectionRating(5),
+                    ),
                 ),
             ),
-            weeklyRepository.summaryNoteChanges,
+            weeklyRepository.reflectionChanges,
         )
     }
 
@@ -228,7 +238,7 @@ class WeeklyViewModelTest {
     private fun createViewModel(): WeeklyViewModel =
         WeeklyViewModel(
             weeklyItemsUseCase = WeeklyItemsUseCase(weeklyRepository),
-            weeklySummaryNoteUseCase = WeeklySummaryNoteUseCase(weeklyRepository),
+            weeklyReflectionUseCase = WeeklyReflectionUseCase(weeklyRepository),
             debugItemsPopulator = RoutineTrackingDebugItemsPopulator(
                 addTemplateItemUseCase = AddTemplateItemUseCase(templateRepository),
                 debugTextProvider = englishDebugTextProvider,
@@ -243,7 +253,7 @@ class WeeklyViewModelTest {
             setWeeklyItemHiddenUseCase = SetWeeklyItemHiddenUseCase(weeklyRepository),
             updateWeeklyItemCompletedCountUseCase = UpdateWeeklyItemCompletedCountUseCase(weeklyRepository),
             updateWeeklyItemNoteUseCase = UpdateWeeklyItemNoteUseCase(weeklyRepository),
-            updateWeeklySummaryNoteUseCase = UpdateWeeklySummaryNoteUseCase(weeklyRepository),
+            updateWeeklyReflectionUseCase = UpdateWeeklyReflectionUseCase(weeklyRepository),
             noteDateTimeTextProvider = noteDateTimeTextProvider,
             timeProvider = timeProvider,
         )

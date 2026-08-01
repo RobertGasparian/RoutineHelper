@@ -17,6 +17,7 @@ data class RoutineSnapshotEntity(
     val finalizedAtMillis: Long,
     val cadence: String,
     val summaryNote: String? = null,
+    val rating: Int? = null,
 ) {
     companion object {
         const val DAILY_CADENCE_STORAGE_VALUE = "DAILY"

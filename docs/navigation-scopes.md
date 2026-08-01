@@ -52,21 +52,24 @@ Reflection is the first navigation-flow-scoped feature:
 
 1. Daily, Weekly, or History detail obtains a `ReflectionEditorSessionViewModel` from its local
    entry owner.
-2. The client initializes the session with its current summary and pushes
+2. The client initializes the session with its current reflection text and rating, then pushes
    `ReflectionEditorDestination(parentContentKey)`.
 3. The editor is rendered by `BottomSheetSceneStrategy` as an overlay. It obtains the same
    `ReflectionEditorSessionViewModel` from `LocalNavigationFlowViewModelStoreOwner`.
    `BottomSheetSceneStrategy` also provides a sticky `LocalBottomSheetPresentationState`; the
    editor waits for `Presented` before requesting focus so the sheet and IME enter sequentially
    without relying on a fixed delay.
-4. Reflection owns the draft and emits an explicit `ReflectionEditorSaveRequest`.
+4. Reflection owns the text and rating draft and emits both in one explicit
+   `ReflectionEditorSaveRequest`.
 5. The still-alive client screen consumes the request and sends a focused save intent to its own
    ViewModel. Reflection never imports a Daily, Weekly, or History ViewModel or business use case.
 6. Dismissing without Save produces no request. Opening a new session always replaces any old
    unsaved draft.
 
-The shared contract lives in `:features:reflection-api`; the ViewModel and editor UI live in
-`:features:reflection`. Client features depend only on the API module, while `:app` composes the
+The shared session contract and `ReflectionCard` live in `:features:reflection-api`; the ViewModel
+and editor UI live in `:features:reflection`. The API uses the platform-independent
+`RoutineReflection` and `ReflectionRating` contracts from `:libs:routine:reflection:domain`.
+Client features depend only on these API/domain boundaries, while `:app` composes the
 implementations and navigation entries.
 
 Bottom-sheet presentation state is composition-scoped UI mechanics, not shared workflow or
@@ -77,7 +80,7 @@ History reminder deep links synthesize:
 
 `HistoryDestination -> HistoryDetailDestination -> ReflectionEditorDestination`
 
-The parent entry loads the persisted summary and initializes the same session used by a manual
+The parent entry loads the persisted reflection and initializes the same session used by a manual
 open. Link origin does not change the editor or Back behavior.
 
 ## Multi-step flows

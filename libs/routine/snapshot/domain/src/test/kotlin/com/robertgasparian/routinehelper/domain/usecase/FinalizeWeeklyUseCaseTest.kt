@@ -1,6 +1,8 @@
 package com.robertgasparian.routinehelper.domain.usecase
 
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotSummary
 import com.robertgasparian.routinehelper.domain.model.WeeklyRoutineItem
@@ -47,9 +49,12 @@ class FinalizeWeeklyUseCaseTest {
                 ),
             ),
         )
-        weeklyRepository.setSummaryNote(
+        weeklyRepository.setReflection(
             weekStartDate = "2026-05-24",
-            note = "Solid weekly reset.",
+            reflection = RoutineReflection(
+                summaryNote = "Solid weekly reset.",
+                rating = ReflectionRating(5),
+            ),
         )
 
         val snapshotId = useCase(
@@ -64,6 +69,7 @@ class FinalizeWeeklyUseCaseTest {
                 periodStartDate = "2026-05-24",
                 finalizedAtMillis = 123L,
                 summaryNote = "Solid weekly reset.",
+                rating = ReflectionRating(5),
                 cadence = RoutineCadence.Weekly,
                 items = listOf(
                     RoutineSnapshotItem(

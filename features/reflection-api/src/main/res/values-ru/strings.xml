@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reflection_card_add_reflection">Добавить рефлексию</string>
+    <string name="reflection_card_edit_reflection">Изменить рефлексию</string>
+    <string name="reflection_card_rating">Оценка: %1$d из %2$d</string>
+</resources>

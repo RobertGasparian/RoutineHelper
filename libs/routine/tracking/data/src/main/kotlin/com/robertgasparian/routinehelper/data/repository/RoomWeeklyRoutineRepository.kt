@@ -5,23 +5,25 @@ import androidx.room.withTransaction
 import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.data.local.dao.RoutineItemDao
 import com.robertgasparian.routinehelper.data.local.dao.WeeklyEntryDao
-import com.robertgasparian.routinehelper.data.local.dao.WeeklySummaryNoteDao
+import com.robertgasparian.routinehelper.data.local.dao.WeeklyReflectionDao
 import com.robertgasparian.routinehelper.data.local.entity.RoutineItemEntity
 import com.robertgasparian.routinehelper.data.local.entity.WeeklyEntryEntity
-import com.robertgasparian.routinehelper.data.local.entity.WeeklySummaryNoteEntity
+import com.robertgasparian.routinehelper.data.local.entity.WeeklyReflectionEntity
 import com.robertgasparian.routinehelper.data.local.model.RoutineItemWithAction
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.model.WeeklyRoutineItem
 import com.robertgasparian.routinehelper.domain.repository.WeeklyRoutineRepository
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
 
 class RoomWeeklyRoutineRepository @Inject constructor(
     private val database: RoomDatabase,
     private val routineItemDao: RoutineItemDao,
     private val weeklyEntryDao: WeeklyEntryDao,
-    private val weeklySummaryNoteDao: WeeklySummaryNoteDao,
+    private val weeklyReflectionDao: WeeklyReflectionDao,
     private val timeProvider: TimeProvider,
 ) : WeeklyRoutineRepository {
     override fun weeklyItems(weekStartDate: String): Flow<List<WeeklyRoutineItem>> =
@@ -38,8 +40,13 @@ class RoomWeeklyRoutineRepository @Inject constructor(
             }
         }
 
-    override fun summaryNote(weekStartDate: String): Flow<String?> =
-        weeklySummaryNoteDao.noteForWeek(weekStartDate).map { note -> note?.note }
+    override fun reflection(weekStartDate: String): Flow<RoutineReflection> =
+        weeklyReflectionDao.reflectionForWeek(weekStartDate).map { storedReflection ->
+            RoutineReflection(
+                summaryNote = storedReflection?.summaryNote,
+                rating = storedReflection?.rating?.let(::ReflectionRating),
+            )
+        }
 
     override suspend fun setChecked(
         weekStartDate: String,
@@ -94,18 +101,19 @@ class RoomWeeklyRoutineRepository @Inject constructor(
         )
     }
 
-    override suspend fun updateSummaryNote(
+    override suspend fun updateReflection(
         weekStartDate: String,
-        note: String?,
+        reflection: RoutineReflection,
     ) {
-        val normalizedNote = note?.trim()?.takeIf(String::isNotEmpty)
-        if (normalizedNote == null) {
-            weeklySummaryNoteDao.deleteForWeek(weekStartDate)
+        val normalizedReflection = reflection.normalized()
+        if (normalizedReflection.isEmpty) {
+            weeklyReflectionDao.deleteForWeek(weekStartDate)
         } else {
-            weeklySummaryNoteDao.upsert(
-                WeeklySummaryNoteEntity(
+            weeklyReflectionDao.upsert(
+                WeeklyReflectionEntity(
                     weekStartDate = weekStartDate,
-                    note = normalizedNote,
+                    summaryNote = normalizedReflection.summaryNote,
+                    rating = normalizedReflection.rating?.value,
                     updatedAtMillis = timeProvider.currentTimeMillis(),
                 ),
             )
@@ -115,10 +123,13 @@ class RoomWeeklyRoutineRepository @Inject constructor(
     override suspend fun resetWeek(weekStartDate: String) {
         database.withTransaction {
             weeklyEntryDao.deleteEntriesForWeek(weekStartDate)
-            weeklySummaryNoteDao.deleteForWeek(weekStartDate)
+            weeklyReflectionDao.deleteForWeek(weekStartDate)
         }
     }
 }
+
+private fun RoutineReflection.normalized(): RoutineReflection =
+    copy(summaryNote = summaryNote?.trim()?.takeIf(String::isNotEmpty))
 
 private fun RoutineItemWithAction.toWeeklyDomain(
     weekStartDate: String,
