@@ -459,11 +459,17 @@ private fun CurrentListOverflowMenu(
     ) {
         if (showAddTestItems) {
             DropdownMenuItem(
-                text = { Text(text = stringResource(R.string.current_list_add_test_items)) },
+                text = {
+                    Text(
+                        text = stringResource(R.string.current_list_add_test_items),
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
                     )
                 },
                 onClick = { onIntent(CurrentListOverflowMenuIntent.AddTestItemsClick) },

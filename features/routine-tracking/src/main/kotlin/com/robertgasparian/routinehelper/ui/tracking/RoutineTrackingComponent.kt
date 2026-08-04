@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
@@ -27,6 +28,7 @@ import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SelectableDates
@@ -144,6 +146,9 @@ fun RoutineTrackingComponent(
                                 // TODO Remove this debug-only action when worker triggering has a dedicated test tool.
                                 isSnapshotDatePickerVisible = true
                             },
+                            colors = ButtonDefaults.textButtonColors(
+                                contentColor = MaterialTheme.colorScheme.error,
+                            ),
                         ) {
                             Text(text = stringResource(R.string.routine_tracking_snapshot))
                         }
@@ -324,7 +329,12 @@ private fun RoutineTrackingDebugOverflowMenu(
     var isExpanded by rememberSaveable { mutableStateOf(false) }
 
     Box(modifier = modifier) {
-        IconButton(onClick = { isExpanded = true }) {
+        IconButton(
+            onClick = { isExpanded = true },
+            colors = IconButtonDefaults.iconButtonColors(
+                contentColor = MaterialTheme.colorScheme.error,
+            ),
+        ) {
             Icon(
                 imageVector = Icons.Default.MoreVert,
                 contentDescription = stringResource(R.string.routine_tracking_more_options),
@@ -335,11 +345,17 @@ private fun RoutineTrackingDebugOverflowMenu(
             onDismissRequest = { isExpanded = false },
         ) {
             DropdownMenuItem(
-                text = { Text(text = stringResource(R.string.routine_tracking_add_test_items)) },
+                text = {
+                    Text(
+                        text = stringResource(R.string.routine_tracking_add_test_items),
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
                     )
                 },
                 onClick = {
@@ -373,6 +389,9 @@ private fun DebugSnapshotDatePickerDialog(
                         ?.toLocalDateString()
                         ?.let(onDateSelected)
                 },
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error,
+                ),
             ) {
                 Text(text = stringResource(R.string.routine_tracking_snapshot))
             }

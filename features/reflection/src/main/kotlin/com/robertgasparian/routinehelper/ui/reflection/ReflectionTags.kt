@@ -252,7 +252,10 @@ internal fun ReflectionTagsComponent(
                 onClick = { onAction(ReflectionTagsAction.AddTestTagsClick) },
                 modifier = Modifier.align(Alignment.End),
             ) {
-                Text(text = "Add 5 test tags")
+                Text(
+                    text = "Add 5 test tags",
+                    color = MaterialTheme.colorScheme.error,
+                )
             }
         }
     }

@@ -32,6 +32,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -233,6 +234,9 @@ fun HistoryDetailComponent(
                             onClick = {
                                 onIntent(HistoryDetailIntent.DebugSummaryNotificationClick)
                             },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                contentColor = MaterialTheme.colorScheme.error,
+                            ),
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Notifications,
@@ -257,6 +261,9 @@ fun HistoryDetailComponent(
                                 // TODO Remove this test-only delete affordance when history management UX is finalized.
                                 showDeleteConfirmation = true
                             },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                contentColor = MaterialTheme.colorScheme.error,
+                            ),
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
