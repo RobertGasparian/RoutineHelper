@@ -4,6 +4,7 @@ import androidx.room.Embedded
 import androidx.room.Relation
 import com.robertgasparian.routinehelper.data.local.entity.RoutineSnapshotEntity
 import com.robertgasparian.routinehelper.data.local.entity.RoutineSnapshotEntryEntity
+import com.robertgasparian.routinehelper.data.local.entity.RoutineSnapshotReflectionTagEntity
 
 data class RoutineSnapshotWithEntries(
     @Embedded
@@ -13,4 +14,9 @@ data class RoutineSnapshotWithEntries(
         entityColumn = "snapshotId",
     )
     val entries: List<RoutineSnapshotEntryEntity>,
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "snapshotId",
+    )
+    val reflectionTags: List<RoutineSnapshotReflectionTagEntity>,
 )

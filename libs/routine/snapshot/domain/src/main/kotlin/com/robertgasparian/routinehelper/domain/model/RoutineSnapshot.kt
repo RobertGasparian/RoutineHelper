@@ -8,6 +8,7 @@ data class RoutineSnapshot(
     val cadence: RoutineCadence,
     val summaryNote: String? = null,
     val rating: ReflectionRating? = null,
+    val selectedTags: List<SelectedReflectionTag> = emptyList(),
     /**
      * Intentional capability seam for future snapshot reflection-editing policy.
      *

@@ -5,8 +5,12 @@ import com.robertgasparian.routinehelper.data.local.dao.WeeklyEntryDao
 import com.robertgasparian.routinehelper.data.local.dao.WeeklyReflectionDao
 import com.robertgasparian.routinehelper.data.local.entity.WeeklyEntryEntity
 import com.robertgasparian.routinehelper.data.local.entity.WeeklyReflectionEntity
+import com.robertgasparian.routinehelper.data.local.entity.WeeklyReflectionTagSelectionEntity
+import com.robertgasparian.routinehelper.data.local.entity.ReflectionTagEntity
+import com.robertgasparian.routinehelper.data.local.model.WeeklyReflectionWithTags
 import com.robertgasparian.routinehelper.domain.model.ReflectionRating
 import com.robertgasparian.routinehelper.domain.model.RoutineReflection
+import com.robertgasparian.routinehelper.domain.model.SelectedReflectionTag
 import com.robertgasparian.routinehelper.domain.model.WeeklyRoutineItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -20,12 +24,14 @@ class RoomWeeklyRoutineRepositoryTest {
     private val routineItemDao = FakeRoutineItemDao()
     private val weeklyEntryDao = FakeWeeklyEntryDao()
     private val weeklyReflectionDao = FakeWeeklyReflectionDao()
+    private val reflectionTagDao = FakeReflectionTagDao()
     private val timeProvider = FixedTimeProvider()
     private val repository = RoomWeeklyRoutineRepository(
         database = database,
         routineItemDao = routineItemDao,
         weeklyEntryDao = weeklyEntryDao,
         weeklyReflectionDao = weeklyReflectionDao,
+        reflectionTagDao = reflectionTagDao,
         timeProvider = timeProvider,
     )
 
@@ -217,6 +223,31 @@ class RoomWeeklyRoutineRepositoryTest {
     }
 
     @Test
+    fun `given weekly template tag when updating reflection then selection is persisted by id`() = runTest {
+        reflectionTagDao.tagsById[7L] = ReflectionTagEntity(
+            id = 7L,
+            cadence = "WEEKLY",
+            label = "Focused",
+            normalizedLabel = "focused",
+            position = 0,
+            createdAtMillis = 1L,
+            updatedAtMillis = 1L,
+        )
+
+        repository.updateReflection(
+            WEEK_START_DATE,
+            RoutineReflection(
+                selectedTags = listOf(
+                    SelectedReflectionTag(templateTagId = 7L, label = "Focused", position = 0),
+                ),
+            ),
+        )
+
+        assertEquals(listOf(7L), weeklyReflectionDao.tagSelections[WEEK_START_DATE])
+        assertEquals(WEEK_START_DATE, weeklyReflectionDao.reflections[WEEK_START_DATE]?.weekStartDate)
+    }
+
+    @Test
     fun `given stored weekly state when resetting the week then deletes entries and reflection`() = runTest {
         weeklyEntryDao.entries[WEEK_START_DATE to 10L] = weeklyEntry(routineItemId = 10L)
         weeklyReflectionDao.reflections[WEEK_START_DATE] = WeeklyReflectionEntity(
@@ -336,17 +367,37 @@ private class FakeWeeklyEntryDao : WeeklyEntryDao {
 
 private class FakeWeeklyReflectionDao : WeeklyReflectionDao {
     val reflections = mutableMapOf<String, WeeklyReflectionEntity>()
+    val reflectionTags = mutableMapOf<String, List<ReflectionTagEntity>>()
+    val tagSelections = mutableMapOf<String, List<Long>>()
     val deletedWeekStartDates = mutableListOf<String>()
 
-    override fun reflectionForWeek(weekStartDate: String): Flow<WeeklyReflectionEntity?> =
-        flowOf(reflections[weekStartDate])
+    override fun reflectionForWeek(weekStartDate: String): Flow<WeeklyReflectionWithTags?> =
+        flowOf(
+            reflections[weekStartDate]?.let { reflection ->
+                WeeklyReflectionWithTags(
+                    reflection = reflection,
+                    tags = reflectionTags[weekStartDate].orEmpty(),
+                )
+            },
+        )
 
     override suspend fun upsert(reflection: WeeklyReflectionEntity) {
         reflections[reflection.weekStartDate] = reflection
     }
 
+    override suspend fun insertTagSelections(selections: List<WeeklyReflectionTagSelectionEntity>) {
+        selections.groupBy(WeeklyReflectionTagSelectionEntity::weekStartDate).forEach { (weekStartDate, values) ->
+            tagSelections[weekStartDate] = values.map(WeeklyReflectionTagSelectionEntity::tagId)
+        }
+    }
+
+    override suspend fun deleteTagSelectionsForWeek(weekStartDate: String) {
+        tagSelections.remove(weekStartDate)
+    }
+
     override suspend fun deleteForWeek(weekStartDate: String) {
         reflections.remove(weekStartDate)
+        tagSelections.remove(weekStartDate)
         deletedWeekStartDates += weekStartDate
     }
 }

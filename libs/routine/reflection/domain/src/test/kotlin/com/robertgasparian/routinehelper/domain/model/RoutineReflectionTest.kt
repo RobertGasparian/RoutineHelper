@@ -18,6 +18,15 @@ class RoutineReflectionTest {
     }
 
     @Test
+    fun `given only a selected tag when checking emptiness then reflection is not empty`() {
+        assertFalse(
+            RoutineReflection(
+                selectedTags = listOf(SelectedReflectionTag(label = "Calm", position = 0)),
+            ).isEmpty,
+        )
+    }
+
+    @Test
     fun `given rating at supported bounds when creating rating then creation succeeds`() {
         ReflectionRating(ReflectionRating.MINIMUM)
         ReflectionRating(ReflectionRating.MAXIMUM)

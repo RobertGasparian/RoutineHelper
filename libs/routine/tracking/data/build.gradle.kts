@@ -23,6 +23,7 @@ android {
 dependencies {
     api(project(":core:time"))
     implementation(project(":libs:routine:reflection:domain"))
+    api(project(":libs:routine:reflection:data"))
     api(project(":libs:routine:template:data"))
     implementation(project(":libs:routine:template:domain"))
     api(project(":libs:routine:tracking:domain"))
@@ -36,4 +37,6 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(project(":core:testing"))
+    testImplementation(testFixtures(project(":libs:routine:reflection:domain")))
+    testImplementation(testFixtures(project(":libs:routine:tracking:domain")))
 }

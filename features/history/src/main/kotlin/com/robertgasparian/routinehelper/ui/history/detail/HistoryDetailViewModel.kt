@@ -2,12 +2,16 @@ package com.robertgasparian.routinehelper.ui.history.detail
 
 import com.robertgasparian.routinehelper.core.presentation.BaseViewModel
 import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
+import com.robertgasparian.routinehelper.domain.model.SelectedReflectionTag
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
+import com.robertgasparian.routinehelper.domain.usecase.ReflectionTagsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateSnapshotReflectionUseCase
 import com.robertgasparian.routinehelper.ui.history.HistoryTextProvider
+import com.robertgasparian.routinehelper.ui.reflection.api.ReflectionEditorTag
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -24,6 +28,7 @@ class HistoryDetailViewModel @AssistedInject constructor(
     private val deleteSnapshotUseCase: DeleteSnapshotUseCase,
     private val historyTextProvider: HistoryTextProvider,
     snapshotUseCase: SnapshotUseCase,
+    reflectionTagsUseCase: ReflectionTagsUseCase,
     private val updateSnapshotReflectionUseCase: UpdateSnapshotReflectionUseCase,
 ) : BaseViewModel<HistoryDetailUiState, HistoryDetailIntent, HistoryDetailUiEvent>() {
     private val isShareFormatDialogVisible = MutableStateFlow(false)
@@ -39,13 +44,19 @@ class HistoryDetailViewModel @AssistedInject constructor(
             snapshot,
             isShareFormatDialogVisible,
             shareDraft,
-        ) { snapshotLoadState, isShareFormatDialogVisible, shareDraft ->
+            reflectionTagsUseCase(RoutineCadence.Daily),
+            reflectionTagsUseCase(RoutineCadence.Weekly),
+        ) { snapshotLoadState, isShareFormatDialogVisible, shareDraft, dailyTags, weeklyTags ->
             val snapshotState = when (snapshotLoadState) {
                 SnapshotLoadState.Loading -> HistoryDetailUiState.loading()
                 is SnapshotLoadState.Loaded -> snapshotLoadState.snapshot?.toHistoryDetailUiState(
                     finalizedTime = historyTextProvider.finalizedTime(
                         snapshotLoadState.snapshot.finalizedAtMillis,
                     ),
+                    cadenceTagTemplate = when (snapshotLoadState.snapshot.cadence) {
+                        RoutineCadence.Daily -> dailyTags
+                        RoutineCadence.Weekly -> weeklyTags
+                    },
                 ) ?: HistoryDetailUiState.previewMissing()
             }
             snapshotState.copy(
@@ -66,6 +77,7 @@ class HistoryDetailViewModel @AssistedInject constructor(
             is HistoryDetailIntent.SaveReflection -> saveReflection(
                 summaryNote = intent.summaryNote,
                 rating = intent.rating,
+                tags = intent.tags,
             )
             HistoryDetailIntent.ShareAsFileClick -> showFileSharePreview()
             HistoryDetailIntent.ShareAsTextClick -> showTextSharePreview()
@@ -79,6 +91,7 @@ class HistoryDetailViewModel @AssistedInject constructor(
     private fun saveReflection(
         summaryNote: String,
         rating: ReflectionRating?,
+        tags: List<ReflectionEditorTag>,
     ) {
         if (currentSnapshot()?.isReflectionEditable != true) return
 
@@ -88,6 +101,13 @@ class HistoryDetailViewModel @AssistedInject constructor(
                 reflection = RoutineReflection(
                     summaryNote = summaryNote,
                     rating = rating,
+                    selectedTags = tags.filter(ReflectionEditorTag::isSelected)
+                        .mapIndexed { position, tag ->
+                            SelectedReflectionTag(
+                                label = tag.label,
+                                position = position,
+                            )
+                        },
                 ),
             )
         }

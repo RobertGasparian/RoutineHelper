@@ -52,14 +52,15 @@ Reflection is the first navigation-flow-scoped feature:
 
 1. Daily, Weekly, or History detail obtains a `ReflectionEditorSessionViewModel` from its local
    entry owner.
-2. The client initializes the session with its current reflection text and rating, then pushes
+2. The client initializes the session with its current reflection text, rating, and generic tag
+   values, then pushes
    `ReflectionEditorDestination(parentContentKey)`.
 3. The editor is rendered by `BottomSheetSceneStrategy` as an overlay. It obtains the same
    `ReflectionEditorSessionViewModel` from `LocalNavigationFlowViewModelStoreOwner`.
    `BottomSheetSceneStrategy` also provides a sticky `LocalBottomSheetPresentationState`; the
    editor waits for `Presented` before requesting focus so the sheet and IME enter sequentially
    without relying on a fixed delay.
-4. Reflection owns the text and rating draft and emits both in one explicit
+4. Reflection owns the text, rating, and tag draft and emits them in one explicit
    `ReflectionEditorSaveRequest`.
 5. The still-alive client screen consumes the request and sends a focused save intent to its own
    ViewModel. Reflection never imports a Daily, Weekly, or History ViewModel or business use case.
@@ -71,6 +72,14 @@ and editor UI live in `:features:reflection`. The API uses the platform-independ
 `RoutineReflection` and `ReflectionRating` contracts from `:libs:routine:reflection:domain`.
 Client features depend only on these API/domain boundaries, while `:app` composes the
 implementations and navigation entries.
+
+The editor treats each tag source ID as opaque and has no cadence, tracking, or History business
+logic. Daily and Weekly clients use those IDs to reconcile their independent cadence templates,
+then persist selected template IDs on the current reflection. History always passes detached tag
+values and stores selected labels only in the snapshot. If a snapshot has no selected tags, History
+initializes its editor from an unselected copy of the current cadence template; once a snapshot has
+selected tags, only those snapshot tags initialize the editor. Saving no selected tags intentionally
+returns the snapshot to the template-fallback state the next time it is opened.
 
 Bottom-sheet presentation state is composition-scoped UI mechanics, not shared workflow or
 business state. It reports only that the scene's initial opening animation has settled and must not

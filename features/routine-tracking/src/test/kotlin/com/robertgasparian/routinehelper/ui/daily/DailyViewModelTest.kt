@@ -15,6 +15,7 @@ import com.robertgasparian.routinehelper.domain.repository.AddedTemplateItem
 import com.robertgasparian.routinehelper.domain.repository.CheckedChange
 import com.robertgasparian.routinehelper.domain.repository.CountChange
 import com.robertgasparian.routinehelper.domain.repository.FakeRoutineHistoryRepository
+import com.robertgasparian.routinehelper.domain.repository.FakeReflectionTagTemplateRepository
 import com.robertgasparian.routinehelper.domain.repository.FakeRoutineTemplateRepository
 import com.robertgasparian.routinehelper.domain.repository.FakeTodayRoutineRepository
 import com.robertgasparian.routinehelper.domain.repository.HiddenChange
@@ -23,13 +24,14 @@ import com.robertgasparian.routinehelper.domain.repository.ReflectionChange
 import com.robertgasparian.routinehelper.domain.usecase.AddTemplateItemUseCase
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeTodayUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ReorderDailyRoutineItemsUseCase
+import com.robertgasparian.routinehelper.domain.usecase.ReflectionTagsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetTodayItemCheckedUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetTodayItemHiddenUseCase
 import com.robertgasparian.routinehelper.domain.usecase.TodayItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.TodayReflectionUseCase
+import com.robertgasparian.routinehelper.domain.usecase.TodayReflectionSaveCoordinator
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayItemCompletedCountUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayItemNoteUseCase
-import com.robertgasparian.routinehelper.domain.usecase.UpdateTodayReflectionUseCase
 import com.robertgasparian.routinehelper.test.FakeNoteDateTimeTextProvider
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingDebugItemsPopulator
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingIntent
@@ -51,6 +53,7 @@ class DailyViewModelTest {
     private val todayRepository = FakeTodayRoutineRepository()
     private val templateRepository = FakeRoutineTemplateRepository()
     private val historyRepository = FakeRoutineHistoryRepository()
+    private val reflectionTagRepository = FakeReflectionTagTemplateRepository()
     private val noteDateTimeTextProvider = FakeNoteDateTimeTextProvider()
     private val timeProvider = FixedTimeProvider()
     private val removalUndoCoordinator = FakeRoutineRemovalUndoCoordinator()
@@ -256,6 +259,7 @@ class DailyViewModelTest {
         DailyViewModel(
             todayItemsUseCase = TodayItemsUseCase(todayRepository),
             todayReflectionUseCase = TodayReflectionUseCase(todayRepository),
+            reflectionTagsUseCase = ReflectionTagsUseCase(reflectionTagRepository),
             debugItemsPopulator = RoutineTrackingDebugItemsPopulator(
                 addTemplateItemUseCase = AddTemplateItemUseCase(templateRepository),
                 debugTextProvider = englishDebugTextProvider,
@@ -270,7 +274,9 @@ class DailyViewModelTest {
             setTodayItemHiddenUseCase = SetTodayItemHiddenUseCase(todayRepository),
             updateTodayItemCompletedCountUseCase = UpdateTodayItemCompletedCountUseCase(todayRepository),
             updateTodayItemNoteUseCase = UpdateTodayItemNoteUseCase(todayRepository),
-            updateTodayReflectionUseCase = UpdateTodayReflectionUseCase(todayRepository),
+            todayReflectionSaveCoordinator = TodayReflectionSaveCoordinator { date, reflection, _, _ ->
+                todayRepository.updateReflection(date = date, reflection = reflection)
+            },
             noteDateTimeTextProvider = noteDateTimeTextProvider,
             timeProvider = timeProvider,
         )

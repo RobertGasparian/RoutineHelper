@@ -5,13 +5,16 @@ import androidx.room.RoomDatabase
 import com.robertgasparian.routinehelper.data.local.dao.RoutineSnapshotDao
 import com.robertgasparian.routinehelper.data.local.entity.RoutineSnapshotEntity
 import com.robertgasparian.routinehelper.data.local.entity.RoutineSnapshotEntryEntity
+import com.robertgasparian.routinehelper.data.local.entity.RoutineSnapshotReflectionTagEntity
 import com.robertgasparian.routinehelper.data.local.model.RoutineSnapshotWithEntries
+import com.robertgasparian.routinehelper.domain.model.ReflectionTagInputNormalizer
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.ReflectionRating
 import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotSummary
+import com.robertgasparian.routinehelper.domain.model.SelectedReflectionTag
 import java.util.concurrent.Executor
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -26,6 +29,7 @@ class RoomRoutineHistoryRepositoryTest {
     private val repository = RoomRoutineHistoryRepository(
         database = database,
         routineSnapshotDao = routineSnapshotDao,
+        tagInputNormalizer = ReflectionTagInputNormalizer(),
     )
 
     @Test
@@ -123,6 +127,14 @@ class RoomRoutineHistoryRepositoryTest {
                     note = "Done",
                 ),
             ),
+            reflectionTags = listOf(
+                RoutineSnapshotReflectionTagEntity(
+                    snapshotId = 20L,
+                    labelSnapshot = "Calm",
+                    normalizedLabelSnapshot = "calm",
+                    positionSnapshot = 0,
+                ),
+            ),
         )
 
         val snapshot = repository.snapshot(snapshotId = 20L).first()
@@ -135,6 +147,7 @@ class RoomRoutineHistoryRepositoryTest {
                 cadence = RoutineCadence.Weekly,
                 summaryNote = "Good week",
                 rating = ReflectionRating(4),
+                selectedTags = listOf(SelectedReflectionTag(label = "Calm", position = 0)),
                 items = listOf(
                     RoutineSnapshotItem(
                         actionId = 1L,
@@ -167,6 +180,10 @@ class RoomRoutineHistoryRepositoryTest {
             reflection = RoutineReflection(
                 summaryNote = "  Good day  ",
                 rating = ReflectionRating(5),
+                selectedTags = listOf(
+                    SelectedReflectionTag(label = "  Calm  ", position = 3),
+                    SelectedReflectionTag(label = "calm", position = 4),
+                ),
             ),
             cadence = RoutineCadence.Daily,
             items = listOf(
@@ -199,6 +216,17 @@ class RoomRoutineHistoryRepositoryTest {
         assertEquals(2, routineSnapshotDao.entries.getValue(snapshotId).first().completedCount)
         assertEquals(true, routineSnapshotDao.entries.getValue(snapshotId).first().isHidden)
         assertEquals("Almost there", routineSnapshotDao.entries.getValue(snapshotId).first().note)
+        assertEquals(
+            listOf(
+                RoutineSnapshotReflectionTagEntity(
+                    snapshotId = snapshotId,
+                    labelSnapshot = "Calm",
+                    normalizedLabelSnapshot = "calm",
+                    positionSnapshot = 0,
+                ),
+            ),
+            routineSnapshotDao.reflectionTags.getValue(snapshotId),
+        )
         assertEquals(1, database.transactionBegins)
         assertEquals(1, database.transactionSuccesses)
         assertEquals(1, database.transactionEnds)
@@ -258,6 +286,7 @@ class RoomRoutineHistoryRepositoryTest {
             reflection = RoutineReflection(
                 summaryNote = "  Updated reflection  ",
                 rating = ReflectionRating(4),
+                selectedTags = listOf(SelectedReflectionTag(label = "Focused", position = 0)),
             ),
         )
 
@@ -267,6 +296,10 @@ class RoomRoutineHistoryRepositoryTest {
         )
         assertEquals(originalEntries, routineSnapshotDao.entries.getValue(10L))
         assertEquals(listOf(10L), routineSnapshotDao.updatedReflectionSnapshotIds)
+        assertEquals(
+            listOf("Focused"),
+            routineSnapshotDao.reflectionTags.getValue(10L).map { tag -> tag.labelSnapshot },
+        )
 
         repository.updateSnapshotReflection(
             snapshotId = 10L,
@@ -274,6 +307,7 @@ class RoomRoutineHistoryRepositoryTest {
         )
 
         assertEquals(null, routineSnapshotDao.snapshots.getValue(10L).summaryNote)
+        assertEquals(null, routineSnapshotDao.reflectionTags[10L])
     }
 
     @Test
@@ -359,6 +393,7 @@ class RoomRoutineHistoryRepositoryTest {
 private class FakeRoutineSnapshotDao : RoutineSnapshotDao {
     val snapshots = mutableMapOf<Long, RoutineSnapshotEntity>()
     val entries = mutableMapOf<Long, List<RoutineSnapshotEntryEntity>>()
+    val reflectionTags = mutableMapOf<Long, List<RoutineSnapshotReflectionTagEntity>>()
     val requestedCadences = mutableListOf<String>()
     val requestedSnapshotIds = mutableListOf<Long>()
     val updatedSnapshotIds = mutableListOf<Long>()
@@ -428,29 +463,43 @@ private class FakeRoutineSnapshotDao : RoutineSnapshotDao {
         }
     }
 
+    override suspend fun insertReflectionTags(tags: List<RoutineSnapshotReflectionTagEntity>) {
+        tags.groupBy(RoutineSnapshotReflectionTagEntity::snapshotId).forEach { (snapshotId, newTags) ->
+            reflectionTags[snapshotId] = reflectionTags[snapshotId].orEmpty() + newTags
+        }
+    }
+
     override suspend fun deleteEntries(snapshotId: Long) {
         entries.remove(snapshotId)
         deletedEntrySnapshotIds += snapshotId
     }
 
+    override suspend fun deleteReflectionTags(snapshotId: Long) {
+        reflectionTags.remove(snapshotId)
+    }
+
     override suspend fun deleteSnapshot(id: Long) {
         snapshots.remove(id)
         entries.remove(id)
+        reflectionTags.remove(id)
         deletedSnapshotIds += id
     }
 
     fun storeSnapshot(
         snapshot: RoutineSnapshotEntity,
         entries: List<RoutineSnapshotEntryEntity> = emptyList(),
+        reflectionTags: List<RoutineSnapshotReflectionTagEntity> = emptyList(),
     ) {
         snapshots[snapshot.id] = snapshot
         this.entries[snapshot.id] = entries
+        this.reflectionTags[snapshot.id] = reflectionTags
     }
 
     private fun withEntries(snapshot: RoutineSnapshotEntity): RoutineSnapshotWithEntries =
         RoutineSnapshotWithEntries(
             snapshot = snapshot,
             entries = entries[snapshot.id].orEmpty(),
+            reflectionTags = reflectionTags[snapshot.id].orEmpty(),
         )
 
     private fun findSnapshot(

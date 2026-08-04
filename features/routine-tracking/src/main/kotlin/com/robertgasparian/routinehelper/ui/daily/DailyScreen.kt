@@ -29,6 +29,8 @@ fun DailyScreen(
             RoutineTrackingIntent.SaveReflection(
                 summaryNote = request.text,
                 rating = request.rating,
+                originalTags = request.originalTags,
+                tags = request.tags,
             ),
         )
         reflectionEditorSession.consumeSaveRequest(request.requestId)
@@ -46,6 +48,7 @@ fun DailyScreen(
                         ReflectionEditorInitialState(
                             text = uiState.summaryNote,
                             rating = uiState.rating,
+                            tags = uiState.reflectionTags,
                         ),
                     )
                     onSummaryEditorClick()

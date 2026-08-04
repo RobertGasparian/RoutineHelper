@@ -2,8 +2,11 @@ package com.robertgasparian.routinehelper.ui.history.detail
 
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+import com.robertgasparian.routinehelper.domain.model.ReflectionTagDefinition
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
+import com.robertgasparian.routinehelper.domain.model.SelectedReflectionTag
+import com.robertgasparian.routinehelper.ui.reflection.api.ReflectionEditorTag
 import java.time.Instant
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -92,6 +95,78 @@ class HistoryDetailUiMapperTest {
         assertEquals("", state.summaryNote)
         assertEquals(false, state.isReflectionEditable)
         assertEquals("2026-05-29", snapshot.historyDisplayDate)
+    }
+
+    @Test
+    fun `given snapshot without selected tags when mapped then current cadence template is copied unselected`() {
+        val snapshot = RoutineSnapshot(
+            snapshotId = 1L,
+            periodStartDate = "2026-05-29",
+            finalizedAtMillis = FINALIZED_AT_MILLIS,
+            cadence = RoutineCadence.Daily,
+            items = emptyList(),
+        )
+
+        val state = snapshot.toHistoryDetailUiState(
+            finalizedTime = "12:00 PM",
+            cadenceTagTemplate = listOf(
+                ReflectionTagDefinition(7L, "Calm", 0, RoutineCadence.Daily),
+                ReflectionTagDefinition(8L, "Productive", 1, RoutineCadence.Daily),
+            ),
+        )
+
+        assertEquals(
+            listOf(
+                ReflectionEditorTag(label = "Calm", isSelected = false),
+                ReflectionEditorTag(label = "Productive", isSelected = false),
+            ),
+            state.reflectionTags,
+        )
+    }
+
+    @Test
+    fun `given read only snapshot without selected tags when mapped then template tags are omitted`() {
+        val snapshot = RoutineSnapshot(
+            snapshotId = 1L,
+            periodStartDate = "2026-05-29",
+            finalizedAtMillis = FINALIZED_AT_MILLIS,
+            cadence = RoutineCadence.Daily,
+            isReflectionEditable = false,
+            items = emptyList(),
+        )
+
+        val state = snapshot.toHistoryDetailUiState(
+            finalizedTime = "12:00 PM",
+            cadenceTagTemplate = listOf(
+                ReflectionTagDefinition(7L, "Calm", 0, RoutineCadence.Daily),
+            ),
+        )
+
+        assertEquals(emptyList<ReflectionEditorTag>(), state.reflectionTags)
+    }
+
+    @Test
+    fun `given snapshot with selected tags when mapped then template is ignored and only snapshot tags are shown`() {
+        val snapshot = RoutineSnapshot(
+            snapshotId = 1L,
+            periodStartDate = "2026-05-29",
+            finalizedAtMillis = FINALIZED_AT_MILLIS,
+            cadence = RoutineCadence.Daily,
+            selectedTags = listOf(SelectedReflectionTag(label = "Snapshot only", position = 0)),
+            items = emptyList(),
+        )
+
+        val state = snapshot.toHistoryDetailUiState(
+            finalizedTime = "12:00 PM",
+            cadenceTagTemplate = listOf(
+                ReflectionTagDefinition(7L, "Current template", 0, RoutineCadence.Daily),
+            ),
+        )
+
+        assertEquals(
+            listOf(ReflectionEditorTag(label = "Snapshot only", isSelected = true)),
+            state.reflectionTags,
+        )
     }
 
     private companion object {

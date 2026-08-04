@@ -2,6 +2,7 @@ package com.robertgasparian.routinehelper.ui.history.detail
 
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+import com.robertgasparian.routinehelper.ui.reflection.api.ReflectionEditorTag
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
 
 data class HistoryDetailUiState(
@@ -10,6 +11,7 @@ data class HistoryDetailUiState(
     val finalizedTime: String = "",
     val summaryNote: String = "",
     val rating: ReflectionRating? = null,
+    val reflectionTags: List<ReflectionEditorTag> = emptyList(),
     /** Intentional UI capability for future summary edit restrictions; currently always true. */
     val isReflectionEditable: Boolean = true,
     val items: List<HistoryDetailItemUiState> = emptyList(),
@@ -18,7 +20,7 @@ data class HistoryDetailUiState(
     val isShareFormatDialogVisible: Boolean = false,
     val shareDraft: ShareDraft? = null,
 ) {
-    val hasReflection: Boolean = summaryNote.isNotBlank() || rating != null
+    val hasReflection: Boolean = summaryNote.isNotBlank() || rating != null || reflectionTags.any { it.isSelected }
     val visibleItems: List<HistoryDetailItemUiState> = items.filterNot { item -> item.isHidden }
     val hiddenItems: List<HistoryDetailItemUiState> = items.filter { item -> item.isHidden }
     val completionSummary: HistoryDetailCompletionSummary

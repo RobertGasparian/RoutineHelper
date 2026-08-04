@@ -31,7 +31,7 @@ dependencies {
     implementation(project(":core:presentation"))
     implementation(project(":core:time"))
     implementation(project(":core:ui"))
-    implementation(project(":features:reflection-api"))
+    api(project(":features:reflection-api"))
     implementation(project(":libs:routine:reflection:domain"))
     implementation(project(":libs:routine:snapshot:domain"))
     implementation(project(":libs:routine:removal:domain"))
@@ -62,4 +62,5 @@ dependencies {
     testImplementation(testFixtures(project(":libs:routine:removal:domain")))
     testImplementation(testFixtures(project(":libs:routine:template:domain")))
     testImplementation(testFixtures(project(":libs:routine:tracking:domain")))
+    testImplementation(testFixtures(project(":libs:routine:reflection:domain")))
 }

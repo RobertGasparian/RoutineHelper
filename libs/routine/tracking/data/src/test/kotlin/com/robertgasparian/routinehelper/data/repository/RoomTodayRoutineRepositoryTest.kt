@@ -5,8 +5,12 @@ import com.robertgasparian.routinehelper.data.local.dao.DailyEntryDao
 import com.robertgasparian.routinehelper.data.local.dao.DailyReflectionDao
 import com.robertgasparian.routinehelper.data.local.entity.DailyEntryEntity
 import com.robertgasparian.routinehelper.data.local.entity.DailyReflectionEntity
+import com.robertgasparian.routinehelper.data.local.entity.DailyReflectionTagSelectionEntity
+import com.robertgasparian.routinehelper.data.local.entity.ReflectionTagEntity
+import com.robertgasparian.routinehelper.data.local.model.DailyReflectionWithTags
 import com.robertgasparian.routinehelper.domain.model.ReflectionRating
 import com.robertgasparian.routinehelper.domain.model.RoutineReflection
+import com.robertgasparian.routinehelper.domain.model.SelectedReflectionTag
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -20,12 +24,14 @@ class RoomTodayRoutineRepositoryTest {
     private val routineItemDao = FakeRoutineItemDao()
     private val dailyEntryDao = FakeDailyEntryDao()
     private val dailyReflectionDao = FakeDailyReflectionDao()
+    private val reflectionTagDao = FakeReflectionTagDao()
     private val timeProvider = FixedTimeProvider()
     private val repository = RoomTodayRoutineRepository(
         database = database,
         routineItemDao = routineItemDao,
         dailyEntryDao = dailyEntryDao,
         dailyReflectionDao = dailyReflectionDao,
+        reflectionTagDao = reflectionTagDao,
         timeProvider = timeProvider,
     )
 
@@ -214,6 +220,41 @@ class RoomTodayRoutineRepositoryTest {
     }
 
     @Test
+    fun `given daily template tag when updating reflection then selection is persisted by id`() = runTest {
+        reflectionTagDao.tagsById[7L] = reflectionTag(id = 7L, cadence = "DAILY", label = "Calm")
+
+        repository.updateReflection(
+            DATE,
+            RoutineReflection(
+                selectedTags = listOf(
+                    SelectedReflectionTag(templateTagId = 7L, label = "Stale label", position = 99),
+                ),
+            ),
+        )
+
+        assertEquals(listOf(7L), dailyReflectionDao.tagSelections[DATE])
+        assertEquals(DATE, dailyReflectionDao.reflections[DATE]?.date)
+    }
+
+    @Test
+    fun `given weekly template tag when updating daily reflection then selection is rejected`() = runTest {
+        reflectionTagDao.tagsById[7L] = reflectionTag(id = 7L, cadence = "WEEKLY", label = "Calm")
+
+        val failure = runCatching {
+            repository.updateReflection(
+                DATE,
+                RoutineReflection(
+                    selectedTags = listOf(
+                        SelectedReflectionTag(templateTagId = 7L, label = "Calm", position = 0),
+                    ),
+                ),
+            )
+        }.exceptionOrNull()
+
+        assertEquals(IllegalArgumentException::class.java, failure?.javaClass)
+    }
+
+    @Test
     fun `given stored daily state when resetting the date then deletes entries and reflection`() = runTest {
         dailyEntryDao.entries[DATE to 10L] = dailyEntry(routineItemId = 10L)
         dailyReflectionDao.reflections[DATE] = DailyReflectionEntity(
@@ -252,6 +293,21 @@ class RoomTodayRoutineRepositoryTest {
             isHidden = isHidden,
             note = note,
             updatedAtMillis = updatedAtMillis,
+        )
+
+    private fun reflectionTag(
+        id: Long,
+        cadence: String,
+        label: String,
+    ): ReflectionTagEntity =
+        ReflectionTagEntity(
+            id = id,
+            cadence = cadence,
+            label = label,
+            normalizedLabel = label.lowercase(),
+            position = 0,
+            createdAtMillis = 1L,
+            updatedAtMillis = 1L,
         )
 
     private companion object {
@@ -333,17 +389,37 @@ private class FakeDailyEntryDao : DailyEntryDao {
 
 private class FakeDailyReflectionDao : DailyReflectionDao {
     val reflections = mutableMapOf<String, DailyReflectionEntity>()
+    val reflectionTags = mutableMapOf<String, List<ReflectionTagEntity>>()
+    val tagSelections = mutableMapOf<String, List<Long>>()
     val deletedDates = mutableListOf<String>()
 
-    override fun reflectionForDate(date: String): Flow<DailyReflectionEntity?> =
-        flowOf(reflections[date])
+    override fun reflectionForDate(date: String): Flow<DailyReflectionWithTags?> =
+        flowOf(
+            reflections[date]?.let { reflection ->
+                DailyReflectionWithTags(
+                    reflection = reflection,
+                    tags = reflectionTags[date].orEmpty(),
+                )
+            },
+        )
 
     override suspend fun upsert(reflection: DailyReflectionEntity) {
         reflections[reflection.date] = reflection
     }
 
+    override suspend fun insertTagSelections(selections: List<DailyReflectionTagSelectionEntity>) {
+        selections.groupBy(DailyReflectionTagSelectionEntity::date).forEach { (date, values) ->
+            tagSelections[date] = values.map(DailyReflectionTagSelectionEntity::tagId)
+        }
+    }
+
+    override suspend fun deleteTagSelectionsForDate(date: String) {
+        tagSelections.remove(date)
+    }
+
     override suspend fun deleteForDate(date: String) {
         reflections.remove(date)
+        tagSelections.remove(date)
         deletedDates += date
     }
 }

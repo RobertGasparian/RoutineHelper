@@ -13,6 +13,18 @@ sealed interface ReflectionEditorIntent {
         val rating: ReflectionRating?,
     ) : ReflectionEditorIntent
 
+    data class TagSelectionChange(
+        val draftId: Long,
+    ) : ReflectionEditorIntent
+
+    data class AddTag(
+        val label: String,
+    ) : ReflectionEditorIntent
+
+    data class DeleteTag(
+        val draftId: Long,
+    ) : ReflectionEditorIntent
+
     data object ClearClick : ReflectionEditorIntent
 
     data object CancelClick : ReflectionEditorIntent

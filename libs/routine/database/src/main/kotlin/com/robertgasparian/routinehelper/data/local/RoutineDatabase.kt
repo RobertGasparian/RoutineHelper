@@ -6,6 +6,7 @@ import com.robertgasparian.routinehelper.data.local.dao.ActionDao
 import com.robertgasparian.routinehelper.data.local.dao.CurrentListItemDao
 import com.robertgasparian.routinehelper.data.local.dao.DailyEntryDao
 import com.robertgasparian.routinehelper.data.local.dao.DailyReflectionDao
+import com.robertgasparian.routinehelper.data.local.dao.ReflectionTagDao
 import com.robertgasparian.routinehelper.data.local.dao.RoutineSnapshotDao
 import com.robertgasparian.routinehelper.data.local.dao.RoutineItemDao
 import com.robertgasparian.routinehelper.data.local.dao.WeeklyEntryDao
@@ -14,11 +15,15 @@ import com.robertgasparian.routinehelper.data.local.entity.ActionEntity
 import com.robertgasparian.routinehelper.data.local.entity.CurrentListItemEntity
 import com.robertgasparian.routinehelper.data.local.entity.DailyEntryEntity
 import com.robertgasparian.routinehelper.data.local.entity.DailyReflectionEntity
+import com.robertgasparian.routinehelper.data.local.entity.DailyReflectionTagSelectionEntity
+import com.robertgasparian.routinehelper.data.local.entity.ReflectionTagEntity
 import com.robertgasparian.routinehelper.data.local.entity.RoutineSnapshotEntity
 import com.robertgasparian.routinehelper.data.local.entity.RoutineSnapshotEntryEntity
+import com.robertgasparian.routinehelper.data.local.entity.RoutineSnapshotReflectionTagEntity
 import com.robertgasparian.routinehelper.data.local.entity.RoutineItemEntity
 import com.robertgasparian.routinehelper.data.local.entity.WeeklyEntryEntity
 import com.robertgasparian.routinehelper.data.local.entity.WeeklyReflectionEntity
+import com.robertgasparian.routinehelper.data.local.entity.WeeklyReflectionTagSelectionEntity
 
 @Database(
     entities = [
@@ -30,10 +35,14 @@ import com.robertgasparian.routinehelper.data.local.entity.WeeklyReflectionEntit
         WeeklyEntryEntity::class,
         DailyReflectionEntity::class,
         WeeklyReflectionEntity::class,
+        ReflectionTagEntity::class,
+        DailyReflectionTagSelectionEntity::class,
+        WeeklyReflectionTagSelectionEntity::class,
+        RoutineSnapshotReflectionTagEntity::class,
         CurrentListItemEntity::class,
     ],
-    version = 3,
-    exportSchema = true,
+    version = 4,
+    exportSchema = false,
 )
 abstract class RoutineDatabase : RoomDatabase() {
     abstract fun actionDao(): ActionDao
@@ -49,6 +58,8 @@ abstract class RoutineDatabase : RoomDatabase() {
     abstract fun dailyReflectionDao(): DailyReflectionDao
 
     abstract fun weeklyReflectionDao(): WeeklyReflectionDao
+
+    abstract fun reflectionTagDao(): ReflectionTagDao
 
     abstract fun currentListItemDao(): CurrentListItemDao
 }

@@ -7,12 +7,14 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -26,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -50,9 +53,10 @@ fun ReflectionCard(
     modifier: Modifier = Modifier,
     isEditable: Boolean = true,
     rating: ReflectionRating? = null,
+    tags: List<String> = emptyList(),
 ) {
     val hasNote = summaryNote.isNotBlank()
-    val hasReflection = hasNote || rating != null
+    val hasReflection = hasNote || rating != null || tags.isNotEmpty()
 
     OutlinedCard(
         modifier = modifier.fillMaxWidth(),
@@ -99,8 +103,38 @@ fun ReflectionCard(
 
             rating?.let { ReflectionRatingIndicator(rating = it) }
 
+            if (tags.isNotEmpty()) {
+                ReflectionTagIndicators(tags = tags)
+            }
+
             if (hasNote) {
                 ReflectionTextBlock(text = summaryNote)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReflectionTagIndicators(
+    tags: List<String>,
+    modifier: Modifier = Modifier,
+) {
+    FlowRow(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        tags.forEach { tag ->
+            Surface(
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            ) {
+                Text(
+                    text = tag,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    style = MaterialTheme.typography.labelLarge,
+                )
             }
         }
     }

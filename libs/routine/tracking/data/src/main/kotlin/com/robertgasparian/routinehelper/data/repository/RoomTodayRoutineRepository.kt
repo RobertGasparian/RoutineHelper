@@ -5,13 +5,17 @@ import androidx.room.withTransaction
 import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.data.local.dao.DailyEntryDao
 import com.robertgasparian.routinehelper.data.local.dao.DailyReflectionDao
+import com.robertgasparian.routinehelper.data.local.dao.ReflectionTagDao
 import com.robertgasparian.routinehelper.data.local.dao.RoutineItemDao
 import com.robertgasparian.routinehelper.data.local.entity.DailyEntryEntity
 import com.robertgasparian.routinehelper.data.local.entity.DailyReflectionEntity
+import com.robertgasparian.routinehelper.data.local.entity.DailyReflectionTagSelectionEntity
+import com.robertgasparian.routinehelper.data.local.entity.ReflectionTagEntity
 import com.robertgasparian.routinehelper.data.local.entity.RoutineItemEntity
 import com.robertgasparian.routinehelper.data.local.model.RoutineItemWithAction
 import com.robertgasparian.routinehelper.domain.model.ReflectionRating
 import com.robertgasparian.routinehelper.domain.model.RoutineReflection
+import com.robertgasparian.routinehelper.domain.model.SelectedReflectionTag
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import com.robertgasparian.routinehelper.domain.repository.TodayRoutineRepository
 import javax.inject.Inject
@@ -24,6 +28,7 @@ class RoomTodayRoutineRepository @Inject constructor(
     private val routineItemDao: RoutineItemDao,
     private val dailyEntryDao: DailyEntryDao,
     private val dailyReflectionDao: DailyReflectionDao,
+    private val reflectionTagDao: ReflectionTagDao,
     private val timeProvider: TimeProvider,
 ) : TodayRoutineRepository {
     override fun todayItems(date: String): Flow<List<TodayRoutineItem>> =
@@ -43,8 +48,11 @@ class RoomTodayRoutineRepository @Inject constructor(
     override fun reflection(date: String): Flow<RoutineReflection> =
         dailyReflectionDao.reflectionForDate(date).map { storedReflection ->
             RoutineReflection(
-                summaryNote = storedReflection?.summaryNote,
-                rating = storedReflection?.rating?.let(::ReflectionRating),
+                summaryNote = storedReflection?.reflection?.summaryNote,
+                rating = storedReflection?.reflection?.rating?.let(::ReflectionRating),
+                selectedTags = storedReflection?.tags.orEmpty()
+                    .sortedWith(compareBy(ReflectionTagEntity::position, ReflectionTagEntity::id))
+                    .map(ReflectionTagEntity::toSelectedDomain),
             )
         }
 
@@ -104,8 +112,11 @@ class RoomTodayRoutineRepository @Inject constructor(
     override suspend fun updateReflection(
         date: String,
         reflection: RoutineReflection,
-    ) {
-        val normalizedReflection = reflection.normalized()
+    ) = database.withTransaction {
+        val normalizedReflection = normalizeReflectionWithStoredTags(
+            reflection = reflection,
+            cadence = ReflectionTagEntity.DAILY_CADENCE_STORAGE_VALUE,
+        )
         if (normalizedReflection.isEmpty) {
             dailyReflectionDao.deleteForDate(date)
         } else {
@@ -117,6 +128,14 @@ class RoomTodayRoutineRepository @Inject constructor(
                     updatedAtMillis = timeProvider.currentTimeMillis(),
                 ),
             )
+            dailyReflectionDao.deleteTagSelectionsForDate(date)
+            val selections = normalizedReflection.selectedTags.map { tag ->
+                DailyReflectionTagSelectionEntity(
+                    date = date,
+                    tagId = requireNotNull(tag.templateTagId),
+                )
+            }
+            if (selections.isNotEmpty()) dailyReflectionDao.insertTagSelections(selections)
         }
     }
 
@@ -126,10 +145,42 @@ class RoomTodayRoutineRepository @Inject constructor(
             dailyReflectionDao.deleteForDate(date)
         }
     }
+
+    private suspend fun normalizeReflectionWithStoredTags(
+        reflection: RoutineReflection,
+        cadence: String,
+    ): RoutineReflection {
+        val tagIds = reflection.selectedTags.map { tag ->
+            requireNotNull(tag.templateTagId) {
+                "Current reflections can select only cadence-template tags"
+            }
+        }
+        require(tagIds.distinct().size == tagIds.size) {
+            "Current reflection tags must be unique"
+        }
+        val storedTags = if (tagIds.isEmpty()) {
+            emptyList()
+        } else {
+            reflectionTagDao.tagsByIds(cadence = cadence, tagIds = tagIds)
+        }
+        require(storedTags.size == tagIds.size) {
+            "Current reflection contains a tag from a different cadence or a deleted tag"
+        }
+        return reflection.copy(
+            summaryNote = reflection.summaryNote?.trim()?.takeIf(String::isNotEmpty),
+            selectedTags = storedTags
+                .sortedWith(compareBy(ReflectionTagEntity::position, ReflectionTagEntity::id))
+                .map(ReflectionTagEntity::toSelectedDomain),
+        )
+    }
 }
 
-private fun RoutineReflection.normalized(): RoutineReflection =
-    copy(summaryNote = summaryNote?.trim()?.takeIf(String::isNotEmpty))
+private fun ReflectionTagEntity.toSelectedDomain(): SelectedReflectionTag =
+    SelectedReflectionTag(
+        label = label,
+        position = position,
+        templateTagId = id,
+    )
 
 private fun RoutineItemWithAction.toTodayDomain(
     date: String,

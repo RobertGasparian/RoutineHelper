@@ -7,6 +7,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import com.robertgasparian.routinehelper.data.local.entity.RoutineSnapshotEntity
 import com.robertgasparian.routinehelper.data.local.entity.RoutineSnapshotEntryEntity
+import com.robertgasparian.routinehelper.data.local.entity.RoutineSnapshotReflectionTagEntity
 import com.robertgasparian.routinehelper.data.local.model.RoutineSnapshotWithEntries
 import kotlinx.coroutines.flow.Flow
 
@@ -66,8 +67,14 @@ interface RoutineSnapshotDao {
     @Insert
     suspend fun insertEntries(entries: List<RoutineSnapshotEntryEntity>)
 
+    @Insert
+    suspend fun insertReflectionTags(tags: List<RoutineSnapshotReflectionTagEntity>)
+
     @Query("DELETE FROM routine_snapshot_entries WHERE snapshotId = :snapshotId")
     suspend fun deleteEntries(snapshotId: Long)
+
+    @Query("DELETE FROM routine_snapshot_reflection_tags WHERE snapshotId = :snapshotId")
+    suspend fun deleteReflectionTags(snapshotId: Long)
 
     @Query("DELETE FROM routine_snapshots WHERE id = :id")
     suspend fun deleteSnapshot(id: Long)

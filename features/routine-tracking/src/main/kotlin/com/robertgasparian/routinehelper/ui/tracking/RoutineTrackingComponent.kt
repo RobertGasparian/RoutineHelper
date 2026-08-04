@@ -203,6 +203,7 @@ fun RoutineTrackingComponent(
                 ReflectionCard(
                     summaryNote = uiState.summaryNote,
                     rating = uiState.rating,
+                    tags = uiState.reflectionTags.filter { tag -> tag.isSelected }.map { tag -> tag.label },
                     label = stringResource(
                         if (isWeekly) R.string.routine_tracking_week_note else R.string.routine_tracking_day_note,
                     ),

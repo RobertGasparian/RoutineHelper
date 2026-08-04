@@ -9,6 +9,7 @@ import com.robertgasparian.routinehelper.data.local.dao.ActionDao
 import com.robertgasparian.routinehelper.data.local.dao.CurrentListItemDao
 import com.robertgasparian.routinehelper.data.local.dao.DailyEntryDao
 import com.robertgasparian.routinehelper.data.local.dao.DailyReflectionDao
+import com.robertgasparian.routinehelper.data.local.dao.ReflectionTagDao
 import com.robertgasparian.routinehelper.data.local.dao.RoutineSnapshotDao
 import com.robertgasparian.routinehelper.data.local.dao.RoutineItemDao
 import com.robertgasparian.routinehelper.data.local.dao.WeeklyEntryDao
@@ -56,6 +57,9 @@ object DatabaseModule {
 
     @Provides
     fun provideWeeklyReflectionDao(database: RoutineDatabase): WeeklyReflectionDao = database.weeklyReflectionDao()
+
+    @Provides
+    fun provideReflectionTagDao(database: RoutineDatabase): ReflectionTagDao = database.reflectionTagDao()
 
     @Provides
     fun provideRoutineSnapshotDao(database: RoutineDatabase): RoutineSnapshotDao = database.routineSnapshotDao()

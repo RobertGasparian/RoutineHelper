@@ -6,12 +6,12 @@ The post-modularization class-by-class review is tracked in [`refactor-review-ch
 
 ## Current Shape
 
-- The project has 27 Gradle modules across `:app`, `:features:*`, `:libs:*`, and `:core:*`.
+- The project has 28 Gradle modules across `:app`, `:features:*`, `:libs:*`, and `:core:*`.
 - `:app` is a thin Android shell. It owns `MainActivity`, `RoutineHelperApplication`, root Navigation 3 composition, app startup, and dependency aggregation.
 - Daily and Weekly presentation live together in `:features:routine-tracking`, with cadence-specific ViewModels/mappers and neutral shared tracking state/components.
 - History/detail/sharing, Reflection, Current List, Action Editor, and Settings live in their own feature modules.
-- Template, current-list, tracking, and snapshot capabilities each have separate `:domain` and `:data` modules.
-- `:libs:routine:database` owns only Room database/schema/DAO composition. Capability data modules own repository implementations and their Hilt bindings.
+- Template, current-list, reflection, tracking, and snapshot capabilities each have separate `:domain` and `:data` modules.
+- `:libs:routine:database` owns only Room database/entity/DAO composition. Capability data modules own repository implementations and their Hilt bindings.
 - `:libs:background:work` owns WorkManager integration. Thin workers delegate snapshot and summary-reminder decisions to focused orchestrators that compose use cases.
 - `:core:time`, `:core:presentation`, `:core:navigation`, `:core:ui`, and `:core:testing`
   own cross-cutting time, ViewModel, Navigation 3 flow-lifetime, design-system, and shared test
@@ -36,7 +36,7 @@ The post-modularization class-by-class review is tracked in [`refactor-review-ch
 ## Remaining Targets
 
 - Finish final dependency-visibility and build/test-command audits, then document the supported verification commands.
-- Add Room migration tests when the schema first moves beyond version 1; there is no migration path to test yet.
+- Enable Room schema export and add migration tests before the app begins supporting upgrades between released database versions.
 - Record the approved initial Current List Paparazzi goldens after the new component visuals have been reviewed.
 - Record the approved initial Reflection editor Paparazzi golden after the new component visual has
   been reviewed.
@@ -99,6 +99,8 @@ Current and planned module families:
 - `:libs:routine:tracking:data`
   - Room-backed per-period entities, DAOs, and repository implementations.
   - It depends on template data for the routine definitions that tracked entries reference.
+  - Daily and Weekly reflection-save coordinators keep cadence-template reconciliation and current
+    reflection persistence inside one Room transaction.
 - `:libs:routine:current-list:domain`
   - Current List models, repository behavior contracts, input normalization, formatting, and focused item/list commands.
 - `:libs:routine:current-list:data`
@@ -110,14 +112,17 @@ Current and planned module families:
 - `:libs:routine:snapshot:data`
   - Room-backed snapshot entities, DAOs, relation models, and repository implementations.
 - `:libs:routine:database`
-  - Shared Room database composition, schema export, and future migrations.
+  - Shared Room database composition and future migration wiring. Schema export is intentionally
+    disabled while upgrade compatibility between released versions is not required.
   - It may depend on capability data modules to aggregate their entities and DAOs and provide the shared database/DAO bindings, but it must not own repositories or business rules.
   - Each capability data module owns the DI binding between its repository implementation and domain repository contract; `:app` only aggregates those modules.
 - `:libs:routine:reflection:domain`
-  - Platform-independent `RoutineReflection` and `ReflectionRating` contracts shared by current
-    tracking, stored snapshots, the editor, and History. `ReflectionRating` is the single authority
-    for the supported one-to-five scale; Room stores only its integer value and maps it at data
-    boundaries.
+  - Platform-independent reflection, rating, and cadence-tag contracts shared by current tracking,
+    stored snapshots, the editor, and History. `ReflectionRating` is the single authority for the
+    supported one-to-five scale.
+- `:libs:routine:reflection:data`
+  - Room-backed cadence-specific reflection-tag templates and their repository binding. Daily and
+    Weekly tag definitions are independent even when their labels match.
 - `:libs:reminder`
   - Future reminder scheduling intent, reminder settings, and reminder business rules.
 - `:libs:background:work`

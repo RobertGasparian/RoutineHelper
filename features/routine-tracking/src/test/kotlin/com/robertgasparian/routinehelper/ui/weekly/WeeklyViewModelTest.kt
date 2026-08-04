@@ -11,6 +11,7 @@ import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalRequest
 import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalSource
 import com.robertgasparian.routinehelper.domain.repository.AddedTemplateItem
 import com.robertgasparian.routinehelper.domain.repository.FakeRoutineHistoryRepository
+import com.robertgasparian.routinehelper.domain.repository.FakeReflectionTagTemplateRepository
 import com.robertgasparian.routinehelper.domain.repository.FakeRoutineTemplateRepository
 import com.robertgasparian.routinehelper.domain.repository.FakeWeeklyRoutineRepository
 import com.robertgasparian.routinehelper.domain.repository.WeeklyCheckedChange
@@ -21,12 +22,13 @@ import com.robertgasparian.routinehelper.domain.repository.WeeklyReflectionChang
 import com.robertgasparian.routinehelper.domain.usecase.AddTemplateItemUseCase
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeWeeklyUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ReorderWeeklyRoutineItemsUseCase
+import com.robertgasparian.routinehelper.domain.usecase.ReflectionTagsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetWeeklyItemCheckedUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetWeeklyItemHiddenUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyItemCompletedCountUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyItemNoteUseCase
-import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyReflectionUseCase
 import com.robertgasparian.routinehelper.domain.usecase.WeeklyItemsUseCase
+import com.robertgasparian.routinehelper.domain.usecase.WeeklyReflectionSaveCoordinator
 import com.robertgasparian.routinehelper.domain.usecase.WeeklyReflectionUseCase
 import com.robertgasparian.routinehelper.test.FakeNoteDateTimeTextProvider
 import com.robertgasparian.routinehelper.ui.tracking.RoutineTrackingDebugItemsPopulator
@@ -49,6 +51,7 @@ class WeeklyViewModelTest {
     private val weeklyRepository = FakeWeeklyRoutineRepository()
     private val templateRepository = FakeRoutineTemplateRepository()
     private val historyRepository = FakeRoutineHistoryRepository()
+    private val reflectionTagRepository = FakeReflectionTagTemplateRepository()
     private val noteDateTimeTextProvider = FakeNoteDateTimeTextProvider()
     private val timeProvider = FixedTimeProvider()
     private val removalUndoCoordinator = FakeRoutineRemovalUndoCoordinator()
@@ -239,6 +242,7 @@ class WeeklyViewModelTest {
         WeeklyViewModel(
             weeklyItemsUseCase = WeeklyItemsUseCase(weeklyRepository),
             weeklyReflectionUseCase = WeeklyReflectionUseCase(weeklyRepository),
+            reflectionTagsUseCase = ReflectionTagsUseCase(reflectionTagRepository),
             debugItemsPopulator = RoutineTrackingDebugItemsPopulator(
                 addTemplateItemUseCase = AddTemplateItemUseCase(templateRepository),
                 debugTextProvider = englishDebugTextProvider,
@@ -253,7 +257,12 @@ class WeeklyViewModelTest {
             setWeeklyItemHiddenUseCase = SetWeeklyItemHiddenUseCase(weeklyRepository),
             updateWeeklyItemCompletedCountUseCase = UpdateWeeklyItemCompletedCountUseCase(weeklyRepository),
             updateWeeklyItemNoteUseCase = UpdateWeeklyItemNoteUseCase(weeklyRepository),
-            updateWeeklyReflectionUseCase = UpdateWeeklyReflectionUseCase(weeklyRepository),
+            weeklyReflectionSaveCoordinator = WeeklyReflectionSaveCoordinator { weekStartDate, reflection, _, _ ->
+                weeklyRepository.updateReflection(
+                    weekStartDate = weekStartDate,
+                    reflection = reflection,
+                )
+            },
             noteDateTimeTextProvider = noteDateTimeTextProvider,
             timeProvider = timeProvider,
         )

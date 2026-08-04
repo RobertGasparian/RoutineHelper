@@ -3,23 +3,26 @@ package com.robertgasparian.routinehelper.ui.weekly
 import com.robertgasparian.routinehelper.core.presentation.BaseViewModel
 import com.robertgasparian.routinehelper.core.time.TimeProvider
 import com.robertgasparian.routinehelper.core.time.startOfCalendarWeek
-import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+import com.robertgasparian.routinehelper.domain.model.ReflectionTagTemplateDraft
+import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalSource
 import com.robertgasparian.routinehelper.domain.removal.RoutineRemovalUndoCoordinator
 import com.robertgasparian.routinehelper.domain.time.SnapshotDates
 import com.robertgasparian.routinehelper.domain.usecase.FinalizeWeeklyUseCase
 import com.robertgasparian.routinehelper.domain.usecase.ReorderWeeklyRoutineItemsUseCase
+import com.robertgasparian.routinehelper.domain.usecase.ReflectionTagsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetWeeklyItemCheckedUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SetWeeklyItemHiddenUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyItemCompletedCountUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyItemNoteUseCase
-import com.robertgasparian.routinehelper.domain.usecase.UpdateWeeklyReflectionUseCase
+import com.robertgasparian.routinehelper.domain.usecase.WeeklyReflectionSaveCoordinator
 import com.robertgasparian.routinehelper.domain.usecase.WeeklyItemsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.WeeklyReflectionUseCase
 import com.robertgasparian.routinehelper.ui.dsm.RoutineNoteDraftUiState
 import com.robertgasparian.routinehelper.ui.dsm.insertAtCursor
+import com.robertgasparian.routinehelper.ui.reflection.api.ReflectionEditorTag
 import com.robertgasparian.routinehelper.ui.tracking.NoteDateTimeTextProvider
 import com.robertgasparian.routinehelper.ui.tracking.NoteEditorTarget
 import com.robertgasparian.routinehelper.ui.tracking.NoteEditorUiState
@@ -37,6 +40,7 @@ import kotlinx.coroutines.flow.combine
 class WeeklyViewModel @Inject constructor(
     weeklyItemsUseCase: WeeklyItemsUseCase,
     weeklyReflectionUseCase: WeeklyReflectionUseCase,
+    reflectionTagsUseCase: ReflectionTagsUseCase,
     private val debugItemsPopulator: RoutineTrackingDebugItemsPopulator,
     private val finalizeWeeklyUseCase: FinalizeWeeklyUseCase,
     private val routineRemovalUndoCoordinator: RoutineRemovalUndoCoordinator,
@@ -45,7 +49,7 @@ class WeeklyViewModel @Inject constructor(
     private val setWeeklyItemHiddenUseCase: SetWeeklyItemHiddenUseCase,
     private val updateWeeklyItemCompletedCountUseCase: UpdateWeeklyItemCompletedCountUseCase,
     private val updateWeeklyItemNoteUseCase: UpdateWeeklyItemNoteUseCase,
-    private val updateWeeklyReflectionUseCase: UpdateWeeklyReflectionUseCase,
+    private val weeklyReflectionSaveCoordinator: WeeklyReflectionSaveCoordinator,
     private val noteDateTimeTextProvider: NoteDateTimeTextProvider,
     private val timeProvider: TimeProvider,
 ) : BaseViewModel<RoutineTrackingUiState, RoutineTrackingIntent, Nothing>() {
@@ -58,11 +62,22 @@ class WeeklyViewModel @Inject constructor(
             weeklyReflectionUseCase(weekStartDate),
             noteEditor,
             routineRemovalUndoCoordinator.state,
-        ) { items, reflection, noteEditor, removalState ->
+            reflectionTagsUseCase(RoutineCadence.Weekly),
+        ) { items, reflection, noteEditor, removalState, reflectionTags ->
+            val selectedTagIds = reflection.selectedTags.mapNotNullTo(mutableSetOf()) { tag ->
+                tag.templateTagId
+            }
             RoutineTrackingUiState(
                 date = weekStartDate,
                 summaryNote = reflection.summaryNote.orEmpty(),
                 rating = reflection.rating,
+                reflectionTags = reflectionTags.map { tag ->
+                    ReflectionEditorTag(
+                        sourceId = tag.id,
+                        label = tag.label,
+                        isSelected = tag.id in selectedTagIds,
+                    )
+                },
                 items = items.map { item -> item.toRoutineTrackingItemUiState() },
                 noteEditor = noteEditor,
                 canRemoveItems = removalState.allowsRemovalFrom(RoutineRemovalSource.Weekly),
@@ -101,6 +116,8 @@ class WeeklyViewModel @Inject constructor(
             is RoutineTrackingIntent.SaveReflection -> updateReflection(
                 summaryNote = intent.summaryNote,
                 rating = intent.rating,
+                originalTags = intent.originalTags,
+                tags = intent.tags,
             )
             is RoutineTrackingIntent.NoteDraftChange -> updateNoteDraft(intent)
             RoutineTrackingIntent.NoteDraftClearClick -> clearNoteDraft()
@@ -179,14 +196,24 @@ class WeeklyViewModel @Inject constructor(
     private fun updateReflection(
         summaryNote: String,
         rating: ReflectionRating?,
+        originalTags: List<ReflectionEditorTag>,
+        tags: List<ReflectionEditorTag>,
     ) {
         launch {
-            updateWeeklyReflectionUseCase(
+            weeklyReflectionSaveCoordinator(
                 weekStartDate = weekStartDate,
                 reflection = RoutineReflection(
                     summaryNote = summaryNote,
                     rating = rating,
                 ),
+                originalTagIds = originalTags.mapNotNullTo(mutableSetOf(), ReflectionEditorTag::sourceId),
+                tagDraft = tags.map { tag ->
+                    ReflectionTagTemplateDraft(
+                        sourceTagId = tag.sourceId,
+                        label = tag.label,
+                        isSelected = tag.isSelected,
+                    )
+                },
             )
         }
     }

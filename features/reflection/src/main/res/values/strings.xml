@@ -5,6 +5,16 @@
     <string name="reflection_editor_rating_label">How would you rate this period?</string>
     <string name="reflection_editor_rating_option">Rating: %1$d out of %2$d</string>
     <string name="reflection_editor_clear_rating">Clear rating</string>
+    <string name="reflection_editor_tags_label">Tags</string>
+    <string name="reflection_editor_tags_manage">Manage</string>
+    <string name="reflection_editor_tags_done">Done</string>
+    <string name="reflection_editor_tags_add">Add tag</string>
+    <string name="reflection_editor_tags_create_first">Create first tag</string>
+    <string name="reflection_editor_tags_empty">No tags yet</string>
+    <string name="reflection_editor_tags_name_label">Tag name</string>
+    <string name="reflection_editor_tags_add_cancel_description">Cancel adding tag</string>
+    <string name="reflection_editor_tags_add_confirm_description">Add tag</string>
+    <string name="reflection_editor_tags_delete_description">Delete tag %1$s</string>
     <string name="reflection_editor_note_label">Summary</string>
     <string name="reflection_editor_clear">Clear</string>
     <string name="reflection_editor_cancel">Cancel</string>

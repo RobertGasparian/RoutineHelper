@@ -1,11 +1,13 @@
 package com.robertgasparian.routinehelper.ui.tracking
 
 import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+import com.robertgasparian.routinehelper.ui.reflection.api.ReflectionEditorTag
 
 data class RoutineTrackingUiState(
     val date: String,
     val summaryNote: String = "",
     val rating: ReflectionRating? = null,
+    val reflectionTags: List<ReflectionEditorTag> = emptyList(),
     val items: List<RoutineTrackingItemUiState> = emptyList(),
     val noteEditor: NoteEditorUiState? = null,
     val canRemoveItems: Boolean = true,

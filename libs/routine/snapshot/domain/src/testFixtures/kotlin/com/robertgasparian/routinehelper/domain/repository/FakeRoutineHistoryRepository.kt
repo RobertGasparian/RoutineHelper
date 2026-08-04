@@ -6,6 +6,7 @@ import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotSummary
+import com.robertgasparian.routinehelper.domain.model.SelectedReflectionTag
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
@@ -66,6 +67,7 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
             items = items,
             summaryNote = reflection.summaryNote,
             rating = reflection.rating,
+            selectedTags = reflection.selectedTags,
             cadence = cadence,
         )
         savedSnapshots.removeAll { snapshot -> snapshot.periodStartDate == periodStartDate && snapshot.cadence == cadence }
@@ -77,6 +79,7 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
             cadence = cadence,
             summaryNote = reflection.summaryNote,
             rating = reflection.rating,
+            selectedTags = reflection.selectedTags,
             items = items,
         )
         snapshots.value = snapshots.value.filterNot { snapshot ->
@@ -101,6 +104,7 @@ class FakeRoutineHistoryRepository : RoutineHistoryRepository {
         val updatedSnapshot = existingSnapshot.copy(
             summaryNote = normalizedReflection.summaryNote,
             rating = normalizedReflection.rating,
+            selectedTags = normalizedReflection.selectedTags,
         )
         snapshots.value = snapshots.value.replaceById(updatedSnapshot)
         summaries.value = summaries.value.replaceById(updatedSnapshot.toSummary())
@@ -157,4 +161,5 @@ data class SavedSnapshot(
     val cadence: RoutineCadence,
     val summaryNote: String? = null,
     val rating: ReflectionRating? = null,
+    val selectedTags: List<SelectedReflectionTag> = emptyList(),
 )

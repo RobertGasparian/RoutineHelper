@@ -22,11 +22,13 @@ android {
     }
 
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 }
 
 dependencies {
+    api(project(":core:presentation"))
     api(project(":features:reflection-api"))
     implementation(project(":core:navigation"))
     implementation(project(":core:ui"))

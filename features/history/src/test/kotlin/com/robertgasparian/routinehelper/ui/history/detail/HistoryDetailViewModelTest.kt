@@ -4,12 +4,16 @@ import com.robertgasparian.routinehelper.domain.model.RoutineCadence
 import com.robertgasparian.routinehelper.domain.model.ReflectionRating
 import com.robertgasparian.routinehelper.domain.model.RoutineReflection
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotItem
+import com.robertgasparian.routinehelper.domain.model.SelectedReflectionTag
 import com.robertgasparian.routinehelper.domain.repository.FakeRoutineHistoryRepository
+import com.robertgasparian.routinehelper.domain.repository.FakeReflectionTagTemplateRepository
 import com.robertgasparian.routinehelper.domain.usecase.DeleteSnapshotUseCase
+import com.robertgasparian.routinehelper.domain.usecase.ReflectionTagsUseCase
 import com.robertgasparian.routinehelper.domain.usecase.SnapshotUseCase
 import com.robertgasparian.routinehelper.domain.usecase.UpdateSnapshotReflectionUseCase
 import com.robertgasparian.routinehelper.core.testing.MainDispatcherRule
 import com.robertgasparian.routinehelper.ui.share.ShareDraft
+import com.robertgasparian.routinehelper.ui.reflection.api.ReflectionEditorTag
 import com.robertgasparian.routinehelper.ui.history.FakeHistoryTextProvider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -28,6 +32,7 @@ class HistoryDetailViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val repository = FakeRoutineHistoryRepository()
+    private val reflectionTagRepository = FakeReflectionTagTemplateRepository()
 
     @Test
     fun `given weekly snapshot when observing state then snapshot details are mapped`() = runTest {
@@ -127,7 +132,7 @@ class HistoryDetailViewModelTest {
     }
 
     @Test
-    fun `given editable snapshot when reflection save is received then text and rating are persisted`() = runTest {
+    fun `given editable snapshot when reflection save is received then selected tags are persisted`() = runTest {
         val snapshotId = saveWeeklySnapshot()
         val viewModel = createViewModel(snapshotId)
         viewModel.uiState.first { !it.isLoading }
@@ -136,6 +141,10 @@ class HistoryDetailViewModelTest {
             HistoryDetailIntent.SaveReflection(
                 summaryNote = "  Better week  ",
                 rating = ReflectionRating(5),
+                tags = listOf(
+                    ReflectionEditorTag(label = "Calm", isSelected = true),
+                    ReflectionEditorTag(label = "Ignored", isSelected = false),
+                ),
             ),
         )
         advanceUntilIdle()
@@ -143,6 +152,10 @@ class HistoryDetailViewModelTest {
         val savedState = viewModel.uiState.first { state -> state.summaryNote == "Better week" }
         assertEquals("Better week", savedState.summaryNote)
         assertEquals(ReflectionRating(5), savedState.rating)
+        assertEquals(
+            listOf(SelectedReflectionTag(label = "Calm", position = 0)),
+            repository.snapshot(snapshotId).first()?.selectedTags,
+        )
     }
 
     @Test
@@ -208,6 +221,7 @@ class HistoryDetailViewModelTest {
             deleteSnapshotUseCase = DeleteSnapshotUseCase(repository),
             historyTextProvider = FakeHistoryTextProvider(),
             snapshotUseCase = SnapshotUseCase(repository),
+            reflectionTagsUseCase = ReflectionTagsUseCase(reflectionTagRepository),
             updateSnapshotReflectionUseCase = UpdateSnapshotReflectionUseCase(repository),
         )
 

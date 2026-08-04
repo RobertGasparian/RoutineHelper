@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.androidx.room)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
 }
@@ -21,12 +20,9 @@ android {
     }
 }
 
-room {
-    schemaDirectory("$projectDir/schemas")
-}
-
 dependencies {
     api(project(":libs:routine:current-list:data"))
+    api(project(":libs:routine:reflection:data"))
     api(project(":libs:routine:template:data"))
     api(project(":libs:routine:tracking:data"))
     api(project(":libs:routine:snapshot:data"))

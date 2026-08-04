@@ -35,6 +35,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.robertgasparian.routinehelper.core.navigation.BottomSheetPresentationState
 import com.robertgasparian.routinehelper.core.navigation.LocalBottomSheetPresentationState
 import com.robertgasparian.routinehelper.core.navigation.LocalNavigationFlowViewModelStoreOwner
+import com.robertgasparian.routinehelper.features.reflection.BuildConfig
 import com.robertgasparian.routinehelper.features.reflection.R
 import com.robertgasparian.routinehelper.ui.dsm.RoutineOutlinedTextField
 import com.robertgasparian.routinehelper.ui.reflection.api.ReflectionEditorState
@@ -48,32 +49,23 @@ fun ReflectionEditorScreen(
         viewModelStoreOwner = LocalNavigationFlowViewModelStoreOwner.current,
     ),
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     val bottomSheetPresentationState = LocalBottomSheetPresentationState.current
 
     ReflectionEditorComponent(
         state = state,
         onIntent = { intent ->
-            when (intent) {
-                is ReflectionEditorIntent.DraftChange -> viewModel.updateDraft(
-                    text = intent.text,
-                    selectionStart = intent.selectionStart,
-                    selectionEnd = intent.selectionEnd,
-                )
-                is ReflectionEditorIntent.RatingChange -> viewModel.updateRating(intent.rating)
-                ReflectionEditorIntent.ClearClick -> viewModel.clearDraft()
-                ReflectionEditorIntent.CancelClick -> {
-                    viewModel.cancel()
-                    onDismiss()
-                }
-                ReflectionEditorIntent.SaveClick -> {
-                    viewModel.requestSave()
-                    onDismiss()
-                }
+            viewModel.onIntent(intent)
+            if (
+                intent == ReflectionEditorIntent.CancelClick ||
+                intent == ReflectionEditorIntent.SaveClick
+            ) {
+                onDismiss()
             }
         },
         modifier = modifier,
         autoFocus = bottomSheetPresentationState == BottomSheetPresentationState.Presented,
+        showAddTestTags = BuildConfig.DEBUG,
     )
 }
 
@@ -83,6 +75,7 @@ fun ReflectionEditorComponent(
     onIntent: (ReflectionEditorIntent) -> Unit,
     modifier: Modifier = Modifier,
     autoFocus: Boolean = true,
+    showAddTestTags: Boolean = false,
 ) {
     Column(
         modifier = modifier
@@ -109,6 +102,15 @@ fun ReflectionEditorComponent(
                 onRatingChange = { rating ->
                     onIntent(ReflectionEditorIntent.RatingChange(rating))
                 },
+            )
+            ReflectionTagsEditor(
+                tags = state.draftTags,
+                onTagSelectionChange = { draftId ->
+                    onIntent(ReflectionEditorIntent.TagSelectionChange(draftId))
+                },
+                onAddTag = { label -> onIntent(ReflectionEditorIntent.AddTag(label)) },
+                onDeleteTag = { draftId -> onIntent(ReflectionEditorIntent.DeleteTag(draftId)) },
+                showAddTestTags = showAddTestTags,
             )
             ReflectionTextField(
                 state = state,

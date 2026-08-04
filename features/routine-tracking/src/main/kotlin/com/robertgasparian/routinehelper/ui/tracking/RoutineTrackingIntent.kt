@@ -1,6 +1,7 @@
 package com.robertgasparian.routinehelper.ui.tracking
 
 import com.robertgasparian.routinehelper.domain.model.ReflectionRating
+import com.robertgasparian.routinehelper.ui.reflection.api.ReflectionEditorTag
 
 sealed interface RoutineTrackingIntent {
     data object CreateActionClick : RoutineTrackingIntent
@@ -53,6 +54,8 @@ sealed interface RoutineTrackingIntent {
     data class SaveReflection(
         val summaryNote: String,
         val rating: ReflectionRating?,
+        val originalTags: List<ReflectionEditorTag> = emptyList(),
+        val tags: List<ReflectionEditorTag> = emptyList(),
     ) : RoutineTrackingIntent
 
     data class NoteDraftChange(

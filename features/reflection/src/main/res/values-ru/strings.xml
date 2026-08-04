@@ -5,6 +5,16 @@
     <string name="reflection_editor_rating_label">Как бы вы оценили этот период?</string>
     <string name="reflection_editor_rating_option">Оценка: %1$d из %2$d</string>
     <string name="reflection_editor_clear_rating">Сбросить оценку</string>
+    <string name="reflection_editor_tags_label">Теги</string>
+    <string name="reflection_editor_tags_manage">Управление</string>
+    <string name="reflection_editor_tags_done">Готово</string>
+    <string name="reflection_editor_tags_add">Добавить тег</string>
+    <string name="reflection_editor_tags_create_first">Создать первый тег</string>
+    <string name="reflection_editor_tags_empty">Тегов пока нет</string>
+    <string name="reflection_editor_tags_name_label">Название тега</string>
+    <string name="reflection_editor_tags_add_cancel_description">Отменить добавление тега</string>
+    <string name="reflection_editor_tags_add_confirm_description">Добавить тег</string>
+    <string name="reflection_editor_tags_delete_description">Удалить тег %1$s</string>
     <string name="reflection_editor_note_label">Краткий итог</string>
     <string name="reflection_editor_clear">Очистить</string>
     <string name="reflection_editor_cancel">Отмена</string>

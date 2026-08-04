@@ -30,6 +30,8 @@ fun WeeklyScreen(
             RoutineTrackingIntent.SaveReflection(
                 summaryNote = request.text,
                 rating = request.rating,
+                originalTags = request.originalTags,
+                tags = request.tags,
             ),
         )
         reflectionEditorSession.consumeSaveRequest(request.requestId)
@@ -47,6 +49,7 @@ fun WeeklyScreen(
                         ReflectionEditorInitialState(
                             text = uiState.summaryNote,
                             rating = uiState.rating,
+                            tags = uiState.reflectionTags,
                         ),
                     )
                     onSummaryEditorClick()

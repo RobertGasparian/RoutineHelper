@@ -31,7 +31,7 @@ dependencies {
     implementation(project(":core:presentation"))
     implementation(project(":core:time"))
     implementation(project(":core:ui"))
-    implementation(project(":features:reflection-api"))
+    api(project(":features:reflection-api"))
     implementation(project(":libs:routine:reflection:domain"))
     implementation(project(":libs:routine:snapshot:domain"))
     api(project(":libs:routine:template:domain"))
@@ -60,4 +60,5 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(project(":core:testing"))
     testImplementation(testFixtures(project(":libs:routine:snapshot:domain")))
+    testImplementation(testFixtures(project(":libs:routine:reflection:domain")))
 }

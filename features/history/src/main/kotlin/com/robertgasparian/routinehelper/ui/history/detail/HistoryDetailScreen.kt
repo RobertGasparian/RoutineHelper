@@ -113,6 +113,7 @@ fun HistoryDetailScreen(
                 ReflectionEditorInitialState(
                     text = uiState.summaryNote,
                     rating = uiState.rating,
+                    tags = uiState.reflectionTags,
                 ),
             )
         } else {
@@ -134,6 +135,7 @@ fun HistoryDetailScreen(
                 HistoryDetailIntent.SaveReflection(
                     summaryNote = request.text,
                     rating = request.rating,
+                    tags = request.tags,
                 ),
             )
         }
@@ -171,6 +173,7 @@ fun HistoryDetailScreen(
                             ReflectionEditorInitialState(
                                 text = uiState.summaryNote,
                                 rating = uiState.rating,
+                                tags = uiState.reflectionTags,
                             ),
                         )
                         onSummaryEditorClick()
@@ -321,6 +324,7 @@ fun HistoryDetailComponent(
                         ReflectionCard(
                             summaryNote = uiState.summaryNote,
                             rating = uiState.rating,
+                            tags = uiState.reflectionTags.filter { tag -> tag.isSelected }.map { tag -> tag.label },
                             label = if (uiState.cadence == RoutineCadence.Weekly) {
                                 stringResource(R.string.history_week_note)
                             } else {
