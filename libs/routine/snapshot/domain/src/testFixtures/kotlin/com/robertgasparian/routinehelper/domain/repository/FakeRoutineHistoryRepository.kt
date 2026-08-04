@@ -151,6 +151,8 @@ private fun RoutineSnapshot.toSummary(): RoutineSnapshotSummary {
         },
         totalCount = countableItems.size,
         hasSummaryNote = !summaryNote.isNullOrBlank(),
+        hasRating = rating != null,
+        hasSelectedTags = selectedTags.isNotEmpty(),
     )
 }
 

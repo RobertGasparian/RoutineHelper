@@ -91,6 +91,67 @@ class RoomRoutineHistoryRepositoryTest {
     }
 
     @Test
+    fun `given note rating tag and empty snapshots when observing summaries then reflection presence is mapped`() = runTest {
+        routineSnapshotDao.storeSnapshot(
+            snapshot = snapshotEntity(
+                id = 10L,
+                periodStartDate = "2026-05-29",
+                cadence = "DAILY",
+                summaryNote = "Good day",
+            ),
+        )
+        routineSnapshotDao.storeSnapshot(
+            snapshot = snapshotEntity(
+                id = 20L,
+                periodStartDate = "2026-05-28",
+                cadence = "DAILY",
+                rating = 4,
+            ),
+        )
+        routineSnapshotDao.storeSnapshot(
+            snapshot = snapshotEntity(
+                id = 30L,
+                periodStartDate = "2026-05-27",
+                cadence = "DAILY",
+            ),
+            reflectionTags = listOf(
+                RoutineSnapshotReflectionTagEntity(
+                    snapshotId = 30L,
+                    labelSnapshot = "Calm",
+                    normalizedLabelSnapshot = "calm",
+                    positionSnapshot = 0,
+                ),
+            ),
+        )
+        routineSnapshotDao.storeSnapshot(
+            snapshot = snapshotEntity(
+                id = 40L,
+                periodStartDate = "2026-05-26",
+                cadence = "DAILY",
+            ),
+        )
+
+        val reflectionPresence = repository.snapshotSummaries().first().associate { summary ->
+            summary.snapshotId to listOf(
+                summary.hasSummaryNote,
+                summary.hasRating,
+                summary.hasSelectedTags,
+                summary.hasReflection,
+            )
+        }
+
+        assertEquals(
+            mapOf(
+                10L to listOf(true, false, false, true),
+                20L to listOf(false, true, false, true),
+                30L to listOf(false, false, true, true),
+                40L to listOf(false, false, false, false),
+            ),
+            reflectionPresence,
+        )
+    }
+
+    @Test
     fun `given unsupported stored cadence when observing summaries then fails explicitly`() = runTest {
         routineSnapshotDao.storeSnapshot(
             snapshot = snapshotEntity(

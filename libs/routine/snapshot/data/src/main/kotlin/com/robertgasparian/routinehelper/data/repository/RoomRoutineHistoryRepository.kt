@@ -197,5 +197,7 @@ private fun RoutineSnapshotWithEntries.toSummary(): RoutineSnapshotSummary {
         },
         totalCount = countableEntries.size,
         hasSummaryNote = !snapshot.summaryNote.isNullOrBlank(),
+        hasRating = snapshot.rating != null,
+        hasSelectedTags = reflectionTags.isNotEmpty(),
     )
 }

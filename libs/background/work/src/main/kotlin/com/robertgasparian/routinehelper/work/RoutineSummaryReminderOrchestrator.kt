@@ -50,7 +50,7 @@ class RoutineSummaryReminderOrchestrator @Inject internal constructor(
         val snapshot = snapshotSummariesUseCase(cadence)
             .first()
             .firstOrNull { summary -> summary.periodStartDate == periodStartDate }
-        if (snapshot?.hasSummaryNote == true) return
+        if (snapshot?.hasReflection == true) return
 
         // Empty finalized routines deliberately have no stored snapshot. That absence selects the
         // routine-building reminder instead of creating an unusable History destination.

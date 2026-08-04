@@ -2,8 +2,11 @@ package com.robertgasparian.routinehelper.work
 
 import com.robertgasparian.routinehelper.core.testing.FixedTimeProvider
 import com.robertgasparian.routinehelper.domain.model.AppSettings
+import com.robertgasparian.routinehelper.domain.model.ReflectionRating
 import com.robertgasparian.routinehelper.domain.model.RoutineCadence
+import com.robertgasparian.routinehelper.domain.model.RoutineSnapshot
 import com.robertgasparian.routinehelper.domain.model.RoutineSnapshotSummary
+import com.robertgasparian.routinehelper.domain.model.SelectedReflectionTag
 import com.robertgasparian.routinehelper.domain.model.TodayRoutineItem
 import com.robertgasparian.routinehelper.domain.model.WeeklyRoutineItem
 import com.robertgasparian.routinehelper.domain.repository.FakeRoutineHistoryRepository
@@ -114,7 +117,7 @@ class RoutineSummaryReminderOrchestratorTest {
         }
 
     @Test
-    fun `given daily snapshot already has summary when sending then no reminder is shown`() = runTest {
+    fun `given daily snapshot has a note when sending then no reminder is shown`() = runTest {
         settingsRepository.setSettings(
             AppSettings(isDailySummaryNotificationEnabled = true),
         )
@@ -124,6 +127,27 @@ class RoutineSummaryReminderOrchestratorTest {
                 periodStartDate = "2026-06-07",
                 cadence = RoutineCadence.Daily,
                 hasSummaryNote = true,
+            ),
+        )
+
+        orchestrator.sendDailyReminder(now)
+
+        assertTrue(notifier.notifications.isEmpty())
+    }
+
+    @Test
+    fun `given daily snapshot has a rating when sending then no reminder is shown`() = runTest {
+        settingsRepository.setSettings(
+            AppSettings(isDailySummaryNotificationEnabled = true),
+        )
+        historyRepository.setSnapshot(
+            RoutineSnapshot(
+                snapshotId = 42L,
+                periodStartDate = "2026-06-07",
+                finalizedAtMillis = now.toInstant().toEpochMilli(),
+                cadence = RoutineCadence.Daily,
+                rating = ReflectionRating(4),
+                items = emptyList(),
             ),
         )
 
@@ -192,7 +216,7 @@ class RoutineSummaryReminderOrchestratorTest {
         }
 
     @Test
-    fun `given weekly snapshot already has summary when sending then no reminder is shown`() = runTest {
+    fun `given weekly snapshot has a note when sending then no reminder is shown`() = runTest {
         settingsRepository.setSettings(
             AppSettings(isWeeklySummaryNotificationEnabled = true),
         )
@@ -202,6 +226,27 @@ class RoutineSummaryReminderOrchestratorTest {
                 periodStartDate = "2026-06-01",
                 cadence = RoutineCadence.Weekly,
                 hasSummaryNote = true,
+            ),
+        )
+
+        orchestrator.sendWeeklyReminder(now)
+
+        assertTrue(notifier.notifications.isEmpty())
+    }
+
+    @Test
+    fun `given weekly snapshot has a selected tag when sending then no reminder is shown`() = runTest {
+        settingsRepository.setSettings(
+            AppSettings(isWeeklySummaryNotificationEnabled = true),
+        )
+        historyRepository.setSnapshot(
+            RoutineSnapshot(
+                snapshotId = 84L,
+                periodStartDate = "2026-06-01",
+                finalizedAtMillis = now.toInstant().toEpochMilli(),
+                cadence = RoutineCadence.Weekly,
+                selectedTags = listOf(SelectedReflectionTag(label = "Balanced", position = 0)),
+                items = emptyList(),
             ),
         )
 
